@@ -44,8 +44,9 @@ Example (CLI backfill):
     - mapping failures
   - monitor DB row counts increment
 - After:
-  - run “leakage audit query”:
+  - run "leakage audit query":
     - ensure no `chosen_run_utc > asof_utc`
+  - review the mos as-of completeness report in logs (missing % per model + top missing reasons)
 
 ## 5) Common failure modes
 - Station mapping mismatch (issuedby -> ICAO not present in IEM)

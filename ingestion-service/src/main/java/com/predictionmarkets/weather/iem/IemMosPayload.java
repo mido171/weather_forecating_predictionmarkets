@@ -135,6 +135,13 @@ public record IemMosPayload(
       if (text.isEmpty() || text.equalsIgnoreCase("M") || text.equalsIgnoreCase("T")) {
         return null;
       }
+      int slash = text.indexOf('/');
+      if (slash > 0) {
+        text = text.substring(0, slash).trim();
+        if (text.isEmpty() || text.equalsIgnoreCase("M") || text.equalsIgnoreCase("T")) {
+          return null;
+        }
+      }
       try {
         return new BigDecimal(text);
       } catch (NumberFormatException ex) {

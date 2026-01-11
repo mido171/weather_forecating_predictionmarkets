@@ -7,6 +7,7 @@ import com.predictionmarkets.weather.models.IngestCheckpointStatus;
 import com.predictionmarkets.weather.models.MosModel;
 import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.mos.MosAsofMaterializeService;
+import com.predictionmarkets.weather.mos.MosAsofFeatureReportService;
 import com.predictionmarkets.weather.mos.MosRunIngestService;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.time.Duration;
@@ -26,6 +27,7 @@ public class BackfillOrchestrator {
   private final CliDailyIngestService cliDailyIngestService;
   private final MosRunIngestService mosRunIngestService;
   private final MosAsofMaterializeService mosAsofMaterializeService;
+  private final MosAsofFeatureReportService mosAsofFeatureReportService;
   private final IngestCheckpointService checkpointService;
 
   public BackfillOrchestrator(KalshiSeriesResolver kalshiSeriesResolver,
@@ -33,12 +35,14 @@ public class BackfillOrchestrator {
                               CliDailyIngestService cliDailyIngestService,
                               MosRunIngestService mosRunIngestService,
                               MosAsofMaterializeService mosAsofMaterializeService,
+                              MosAsofFeatureReportService mosAsofFeatureReportService,
                               IngestCheckpointService checkpointService) {
     this.kalshiSeriesResolver = kalshiSeriesResolver;
     this.stationRegistryRepository = stationRegistryRepository;
     this.cliDailyIngestService = cliDailyIngestService;
     this.mosRunIngestService = mosRunIngestService;
     this.mosAsofMaterializeService = mosAsofMaterializeService;
+    this.mosAsofFeatureReportService = mosAsofFeatureReportService;
     this.checkpointService = checkpointService;
   }
 
@@ -246,6 +250,8 @@ public class BackfillOrchestrator {
       cursorDate = end;
       cursorRef.set(cursorDate);
       heartbeat.close();
+      mosAsofFeatureReportService.logCompletenessReport(
+          stationId, start, end, request.asofPolicyId(), models);
       checkpointService.markComplete(jobName, stationId, null, cursorDate, null);
     } catch (RuntimeException ex) {
       heartbeat.close();

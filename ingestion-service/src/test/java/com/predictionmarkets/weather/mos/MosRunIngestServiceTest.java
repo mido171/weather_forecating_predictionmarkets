@@ -11,6 +11,7 @@ import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
+import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.io.IOException;
@@ -52,6 +53,9 @@ class MosRunIngestServiceTest {
   private MosRunRepository mosRunRepository;
 
   @Autowired
+  private MosAsofFeatureRepository mosAsofFeatureRepository;
+
+  @Autowired
   private CliDailyRepository cliDailyRepository;
 
   @Autowired
@@ -66,6 +70,7 @@ class MosRunIngestServiceTest {
   @BeforeEach
   void setUp() {
     checkpointRepository.deleteAll();
+    mosAsofFeatureRepository.deleteAll();
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
     stationRegistryRepository.deleteAll();

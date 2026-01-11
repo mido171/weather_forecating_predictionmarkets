@@ -19,9 +19,13 @@ import com.predictionmarkets.weather.models.MosModel;
 import com.predictionmarkets.weather.models.StationMappingStatus;
 import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.mos.MosAsofMaterializeService;
+import com.predictionmarkets.weather.mos.MosAsofFeatureReportService;
 import com.predictionmarkets.weather.mos.MosRunIngestService;
 import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
+import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
+import com.predictionmarkets.weather.repository.MosRunRepository;
+import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,6 +48,15 @@ class BackfillOrchestratorTest {
   private IngestCheckpointRepository checkpointRepository;
 
   @Autowired
+  private MosAsofFeatureRepository mosAsofFeatureRepository;
+
+  @Autowired
+  private MosRunRepository mosRunRepository;
+
+  @Autowired
+  private CliDailyRepository cliDailyRepository;
+
+  @Autowired
   private StationRegistryRepository stationRegistryRepository;
 
   @Autowired
@@ -59,11 +72,17 @@ class BackfillOrchestratorTest {
   private MosAsofMaterializeService mosAsofMaterializeService;
 
   @MockBean
+  private MosAsofFeatureReportService mosAsofFeatureReportService;
+
+  @MockBean
   private KalshiSeriesResolver kalshiSeriesResolver;
 
   @BeforeEach
   void setUp() {
     checkpointRepository.deleteAll();
+    mosAsofFeatureRepository.deleteAll();
+    mosRunRepository.deleteAll();
+    cliDailyRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();
     seedStation();

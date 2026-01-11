@@ -28,7 +28,7 @@
 5) **asof-feature-materializer**
    - For each target day T and as-of policy:
      - selects latest MOS run <= asOfUtc
-     - extracts `tmax` feature for day T for each model
+     - fetches the chosen run payload and extracts `tmax` feature for day T for each model
      - stores `mos_asof_feature`
    - MUST enforce no leakage.
 
@@ -91,4 +91,3 @@ D) Materialize as-of features
 - Use bounded concurrency (configurable thread pool)
 - Use retries with jittered exponential backoff
 - Persist checkpoints frequently
-

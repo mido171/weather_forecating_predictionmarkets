@@ -19,7 +19,26 @@ Required job inputs:
 - asof_policy_id (or default)
 - models list (default: GFS, MEX, NAM, NBS, NBE)
 
-## 3) Backfill jobs + checkpoints
+## 3) Audit report job
+Run the data-quality and leakage audit report from the ingestion service.
+
+Required inputs:
+- series_ticker (e.g., KXHIGHMIA)
+- date_start_local (YYYY-MM-DD)
+- date_end_local (YYYY-MM-DD)
+- asof_policy_id
+- models list (optional; default: GFS, MEX, NAM, NBS, NBE)
+- output_dir (optional; default: reports)
+- max_forecast_days (optional; default: 10)
+
+Example:
+`mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.arguments="--audit.enabled=true --audit.series-ticker=KXHIGHMIA --audit.date-start-local=2023-01-01 --audit.date-end-local=2023-12-31 --audit.asof-policy-id=1 --audit.output-dir=reports"`
+
+Artifacts:
+- Markdown report (human readable)
+- JSON report (machine readable)
+
+## 4) Backfill jobs + checkpoints
 Jobs are run via CommandLineRunner with `backfill.*` properties.
 
 Units of work + checkpoint cursor semantics:
@@ -33,7 +52,7 @@ Checkpoints are updated after each unit and refreshed by a heartbeat every ~30s 
 Example (CLI backfill):
 `mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.arguments="--backfill.enabled=true --backfill.job=cli_ingest_year --backfill.series-ticker=KXHIGHMIA --backfill.date-start-local=2023-01-01 --backfill.date-end-local=2023-12-31"`
 
-## 4) Operational checks
+## 5) Operational checks
 - Before backfill:
   - confirm station registry resolved and validated
   - confirm `asof_policy` exists
@@ -48,7 +67,7 @@ Example (CLI backfill):
     - ensure no `chosen_run_utc > asof_utc`
   - review the mos as-of completeness report in logs (missing % per model + top missing reasons)
 
-## 5) Common failure modes
+## 6) Common failure modes
 - Station mapping mismatch (issuedby -> ICAO not present in IEM)
 - IEM endpoint 503 (rate limiting / load)
 - Partial years missing in CLI (rare gaps)

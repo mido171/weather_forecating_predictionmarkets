@@ -39,6 +39,10 @@
      - by date range
    - Restartable: picks up exactly where it stopped.
 
+7) **audit-report**
+   - Generates data-quality and leakage reports from persisted data
+   - Writes Markdown and JSON artifacts to disk for review and automation
+
 ## 2) Suggested Maven module layout (Epic #1)
 repo-root/
   pom.xml (packaging=pom)

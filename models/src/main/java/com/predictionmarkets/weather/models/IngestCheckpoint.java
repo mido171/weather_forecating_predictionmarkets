@@ -45,6 +45,9 @@ public class IngestCheckpoint {
   @Column(name = "status", nullable = false, length = 16)
   private IngestCheckpointStatus status;
 
+  @Column(name = "error_details", length = 1024)
+  private String errorDetails;
+
   @Column(name = "updated_at_utc", nullable = false)
   private Instant updatedAtUtc;
 
@@ -102,6 +105,14 @@ public class IngestCheckpoint {
 
   public void setStatus(IngestCheckpointStatus status) {
     this.status = status;
+  }
+
+  public String getErrorDetails() {
+    return errorDetails;
+  }
+
+  public void setErrorDetails(String errorDetails) {
+    this.errorDetails = errorDetails;
   }
 
   public Instant getUpdatedAtUtc() {

@@ -9,6 +9,7 @@ import com.predictionmarkets.weather.models.MosRun;
 import com.predictionmarkets.weather.models.StationMappingStatus;
 import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.repository.CliDailyRepository;
+import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
@@ -54,6 +55,9 @@ class MosRunIngestServiceTest {
   private CliDailyRepository cliDailyRepository;
 
   @Autowired
+  private IngestCheckpointRepository checkpointRepository;
+
+  @Autowired
   private StationRegistryRepository stationRegistryRepository;
 
   @Autowired
@@ -61,6 +65,7 @@ class MosRunIngestServiceTest {
 
   @BeforeEach
   void setUp() {
+    checkpointRepository.deleteAll();
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
     stationRegistryRepository.deleteAll();

@@ -7,6 +7,7 @@ import com.predictionmarkets.weather.models.KalshiSeries;
 import com.predictionmarkets.weather.models.StationMappingStatus;
 import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.repository.CliDailyRepository;
+import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.io.IOException;
@@ -50,6 +51,9 @@ class CliDailyIngestServiceTest {
   private CliDailyRepository cliDailyRepository;
 
   @Autowired
+  private IngestCheckpointRepository checkpointRepository;
+
+  @Autowired
   private StationRegistryRepository stationRegistryRepository;
 
   @Autowired
@@ -57,6 +61,7 @@ class CliDailyIngestServiceTest {
 
   @BeforeEach
   void setUp() {
+    checkpointRepository.deleteAll();
     cliDailyRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();

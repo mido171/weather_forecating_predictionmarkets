@@ -6,7 +6,7 @@ loaded from the classpath by the ingestion service.
 
 ## Time semantics contract
 The canonical time semantics for this schema are documented at:
-`epics_and_jiras/epic1_kalshi_weather_ingestion/docs/time-semantics.md`.
+`docs/time-semantics.md`.
 
 Key contract points reflected in the schema:
 - `target_date_local` is a station-local calendar date (CLI climate report day).

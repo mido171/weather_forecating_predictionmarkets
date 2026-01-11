@@ -18,6 +18,7 @@ public class CliDailyUpsertRepository {
         tmax_f,
         tmin_f,
         report_issued_at_utc,
+        truth_source_url,
         raw_payload_hash,
         retrieved_at_utc,
         updated_at_utc
@@ -27,6 +28,7 @@ public class CliDailyUpsertRepository {
         :tmaxF,
         :tminF,
         :reportIssuedAtUtc,
+        :truthSourceUrl,
         :rawPayloadHash,
         :retrievedAtUtc,
         :updatedAtUtc
@@ -35,6 +37,7 @@ public class CliDailyUpsertRepository {
         tmax_f = VALUES(tmax_f),
         tmin_f = VALUES(tmin_f),
         report_issued_at_utc = VALUES(report_issued_at_utc),
+        truth_source_url = VALUES(truth_source_url),
         raw_payload_hash = VALUES(raw_payload_hash),
         retrieved_at_utc = VALUES(retrieved_at_utc),
         updated_at_utc = VALUES(updated_at_utc)
@@ -60,6 +63,7 @@ public class CliDailyUpsertRepository {
         .addValue("tmaxF", row.tmaxF)
         .addValue("tminF", row.tminF)
         .addValue("reportIssuedAtUtc", row.reportIssuedAtUtc)
+        .addValue("truthSourceUrl", row.truthSourceUrl)
         .addValue("rawPayloadHash", row.rawPayloadHash)
         .addValue("retrievedAtUtc", row.retrievedAtUtc)
         .addValue("updatedAtUtc", row.updatedAtUtc);
@@ -71,6 +75,7 @@ public class CliDailyUpsertRepository {
     private final BigDecimal tmaxF;
     private final BigDecimal tminF;
     private final Instant reportIssuedAtUtc;
+    private final String truthSourceUrl;
     private final String rawPayloadHash;
     private final Instant retrievedAtUtc;
     private final Instant updatedAtUtc;
@@ -80,6 +85,7 @@ public class CliDailyUpsertRepository {
                      BigDecimal tmaxF,
                      BigDecimal tminF,
                      Instant reportIssuedAtUtc,
+                     String truthSourceUrl,
                      String rawPayloadHash,
                      Instant retrievedAtUtc,
                      Instant updatedAtUtc) {
@@ -88,6 +94,7 @@ public class CliDailyUpsertRepository {
       this.tmaxF = tmaxF;
       this.tminF = tminF;
       this.reportIssuedAtUtc = reportIssuedAtUtc;
+      this.truthSourceUrl = truthSourceUrl;
       this.rawPayloadHash = rawPayloadHash;
       this.retrievedAtUtc = retrievedAtUtc;
       this.updatedAtUtc = updatedAtUtc;

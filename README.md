@@ -13,16 +13,16 @@ Requires Java 18 (configured in the parent POM).
 mvn clean install
 
 ## Run ingestion-service (local / in-memory)
-The default profile uses an in-memory H2 database for local startup.
+Use the local profile to run against the in-memory H2 database.
 
-mvn -pl ingestion-service spring-boot:run
+mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=local"
 
 ## Run ingestion-service (MySQL)
-Set the MySQL profile and connection settings.
+Default profile is MySQL. Update connection settings if needed.
 
 SPRING_PROFILES_ACTIVE=mysql
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/weather
-SPRING_DATASOURCE_USERNAME=weather
-SPRING_DATASOURCE_PASSWORD=weather
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/weather_predictionmarkets?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=root
 
 mvn -pl ingestion-service spring-boot:run

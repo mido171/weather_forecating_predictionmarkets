@@ -9,5 +9,6 @@ public record IemCliDaily(
     LocalDate targetDateLocal,
     BigDecimal tmaxF,
     BigDecimal tminF,
-    Instant reportIssuedAtUtc) {
+    Instant reportIssuedAtUtc,
+    String truthSourceUrl) {
 }

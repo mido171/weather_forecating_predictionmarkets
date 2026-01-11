@@ -14,14 +14,18 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BackfillOrchestrator {
+  private static final Logger logger = LoggerFactory.getLogger(BackfillOrchestrator.class);
   private final KalshiSeriesResolver kalshiSeriesResolver;
   private final StationRegistryRepository stationRegistryRepository;
   private final CliDailyIngestService cliDailyIngestService;
@@ -62,8 +66,12 @@ public class BackfillOrchestrator {
     if (seriesTickers == null || seriesTickers.isEmpty()) {
       throw new IllegalArgumentException("seriesTicker is required for kalshi_series_sync");
     }
+    int total = seriesTickers.size();
+    int index = 0;
     for (String seriesTicker : seriesTickers) {
+      int current = ++index;
       String normalized = normalizeSeriesTicker(seriesTicker);
+      String stationId = null;
       try {
         StationRegistry station = stationRegistryRepository.findBySeriesTicker(normalized)
             .orElse(null);
@@ -73,21 +81,39 @@ public class BackfillOrchestrator {
                   station.getStationId(), null)
               .orElse(null);
           if (existing != null && existing.getStatus() == IngestCheckpointStatus.COMPLETE) {
+            snapshot("job=kalshi_series_sync progress=" + current + "/" + total
+                + " remaining=" + (total - current)
+                + " ticker=" + normalized
+                + " station=" + station.getStationId()
+                + " status=skipped");
             continue;
           }
         }
         station = kalshiSeriesResolver.resolveAndUpsert(normalized);
-        String stationId = station.getStationId();
+        stationId = station.getStationId();
         checkpointService.markRunning(BackfillJobType.KALSHI_SERIES_SYNC.jobName(), stationId, null,
             null, null);
         checkpointService.markComplete(BackfillJobType.KALSHI_SERIES_SYNC.jobName(), stationId, null,
             null, null);
+        snapshot("job=kalshi_series_sync progress=" + current + "/" + total
+            + " remaining=" + (total - current)
+            + " ticker=" + normalized
+            + " station=" + stationId
+            + " status=complete");
       } catch (RuntimeException ex) {
         StationRegistry existingStation = stationRegistryRepository.findBySeriesTicker(normalized)
             .orElse(null);
         if (existingStation != null) {
+          stationId = existingStation.getStationId();
           checkpointService.markFailed(BackfillJobType.KALSHI_SERIES_SYNC.jobName(),
               existingStation.getStationId(), null, null, null, ex);
+        }
+        if (stationId != null) {
+          snapshot("job=kalshi_series_sync progress=" + current + "/" + total
+              + " remaining=" + (total - current)
+              + " ticker=" + normalized
+              + " station=" + stationId
+              + " status=failed");
         }
         throw ex;
       }
@@ -107,6 +133,9 @@ public class BackfillOrchestrator {
         .orElse(null);
     LocalDate cursorDate = existing != null ? existing.getCursorDate() : null;
     if (cursorDate != null && !cursorDate.isBefore(end)) {
+      snapshot("job=cli_ingest_year station=" + stationId
+          + " progress=complete"
+          + " cursorDate=" + cursorDate);
       checkpointService.markComplete(jobName, stationId, null, cursorDate, null);
       return;
     }
@@ -115,9 +144,14 @@ public class BackfillOrchestrator {
       effectiveStart = cursorDate.plusDays(1);
     }
     if (effectiveStart.isAfter(end)) {
+      snapshot("job=cli_ingest_year station=" + stationId
+          + " progress=complete"
+          + " cursorDate=" + cursorDate);
       checkpointService.markComplete(jobName, stationId, null, cursorDate, null);
       return;
     }
+    long totalDays = ChronoUnit.DAYS.between(effectiveStart, end) + 1;
+    long processedDays = 0;
     AtomicReference<LocalDate> cursorRef = new AtomicReference<>(cursorDate);
     CheckpointHeartbeat heartbeat = CheckpointHeartbeat.start(() ->
         checkpointService.markRunning(jobName, stationId, null, cursorRef.get(), null));
@@ -129,9 +163,15 @@ public class BackfillOrchestrator {
         LocalDate rangeStart = yearStart.isAfter(effectiveStart) ? yearStart : effectiveStart;
         LocalDate rangeEnd = yearEnd.isBefore(end) ? yearEnd : end;
         cliDailyIngestService.ingestRange(stationId, rangeStart, rangeEnd);
+        long daysInSlice = ChronoUnit.DAYS.between(rangeStart, rangeEnd) + 1;
+        processedDays += daysInSlice;
         cursorDate = rangeEnd;
         cursorRef.set(cursorDate);
         checkpointService.markRunning(jobName, stationId, null, cursorDate, null);
+        snapshot("job=cli_ingest_year station=" + stationId
+            + " slice=" + rangeStart + ".." + rangeEnd
+            + " progress=" + processedDays + "/" + totalDays
+            + " remaining=" + (totalDays - processedDays));
       }
       cursorDate = end;
       cursorRef.set(cursorDate);
@@ -170,9 +210,15 @@ public class BackfillOrchestrator {
         effectiveStart = cursorRuntime;
       }
       if (!effectiveStart.isBefore(rangeEndUtc)) {
+        snapshot("job=mos_ingest_window station=" + stationId
+            + " model=" + model.name()
+            + " progress=complete"
+            + " cursorRuntime=" + cursorRuntime);
         checkpointService.markComplete(jobName, stationId, model, null, cursorRuntime);
         continue;
       }
+      long totalWindows = windowCount(effectiveStart, rangeEndUtc, windowSize);
+      long processedWindows = 0;
       AtomicReference<Instant> cursorRef = new AtomicReference<>(cursorRuntime);
       CheckpointHeartbeat heartbeat = CheckpointHeartbeat.start(() ->
           checkpointService.markRunning(jobName, stationId, model, null, cursorRef.get()));
@@ -185,6 +231,12 @@ public class BackfillOrchestrator {
             windowEnd = rangeEndUtc;
           }
           mosRunIngestService.ingestWindow(stationId, model, windowStart, windowEnd);
+          processedWindows += 1;
+          snapshot("job=mos_ingest_window station=" + stationId
+              + " model=" + model.name()
+              + " window=" + windowStart + ".." + windowEnd
+              + " progress=" + processedWindows + "/" + totalWindows
+              + " remaining=" + (totalWindows - processedWindows));
           cursorRuntime = windowEnd;
           cursorRef.set(cursorRuntime);
           checkpointService.markRunning(jobName, stationId, model, null, cursorRuntime);
@@ -222,6 +274,9 @@ public class BackfillOrchestrator {
         .orElse(null);
     LocalDate cursorDate = existing != null ? existing.getCursorDate() : null;
     if (cursorDate != null && !cursorDate.isBefore(end)) {
+      snapshot("job=mos_asof_materialize_range station=" + stationId
+          + " progress=complete"
+          + " cursorDate=" + cursorDate);
       checkpointService.markComplete(jobName, stationId, null, cursorDate, null);
       return;
     }
@@ -230,9 +285,14 @@ public class BackfillOrchestrator {
       effectiveStart = cursorDate.plusDays(1);
     }
     if (effectiveStart.isAfter(end)) {
+      snapshot("job=mos_asof_materialize_range station=" + stationId
+          + " progress=complete"
+          + " cursorDate=" + cursorDate);
       checkpointService.markComplete(jobName, stationId, null, cursorDate, null);
       return;
     }
+    long totalDays = ChronoUnit.DAYS.between(effectiveStart, end) + 1;
+    long processedDays = 0;
     AtomicReference<LocalDate> cursorRef = new AtomicReference<>(cursorDate);
     CheckpointHeartbeat heartbeat = CheckpointHeartbeat.start(() ->
         checkpointService.markRunning(jobName, stationId, null, cursorRef.get(), null));
@@ -242,9 +302,15 @@ public class BackfillOrchestrator {
       while (!current.isAfter(end)) {
         mosAsofMaterializeService.materializeForTargetDate(
             stationId, current, request.asofPolicyId(), models);
+        processedDays += 1;
         cursorDate = current;
         cursorRef.set(cursorDate);
         checkpointService.markRunning(jobName, stationId, null, cursorDate, null);
+        snapshot("job=mos_asof_materialize_range station=" + stationId
+            + " targetDate=" + current
+            + " progress=" + processedDays + "/" + totalDays
+            + " remaining=" + (totalDays - processedDays)
+            + " asofPolicyId=" + request.asofPolicyId());
         current = current.plusDays(1);
       }
       cursorDate = end;
@@ -309,5 +375,23 @@ public class BackfillOrchestrator {
       throw new IllegalArgumentException("seriesTicker is required");
     }
     return seriesTicker.trim().toUpperCase(Locale.ROOT);
+  }
+
+  private long windowCount(Instant start, Instant end, Duration windowSize) {
+    if (!start.isBefore(end)) {
+      return 0;
+    }
+    long windowMillis = windowSize.toMillis();
+    if (windowMillis <= 0) {
+      return 0;
+    }
+    long totalMillis = Duration.between(start, end).toMillis();
+    return (totalMillis + windowMillis - 1) / windowMillis;
+  }
+
+  private void snapshot(String message) {
+    String payload = "[BACKFILL] " + message;
+    logger.info(payload);
+    System.out.println(payload);
   }
 }

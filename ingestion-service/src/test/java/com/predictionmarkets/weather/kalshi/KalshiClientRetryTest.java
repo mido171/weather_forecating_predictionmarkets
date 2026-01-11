@@ -13,7 +13,6 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
 
 class KalshiClientRetryTest {
   private static final MockWebServer SERVER = new MockWebServer();
@@ -48,7 +47,7 @@ class KalshiClientRetryTest {
         Duration.ofSeconds(1),
         Duration.ofSeconds(1),
         retryPolicy);
-    KalshiClient client = new KalshiClient(WebClient.builder(), properties, new ObjectMapper(), settings);
+    KalshiClient client = new KalshiClient(properties, new ObjectMapper(), settings);
 
     KalshiSeriesPayload payload = client.fetchSeries("KXHIGHMIA");
 

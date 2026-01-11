@@ -1,0 +1,1 @@
+"""Mean model training (stub)."""

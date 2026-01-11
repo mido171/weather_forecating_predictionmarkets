@@ -5,18 +5,16 @@ import com.predictionmarkets.weather.common.http.HardenedWebClient;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class KalshiClient {
   private final HardenedWebClient httpClient;
   private final ObjectMapper objectMapper;
 
-  public KalshiClient(WebClient.Builder builder,
-                      KalshiProperties properties,
+  public KalshiClient(KalshiProperties properties,
                       ObjectMapper objectMapper,
                       HttpClientSettings httpClientSettings) {
-    this.httpClient = new HardenedWebClient(builder, properties.getBaseUrl(), httpClientSettings);
+    this.httpClient = new HardenedWebClient(properties.getBaseUrl(), httpClientSettings);
     this.objectMapper = objectMapper;
   }
 
@@ -28,7 +26,9 @@ public class KalshiClient {
     String endpoint = "/series/" + normalizedTicker;
     String correlationId = "kalshi-series-" + normalizedTicker;
     byte[] rawBytes = httpClient.getBytes(endpoint, correlationId,
-        uriBuilder -> uriBuilder.path("/series/{seriesTicker}").build(normalizedTicker));
+        urlBuilder -> urlBuilder.addPathSegments("series")
+            .addPathSegment(normalizedTicker)
+            .build());
     KalshiSeriesPayload payload = KalshiSeriesPayload.parse(objectMapper, rawBytes);
     String expectedTicker = seriesTicker.trim().toUpperCase(Locale.ROOT);
     if (!payload.seriesTicker().equalsIgnoreCase(expectedTicker)) {

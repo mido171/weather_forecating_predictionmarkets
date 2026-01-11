@@ -67,7 +67,17 @@ Notes:
 - For all other backfill jobs, only one series ticker is supported.
 - All jobs are restartable; checkpoints are stored in `ingest_checkpoint`.
 
-## 6) Run the audit report
+## 6) Run the full ingestion pipeline (all configured series)
+Use `com.predictionmarkets.weather.executors.FullIngestionExecutor` as the entry point.
+Pipeline settings live in `ingestion-service/src/main/resources/application.yml` under `pipeline.*`.
+Key settings:
+- `pipeline.series-tickers` (stations to ingest)
+- `pipeline.date-start-local` / `pipeline.date-end-local`
+- `pipeline.models`
+- `pipeline.mos-window-days`
+- `pipeline.thread-count` (parallel station workers)
+
+## 7) Run the audit report
 ```bash
 mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=mysql --audit.enabled=true --audit.series-ticker=KXHIGHMIA --audit.date-start-local=2024-07-01 --audit.date-end-local=2024-07-30 --audit.asof-policy-id=1 --audit.output-dir=reports"
 ```
@@ -76,11 +86,11 @@ Artifacts:
 - Markdown report in `reports/`
 - JSON report in `reports/`
 
-## 7) Common failure modes
+## 8) Common failure modes
 - Station mapping mismatch (needs `station_override`)
 - IEM endpoint 503 rate limiting (retry/backoff)
 - Missing `asof_policy` row for materialization
 - MOS model availability gaps for older periods
 
-## 8) Audit SQL helpers
+## 9) Audit SQL helpers
 Example queries for no-leakage and completeness live under `docs/sql/`.

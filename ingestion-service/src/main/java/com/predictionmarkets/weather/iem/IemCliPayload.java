@@ -57,7 +57,9 @@ public record IemCliPayload(
       BigDecimal tmax = parseDecimal(entry, "high");
       BigDecimal tmin = parseDecimal(entry, "low");
       Instant reportIssuedAtUtc = parseIssuedAt(entry);
-      days.add(new IemCliDaily(normalizedEntryStation, date, tmax, tmin, reportIssuedAtUtc));
+      String truthSourceUrl = optionalText(entry, "link");
+      days.add(new IemCliDaily(normalizedEntryStation, date, tmax, tmin, reportIssuedAtUtc,
+          truthSourceUrl));
     }
     Instant generatedAtUtc = optionalInstant(root, "generated_at");
     String payloadHash = Hashing.sha256Hex(rawBytes);

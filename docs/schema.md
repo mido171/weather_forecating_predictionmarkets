@@ -22,3 +22,6 @@ using MySQL `INSERT ... ON DUPLICATE KEY UPDATE` to keep jobs restartable.
 All ingestion tables include `retrieved_at_utc` and `raw_payload_hash` (or
 `raw_payload_hash_ref`) to support traceability and deduping. `cli_daily`
 tracks `updated_at_utc` to capture revision updates from the CLI source.
+
+`cli_daily` also stores `truth_source_url` to link directly to the NWS CLI
+product page associated with the daily truth value.

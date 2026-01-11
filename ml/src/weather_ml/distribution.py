@@ -1,0 +1,1 @@
+"""Distribution building helpers (stub)."""

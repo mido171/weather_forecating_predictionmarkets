@@ -9,7 +9,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class IemMosClient {
@@ -19,11 +18,10 @@ public class IemMosClient {
   private final HardenedWebClient httpClient;
   private final ObjectMapper objectMapper;
 
-  public IemMosClient(WebClient.Builder builder,
-                      IemProperties properties,
+  public IemMosClient(IemProperties properties,
                       ObjectMapper objectMapper,
                       HttpClientSettings httpClientSettings) {
-    this.httpClient = new HardenedWebClient(builder, properties.getBaseUrl(), httpClientSettings);
+    this.httpClient = new HardenedWebClient(properties.getBaseUrl(), httpClientSettings);
     this.objectMapper = objectMapper;
   }
 
@@ -50,12 +48,13 @@ public class IemMosClient {
         + "&format=json";
     String correlationId = "iem-mos-" + normalizedStation + "-" + model.name()
         + "-" + startParam + "-" + endParam;
-    byte[] rawBytes = httpClient.getBytes(endpoint, correlationId, uriBuilder -> uriBuilder.path("/cgi-bin/request/mos.py")
-        .queryParam("station", normalizedStation)
-        .queryParam("model", model.name())
-        .queryParam("sts", startParam)
-        .queryParam("ets", endParam)
-        .queryParam("format", "json")
+    byte[] rawBytes = httpClient.getBytes(endpoint, correlationId, urlBuilder -> urlBuilder
+        .addPathSegments("cgi-bin/request/mos.py")
+        .addQueryParameter("station", normalizedStation)
+        .addQueryParameter("model", model.name())
+        .addQueryParameter("sts", startParam)
+        .addQueryParameter("ets", endParam)
+        .addQueryParameter("format", "json")
         .build());
     return IemMosPayload.parse(objectMapper, rawBytes, normalizedStation, model);
   }

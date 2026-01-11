@@ -2,11 +2,16 @@ spring:
   application:
     name: ingestion-service
   profiles:
-    default: local
+    default: mysql
   jpa:
     hibernate:
       ddl-auto: none
     open-in-view: false
+  flyway:
+    locations:
+      - classpath:db/migration
+      - filesystem:../models/src/main/resources/db/migration
+    fail-on-missing-locations: false
 
 logging:
   level:
@@ -17,3 +22,25 @@ kalshi:
 
 iem:
   base-url: https://mesonet.agron.iastate.edu
+
+pipeline:
+  series-tickers:
+    - KXHIGHNY
+    - KXHIGHPHIL
+    - KXHIGHMIA
+    - KXHIGHCHI
+    - KXHIGHLAX
+  models:
+    - GFS
+    - MEX
+    - NAM
+    - NBS
+    - NBE
+  date-start-local: 2015-01-01
+  date-end-local: 2025-12-31
+  mos-window-days: 1
+  thread-count: 20
+  default-range-days: 30
+  asof-policy-name: default-23
+  asof-local-time: "23:00"
+  reset-checkpoints: true

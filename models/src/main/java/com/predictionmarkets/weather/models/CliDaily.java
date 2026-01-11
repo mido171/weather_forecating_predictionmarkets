@@ -22,6 +22,9 @@ public class CliDaily {
   @Column(name = "report_issued_at_utc")
   private Instant reportIssuedAtUtc;
 
+  @Column(name = "truth_source_url", length = 1024)
+  private String truthSourceUrl;
+
   @Column(name = "raw_payload_hash", nullable = false, length = 64)
   private String rawPayloadHash;
 
@@ -61,6 +64,14 @@ public class CliDaily {
 
   public void setReportIssuedAtUtc(Instant reportIssuedAtUtc) {
     this.reportIssuedAtUtc = reportIssuedAtUtc;
+  }
+
+  public String getTruthSourceUrl() {
+    return truthSourceUrl;
+  }
+
+  public void setTruthSourceUrl(String truthSourceUrl) {
+    this.truthSourceUrl = truthSourceUrl;
   }
 
   public String getRawPayloadHash() {

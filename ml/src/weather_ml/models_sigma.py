@@ -1,0 +1,1 @@
+"""Sigma model training (stub)."""

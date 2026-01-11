@@ -1,57 +1,64 @@
 package com.predictionmarkets.weather.common.http;
 
-import io.netty.channel.ChannelOption;
 import java.io.IOException;
-import java.net.URI;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.util.UriBuilder;
-import reactor.netty.http.client.HttpClient;
 
 public final class HardenedWebClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(HardenedWebClient.class);
 
-  private final WebClient webClient;
+  private final OkHttpClient httpClient;
   private final HttpClientSettings settings;
   private final Sleeper sleeper;
+  private final HttpUrl baseUrl;
 
-  public HardenedWebClient(WebClient.Builder builder, String baseUrl, HttpClientSettings settings) {
-    this(builder, baseUrl, settings, Sleeper.defaultSleeper());
+  public HardenedWebClient(String baseUrl, HttpClientSettings settings) {
+    this(baseUrl, settings, Sleeper.defaultSleeper());
   }
 
-  HardenedWebClient(WebClient.Builder builder,
-                    String baseUrl,
+  HardenedWebClient(String baseUrl,
                     HttpClientSettings settings,
                     Sleeper sleeper) {
-    Objects.requireNonNull(builder, "builder must not be null");
     Objects.requireNonNull(baseUrl, "baseUrl must not be null");
+    this.baseUrl = parseBaseUrl(baseUrl);
     this.settings = Objects.requireNonNull(settings, "settings must not be null");
     this.sleeper = Objects.requireNonNull(sleeper, "sleeper must not be null");
-    this.webClient = buildWebClient(builder, baseUrl, settings);
+    this.httpClient = buildClient(settings);
   }
 
-  public byte[] getBytes(String endpoint, String correlationId, Function<UriBuilder, URI> uriBuilder) {
-    Objects.requireNonNull(uriBuilder, "uriBuilder must not be null");
-    return executeWithRetry("GET", endpoint, correlationId, () -> fetchOnce(uriBuilder));
+  public byte[] getBytes(String endpoint,
+                         String correlationId,
+                         Function<HttpUrl.Builder, HttpUrl> urlBuilder) {
+    Objects.requireNonNull(urlBuilder, "urlBuilder must not be null");
+    return executeWithRetry("GET", endpoint, correlationId, () -> fetchOnce(urlBuilder));
   }
 
-  private HttpResult fetchOnce(Function<UriBuilder, URI> uriBuilder) {
-    Duration readTimeout = settings.readTimeout();
-    return webClient.get()
-        .uri(uriBuilder)
-        .exchangeToMono(response -> response.bodyToMono(byte[].class)
-            .defaultIfEmpty(new byte[0])
-            .map(body -> new HttpResult(response.statusCode().value(), body)))
-        .timeout(readTimeout)
-        .block();
+  private HttpResult fetchOnce(Function<HttpUrl.Builder, HttpUrl> urlBuilder) {
+    HttpUrl url = Objects.requireNonNull(urlBuilder.apply(baseUrl.newBuilder()),
+        "urlBuilder returned null");
+    Request request = new Request.Builder()
+        .url(url)
+        .get()
+        .build();
+    try (Response response = httpClient.newCall(request).execute()) {
+      ResponseBody body = response.body();
+      byte[] payload = body == null ? new byte[0] : body.bytes();
+      return new HttpResult(response.code(), payload);
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 
   private byte[] executeWithRetry(String method,
@@ -104,9 +111,6 @@ public final class HardenedWebClient {
   }
 
   private boolean isRetryableException(Throwable ex) {
-    if (ex instanceof WebClientRequestException) {
-      return true;
-    }
     if (ex instanceof TimeoutException) {
       return true;
     }
@@ -155,25 +159,24 @@ public final class HardenedWebClient {
     }
   }
 
-  private static WebClient buildWebClient(WebClient.Builder builder,
-                                          String baseUrl,
-                                          HttpClientSettings settings) {
+  private static OkHttpClient buildClient(HttpClientSettings settings) {
     Duration connectTimeout = settings.connectTimeout();
     Duration readTimeout = settings.readTimeout();
-    HttpClient httpClient = HttpClient.create()
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, toMillisInt(connectTimeout))
-        .responseTimeout(readTimeout);
-    return builder.baseUrl(baseUrl)
-        .clientConnector(new ReactorClientHttpConnector(httpClient))
+    return new OkHttpClient.Builder()
+        .connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        .readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        .callTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        .writeTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        .retryOnConnectionFailure(true)
         .build();
   }
 
-  private static int toMillisInt(Duration duration) {
-    long millis = duration.toMillis();
-    if (millis > Integer.MAX_VALUE) {
-      return Integer.MAX_VALUE;
+  private static HttpUrl parseBaseUrl(String baseUrl) {
+    HttpUrl parsed = HttpUrl.parse(baseUrl);
+    if (parsed == null) {
+      throw new IllegalArgumentException("Invalid baseUrl: " + baseUrl);
     }
-    return (int) millis;
+    return parsed;
   }
 
   private record HttpResult(int statusCode, byte[] body) {

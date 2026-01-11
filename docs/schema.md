@@ -20,4 +20,5 @@ using MySQL `INSERT ... ON DUPLICATE KEY UPDATE` to keep jobs restartable.
 
 ## Audit fields
 All ingestion tables include `retrieved_at_utc` and `raw_payload_hash` (or
-`raw_payload_hash_ref`) to support traceability and deduping.
+`raw_payload_hash_ref`) to support traceability and deduping. `cli_daily`
+tracks `updated_at_utc` to capture revision updates from the CLI source.

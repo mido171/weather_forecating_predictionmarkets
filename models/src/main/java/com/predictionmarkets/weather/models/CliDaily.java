@@ -28,6 +28,9 @@ public class CliDaily {
   @Column(name = "retrieved_at_utc", nullable = false)
   private Instant retrievedAtUtc;
 
+  @Column(name = "updated_at_utc", nullable = false)
+  private Instant updatedAtUtc;
+
   public CliDailyId getId() {
     return id;
   }
@@ -74,5 +77,13 @@ public class CliDaily {
 
   public void setRetrievedAtUtc(Instant retrievedAtUtc) {
     this.retrievedAtUtc = retrievedAtUtc;
+  }
+
+  public Instant getUpdatedAtUtc() {
+    return updatedAtUtc;
+  }
+
+  public void setUpdatedAtUtc(Instant updatedAtUtc) {
+    this.updatedAtUtc = updatedAtUtc;
   }
 }

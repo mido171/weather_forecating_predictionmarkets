@@ -16,7 +16,7 @@ python -m pip install -e .
 pytest
 ```
 
-## Run training CLI (stub)
+## Run training CLI
 
 ```powershell
 python -m weather_ml.train --help
@@ -39,4 +39,32 @@ df = dataset.build_dataset(
     date(2024, 1, 31),
     1,
 )
+```
+
+## Dataset snapshots (WX-203)
+
+The snapshot builder writes versioned Parquet datasets plus metadata for auditing.
+It is driven by the same config used by the CLI.
+
+Outputs:
+- `datasets/<dataset_id>/data.parquet`
+- `datasets/<dataset_id>/metadata.json`
+
+Example (Python):
+
+```python
+from datetime import date
+
+from weather_ml import dataset
+
+snapshot = dataset.build_dataset_snapshot(
+    ["KMIA"],
+    date(2024, 1, 1),
+    date(2024, 1, 31),
+    1,
+    missing_strategy="drop",
+    datasets_dir="datasets",
+)
+
+print(snapshot.dataset_id, snapshot.data_path)
 ```

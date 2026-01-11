@@ -11,6 +11,8 @@ data:
   start_date_local: "2024-01-01"
   end_date_local: "2024-12-31"
   asof_policy_id: 1
+  missing_strategy: "drop"
 
 output:
   artifacts_dir: "artifacts"
+  datasets_dir: "datasets"

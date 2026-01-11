@@ -18,6 +18,7 @@
 
 ## 3) Output artifacts
 - artifacts/<run_id>/{models,report,metrics,metadata}
+- datasets/<dataset_id>/{data.parquet,metadata.json} when running the dataset stage
 
 ## 4) Safety checks
 - Pipeline should abort if any row violates:
@@ -25,4 +26,3 @@
 
 - Pipeline should log:
   station, date range, #rows, missing fraction, leakage check results.
-

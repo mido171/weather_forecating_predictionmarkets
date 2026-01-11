@@ -1,3 +1,3 @@
 # Docs
 
-Project documentation will live here.
+- `docs/schema.md` (Epic #1 schema + time semantics references)

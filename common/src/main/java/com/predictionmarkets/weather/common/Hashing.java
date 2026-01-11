@@ -13,8 +13,15 @@ public final class Hashing {
     if (value == null) {
       throw new IllegalArgumentException("value must not be null");
     }
+    return sha256Hex(value.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static String sha256Hex(byte[] value) {
+    if (value == null) {
+      throw new IllegalArgumentException("value must not be null");
+    }
     MessageDigest digest = sha256Digest();
-    byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+    byte[] hash = digest.digest(value);
     return HexFormat.of().formatHex(hash);
   }
 

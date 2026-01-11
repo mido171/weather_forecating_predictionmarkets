@@ -1,18 +1,22 @@
 package com.predictionmarkets.weather.kalshi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Duration;
+import com.predictionmarkets.weather.common.http.HardenedWebClient;
+import com.predictionmarkets.weather.common.http.HttpClientSettings;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class KalshiClient {
-  private final WebClient webClient;
+  private final HardenedWebClient httpClient;
   private final ObjectMapper objectMapper;
 
-  public KalshiClient(WebClient.Builder builder, KalshiProperties properties, ObjectMapper objectMapper) {
-    this.webClient = builder.baseUrl(properties.getBaseUrl()).build();
+  public KalshiClient(WebClient.Builder builder,
+                      KalshiProperties properties,
+                      ObjectMapper objectMapper,
+                      HttpClientSettings httpClientSettings) {
+    this.httpClient = new HardenedWebClient(builder, properties.getBaseUrl(), httpClientSettings);
     this.objectMapper = objectMapper;
   }
 
@@ -20,16 +24,12 @@ public class KalshiClient {
     if (seriesTicker == null || seriesTicker.isBlank()) {
       throw new IllegalArgumentException("seriesTicker is required");
     }
-    String rawJson = webClient.get()
-        .uri("/series/{seriesTicker}", seriesTicker)
-        .retrieve()
-        .bodyToMono(String.class)
-        .timeout(Duration.ofSeconds(30))
-        .block();
-    if (rawJson == null || rawJson.isBlank()) {
-      throw new IllegalStateException("Kalshi series payload was empty");
-    }
-    KalshiSeriesPayload payload = KalshiSeriesPayload.parse(objectMapper, rawJson);
+    String normalizedTicker = seriesTicker.trim().toUpperCase(Locale.ROOT);
+    String endpoint = "/series/" + normalizedTicker;
+    String correlationId = "kalshi-series-" + normalizedTicker;
+    byte[] rawBytes = httpClient.getBytes(endpoint, correlationId,
+        uriBuilder -> uriBuilder.path("/series/{seriesTicker}").build(normalizedTicker));
+    KalshiSeriesPayload payload = KalshiSeriesPayload.parse(objectMapper, rawBytes);
     String expectedTicker = seriesTicker.trim().toUpperCase(Locale.ROOT);
     if (!payload.seriesTicker().equalsIgnoreCase(expectedTicker)) {
       throw new IllegalArgumentException("Series ticker mismatch: expected " + expectedTicker

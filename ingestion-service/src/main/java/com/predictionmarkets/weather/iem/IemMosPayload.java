@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
 import com.predictionmarkets.weather.models.MosModel;
+import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,11 +22,15 @@ public record IemMosPayload(
     String rawPayloadHash) {
 
   public static IemMosPayload parse(ObjectMapper mapper,
-                                    String rawJson,
+                                    byte[] rawBytes,
                                     String expectedStationId,
                                     MosModel expectedModel) {
     Objects.requireNonNull(mapper, "mapper");
-    if (rawJson == null || rawJson.isBlank()) {
+    if (rawBytes == null || rawBytes.length == 0) {
+      throw new IllegalArgumentException("Raw JSON payload is required");
+    }
+    String rawJson = new String(rawBytes, StandardCharsets.UTF_8);
+    if (rawJson.isBlank()) {
       throw new IllegalArgumentException("Raw JSON payload is required");
     }
     String normalizedStation = normalizeStation(expectedStationId);
@@ -55,7 +60,7 @@ public record IemMosPayload(
       BigDecimal nX = parseDecimal(entry, "n_x");
       entries.add(new IemMosEntry(runtimeUtc, forecastTimeUtc, nX));
     }
-    String payloadHash = Hashing.sha256Hex(rawJson);
+    String payloadHash = Hashing.sha256Hex(rawBytes);
     return new IemMosPayload(
         normalizedStation,
         expectedModel,

@@ -91,3 +91,4 @@ D) Materialize as-of features
 - Use bounded concurrency (configurable thread pool)
 - Use retries with jittered exponential backoff
 - Persist checkpoints frequently
+- External HTTP calls use the common HardenedWebClient with connect/read timeouts and retry logging

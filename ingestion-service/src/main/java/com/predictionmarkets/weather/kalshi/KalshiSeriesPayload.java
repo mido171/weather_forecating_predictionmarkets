@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public record KalshiSeriesPayload(
@@ -17,9 +18,13 @@ public record KalshiSeriesPayload(
     String rawJson,
     String rawPayloadHash) {
 
-  public static KalshiSeriesPayload parse(ObjectMapper mapper, String rawJson) {
+  public static KalshiSeriesPayload parse(ObjectMapper mapper, byte[] rawBytes) {
     Objects.requireNonNull(mapper, "mapper");
-    if (rawJson == null || rawJson.isBlank()) {
+    if (rawBytes == null || rawBytes.length == 0) {
+      throw new IllegalArgumentException("Raw JSON payload is required");
+    }
+    String rawJson = new String(rawBytes, StandardCharsets.UTF_8);
+    if (rawJson.isBlank()) {
       throw new IllegalArgumentException("Raw JSON payload is required");
     }
     JsonNode root = readTree(mapper, rawJson);
@@ -36,7 +41,7 @@ public record KalshiSeriesPayload(
     String settlementUrl = requireText(primarySettlement, "url");
     String contractTermsUrl = optionalText(series, "contract_terms_url");
     String contractUrl = optionalText(series, "contract_url");
-    String payloadHash = Hashing.sha256Hex(rawJson);
+    String payloadHash = Hashing.sha256Hex(rawBytes);
     return new KalshiSeriesPayload(
         ticker,
         title,

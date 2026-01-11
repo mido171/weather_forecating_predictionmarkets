@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
+import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,9 +30,13 @@ public record IemCliPayload(
   private static final Pattern ISSUE_TIMESTAMP = Pattern.compile("(\\d{12})");
   private static final DateTimeFormatter ISSUE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
 
-  public static IemCliPayload parse(ObjectMapper mapper, String rawJson, String expectedStationId) {
+  public static IemCliPayload parse(ObjectMapper mapper, byte[] rawBytes, String expectedStationId) {
     Objects.requireNonNull(mapper, "mapper");
-    if (rawJson == null || rawJson.isBlank()) {
+    if (rawBytes == null || rawBytes.length == 0) {
+      throw new IllegalArgumentException("Raw JSON payload is required");
+    }
+    String rawJson = new String(rawBytes, StandardCharsets.UTF_8);
+    if (rawJson.isBlank()) {
       throw new IllegalArgumentException("Raw JSON payload is required");
     }
     String normalizedStation = normalizeStation(expectedStationId);
@@ -55,7 +60,7 @@ public record IemCliPayload(
       days.add(new IemCliDaily(normalizedEntryStation, date, tmax, tmin, reportIssuedAtUtc));
     }
     Instant generatedAtUtc = optionalInstant(root, "generated_at");
-    String payloadHash = Hashing.sha256Hex(rawJson);
+    String payloadHash = Hashing.sha256Hex(rawBytes);
     return new IemCliPayload(normalizedStation, Collections.unmodifiableList(days), rawJson, payloadHash, generatedAtUtc);
   }
 

@@ -55,8 +55,12 @@ public class KalshiSeriesResolver {
     series.setContractTermsUrl(payload.contractTermsUrl());
     series.setContractUrl(payload.contractUrl());
     series.setRetrievedAtUtc(now);
-    series.setRawPayloadHash(payload.rawPayloadHash());
-    series.setRawJson(payload.rawJson());
+    String payloadHash = payload.rawPayloadHash();
+    String existingHash = series.getRawPayloadHash();
+    series.setRawPayloadHash(payloadHash);
+    if (series.getRawJson() == null || !payloadHash.equals(existingHash)) {
+      series.setRawJson(payload.rawJson());
+    }
     kalshiSeriesRepository.save(series);
 
     StationRegistry registry = stationRegistryRepository.findById(stationId)

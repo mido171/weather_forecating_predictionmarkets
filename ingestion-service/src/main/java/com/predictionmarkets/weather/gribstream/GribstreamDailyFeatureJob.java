@@ -4,6 +4,7 @@ import com.predictionmarkets.weather.backfill.CheckpointHeartbeat;
 import com.predictionmarkets.weather.backfill.IngestCheckpointService;
 import com.predictionmarkets.weather.models.IngestCheckpoint;
 import com.predictionmarkets.weather.models.IngestCheckpointStatus;
+import com.predictionmarkets.weather.repository.GribstreamDailyFeatureRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -22,13 +23,16 @@ public class GribstreamDailyFeatureJob {
 
   private final GribstreamDailyTmaxService dailyService;
   private final IngestCheckpointService checkpointService;
+  private final GribstreamDailyFeatureRepository featureRepository;
   private final StationRegistryRepository stationRegistryRepository;
 
   public GribstreamDailyFeatureJob(GribstreamDailyTmaxService dailyService,
                                    IngestCheckpointService checkpointService,
+                                   GribstreamDailyFeatureRepository featureRepository,
                                    StationRegistryRepository stationRegistryRepository) {
     this.dailyService = dailyService;
     this.checkpointService = checkpointService;
+    this.featureRepository = featureRepository;
     this.stationRegistryRepository = stationRegistryRepository;
   }
 
@@ -57,11 +61,21 @@ public class GribstreamDailyFeatureJob {
       snapshot("job=gribstream_daily_features station=" + stationId
           + " checkpoint=skipped reason=station_registry_missing");
     }
-    IngestCheckpoint existing = checkpointsEnabled
-        ? checkpointService.findCheckpoint(JOB_NAME, stationId, null).orElse(null)
-        : null;
-    LocalDate cursorDate = existing != null ? existing.getCursorDate() : null;
-    if (cursorDate != null && !cursorDate.isBefore(end)) {
+    LocalDate cursorDate = null;
+    boolean resumeFromFeatures = false;
+    if (checkpointsEnabled) {
+      IngestCheckpoint existing =
+          checkpointService.findCheckpoint(JOB_NAME, stationId, null).orElse(null);
+      cursorDate = existing != null ? existing.getCursorDate() : null;
+    } else {
+      cursorDate = featureRepository.findMaxTargetDateLocalByStationId(stationId);
+      if (cursorDate != null) {
+        resumeFromFeatures = true;
+        snapshot("job=gribstream_daily_features station=" + stationId
+            + " resume=feature_table cursorDate=" + cursorDate);
+      }
+    }
+    if (!resumeFromFeatures && cursorDate != null && !cursorDate.isBefore(end)) {
       snapshot("job=gribstream_daily_features station=" + stationId
           + " progress=complete cursorDate=" + cursorDate);
       if (checkpointsEnabled) {
@@ -71,15 +85,17 @@ public class GribstreamDailyFeatureJob {
     }
     LocalDate effectiveStart = start;
     if (cursorDate != null && !cursorDate.isBefore(start)) {
-      effectiveStart = cursorDate.plusDays(1);
+      effectiveStart = resumeFromFeatures ? cursorDate : cursorDate.plusDays(1);
     }
     if (effectiveStart.isAfter(end)) {
-      snapshot("job=gribstream_daily_features station=" + stationId
-          + " progress=complete cursorDate=" + cursorDate);
-      if (checkpointsEnabled) {
-        checkpointService.markComplete(JOB_NAME, stationId, null, cursorDate, null);
+      if (!resumeFromFeatures) {
+        snapshot("job=gribstream_daily_features station=" + stationId
+            + " progress=complete cursorDate=" + cursorDate);
+        if (checkpointsEnabled) {
+          checkpointService.markComplete(JOB_NAME, stationId, null, cursorDate, null);
+        }
+        return List.of();
       }
-      return List.of();
     }
     List<GribstreamDailyOpinionResult> results = new ArrayList<>();
     AtomicReference<LocalDate> cursorRef = new AtomicReference<>(cursorDate);

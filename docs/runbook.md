@@ -89,12 +89,12 @@ Artifacts:
 ## 8) Gribstream CSV transfer (export/import)
 Export `gribstream_daily_feature` to a CSV file:
 ```bash
-mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.mainClass=com.predictionmarkets.weather.executors.GribstreamDailyFeatureCsvExportExecutor -Dspring-boot.run.arguments="--spring.profiles.active=mysql --gribstream.transfer.export.output-path=gribstream_daily_feature.csv"
+mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.mainClass=com.predictionmarkets.weather.executors.GribstreamDailyFeatureCsvExportExecutor -Dspring-boot.run.arguments="--spring.profiles.active=mysql --gribstream.transfer.export.output-path=ingestion-service/src/main/resources/gribstream_daily_feature.csv"
 ```
 
 Import a CSV file into `gribstream_daily_feature` (idempotent upsert):
 ```bash
-mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.mainClass=com.predictionmarkets.weather.executors.GribstreamDailyFeatureCsvImportExecutor -Dspring-boot.run.arguments="--spring.profiles.active=mysql --gribstream.transfer.import.input-path=gribstream_daily_feature.csv"
+mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.mainClass=com.predictionmarkets.weather.executors.GribstreamDailyFeatureCsvImportExecutor -Dspring-boot.run.arguments="--spring.profiles.active=mysql --gribstream.transfer.import.input-path=ingestion-service/src/main/resources/gribstream_daily_feature.csv"
 ```
 
 Config keys (see `ingestion-service/src/main/resources/application.yml`):

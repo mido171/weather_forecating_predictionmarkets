@@ -4,15 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,15 +38,9 @@ class GribstreamClientParsingTest {
     String gfsBody = loadFixture("gribstream/gfs_history.json");
     String gefsBody = loadFixture("gribstream/gefs_history.json");
     for (int i = 0; i < 5; i++) {
-      SERVER.enqueue(new MockResponse()
-          .setResponseCode(200)
-          .setHeader("Content-Type", "application/ndjson")
-          .setBody(gfsBody));
+      SERVER.enqueue(gzipResponse(gfsBody));
     }
-    SERVER.enqueue(new MockResponse()
-        .setResponseCode(200)
-        .setHeader("Content-Type", "application/ndjson")
-        .setBody(gefsBody));
+    SERVER.enqueue(gzipResponse(gefsBody));
 
     GribstreamProperties properties = new GribstreamProperties();
     properties.setBaseUrl(SERVER.url("/").toString());
@@ -112,5 +109,23 @@ class GribstreamClientParsingTest {
       }
       return new String(input.readAllBytes(), StandardCharsets.UTF_8);
     }
+  }
+
+  private static MockResponse gzipResponse(String body) throws IOException {
+    Buffer buffer = new Buffer();
+    buffer.write(gzipBytes(body));
+    return new MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", "application/ndjson")
+        .setHeader("Content-Encoding", "gzip")
+        .setBody(buffer);
+  }
+
+  private static byte[] gzipBytes(String body) throws IOException {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    try (GZIPOutputStream gzip = new GZIPOutputStream(output)) {
+      gzip.write(body.getBytes(StandardCharsets.UTF_8));
+    }
+    return output.toByteArray();
   }
 }

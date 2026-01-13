@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
 import com.predictionmarkets.weather.common.http.HttpRetryPolicy;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -155,11 +158,16 @@ public class GribstreamClient {
         .header("Content-Type", "application/json");
     if (gzipEnabled) {
       builder.header("Accept-Encoding", "gzip");
+    } else {
+      builder.header("Accept-Encoding", "identity");
     }
     Request request = builder.build();
     try (Response response = httpClient.newCall(request).execute()) {
       ResponseBody responseBody = response.body();
       byte[] payload = responseBody == null ? new byte[0] : responseBody.bytes();
+      if (isGzipEncoded(response) && payload.length > 0) {
+        payload = decompressGzip(payload);
+      }
       return new GribstreamHttpResponse(response.code(), payload);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
@@ -210,6 +218,31 @@ public class GribstreamClient {
       throw new IllegalArgumentException("Invalid gribstream.baseUrl: " + baseUrl);
     }
     return parsed;
+  }
+
+  private static boolean isGzipEncoded(Response response) {
+    String encoding = response.header("Content-Encoding");
+    if (encoding == null || encoding.isBlank()) {
+      return false;
+    }
+    String[] parts = encoding.split(",");
+    for (String part : parts) {
+      if ("gzip".equalsIgnoreCase(part.trim())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static byte[] decompressGzip(byte[] payload) {
+    try (ByteArrayInputStream input = new ByteArrayInputStream(payload);
+         GZIPInputStream gzip = new GZIPInputStream(input);
+         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+      gzip.transferTo(output);
+      return output.toByteArray();
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 
   private boolean isRetryableException(Throwable ex) {

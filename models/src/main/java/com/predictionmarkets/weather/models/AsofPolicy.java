@@ -3,6 +3,8 @@ package com.predictionmarkets.weather.models;
 import java.time.LocalTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,6 +23,10 @@ public class AsofPolicy {
 
   @Column(name = "asof_local_time", nullable = false)
   private LocalTime asofLocalTime;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "asof_time_zone", nullable = false, length = 16)
+  private AsofTimeZone asofTimeZone = AsofTimeZone.LOCAL;
 
   @Column(name = "enabled", nullable = false)
   private Boolean enabled;
@@ -47,6 +53,14 @@ public class AsofPolicy {
 
   public void setAsofLocalTime(LocalTime asofLocalTime) {
     this.asofLocalTime = asofLocalTime;
+  }
+
+  public AsofTimeZone getAsofTimeZone() {
+    return asofTimeZone;
+  }
+
+  public void setAsofTimeZone(AsofTimeZone asofTimeZone) {
+    this.asofTimeZone = asofTimeZone;
   }
 
   public Boolean getEnabled() {

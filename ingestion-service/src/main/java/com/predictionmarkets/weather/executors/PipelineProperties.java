@@ -1,5 +1,6 @@
 package com.predictionmarkets.weather.executors;
 
+import com.predictionmarkets.weather.models.AsofTimeZone;
 import com.predictionmarkets.weather.models.MosModel;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,6 +18,7 @@ public class PipelineProperties {
   private Long asofPolicyId;
   private String asofPolicyName;
   private LocalTime asofLocalTime;
+  private AsofTimeZone asofTimeZone;
   private int defaultRangeDays;
   private boolean resetCheckpoints;
 
@@ -90,6 +92,14 @@ public class PipelineProperties {
 
   public void setAsofLocalTime(LocalTime asofLocalTime) {
     this.asofLocalTime = asofLocalTime;
+  }
+
+  public AsofTimeZone getAsofTimeZone() {
+    return asofTimeZone;
+  }
+
+  public void setAsofTimeZone(AsofTimeZone asofTimeZone) {
+    this.asofTimeZone = asofTimeZone;
   }
 
   public int getDefaultRangeDays() {

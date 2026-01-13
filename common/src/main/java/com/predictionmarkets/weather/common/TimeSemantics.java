@@ -26,12 +26,22 @@ public final class TimeSemantics {
   public static AsOfTimes computeAsOfTimes(LocalDate targetDateLocal,
                                            LocalTime asOfLocalTime,
                                            ZoneId stationZoneId) {
+    return computeAsOfTimes(targetDateLocal, asOfLocalTime, stationZoneId, stationZoneId);
+  }
+
+  public static AsOfTimes computeAsOfTimes(LocalDate targetDateLocal,
+                                           LocalTime asOfLocalTime,
+                                           ZoneId stationZoneId,
+                                           ZoneId asOfZoneId) {
     Objects.requireNonNull(targetDateLocal, "targetDateLocal must not be null");
     Objects.requireNonNull(asOfLocalTime, "asOfLocalTime must not be null");
     Objects.requireNonNull(stationZoneId, "stationZoneId must not be null");
+    ZoneId resolvedAsOfZoneId = asOfZoneId != null ? asOfZoneId : stationZoneId;
     LocalDate asOfDateLocal = targetDateLocal.minusDays(1);
-    ZonedDateTime asOfLocalZdt = ZonedDateTime.of(asOfDateLocal, asOfLocalTime, stationZoneId);
-    Instant asOfUtc = asOfLocalZdt.toInstant();
+    ZonedDateTime decisionLocalZdt =
+        ZonedDateTime.of(asOfDateLocal, asOfLocalTime, resolvedAsOfZoneId);
+    Instant asOfUtc = decisionLocalZdt.toInstant();
+    ZonedDateTime asOfLocalZdt = ZonedDateTime.ofInstant(asOfUtc, stationZoneId);
     return new AsOfTimes(asOfUtc, asOfLocalZdt);
   }
 

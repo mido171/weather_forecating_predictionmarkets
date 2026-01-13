@@ -30,4 +30,24 @@ class GefsSpreadComputationTest {
         org.assertj.core.data.Offset.offset(1e-6));
     assertThat(result.timesUsed()).isEqualTo(2);
   }
+
+  @Test
+  void computesEnsembleMeanTmax() {
+    Instant forecastedAt = Instant.parse("2026-01-09T06:00:00Z");
+    Instant time1 = Instant.parse("2026-01-10T12:00:00Z");
+    Instant time2 = Instant.parse("2026-01-10T18:00:00Z");
+    List<GribstreamRow> rows = List.of(
+        new GribstreamRow(forecastedAt, time1, 280.0, 0),
+        new GribstreamRow(forecastedAt, time1, 282.0, 1),
+        new GribstreamRow(forecastedAt, time2, 285.0, 0),
+        new GribstreamRow(forecastedAt, time2, 287.0, 1));
+
+    GribstreamDailyMetrics.EnsembleMeanResult result =
+        GribstreamDailyMetrics.computeEnsembleMeanTmax(rows, 2);
+
+    assertThat(result.tmaxK()).isEqualTo(286.0);
+    assertThat(result.membersUsed()).isEqualTo(2);
+    assertThat(result.timesUsed()).isEqualTo(2);
+    assertThat(result.forecastedAtUtc()).isEqualTo(forecastedAt);
+  }
 }

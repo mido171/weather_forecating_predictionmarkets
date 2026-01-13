@@ -65,6 +65,50 @@ public final class GribstreamDailyMetrics {
     return new SpreadResult(maxStddev, spreadF, usedTimes);
   }
 
+  public static EnsembleMeanResult computeEnsembleMeanTmax(List<GribstreamRow> rows, int minMembers) {
+    if (rows == null || rows.isEmpty()) {
+      throw new IllegalArgumentException("rows are required");
+    }
+    if (minMembers < 1) {
+      throw new IllegalArgumentException("minMembers must be >= 1");
+    }
+    Map<Instant, MeanAccumulator> grouped = new HashMap<>();
+    for (GribstreamRow row : rows) {
+      Instant forecastedTime = row.forecastedTime();
+      if (forecastedTime == null) {
+        continue;
+      }
+      grouped.computeIfAbsent(forecastedTime, ignored -> new MeanAccumulator())
+          .add(row.tmpk(), row.forecastedAt());
+    }
+    double maxMeanK = Double.NEGATIVE_INFINITY;
+    Instant selectedForecastedAt = null;
+    int membersUsed = 0;
+    int usedTimes = 0;
+    for (MeanAccumulator accumulator : grouped.values()) {
+      if (accumulator.count < minMembers) {
+        continue;
+      }
+      double meanK = accumulator.sum / accumulator.count;
+      if (Double.isFinite(meanK)) {
+        usedTimes++;
+        if (meanK > maxMeanK) {
+          maxMeanK = meanK;
+          selectedForecastedAt = accumulator.maxForecastedAt;
+          membersUsed = accumulator.count;
+        }
+      }
+    }
+    if (usedTimes == 0 || !Double.isFinite(maxMeanK)) {
+      throw new IllegalArgumentException("insufficient member coverage for ensemble mean");
+    }
+    if (selectedForecastedAt == null) {
+      throw new IllegalArgumentException("forecastedAt is required for ensemble mean");
+    }
+    double meanF = kelvinToF(maxMeanK);
+    return new EnsembleMeanResult(maxMeanK, meanF, selectedForecastedAt, membersUsed, usedTimes);
+  }
+
   public static double kelvinToF(double valueK) {
     return (valueK - 273.15) * 9.0 / 5.0 + 32.0;
   }
@@ -92,5 +136,27 @@ public final class GribstreamDailyMetrics {
   }
 
   public record SpreadResult(double spreadK, double spreadF, int timesUsed) {
+  }
+
+  public record EnsembleMeanResult(double tmaxK,
+                                   double tmaxF,
+                                   Instant forecastedAtUtc,
+                                   int membersUsed,
+                                   int timesUsed) {
+  }
+
+  private static final class MeanAccumulator {
+    private double sum = 0.0;
+    private int count = 0;
+    private Instant maxForecastedAt;
+
+    private void add(double value, Instant forecastedAt) {
+      sum += value;
+      count++;
+      if (forecastedAt != null
+          && (maxForecastedAt == null || forecastedAt.isAfter(maxForecastedAt))) {
+        maxForecastedAt = forecastedAt;
+      }
+    }
   }
 }

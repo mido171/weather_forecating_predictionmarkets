@@ -58,7 +58,7 @@ app:
   runners:
     gribstream-example:
       enabled: false
-      start-date-local: 2020-10-03
+      start-date-local: 2021-02-22
       end-date-local: 2025-12-31
       asof-utc: "2025-12-31T17:00:00Z"
 
@@ -80,6 +80,7 @@ pipeline:
   mos-window-days: 1
   thread-count: 20
   default-range-days: 30
-  asof-policy-name: default-23
-  asof-local-time: "23:00"
+  asof-policy-name: utc-12
+  asof-local-time: "12:00"
+  asof-time-zone: UTC
   reset-checkpoints: true

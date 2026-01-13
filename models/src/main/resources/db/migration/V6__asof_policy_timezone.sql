@@ -1,0 +1,2 @@
+ALTER TABLE asof_policy
+  ADD COLUMN asof_time_zone VARCHAR(16) NOT NULL DEFAULT 'LOCAL';

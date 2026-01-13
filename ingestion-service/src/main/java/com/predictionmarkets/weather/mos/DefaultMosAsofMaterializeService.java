@@ -5,6 +5,7 @@ import com.predictionmarkets.weather.iem.IemMosClient;
 import com.predictionmarkets.weather.iem.IemMosEntry;
 import com.predictionmarkets.weather.iem.IemMosPayload;
 import com.predictionmarkets.weather.models.AsofPolicy;
+import com.predictionmarkets.weather.models.AsofTimeZone;
 import com.predictionmarkets.weather.models.MosModel;
 import com.predictionmarkets.weather.models.MosRun;
 import com.predictionmarkets.weather.models.StationRegistry;
@@ -19,6 +20,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -79,8 +81,9 @@ public class DefaultMosAsofMaterializeService implements MosAsofMaterializeServi
         .orElseThrow(() -> new IllegalArgumentException("asofPolicyId not found: " + asofPolicyId));
 
     ZoneId zoneId = ZoneId.of(station.getZoneId());
+    ZoneId asOfZoneId = resolveAsofZone(policy.getAsofTimeZone(), zoneId);
     TimeSemantics.AsOfTimes asOfTimes = TimeSemantics.computeAsOfTimes(
-        targetDate, policy.getAsofLocalTime(), zoneId);
+        targetDate, policy.getAsofLocalTime(), zoneId, asOfZoneId);
     Instant asOfUtc = asOfTimes.asOfUtc();
     LocalDateTime asOfLocal = asOfTimes.asOfLocalZdt().toLocalDateTime();
     String stationZoneid = station.getZoneId();
@@ -206,6 +209,13 @@ public class DefaultMosAsofMaterializeService implements MosAsofMaterializeServi
       throw new IllegalArgumentException("stationId is required");
     }
     return stationId.trim().toUpperCase(Locale.ROOT);
+  }
+
+  private ZoneId resolveAsofZone(AsofTimeZone asofTimeZone, ZoneId stationZoneId) {
+    if (asofTimeZone == null || asofTimeZone == AsofTimeZone.LOCAL) {
+      return stationZoneId;
+    }
+    return ZoneOffset.UTC;
   }
 
   private record TMaxSelection(BigDecimal tmaxF, String missingReason) {

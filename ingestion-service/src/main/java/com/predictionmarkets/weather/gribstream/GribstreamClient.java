@@ -137,7 +137,7 @@ public class GribstreamClient {
               sleepBackoff(backoffMillis);
               continue;
             }
-            throw new GribstreamResponseException("Gribstream empty response body"
+            throw new GribstreamEmptyResponseException("Gribstream empty response body"
                 + " status=" + response.statusCode
                 + " model=" + modelCode
                 + " requestSha256=" + requestSha256);

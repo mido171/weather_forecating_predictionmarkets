@@ -15,12 +15,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GribstreamDailyTmaxService {
+  private static final Logger logger = LoggerFactory.getLogger(GribstreamDailyTmaxService.class);
+  private static final String GEFS_MEAN_MODEL = "gefsatmosmean";
   private static final List<String> DETERMINISTIC_MODELS =
-      List.of("hrrr", "nbm", "gefsatmosmean");
+      List.of("hrrr", "nbm", "rap", GEFS_MEAN_MODEL);
   private static final String GEFS_SPREAD_MODEL = "gefsatmos";
   private static final int GEFS_MIN_MEMBERS = 10;
   private static final double VALUE_TOLERANCE = 1e-6;
@@ -67,6 +71,9 @@ public class GribstreamDailyTmaxService {
     Map<String, Double> tmaxByModel = new HashMap<>();
     Double spreadF = null;
     for (ModelResult result : results) {
+      if (result == null) {
+        continue;
+      }
       if (result.metric() == GribstreamMetric.TMAX_F) {
         tmaxByModel.put(result.modelCode(), result.valueF());
       } else if (result.metric() == GribstreamMetric.TMP_SPREAD_F) {
@@ -95,29 +102,21 @@ public class GribstreamDailyTmaxService {
         coordinates,
         variables,
         null);
-    GribstreamClientResponse response = client.fetchHistory(normalizedModel, request);
+    GribstreamClientResponse response;
+    try {
+      response = client.fetchHistory(normalizedModel, request);
+    } catch (GribstreamEmptyResponseException ex) {
+      if (GEFS_MEAN_MODEL.equals(normalizedModel)) {
+        return computeDerivedGefsMean(station, targetDateLocal, asOfUtc, range, minHorizon,
+            coordinates, variables);
+      }
+      logger.warn("[GRIBSTREAM] model={} status=skipped reason=empty_response", normalizedModel);
+      return null;
+    }
     enforceNoLeakage(response.rows(), asOfUtc, normalizedModel);
     GribstreamDailyMetrics.TmaxResult tmax = GribstreamDailyMetrics.computeTmax(response.rows());
-    GribstreamDailyFeatureEntity entity = new GribstreamDailyFeatureEntity();
-    entity.setStationId(station.stationId());
-    entity.setZoneId(station.zoneId());
-    entity.setTargetDateLocal(targetDateLocal);
-    entity.setAsofUtc(asOfUtc);
-    entity.setModelCode(normalizedModel);
-    entity.setMetric(GribstreamMetric.TMAX_F);
-    entity.setValueF(tmax.tmaxF());
-    entity.setValueK(tmax.tmaxK());
-    entity.setSourceForecastedAtUtc(tmax.forecastedAtUtc());
-    entity.setWindowStartUtc(range.startUtc());
-    entity.setWindowEndUtc(range.endUtc());
-    entity.setMinHorizonHours(minHorizon);
-    entity.setMaxHorizonHours(maxHorizon);
-    entity.setRequestJson(response.requestJson());
-    entity.setRequestSha256(response.requestSha256());
-    entity.setResponseSha256(response.responseSha256());
-    entity.setRetrievedAtUtc(response.retrievedAtUtc());
-    upsertFeature(entity);
-    return new ModelResult(normalizedModel, GribstreamMetric.TMAX_F, tmax.tmaxF());
+    return upsertTmaxFeature(station, targetDateLocal, asOfUtc, range, minHorizon, maxHorizon,
+        normalizedModel, response, tmax, null);
   }
 
   private ModelResult computeGefsSpread(StationSpec station,
@@ -141,7 +140,13 @@ public class GribstreamDailyTmaxService {
         coordinates,
         variables,
         members);
-    GribstreamClientResponse response = client.fetchHistory(GEFS_SPREAD_MODEL, request);
+    GribstreamClientResponse response;
+    try {
+      response = client.fetchHistory(GEFS_SPREAD_MODEL, request);
+    } catch (GribstreamEmptyResponseException ex) {
+      logger.warn("[GRIBSTREAM] model={} status=skipped reason=empty_response", GEFS_SPREAD_MODEL);
+      return null;
+    }
     enforceNoLeakage(response.rows(), asOfUtc, GEFS_SPREAD_MODEL);
     ensureMembersPresent(response.rows(), GEFS_SPREAD_MODEL);
     GribstreamDailyMetrics.SpreadResult spread =
@@ -169,6 +174,82 @@ public class GribstreamDailyTmaxService {
         + " timesUsed=" + spread.timesUsed());
     upsertFeature(entity);
     return new ModelResult(GEFS_SPREAD_MODEL, GribstreamMetric.TMP_SPREAD_F, spread.spreadF());
+  }
+
+  private ModelResult computeDerivedGefsMean(StationSpec station,
+                                             LocalDate targetDateLocal,
+                                             Instant asOfUtc,
+                                             StandardTimeClimateWindow.UtcRange range,
+                                             int minHorizon,
+                                             List<GribstreamCoordinate> coordinates,
+                                             List<GribstreamVariable> variables) {
+    int maxHorizon = resolveMaxHorizon(GEFS_MEAN_MODEL);
+    List<Integer> members = properties.getGefs().getMembers();
+    if (members == null || members.isEmpty()) {
+      throw new IllegalArgumentException("gribstream.gefs.members is required");
+    }
+    GribstreamHistoryRequest request = new GribstreamHistoryRequest(
+        range.startUtc().toString(),
+        range.endUtc().toString(),
+        asOfUtc.toString(),
+        minHorizon,
+        maxHorizon,
+        coordinates,
+        variables,
+        members);
+    GribstreamClientResponse response;
+    try {
+      response = client.fetchHistory(GEFS_SPREAD_MODEL, request);
+    } catch (GribstreamEmptyResponseException ex) {
+      logger.warn("[GRIBSTREAM] model={} status=skipped reason=empty_response", GEFS_MEAN_MODEL);
+      return null;
+    }
+    enforceNoLeakage(response.rows(), asOfUtc, GEFS_SPREAD_MODEL);
+    ensureMembersPresent(response.rows(), GEFS_SPREAD_MODEL);
+    GribstreamDailyMetrics.EnsembleMeanResult meanResult =
+        GribstreamDailyMetrics.computeEnsembleMeanTmax(response.rows(), GEFS_MIN_MEMBERS);
+    GribstreamDailyMetrics.TmaxResult tmax = new GribstreamDailyMetrics.TmaxResult(
+        meanResult.tmaxK(),
+        meanResult.tmaxF(),
+        meanResult.forecastedAtUtc());
+    String notes = "derivedFrom=" + GEFS_SPREAD_MODEL
+        + " membersUsed=" + meanResult.membersUsed()
+        + " timesUsed=" + meanResult.timesUsed();
+    return upsertTmaxFeature(station, targetDateLocal, asOfUtc, range, minHorizon, maxHorizon,
+        GEFS_MEAN_MODEL, response, tmax, notes);
+  }
+
+  private ModelResult upsertTmaxFeature(StationSpec station,
+                                        LocalDate targetDateLocal,
+                                        Instant asOfUtc,
+                                        StandardTimeClimateWindow.UtcRange range,
+                                        int minHorizon,
+                                        int maxHorizon,
+                                        String modelCode,
+                                        GribstreamClientResponse response,
+                                        GribstreamDailyMetrics.TmaxResult tmax,
+                                        String notes) {
+    GribstreamDailyFeatureEntity entity = new GribstreamDailyFeatureEntity();
+    entity.setStationId(station.stationId());
+    entity.setZoneId(station.zoneId());
+    entity.setTargetDateLocal(targetDateLocal);
+    entity.setAsofUtc(asOfUtc);
+    entity.setModelCode(modelCode);
+    entity.setMetric(GribstreamMetric.TMAX_F);
+    entity.setValueF(tmax.tmaxF());
+    entity.setValueK(tmax.tmaxK());
+    entity.setSourceForecastedAtUtc(tmax.forecastedAtUtc());
+    entity.setWindowStartUtc(range.startUtc());
+    entity.setWindowEndUtc(range.endUtc());
+    entity.setMinHorizonHours(minHorizon);
+    entity.setMaxHorizonHours(maxHorizon);
+    entity.setRequestJson(response.requestJson());
+    entity.setRequestSha256(response.requestSha256());
+    entity.setResponseSha256(response.responseSha256());
+    entity.setRetrievedAtUtc(response.retrievedAtUtc());
+    entity.setNotes(notes);
+    upsertFeature(entity);
+    return new ModelResult(modelCode, GribstreamMetric.TMAX_F, tmax.tmaxF());
   }
 
   private void enforceNoLeakage(List<GribstreamRow> rows, Instant asOfUtc, String modelCode) {

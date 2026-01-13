@@ -5,6 +5,7 @@ import com.predictionmarkets.weather.backfill.BackfillJobType;
 import com.predictionmarkets.weather.backfill.BackfillOrchestrator;
 import com.predictionmarkets.weather.backfill.BackfillRequest;
 import com.predictionmarkets.weather.models.AsofPolicy;
+import com.predictionmarkets.weather.models.AsofTimeZone;
 import com.predictionmarkets.weather.models.StationRegistry;
 import com.predictionmarkets.weather.repository.AsofPolicyRepository;
 import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
@@ -77,7 +78,8 @@ public final class FullIngestionExecutor {
       Long asofPolicyId = resolveAsofPolicyId(config, asofPolicyRepository);
       snapshot("Using asofPolicyId=" + asofPolicyId
           + " asofPolicyName=" + config.getAsofPolicyName()
-          + " asofLocalTime=" + config.getAsofLocalTime());
+          + " asofLocalTime=" + config.getAsofLocalTime()
+          + " asofTimeZone=" + resolveAsofTimeZone(config.getAsofTimeZone()));
       runStationsInParallel(seriesTickers, stationRegistryRepository, orchestrator,
           config, asofPolicyId);
       snapshot("Full ingestion pipeline complete.");
@@ -97,13 +99,28 @@ public final class FullIngestionExecutor {
     if (asofLocalTime == null) {
       throw new IllegalArgumentException("pipeline.asof-local-time is required");
     }
+    AsofTimeZone asofTimeZone = resolveAsofTimeZone(config.getAsofTimeZone());
     Optional<AsofPolicy> existing = repository.findByName(policyName);
     if (existing.isPresent()) {
-      return existing.get().getId();
+      AsofPolicy policy = existing.get();
+      AsofTimeZone existingZone = policy.getAsofTimeZone() == null
+          ? AsofTimeZone.LOCAL
+          : policy.getAsofTimeZone();
+      if (!asofLocalTime.equals(policy.getAsofLocalTime())
+          || existingZone != asofTimeZone) {
+        throw new IllegalArgumentException(
+            "asof_policy name=" + policyName + " already exists with"
+                + " asofLocalTime=" + policy.getAsofLocalTime()
+                + " asofTimeZone=" + existingZone
+                + " (expected asofLocalTime=" + asofLocalTime
+                + " asofTimeZone=" + asofTimeZone + ")");
+      }
+      return policy.getId();
     }
     AsofPolicy policy = new AsofPolicy();
     policy.setName(policyName);
     policy.setAsofLocalTime(asofLocalTime);
+    policy.setAsofTimeZone(asofTimeZone);
     policy.setEnabled(true);
     AsofPolicy saved = repository.save(policy);
     snapshot("Created asof_policy name=" + policyName + " id=" + saved.getId());
@@ -161,6 +178,10 @@ public final class FullIngestionExecutor {
     if (config.getDefaultRangeDays() < 1) {
       throw new IllegalArgumentException("pipeline.default-range-days must be >= 1");
     }
+  }
+
+  private static AsofTimeZone resolveAsofTimeZone(AsofTimeZone configured) {
+    return configured == null ? AsofTimeZone.LOCAL : configured;
   }
 
   private record DateRange(LocalDate start, LocalDate end) {

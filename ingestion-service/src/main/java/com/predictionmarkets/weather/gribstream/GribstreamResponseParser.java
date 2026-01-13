@@ -28,24 +28,91 @@ public final class GribstreamResponseParser {
           + " empty response body");
     }
     String bodySnippet = snippet(responseBytes);
-    JsonNode root = readTree(mapper, responseBytes, safeModel, safeRequestHash, bodySnippet);
-    if (root == null || !root.isArray()) {
+    int firstNonWhitespace = firstNonWhitespaceIndex(responseBytes);
+    if (firstNonWhitespace < 0) {
       throw new GribstreamResponseException(errorPrefix(safeModel, safeRequestHash, bodySnippet)
-          + " expected JSON array body");
+          + " empty response body");
     }
+    byte firstByte = responseBytes[firstNonWhitespace];
+    if (firstByte == '[') {
+      JsonNode root = readTree(mapper, responseBytes, safeModel, safeRequestHash, bodySnippet);
+      if (root == null || !root.isArray()) {
+        throw new GribstreamResponseException(errorPrefix(safeModel, safeRequestHash, bodySnippet)
+            + " expected JSON array body");
+      }
+      return parseArray(root, safeModel, safeRequestHash, bodySnippet);
+    }
+    return parseNdjson(mapper, responseBytes, safeModel, safeRequestHash, bodySnippet);
+  }
+
+  private static List<GribstreamRow> parseArray(JsonNode root,
+                                                String modelCode,
+                                                String requestSha256,
+                                                String bodySnippet) {
     List<GribstreamRow> rows = new ArrayList<>(root.size());
     for (JsonNode entry : root) {
-      if (entry == null || !entry.isObject()) {
-        throw new GribstreamResponseException(errorPrefix(safeModel, safeRequestHash, bodySnippet)
-            + " expected object rows");
-      }
-      Instant forecastedAt = requireInstant(entry, "forecasted_at", safeModel, safeRequestHash, bodySnippet);
-      Instant forecastedTime = requireInstant(entry, "forecasted_time", safeModel, safeRequestHash, bodySnippet);
-      double tmpk = requireDouble(entry, "tmpk", safeModel, safeRequestHash, bodySnippet);
-      Integer member = optionalMember(entry);
-      rows.add(new GribstreamRow(forecastedAt, forecastedTime, tmpk, member));
+      rows.add(parseRow(entry, modelCode, requestSha256, bodySnippet));
     }
     return rows;
+  }
+
+  private static List<GribstreamRow> parseNdjson(ObjectMapper mapper,
+                                                 byte[] responseBytes,
+                                                 String modelCode,
+                                                 String requestSha256,
+                                                 String bodySnippet) {
+    String body = new String(responseBytes, StandardCharsets.UTF_8);
+    String[] lines = body.split("\\r?\\n");
+    List<GribstreamRow> rows = new ArrayList<>(lines.length);
+    for (String line : lines) {
+      if (line == null) {
+        continue;
+      }
+      String trimmed = line.trim();
+      if (trimmed.isEmpty()) {
+        continue;
+      }
+      JsonNode entry = readTree(mapper, trimmed.getBytes(StandardCharsets.UTF_8),
+          modelCode, requestSha256, bodySnippet);
+      if (entry.isArray()) {
+        rows.addAll(parseArray(entry, modelCode, requestSha256, bodySnippet));
+      } else {
+        rows.add(parseRow(entry, modelCode, requestSha256, bodySnippet));
+      }
+    }
+    if (rows.isEmpty()) {
+      throw new GribstreamResponseException(errorPrefix(modelCode, requestSha256, bodySnippet)
+          + " empty response body");
+    }
+    return rows;
+  }
+
+  private static GribstreamRow parseRow(JsonNode entry,
+                                        String modelCode,
+                                        String requestSha256,
+                                        String bodySnippet) {
+    if (entry == null || !entry.isObject()) {
+      throw new GribstreamResponseException(errorPrefix(modelCode, requestSha256, bodySnippet)
+          + " expected object rows");
+    }
+    Instant forecastedAt = requireInstant(entry, "forecasted_at", modelCode, requestSha256, bodySnippet);
+    Instant forecastedTime = requireInstant(entry, "forecasted_time", modelCode, requestSha256, bodySnippet);
+    double tmpk = requireDouble(entry, "tmpk", modelCode, requestSha256, bodySnippet);
+    Integer member = optionalMember(entry);
+    return new GribstreamRow(forecastedAt, forecastedTime, tmpk, member);
+  }
+
+  private static int firstNonWhitespaceIndex(byte[] responseBytes) {
+    for (int i = 0; i < responseBytes.length; i++) {
+      if (!isWhitespace(responseBytes[i])) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean isWhitespace(byte value) {
+    return value == ' ' || value == '\n' || value == '\r' || value == '\t';
   }
 
   private static JsonNode readTree(ObjectMapper mapper,

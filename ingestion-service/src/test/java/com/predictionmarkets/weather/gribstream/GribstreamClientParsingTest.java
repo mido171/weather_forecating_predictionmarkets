@@ -16,34 +16,22 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class GribstreamClientParsingTest {
-  private static final MockWebServer SERVER = new MockWebServer();
-
-  @BeforeAll
-  static void startServer() throws IOException {
-    SERVER.start();
-  }
-
-  @AfterAll
-  static void shutdown() throws IOException {
-    SERVER.shutdown();
-  }
-
   @Test
   void parsesNdjsonArrayResponses() throws Exception {
+    MockWebServer server = startServer();
+    try {
     String gfsBody = loadFixture("gribstream/gfs_history.json");
     String gefsBody = loadFixture("gribstream/gefs_history.json");
     for (int i = 0; i < 5; i++) {
-      SERVER.enqueue(gzipResponse(gfsBody));
+      server.enqueue(gzipResponse(gfsBody));
     }
-    SERVER.enqueue(gzipResponse(gefsBody));
+    server.enqueue(gzipResponse(gefsBody));
 
     GribstreamProperties properties = new GribstreamProperties();
-    properties.setBaseUrl(SERVER.url("/").toString());
+    properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
     GribstreamClient client = new GribstreamClient(
         properties,
@@ -90,7 +78,7 @@ class GribstreamClientParsingTest {
 
     List<String> paths = new ArrayList<>();
     for (int i = 0; i < models.size(); i++) {
-      RecordedRequest recorded = SERVER.takeRequest();
+      RecordedRequest recorded = server.takeRequest();
       paths.add(recorded.getPath());
     }
     assertThat(paths).containsExactly(
@@ -100,22 +88,27 @@ class GribstreamClientParsingTest {
         "/api/v2/rap/history",
         "/api/v2/gefsatmosmean/history",
         "/api/v2/gefsatmos/history");
+    } finally {
+      server.shutdown();
+    }
   }
 
   @Test
   void parsesNdjsonLineResponses() throws Exception {
+    MockWebServer server = startServer();
+    try {
     String ndjsonBody = String.join("\n",
         "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T12:00:00Z\","
             + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":280.0}",
         "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T18:00:00Z\","
             + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":282.0}");
-    SERVER.enqueue(new MockResponse()
+    server.enqueue(new MockResponse()
         .setResponseCode(200)
         .setHeader("Content-Type", "application/ndjson")
         .setBody(ndjsonBody));
 
     GribstreamProperties properties = new GribstreamProperties();
-    properties.setBaseUrl(SERVER.url("/").toString());
+    properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
     GribstreamClient client = new GribstreamClient(
         properties,
@@ -136,22 +129,27 @@ class GribstreamClientParsingTest {
     assertThat(response.rows()).hasSize(2);
     assertThat(response.rows().get(0).forecastedAt())
         .isEqualTo(Instant.parse("2026-01-09T12:00:00Z"));
+    } finally {
+      server.shutdown();
+    }
   }
 
   @Test
   void skipsNullTmpkRows() throws Exception {
+    MockWebServer server = startServer();
+    try {
     String ndjsonBody = String.join("\n",
         "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T12:00:00Z\","
             + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":null}",
         "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T18:00:00Z\","
             + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":282.0}");
-    SERVER.enqueue(new MockResponse()
+    server.enqueue(new MockResponse()
         .setResponseCode(200)
         .setHeader("Content-Type", "application/ndjson")
         .setBody(ndjsonBody));
 
     GribstreamProperties properties = new GribstreamProperties();
-    properties.setBaseUrl(SERVER.url("/").toString());
+    properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
     GribstreamClient client = new GribstreamClient(
         properties,
@@ -171,6 +169,9 @@ class GribstreamClientParsingTest {
     GribstreamClientResponse response = client.fetchHistory("rap", request);
     assertThat(response.rows()).hasSize(1);
     assertThat(response.rows().get(0).tmpk()).isEqualTo(282.0);
+    } finally {
+      server.shutdown();
+    }
   }
 
   private static String loadFixture(String path) throws IOException {
@@ -198,5 +199,11 @@ class GribstreamClientParsingTest {
       gzip.write(body.getBytes(StandardCharsets.UTF_8));
     }
     return output.toByteArray();
+  }
+
+  private static MockWebServer startServer() throws IOException {
+    MockWebServer server = new MockWebServer();
+    server.start();
+    return server;
   }
 }

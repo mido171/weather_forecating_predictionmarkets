@@ -36,10 +36,18 @@ public class GribstreamDailyFeatureJob {
                                                      LocalDate start,
                                                      LocalDate end,
                                                      Instant asOfUtc) {
+    Objects.requireNonNull(asOfUtc, "asOfUtc is required");
+    return runRange(station, start, end, (ignoredStation, ignoredDate) -> asOfUtc);
+  }
+
+  public List<GribstreamDailyOpinionResult> runRange(StationSpec station,
+                                                     LocalDate start,
+                                                     LocalDate end,
+                                                     GribstreamAsOfSupplier asOfSupplier) {
     Objects.requireNonNull(station, "station is required");
     Objects.requireNonNull(start, "start is required");
     Objects.requireNonNull(end, "end is required");
-    Objects.requireNonNull(asOfUtc, "asOfUtc is required");
+    Objects.requireNonNull(asOfSupplier, "asOfSupplier is required");
     if (end.isBefore(start)) {
       throw new IllegalArgumentException("end must be >= start");
     }
@@ -88,6 +96,10 @@ public class GribstreamDailyFeatureJob {
       int totalDays = (int) (end.toEpochDay() - effectiveStart.toEpochDay() + 1);
       int processed = 0;
       while (!current.isAfter(end)) {
+        Instant asOfUtc = asOfSupplier.resolve(station, current);
+        if (asOfUtc == null) {
+          throw new IllegalArgumentException("asOfUtc is required");
+        }
         GribstreamDailyOpinionResult result =
             dailyService.computeAndPersistDailyOpinions(station, current, asOfUtc);
         results.add(result);

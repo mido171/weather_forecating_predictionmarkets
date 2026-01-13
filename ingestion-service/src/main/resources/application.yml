@@ -60,7 +60,8 @@ app:
       enabled: false
       start-date-local: 2021-02-22
       end-date-local: 2025-12-31
-      asof-utc: "2025-12-31T17:00:00Z"
+      asof-local-time: "12:00"
+      asof-time-zone: UTC
 
 pipeline:
   series-tickers:

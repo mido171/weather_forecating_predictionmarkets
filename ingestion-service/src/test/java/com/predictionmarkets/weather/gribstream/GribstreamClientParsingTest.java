@@ -138,6 +138,41 @@ class GribstreamClientParsingTest {
         .isEqualTo(Instant.parse("2026-01-09T12:00:00Z"));
   }
 
+  @Test
+  void skipsNullTmpkRows() throws Exception {
+    String ndjsonBody = String.join("\n",
+        "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T12:00:00Z\","
+            + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":null}",
+        "{\"forecasted_at\":\"2026-01-09T12:00:00Z\",\"forecasted_time\":\"2026-01-10T18:00:00Z\","
+            + "\"lat\":40.77898,\"lon\":-73.96925,\"name\":\"KNYC\",\"tmpk\":282.0}");
+    SERVER.enqueue(new MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", "application/ndjson")
+        .setBody(ndjsonBody));
+
+    GribstreamProperties properties = new GribstreamProperties();
+    properties.setBaseUrl(SERVER.url("/").toString());
+    properties.setApiToken("test-token");
+    GribstreamClient client = new GribstreamClient(
+        properties,
+        new ObjectMapper(),
+        HttpClientSettings.defaultSettings());
+
+    GribstreamHistoryRequest request = new GribstreamHistoryRequest(
+        "2026-01-10T05:00:00Z",
+        "2026-01-11T05:00:00Z",
+        "2026-01-09T17:00:00Z",
+        0,
+        48,
+        List.of(new GribstreamCoordinate(40.77898, -73.96925, "KNYC")),
+        List.of(new GribstreamVariable("TMP", "2 m above ground", "", "tmpk")),
+        null);
+
+    GribstreamClientResponse response = client.fetchHistory("rap", request);
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0).tmpk()).isEqualTo(282.0);
+  }
+
   private static String loadFixture(String path) throws IOException {
     try (InputStream input = GribstreamClientParsingTest.class.getClassLoader().getResourceAsStream(path)) {
       if (input == null) {

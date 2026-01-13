@@ -1,12 +1,18 @@
 package com.predictionmarkets.weather.executors;
 
 import com.predictionmarkets.weather.IngestionServiceApplication;
+import com.predictionmarkets.weather.common.TimeSemantics;
+import com.predictionmarkets.weather.gribstream.GribstreamAsOfSupplier;
 import com.predictionmarkets.weather.gribstream.GribstreamDailyFeatureJob;
 import com.predictionmarkets.weather.gribstream.GribstreamDailyOpinionResult;
 import com.predictionmarkets.weather.gribstream.GribstreamRunnerProperties;
 import com.predictionmarkets.weather.gribstream.StationSpec;
+import com.predictionmarkets.weather.models.AsofTimeZone;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,12 +44,12 @@ public final class GribstreamKxhighnyJan10_2026Executor {
           "KNYC");
       LocalDate startDateLocal = requireStartDate(properties);
       LocalDate endDateLocal = requireEndDate(properties);
-      Instant asOfUtc = requireAsOfUtc(properties);
+      GribstreamAsOfSupplier asOfSupplier = resolveAsOfSupplier(properties);
       snapshot("Starting Gribstream example station=" + station.stationId()
           + " targetDateLocalRange=" + startDateLocal + ".." + endDateLocal
-          + " asOfUtc=" + asOfUtc);
+          + " " + describeAsOf(properties));
       List<GribstreamDailyOpinionResult> results =
-          job.runRange(station, startDateLocal, endDateLocal, asOfUtc);
+          job.runRange(station, startDateLocal, endDateLocal, asOfSupplier);
       if (results.isEmpty()) {
         snapshot("No Gribstream results (already complete per checkpoint).");
         return;
@@ -91,11 +97,37 @@ public final class GribstreamKxhighnyJan10_2026Executor {
     return end;
   }
 
-  private static Instant requireAsOfUtc(GribstreamRunnerProperties properties) {
+  private static GribstreamAsOfSupplier resolveAsOfSupplier(GribstreamRunnerProperties properties) {
+    LocalTime asOfLocalTime = properties.getAsOfLocalTime();
+    if (asOfLocalTime != null) {
+      AsofTimeZone asOfTimeZone = resolveAsOfTimeZone(properties.getAsOfTimeZone());
+      return (station, targetDateLocal) -> {
+        ZoneId stationZoneId = ZoneId.of(station.zoneId());
+        ZoneId asOfZoneId = asOfTimeZone == AsofTimeZone.UTC ? ZoneOffset.UTC : stationZoneId;
+        return TimeSemantics.computeAsOfTimes(
+            targetDateLocal,
+            asOfLocalTime,
+            stationZoneId,
+            asOfZoneId).asOfUtc();
+      };
+    }
     Instant asOfUtc = properties.getAsOfUtc();
     if (asOfUtc == null) {
-      throw new IllegalArgumentException("app.runners.gribstream-example.asof-utc is required");
+      throw new IllegalArgumentException(
+          "app.runners.gribstream-example.asof-local-time/asof-time-zone or asof-utc is required");
     }
-    return asOfUtc;
+    return (station, targetDateLocal) -> asOfUtc;
+  }
+
+  private static AsofTimeZone resolveAsOfTimeZone(AsofTimeZone asOfTimeZone) {
+    return asOfTimeZone == null ? AsofTimeZone.LOCAL : asOfTimeZone;
+  }
+
+  private static String describeAsOf(GribstreamRunnerProperties properties) {
+    if (properties.getAsOfLocalTime() != null) {
+      return "asOfLocalTime=" + properties.getAsOfLocalTime()
+          + " asOfTimeZone=" + resolveAsOfTimeZone(properties.getAsOfTimeZone());
+    }
+    return "asOfUtc=" + properties.getAsOfUtc();
   }
 }

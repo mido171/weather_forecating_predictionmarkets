@@ -1,7 +1,12 @@
 package com.predictionmarkets.weather.gribstream;
 
+import com.predictionmarkets.weather.common.TimeSemantics;
+import com.predictionmarkets.weather.models.AsofTimeZone;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,12 +42,12 @@ public class GribstreamExampleRunner implements CommandLineRunner {
         "KNYC");
     LocalDate startDateLocal = requireStartDate();
     LocalDate endDateLocal = requireEndDate();
-    Instant asOfUtc = requireAsOfUtc();
+    GribstreamAsOfSupplier asOfSupplier = resolveAsOfSupplier();
     snapshot("Starting Gribstream example runner station=" + station.stationId()
         + " targetDateLocalRange=" + startDateLocal + ".." + endDateLocal
-        + " asOfUtc=" + asOfUtc);
+        + " " + describeAsOf());
     List<GribstreamDailyOpinionResult> results =
-        job.runRange(station, startDateLocal, endDateLocal, asOfUtc);
+        job.runRange(station, startDateLocal, endDateLocal, asOfSupplier);
     if (results.isEmpty()) {
       snapshot("No Gribstream results (already complete per checkpoint).");
       return;
@@ -89,11 +94,37 @@ public class GribstreamExampleRunner implements CommandLineRunner {
     return end;
   }
 
-  private Instant requireAsOfUtc() {
+  private GribstreamAsOfSupplier resolveAsOfSupplier() {
+    LocalTime asOfLocalTime = properties.getAsOfLocalTime();
+    if (asOfLocalTime != null) {
+      AsofTimeZone asOfTimeZone = resolveAsOfTimeZone(properties.getAsOfTimeZone());
+      return (station, targetDateLocal) -> {
+        ZoneId stationZoneId = ZoneId.of(station.zoneId());
+        ZoneId asOfZoneId = asOfTimeZone == AsofTimeZone.UTC ? ZoneOffset.UTC : stationZoneId;
+        return TimeSemantics.computeAsOfTimes(
+            targetDateLocal,
+            asOfLocalTime,
+            stationZoneId,
+            asOfZoneId).asOfUtc();
+      };
+    }
     Instant asOfUtc = properties.getAsOfUtc();
     if (asOfUtc == null) {
-      throw new IllegalArgumentException("app.runners.gribstream-example.asof-utc is required");
+      throw new IllegalArgumentException(
+          "app.runners.gribstream-example.asof-local-time/asof-time-zone or asof-utc is required");
     }
-    return asOfUtc;
+    return (station, targetDateLocal) -> asOfUtc;
+  }
+
+  private AsofTimeZone resolveAsOfTimeZone(AsofTimeZone asOfTimeZone) {
+    return asOfTimeZone == null ? AsofTimeZone.LOCAL : asOfTimeZone;
+  }
+
+  private String describeAsOf() {
+    if (properties.getAsOfLocalTime() != null) {
+      return "asOfLocalTime=" + properties.getAsOfLocalTime()
+          + " asOfTimeZone=" + resolveAsOfTimeZone(properties.getAsOfTimeZone());
+    }
+    return "asOfUtc=" + properties.getAsOfUtc();
   }
 }

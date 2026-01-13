@@ -51,7 +51,10 @@ public final class GribstreamResponseParser {
                                                 String bodySnippet) {
     List<GribstreamRow> rows = new ArrayList<>(root.size());
     for (JsonNode entry : root) {
-      rows.add(parseRow(entry, modelCode, requestSha256, bodySnippet));
+      GribstreamRow row = parseRow(entry, modelCode, requestSha256, bodySnippet);
+      if (row != null) {
+        rows.add(row);
+      }
     }
     return rows;
   }
@@ -77,7 +80,10 @@ public final class GribstreamResponseParser {
       if (entry.isArray()) {
         rows.addAll(parseArray(entry, modelCode, requestSha256, bodySnippet));
       } else {
-        rows.add(parseRow(entry, modelCode, requestSha256, bodySnippet));
+        GribstreamRow row = parseRow(entry, modelCode, requestSha256, bodySnippet);
+        if (row != null) {
+          rows.add(row);
+        }
       }
     }
     if (rows.isEmpty()) {
@@ -97,7 +103,10 @@ public final class GribstreamResponseParser {
     }
     Instant forecastedAt = requireInstant(entry, "forecasted_at", modelCode, requestSha256, bodySnippet);
     Instant forecastedTime = requireInstant(entry, "forecasted_time", modelCode, requestSha256, bodySnippet);
-    double tmpk = requireDouble(entry, "tmpk", modelCode, requestSha256, bodySnippet);
+    Double tmpk = optionalDouble(entry, "tmpk", modelCode, requestSha256, bodySnippet);
+    if (tmpk == null) {
+      return null;
+    }
     Integer member = optionalMember(entry);
     return new GribstreamRow(forecastedAt, forecastedTime, tmpk, member);
   }
@@ -165,6 +174,34 @@ public final class GribstreamResponseParser {
       if (text.isEmpty()) {
         throw new GribstreamResponseException(errorPrefix(modelCode, requestSha256, bodySnippet)
             + " missing numeric field: " + field);
+      }
+      try {
+        return Double.parseDouble(text);
+      } catch (NumberFormatException ex) {
+        throw new GribstreamResponseException(errorPrefix(modelCode, requestSha256, bodySnippet)
+            + " invalid numeric field: " + field + " value=" + text, ex);
+      }
+    }
+    throw new GribstreamResponseException(errorPrefix(modelCode, requestSha256, bodySnippet)
+        + " invalid numeric field: " + field);
+  }
+
+  private static Double optionalDouble(JsonNode node,
+                                       String field,
+                                       String modelCode,
+                                       String requestSha256,
+                                       String bodySnippet) {
+    JsonNode value = node.get(field);
+    if (value == null || value.isNull()) {
+      return null;
+    }
+    if (value.isNumber()) {
+      return value.asDouble();
+    }
+    if (value.isTextual()) {
+      String text = value.asText().trim();
+      if (text.isEmpty()) {
+        return null;
       }
       try {
         return Double.parseDouble(text);

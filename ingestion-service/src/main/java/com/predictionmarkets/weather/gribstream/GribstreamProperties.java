@@ -129,7 +129,16 @@ public class GribstreamProperties {
   }
 
   public static class GefsProperties {
+    private boolean useMeanEndpoint = false;
     private List<Integer> members = defaultMembers();
+
+    public boolean isUseMeanEndpoint() {
+      return useMeanEndpoint;
+    }
+
+    public void setUseMeanEndpoint(boolean useMeanEndpoint) {
+      this.useMeanEndpoint = useMeanEndpoint;
+    }
 
     public List<Integer> getMembers() {
       return members;

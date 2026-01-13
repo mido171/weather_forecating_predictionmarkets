@@ -92,6 +92,10 @@ public class GribstreamDailyTmaxService {
                                            List<GribstreamCoordinate> coordinates,
                                            List<GribstreamVariable> variables) {
     String normalizedModel = normalizeModelCode(modelCode);
+    if (GEFS_MEAN_MODEL.equals(normalizedModel) && !properties.getGefs().isUseMeanEndpoint()) {
+      return computeDerivedGefsMean(station, targetDateLocal, asOfUtc, range, minHorizon,
+          coordinates, variables);
+    }
     int maxHorizon = resolveMaxHorizon(normalizedModel);
     GribstreamHistoryRequest request = new GribstreamHistoryRequest(
         range.startUtc().toString(),

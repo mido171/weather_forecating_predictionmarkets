@@ -33,6 +33,8 @@ gribstream:
   readTimeoutMillis: 30000
   defaultAccept: "application/ndjson"
   gzip: true
+  logHttp: true
+  logBodyLimit: 4000
   executor:
     thread-count: 4
   models:

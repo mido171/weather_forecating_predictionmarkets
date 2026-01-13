@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -44,6 +45,8 @@ public class GribstreamClient {
   private final String authHeader;
   private final String acceptHeader;
   private final boolean gzipEnabled;
+  private final boolean logHttp;
+  private final int logBodyLimit;
   private final HttpRetryPolicy retryPolicy;
   private final ObjectMapper objectMapper;
 
@@ -57,6 +60,8 @@ public class GribstreamClient {
     this.authHeader = buildAuthorizationHeader(apiToken, authScheme);
     this.acceptHeader = properties.getDefaultAccept();
     this.gzipEnabled = properties.isGzip();
+    this.logHttp = properties.isLogHttp();
+    this.logBodyLimit = Math.max(0, properties.getLogBodyLimit());
     this.retryPolicy = Objects.requireNonNull(httpClientSettings, "httpClientSettings is required")
         .retryPolicy();
     this.baseUrl = parseBaseUrl(properties.getBaseUrl());
@@ -110,9 +115,14 @@ public class GribstreamClient {
   private byte[] executeWithRetry(String modelCode, String requestJson, String requestSha256) {
     int maxAttempts = retryPolicy.maxAttempts();
     RuntimeException lastException = null;
+    HttpUrl url = buildUrl(modelCode);
+    if (logHttp) {
+      logRequest(modelCode, url, requestJson, requestSha256, maxAttempts);
+    }
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        GribstreamHttpResponse response = executeOnce(modelCode, requestJson);
+        GribstreamHttpResponse response =
+            executeOnce(modelCode, url, requestJson, requestSha256, attempt, maxAttempts);
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (isBlankPayload(response.bodyBytes)) {
             if (attempt < maxAttempts) {
@@ -157,16 +167,16 @@ public class GribstreamClient {
     throw lastException;
   }
 
-  private GribstreamHttpResponse executeOnce(String modelCode, String requestJson) {
+  private GribstreamHttpResponse executeOnce(String modelCode,
+                                             HttpUrl url,
+                                             String requestJson,
+                                             String requestSha256,
+                                             int attempt,
+                                             int maxAttempts) {
     if (authHeader == null || authHeader.isBlank() || !hasAuthScheme(authHeader)) {
       throw new IllegalStateException(
           "GribStream authorization header is invalid; refusing to send request.");
     }
-    HttpUrl url = baseUrl.newBuilder()
-        .addPathSegments("api/v2")
-        .addPathSegment(modelCode)
-        .addPathSegment("history")
-        .build();
     RequestBody body = RequestBody.create(requestJson, JSON_MEDIA);
     Request.Builder builder = new Request.Builder()
         .url(url)
@@ -182,11 +192,16 @@ public class GribstreamClient {
     Request request = builder.build();
     try (Response response = httpClient.newCall(request).execute()) {
       ResponseBody responseBody = response.body();
-      byte[] payload = responseBody == null ? new byte[0] : responseBody.bytes();
-      if (isGzipEncoded(response) && payload.length > 0) {
-        payload = decompressGzip(payload);
+      byte[] rawPayload = responseBody == null ? new byte[0] : responseBody.bytes();
+      byte[] decodedPayload = rawPayload;
+      if (isGzipEncoded(response) && rawPayload.length > 0) {
+        decodedPayload = decompressGzip(rawPayload);
       }
-      return new GribstreamHttpResponse(response.code(), payload);
+      if (logHttp) {
+        logResponse(modelCode, url, requestSha256, attempt, maxAttempts, response,
+            rawPayload.length, decodedPayload);
+      }
+      return new GribstreamHttpResponse(response.code(), decodedPayload);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
@@ -236,6 +251,105 @@ public class GribstreamClient {
       throw new IllegalArgumentException("Invalid gribstream.baseUrl: " + baseUrl);
     }
     return parsed;
+  }
+
+  private HttpUrl buildUrl(String modelCode) {
+    return baseUrl.newBuilder()
+        .addPathSegments("api/v2")
+        .addPathSegment(modelCode)
+        .addPathSegment("history")
+        .build();
+  }
+
+  private void logRequest(String modelCode,
+                          HttpUrl url,
+                          String requestJson,
+                          String requestSha256,
+                          int maxAttempts) {
+    byte[] requestBytes = requestJson.getBytes(StandardCharsets.UTF_8);
+    String payload = limitBody(requestJson);
+    logger.info(
+        "[GRIBSTREAM-HTTP] request model={} url={} attempt=1/{} accept={} contentType={} "
+            + "acceptEncoding={} auth={} bodyBytes={} requestSha256={} bodyJson={}",
+        modelCode,
+        url,
+        maxAttempts,
+        acceptHeader,
+        JSON_MEDIA,
+        gzipEnabled ? "gzip" : "identity",
+        maskAuthHeader(authHeader),
+        requestBytes.length,
+        requestSha256,
+        payload);
+  }
+
+  private void logResponse(String modelCode,
+                           HttpUrl url,
+                           String requestSha256,
+                           int attempt,
+                           int maxAttempts,
+                           Response response,
+                           int rawBytesLength,
+                           byte[] decodedPayload) {
+    String bodySnippet = limitBody(decodedPayload);
+    String contentType = response.header("Content-Type");
+    String contentEncoding = response.header("Content-Encoding");
+    String contentLength = response.header("Content-Length");
+    String transferEncoding = response.header("Transfer-Encoding");
+    String responseSha = decodedPayload == null ? "null" : Hashing.sha256Hex(decodedPayload);
+    int decodedLength = decodedPayload == null ? 0 : decodedPayload.length;
+    logger.info(
+        "[GRIBSTREAM-HTTP] response model={} url={} attempt={}/{} status={} contentType={} "
+            + "contentEncoding={} contentLength={} transferEncoding={} rawBytes={} decodedBytes={} "
+            + "requestSha256={} responseSha256={} bodySnippet={}",
+        modelCode,
+        url,
+        attempt,
+        maxAttempts,
+        response.code(),
+        contentType,
+        contentEncoding,
+        contentLength,
+        transferEncoding,
+        rawBytesLength,
+        decodedLength,
+        requestSha256,
+        responseSha,
+        bodySnippet);
+  }
+
+  private String limitBody(String body) {
+    if (body == null || body.isEmpty()) {
+      return "";
+    }
+    if (logBodyLimit <= 0 || body.length() <= logBodyLimit) {
+      return body;
+    }
+    return body.substring(0, logBodyLimit) + "...(truncated)";
+  }
+
+  private String limitBody(byte[] payload) {
+    if (payload == null || payload.length == 0) {
+      return "";
+    }
+    String text = new String(payload, StandardCharsets.UTF_8);
+    return limitBody(text);
+  }
+
+  private static String maskAuthHeader(String authHeader) {
+    if (authHeader == null || authHeader.isBlank()) {
+      return "<empty>";
+    }
+    int spaceIndex = authHeader.indexOf(' ');
+    if (spaceIndex < 0 || spaceIndex == authHeader.length() - 1) {
+      return "<redacted>";
+    }
+    String scheme = authHeader.substring(0, spaceIndex).trim();
+    String token = authHeader.substring(spaceIndex + 1).trim();
+    if (token.length() <= 8) {
+      return scheme + " ****";
+    }
+    return scheme + " " + token.substring(0, 4) + "..." + token.substring(token.length() - 4);
   }
 
   private static boolean isGzipEncoded(Response response) {

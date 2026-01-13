@@ -16,6 +16,8 @@ public class GribstreamProperties {
   private int readTimeoutMillis = 30000;
   private String defaultAccept = "application/ndjson";
   private boolean gzip = true;
+  private boolean logHttp = false;
+  private int logBodyLimit = 2000;
   private Map<String, ModelProperties> models = new HashMap<>();
   private GefsProperties gefs = new GefsProperties();
 
@@ -76,6 +78,22 @@ public class GribstreamProperties {
 
   public void setGzip(boolean gzip) {
     this.gzip = gzip;
+  }
+
+  public boolean isLogHttp() {
+    return logHttp;
+  }
+
+  public void setLogHttp(boolean logHttp) {
+    this.logHttp = logHttp;
+  }
+
+  public int getLogBodyLimit() {
+    return logBodyLimit;
+  }
+
+  public void setLogBodyLimit(int logBodyLimit) {
+    this.logBodyLimit = logBodyLimit;
   }
 
   public Map<String, ModelProperties> getModels() {

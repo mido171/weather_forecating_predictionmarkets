@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GribstreamDailyTmaxService {
   private static final List<String> DETERMINISTIC_MODELS =
-      List.of("gfs", "hrrr", "nbm", "rap", "gefsatmosmean");
+      List.of("hrrr", "nbm", "gefsatmosmean");
   private static final String GEFS_SPREAD_MODEL = "gefsatmos";
   private static final int GEFS_MIN_MEMBERS = 10;
   private static final double VALUE_TOLERANCE = 1e-6;

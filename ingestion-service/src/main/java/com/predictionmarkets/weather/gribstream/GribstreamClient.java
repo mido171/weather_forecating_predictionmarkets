@@ -114,6 +114,24 @@ public class GribstreamClient {
       try {
         GribstreamHttpResponse response = executeOnce(modelCode, requestJson);
         if (response.statusCode >= 200 && response.statusCode < 300) {
+          if (isBlankPayload(response.bodyBytes)) {
+            if (attempt < maxAttempts) {
+              long backoffMillis = retryPolicy.computeDelayMillis(attempt);
+              logger.warn(
+                  "Gribstream retry {}/{} for model={} (status={}, backoffMs={}, reason=empty_body)",
+                  attempt,
+                  maxAttempts,
+                  modelCode,
+                  response.statusCode,
+                  backoffMillis);
+              sleepBackoff(backoffMillis);
+              continue;
+            }
+            throw new GribstreamResponseException("Gribstream empty response body"
+                + " status=" + response.statusCode
+                + " model=" + modelCode
+                + " requestSha256=" + requestSha256);
+          }
           return response.bodyBytes;
         }
         if (retryPolicy.isRetryableStatus(response.statusCode) && attempt < maxAttempts) {
@@ -232,6 +250,22 @@ public class GribstreamClient {
       }
     }
     return false;
+  }
+
+  private static boolean isBlankPayload(byte[] payload) {
+    if (payload == null || payload.length == 0) {
+      return true;
+    }
+    for (byte value : payload) {
+      if (!isWhitespace(value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean isWhitespace(byte value) {
+    return value == ' ' || value == '\n' || value == '\r' || value == '\t';
   }
 
   private static byte[] decompressGzip(byte[] payload) {

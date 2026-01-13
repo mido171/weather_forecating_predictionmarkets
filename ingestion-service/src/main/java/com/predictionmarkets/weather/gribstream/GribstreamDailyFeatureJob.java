@@ -74,10 +74,9 @@ public class GribstreamDailyFeatureJob {
       return List.of();
     }
     List<GribstreamDailyOpinionResult> results = new ArrayList<>();
-    AtomicReference<LocalDate> cursorRef = null;
+    AtomicReference<LocalDate> cursorRef = new AtomicReference<>(cursorDate);
     CheckpointHeartbeat heartbeat = null;
     if (checkpointsEnabled) {
-      cursorRef = new AtomicReference<>(cursorDate);
       heartbeat = CheckpointHeartbeat.start(() ->
           checkpointService.markRunning(JOB_NAME, stationId, null, cursorRef.get(), null));
     }

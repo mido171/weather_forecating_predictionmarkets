@@ -1,0 +1,2200 @@
+
+=== _digest_headings_and_bullets.txt ===
+
+=== epic1_kalshi_weather_ingestion\agents.md ===
+# agents.md — Implementation Handoff Rules (for Codex / agent tooling)
+## Scope for this repo (important)
+- Epic #1: Java ingestion + MySQL persistence for MOS + CLI
+- Epic #2: Python ML training
+- Epic #3: Python backtesting vs Kalshi prices
+## Non-negotiable rules
+   - `target_date_local` which is a DATE
+   - `station_zoneid` stored as string
+   - MOS runtime_utc used for as-of features must be <= asof_utc
+   - Every ingestion job can be killed and restarted without manual cleanup
+   - store raw payload hashes and retrieved timestamps
+   - `mvn clean install` from root must pass at every commit
+## Implementation style
+- Prefer Flyway for schema migrations (versioned SQL)
+- Prefer `WebClient` (Spring reactive) or `OkHttp` with retries
+- Strict JSON parsing (Jackson), with schema versioning stored in DB
+
+=== epic1_kalshi_weather_ingestion\EPIC-1.md ===
+# EPIC #1 — Kalshi Weather Data Ingestion (MOS “as-of” forecasts + CLI settlement truth)
+## Goal (what “done” looks like)
+- **Forecast features available “as-of” day T-1** (MOS-based) for predicting day **T**’s daily max temperature
+- **Settlement truth for day T** from the **NWS Daily Climate Report (CLI)** (same source Kalshi uses)
+- station
+- target date (local date for the station)
+- climate-report “day” definition (local standard time)
+- as-of (no forward-looking leakage)
+- **idempotent** (safe to re-run, restart, partial resume)
+- **scalable** (multi-station, multi-year)
+- **auditable** (store raw payloads, run times, retrieval times, versions)
+## Sources (authoritative)
+- Kalshi API “Get Series” response includes settlement source URL(s) per series. Example: KXHIGHMIA settlement is NWS CLI issued by MIA and hosted at forecast.weather.gov.  
+  - KXHIGHMIA: https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHMIA  
+  - KXHIGHLAX: https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHLAX  
+  - KXHIGHCHI: https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHCHI  
+  - KXHIGHPHIL: https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHPHIL  
+  - KXHIGHNY: https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHNY  
+- Kalshi Help Center: weather markets settle on final NWS Daily Climate Report, and climate reports use **local standard time** (DST implies 1:00AM→12:59AM).  
+- IEM MOS archive: model availability, run cycles (including NBS/NBE), and MOS variable definitions (n_x = max/min temp, tmp = 2m temp).  
+- IEM MOS bulk CGI backend: /cgi-bin/request/mos.py (supports sts/ets window; csv/json/excel).  
+- IEM CLI JSON backend: /json/cli.py (station/year; json/csv).  
+- IEM CLI notes on climate day window: midnight local standard time; during DST it maps to 1AM→1AM local daylight time.  
+## Scope boundary (Epic #1 ONLY)
+- Station/series discovery (Kalshi series metadata) for temperature-high markets
+- Fetch + persist MOS data needed to construct T-1 “as-of” features for day T
+- Fetch + persist CLI settlement values for day T
+- Robust time semantics + leakage-proof “as-of” selection logic
+- Idempotent backfill + checkpointing
+- Operational concerns (retries, rate limits, raw payload storage, auditing)
+- Works for: Miami, NYC, Chicago, Philadelphia, Los Angeles (and extensible)
+- ML training (Epic #2)
+- Kalshi market price backtesting (Epic #3)
+- Trading engine integration
+## Deliverables
+   - resolves Kalshi series → settlement source URL → station identifier strategy
+   - ingests CLI truth into `cli_daily`
+   - ingests MOS runs into `mos_run` + derived features into `mos_asof_feature`
+   - can run:
+     - incremental daily updates
+     - historical backfills
+     - resume after abort
+   - `docs/time-semantics.md`
+   - `docs/station-mapping.md`
+   - `docs/architecture.md`
+   - `docs/runbook.md`
+   - `agents.md` (Codex/agent handoff instructions)
+## Definition of Done (Epic-level)
+- For each of the 5 target series (NY, PHL, MIA, CHI, LAX), for any date range requested:
+  - the system can materialize, per day T:
+    - CLI settlement tmax (truth)
+    - MOS as-of(T-1) features for models: GFS, MEX, NAM, NBS, NBE
+    - metadata: asOfUtc, chosen MOS runtimeUtc per model, retrieval timestamps, raw payload references
+- Proven no-leakage:
+  - runtimeUtc chosen for features is always <= asOfUtc
+  - asOfUtc is computed from station timezone and a configured local “decision time”
+- Restartability:
+  - killing the process mid-backfill and re-running continues without duplicates or gaps
+- Build correctness:
+  - `mvn clean install` succeeds from repo root (within Epic #1 modules)
+
+=== epic1_kalshi_weather_ingestion\docs\architecture.md ===
+# Epic #1 Architecture (Java Spring Boot + MySQL)
+## 1) High-level components
+   - Calls Kalshi public API to resolve:
+     - series ticker → settlement source URL(s)
+     - contract terms URLs (stored for audit)
+   - Maps Kalshi settlement station → IEM station identifier (ICAO)
+   - Stores timezone + standard offset
+   - Validates station exists in IEM CLI and MOS archives
+   - Fetches CLI daily truth via IEM `/json/cli.py`
+   - Stores:
+     - `cli_daily` (normalized)
+     - `raw_payload` (compressed JSON)
+     - `retrieved_at_utc`
+   - Fetches MOS runs via IEM `/cgi-bin/request/mos.py` (bulk backfill) and optionally `/api/1/mos.json` (latest)
+   - Stores:
+     - `mos_run` (one row per station/model/runtime)
+     - `mos_value` (variable/time series OR extracted daily fields)
+     - `raw_payload`
+   - For each target day T and as-of policy:
+     - selects latest MOS run <= asOfUtc
+     - fetches the chosen run payload and extracts `tmax` feature for day T for each model
+     - stores `mos_asof_feature`
+   - MUST enforce no leakage.
+   - Runs backfills with checkpoints:
+     - by station
+     - by model
+     - by date range
+   - Restartable: picks up exactly where it stopped.
+   - Generates data-quality and leakage reports from persisted data
+   - Writes Markdown and JSON artifacts to disk for review and automation
+## 2) Suggested Maven module layout (Epic #1)
+## 3) Data flow (backfill)
+   - resolve from Kalshi series
+   - validate mapping to IEM station id
+   - store timezone + standard offset
+   - for each year in date range:
+     - GET IEM `/json/cli.py?station=<ICAO>&year=<YYYY>&fmt=json`
+     - upsert `cli_daily` rows
+   - for each model (GFS, MEX, NAM, NBS, NBE):
+     - request MOS runs over a time window using `/cgi-bin/request/mos.py?station=<ICAO>&model=<MODEL>&sts=<...>&ets=<...>&format=json`
+     - upsert `mos_run` + store payload
+   - for each day T:
+     - compute asOfUtc from station timezone + policy
+     - for each model:
+       - choose max runtime <= asOfUtc
+       - extract tmax for target date T
+     - store `mos_asof_feature`
+## 4) Idempotency strategy
+- Each table uses natural unique keys:
+  - `kalshi_series` unique (series_ticker)
+  - `station_registry` unique (station_id)
+  - `cli_daily` unique (station_id, target_date_local)
+  - `mos_run` unique (station_id, model, runtime_utc)
+  - `mos_asof_feature` unique (station_id, target_date_local, asof_policy_id, model)
+- Inserts are UPSERT (MySQL `INSERT ... ON DUPLICATE KEY UPDATE`)
+- Raw payloads are stored with SHA-256 hash for dedupe and audit.
+## 5) Operational safety
+- Respect IEM service rate limits (treat 503 as backoff condition)
+- Use bounded concurrency (configurable thread pool)
+- Use retries with jittered exponential backoff
+- Persist checkpoints frequently
+- External HTTP calls use the common HardenedWebClient with connect/read timeouts and retry logging
+
+=== epic1_kalshi_weather_ingestion\docs\runbook.md ===
+# Runbook (Epic #1)
+## 1) Required configuration
+- MySQL connection (URL, user, password)
+- Kalshi base URL: https://api.elections.kalshi.com/trade-api/v2
+- IEM base URL: https://mesonet.agron.iastate.edu
+- Station/timezone overrides (optional)
+## 2) Backfill command patterns (internal endpoints or CLI)
+- Spring Boot CommandLineRunner jobs
+- Spring Batch jobs
+- or an internal REST endpoint restricted to localhost/VPN
+- series_ticker (e.g., KXHIGHMIA)
+- date_start_local (YYYY-MM-DD)
+- date_end_local (YYYY-MM-DD)
+- asof_policy_id (or default)
+- models list (default: GFS, MEX, NAM, NBS, NBE)
+## 3) Audit report job
+- series_ticker (e.g., KXHIGHMIA)
+- date_start_local (YYYY-MM-DD)
+- date_end_local (YYYY-MM-DD)
+- asof_policy_id
+- models list (optional; default: GFS, MEX, NAM, NBS, NBE)
+- output_dir (optional; default: reports)
+- max_forecast_days (optional; default: 10)
+- Markdown report (human readable)
+- JSON report (machine readable)
+## 4) Backfill jobs + checkpoints
+- `kalshi_series_sync`: per series_ticker (station). No cursor fields; status only.
+- `cli_ingest_year`: per year slice inside the date range. `cursor_date` is the last completed local date.
+- `mos_ingest_window`: per UTC window (default 1 day). `cursor_runtime_utc` is the end of the last completed window.
+- `mos_asof_materialize_range`: per target day. `cursor_date` is the last completed target_date_local.
+## 5) Operational checks
+- Before backfill:
+  - confirm station registry resolved and validated
+  - confirm `asof_policy` exists
+- During:
+  - monitor logs for:
+    - retry storms
+    - 503 backoffs
+    - mapping failures
+  - monitor DB row counts increment
+- After:
+  - run "leakage audit query":
+    - ensure no `chosen_run_utc > asof_utc`
+  - review the mos as-of completeness report in logs (missing % per model + top missing reasons)
+## 6) Common failure modes
+- Station mapping mismatch (issuedby -> ICAO not present in IEM)
+- IEM endpoint 503 (rate limiting / load)
+- Partial years missing in CLI (rare gaps)
+- Model run cycles differ by model and era (esp. NBS pre/post Feb 2020)
+
+=== epic1_kalshi_weather_ingestion\docs\station-mapping.md ===
+# Station Mapping Strategy (Kalshi → NWS CLI → IEM station IDs)
+## 1) What Kalshi provides (source of truth)
+- `settlement_sources[].url` pointing to the NWS Daily Climate Report (CLI) page on forecast.weather.gov
+- Example series endpoint: `GET https://api.elections.kalshi.com/trade-api/v2/series/KXHIGHMIA`
+- `site` (WFO identifier used by NWS pages)
+- `issuedby` (the 3-letter station code used by CLI product ID)
+## 2) Mapping to IEM station IDs for MOS + CLI
+- `K` + the 3-letter issuedby code
+- issuedby=MIA → station=KMIA
+- issuedby=LAX → station=KLAX
+- issuedby=PHL → station=KPHL
+- issuedby=MDW → station=KMDW
+- issuedby=NYC → station=KNYC (Central Park station)
+- If `issuedby` is 3 letters and not already starting with `K`, map to `K{issuedby}`.
+- Store both values: `issuedby` and `icao_guess`.
+- Call IEM CLI `json/cli.py` for the station/year.
+- If station returns data, mapping is valid.
+- If not, mark station as `mapping_status=NEEDS_MANUAL_OVERRIDE` and require a row in `station_override`.
+## 3) Initial station set for this repo (must work on day 1)
+- KXHIGHNY settlement source uses issuedby=NYC (Central Park) and site=OKX.
+- KXHIGHPHIL settlement source uses issuedby=PHL and site=PHI.
+- KXHIGHMIA settlement source uses issuedby=MIA and site=MFL.
+- KXHIGHCHI settlement source uses issuedby=MDW and site=LOT.
+- KXHIGHLAX settlement source uses issuedby=LAX and site=LOX.
+- KNYC, KPHL, KMIA, KMDW, KLAX
+## 4) Time zone mapping
+- KNYC → America/New_York
+- KPHL → America/New_York
+- KMIA → America/New_York
+- KMDW → America/Chicago
+- KLAX → America/Los_Angeles
+## 5) Why we store BOTH station code types
+- Kalshi uses NWS CLI station (“issuedby=XXX”).
+- IEM services often use ICAO (“KXXX”).
+- Storing both removes ambiguity and makes auditing easy.
+
+=== epic1_kalshi_weather_ingestion\docs\time-semantics.md ===
+# Time Semantics (MUST BE CONSISTENT EVERYWHERE)
+## 1) Key terms
+### Station Time Zone (ZoneId)
+- Example: `America/New_York`, `America/Chicago`, `America/Los_Angeles`
+- Used for:
+  - interpreting user-facing dates/times
+  - producing `asOfLocal` timestamps
+### Station Standard Offset (ZoneOffset)
+- Standard offset is the *winter* offset for the zone:
+  - America/New_York → -05:00
+  - America/Chicago → -06:00
+  - America/Los_Angeles → -08:00
+- Store this per station as `standard_offset_minutes` (e.g., -300, -360, -480)
+### Target date (T) — `targetDateLocal`
+### Settlement “day window” (for CLI truth) — local standard time day
+- Define the CLI day window for `targetDateLocal = T` as:
+  - Start: `T 00:00` at the station’s **standard offset**
+  - End: `(T+1) 00:00` at the station’s **standard offset**
+- During DST, local clocks are 1 hour ahead of standard time.
+- So the above window appears as:
+  - Start: `T 01:00` local daylight time
+  - End: `(T+1) 01:00` local daylight time
+- On DST transition days, the duration may be 23 or 25 hours in local clock terms, but this is correct for “standard time day.”
+### “as-of” timestamp for forecast availability — `asOfUtc`
+- Default: `asOfLocalTime = 23:00` at station timezone on date (T-1)
+- `asOfLocal = (T-1) at 23:00` in `stationZoneId`
+- Convert to UTC → `asOfUtc`
+## 2) No-leakage rule (hard requirement)
+- The MOS model run chosen must satisfy:
+  - `mos_run.runtime_utc <= asOfUtc`
+- If no run exists, feature is NULL and marked missing.
+## 3) Required timestamps stored in DB for auditing
+- `target_date_local` (DATE)
+- `asof_utc` (TIMESTAMP)
+- `asof_local` (TIMESTAMP + zone stored separately)
+- `station_zoneid` (string)
+- `chosen_run_utc` (TIMESTAMP) — the MOS run that produced this feature
+- `retrieved_at_utc` (TIMESTAMP) — when we fetched the MOS run from IEM
+- `target_date_local` (DATE) — as the climate report date
+- `tmax_f` (DECIMAL)
+- `report_issued_at_utc` (TIMESTAMP if available, else NULL)
+- `retrieved_at_utc` (TIMESTAMP)
+- `raw_payload_hash` / raw reference
+## 4) Worked example: Miami, DST vs standard
+- StartUtc = 2025-07-10 00:00 at -05:00 → 2025-07-10 05:00Z
+- EndUtc   = 2025-07-11 00:00 at -05:00 → 2025-07-11 05:00Z
+- StartLocal = 2025-07-10 01:00 EDT
+- EndLocal   = 2025-07-11 01:00 EDT
+## 5) Worked example: as-of time
+- asOfLocal = 2025-07-09 23:00 EDT
+- asOfUtc   = 2025-07-10 03:00Z
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-101 - Repo scaffold for Epic #1 (multi-module Maven + Spring Boot + models module).md ===
+# WX-101 — Repo scaffold for Epic #1 (multi-module Maven + Spring Boot + models module)
+## Objective
+## Requirements
+- Root Maven parent `pom.xml` with modules:
+  - `models` (JPA entities, enums, shared DTOs, Flyway migrations)
+  - `common` (time helpers, HTTP clients, retry utils, hashing)
+  - `ingestion-service` (Spring Boot app; scheduled jobs / batch jobs)
+- Java version pinned (e.g., 21) + consistent toolchain
+- Spring Boot configured for MySQL (but can run tests with H2)
+- Add minimal `.editorconfig`, `checkstyle` or `spotless` (optional but recommended)
+- Add `README.md` describing how to build and run.
+## Acceptance Criteria
+- [ ] Running `mvn clean install` at repo root completes successfully on a clean machine.
+- [ ] Module `models` is present and contains an empty placeholder JPA entity package.
+- [ ] Module `ingestion-service` starts (at least with an in-memory profile) without DB connectivity.
+- [ ] A standard logging framework is configured (SLF4J + Logback).
+- [ ] `docs/` folder committed (even if placeholder).
+## Notes / Sources
+- This epic ultimately consumes Kalshi API (public, no auth required for market data endpoints): {"base":"https://api.elections.kalshi.com/trade-api/v2"}.
+- Kalshi provides settlement sources per series via `GET /series/{ticker}`.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-102 - Define database schema + JPA entities (models module) for MOS + CLI ingestion.md ===
+# WX-102 — Define database schema + JPA entities (models module) for MOS + CLI ingestion
+## Objective
+- Kalshi series metadata
+- Station registry + mapping overrides
+- CLI daily truth values
+- MOS runs (raw) + extracted as-of features
+- Ingestion checkpoints (restartability)
+## Must-support series / stations (day 1)
+## Proposed tables (minimum)
+### `kalshi_series`
+- `series_ticker` (PK)
+- `title`
+- `category`
+- `settlement_source_name`
+- `settlement_source_url`  (forecast.weather.gov product.php link)
+- `contract_terms_url` (PDF)
+- `contract_url` (product certification PDF)
+- `retrieved_at_utc`
+- `raw_json` (optional)
+### `station_registry`
+- `station_id` (PK) — IEM/MOS/CLI station ID we use (e.g., KMIA)
+- `issuedby` — from Kalshi settlement source (e.g., MIA)
+- `wfo_site` — from settlement source (e.g., MFL)
+- `series_ticker` (FK)
+- `zone_id` (IANA string)
+- `standard_offset_minutes` (INT; e.g., -300)
+- `mapping_status` (ENUM: AUTO_OK, NEEDS_OVERRIDE)
+- `created_at_utc`, `updated_at_utc`
+### `station_override`
+- `issuedby` (PK)
+- `station_id_override` (e.g., KNYC)
+- `zone_id_override`
+- `notes`
+### `cli_daily`
+- `station_id` (FK)
+- `target_date_local` (DATE)
+- `tmax_f` (DECIMAL(5,2))
+- `tmin_f` (DECIMAL(5,2), nullable)
+- `raw_payload_hash` (CHAR(64))
+- `retrieved_at_utc` (TIMESTAMP)
+- UNIQUE(station_id, target_date_local)
+### `mos_run`
+- `station_id` (FK)
+- `model` (ENUM: GFS, MEX, NAM, NBS, NBE)
+- `runtime_utc` (TIMESTAMP)
+- `raw_payload_hash`
+- `retrieved_at_utc`
+- UNIQUE(station_id, model, runtime_utc)
+### `mos_asof_feature`
+- `station_id`
+- `target_date_local` (DATE)
+- `asof_policy_id` (FK)
+- `model`
+- `asof_utc` (TIMESTAMP)
+- `chosen_runtime_utc` (TIMESTAMP)
+- `tmax_f` (DECIMAL(5,2), nullable)
+- `missing_reason` (nullable string)
+- `raw_payload_hash_ref` (nullable)
+- `retrieved_at_utc`
+- UNIQUE(station_id, target_date_local, asof_policy_id, model)
+### `asof_policy`
+- `id` (PK)
+- `name` (e.g., DEFAULT_23_LOCAL)
+- `asof_local_time` (TIME) (e.g., 23:00:00)
+- `enabled` (BOOL)
+### `ingest_checkpoint`
+- `job_name`
+- `station_id`
+- `model` (nullable)
+- `cursor_date` (DATE or TIMESTAMP)
+- `cursor_runtime_utc` (TIMESTAMP nullable)
+- `status` (RUNNING, COMPLETE, FAILED)
+- `updated_at_utc`
+- UNIQUE(job_name, station_id, model)
+## Acceptance Criteria
+- [ ] Flyway migrations create all tables + indexes + constraints.
+- [ ] All entities/enums live in `models` module.
+- [ ] Upsert strategy documented (MySQL `ON DUPLICATE KEY UPDATE`).
+- [ ] A written “time semantics contract” is referenced from schema docs:
+  - `target_date_local` is a date as used by CLI daily climate report.
+  - all instants are stored as UTC timestamps.
+- [ ] Schema supports idempotent ingest: uniqueness keys prevent duplicates.
+## Source references
+- Kalshi series provides settlement sources + contract terms: `GET /series/{ticker}` (Kalshi API docs).
+- CLI day uses local standard time (DST => 1AM to 1AM local daylight time). See Kalshi weather markets help and IEM CLI table notes.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-103 - Kalshi series resolver + station registry bootstrapper.md ===
+# WX-103 — Kalshi series resolver + station registry bootstrapper
+## Objective
+## Inputs
+- `series_ticker` (string)
+- Optional: overrides config (DB `station_override`)
+## Required series (must work)
+- KXHIGHNY, KXHIGHPHIL, KXHIGHMIA, KXHIGHCHI, KXHIGHLAX
+## Kalshi API endpoint
+- `GET https://api.elections.kalshi.com/trade-api/v2/series/{series_ticker}`
+- `settlement_sources[]` with `name` and `url`
+- `contract_terms_url` (PDF)
+## Parsing logic (MUST be deterministic)
+- `wfo_site = site`
+- `issuedby = issuedby`
+- If `issuedby` is 3 letters: `station_id = "K" + issuedby` (e.g., MIA → KMIA)
+- Store `issuedby` and `station_id` separately.
+## Timezone assignment (day-1 default)
+- KNYC/KPHL/KMIA → America/New_York
+- KMDW → America/Chicago
+- KLAX → America/Los_Angeles
+## Acceptance Criteria
+- [ ] `station_registry` rows created for each series ticker above.
+- [ ] The stored settlement source URLs exactly match the ones returned by Kalshi.
+- [ ] Parsing unit tests cover:
+  - valid settlement URL
+  - missing query params (fail fast)
+  - unexpected format (fail fast)
+- [ ] The component is safe to re-run (upsert; no duplicates).
+- [ ] On every run, `retrieved_at_utc` is updated and raw JSON stored (optional).
+## Source references
+- Kalshi “Get Series” endpoint format and fields are documented in Kalshi API docs.
+- Example KXHIGHNY settlement source points to `issuedby=NYC` and is described as Central Park in Kalshi quick-start.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-104-time-semantics.md ===
+# WX-104 — Implement Time Semantics Library (asOf + CLI standard-time day windows) with exhaustive tests
+## Objective
+- `asOfUtc` from:
+  - station ZoneId
+  - target date T
+  - as-of policy local time (applied to date T-1)
+- CLI “standard-time day window” start/end instants in UTC for date T:
+  - Start = T 00:00 at station standard offset
+  - End   = (T+1) 00:00 at station standard offset
+## Inputs / outputs
+### asOfUtc
+- `targetDateLocal` (LocalDate)
+- `asofLocalTime` (LocalTime)
+- `stationZoneId` (ZoneId)
+- `asOfUtc` (Instant)
+- `asOfLocalZdt` (ZonedDateTime)
+### CLI standard-time window
+- `targetDateLocal` (LocalDate)
+- `standardOffsetMinutes` (int)
+- `windowStartUtc` (Instant)
+- `windowEndUtc` (Instant)
+## DST edge cases (MUST TEST)
+- America/New_York
+- America/Chicago
+- America/Los_Angeles
+- DST starts (spring forward): second Sunday in March
+- DST ends (fall back): first Sunday in November
+## Acceptance Criteria
+- [ ] Library functions are pure and deterministic (no system clock dependency).
+- [ ] Unit tests cover DST start/end for each timezone and validate expected UTC conversions.
+- [ ] Library includes a “leakage guard” helper:
+  - `assertRuntimeNotAfterAsOf(runtimeUtc, asOfUtc)` throws with clear diagnostics.
+- [ ] Documented examples in Javadoc match `docs/time-semantics.md`.
+## Source references
+- Kalshi weather markets: NWS climate reports use local standard time; during DST daily highs correspond to 1AM→12:59AM local time.
+- IEM CLI notes: daily climate report totals are midnight local standard time; during DST it maps to 1AM→1AM local daylight time.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-107 - Materialize T-1 as-of features (choose latest eligible MOS run _= asOfUtc; extract day-T tmax).md ===
+# WX-107 — Materialize T-1 as-of features (choose latest eligible MOS run <= asOfUtc; extract day-T tmax)
+## Objective
+- station
+- target date T (local date)
+- asOf policy (local time on T-1)
+- `tmax_f_model_asof(T-1 → T)`
+- asOfUtc
+- chosen MOS runtimeUtc (<= asOfUtc)
+- retrieval timestamps and raw refs
+## Inputs
+- `station_id` (e.g., KMIA)
+- `target_date_local` (DATE)
+- `asof_policy_id`
+- models = [GFS, MEX, NAM, NBS, NBE]
+## Step-by-step algorithm (MUST FOLLOW)
+   - Use MOS variable `n_x` (max/min temp [F]) as defined by IEM.
+   - Extract the “max” component for the specific day matching T.
+   - mos_asof_feature row with tmax_f, chosen_runtime_utc, asof_utc
+   - persist row with tmax_f=NULL and missing_reason="NO_ELIGIBLE_RUN"
+## No-leakage guard (hard requirement)
+- If chosen_runtime_utc > asof_utc, abort and log a structured error.
+## Acceptance Criteria
+- [ ] For each station and each day in a sample range (e.g., 30 days), features are produced for all 5 models (unless missing for a legitimate reason).
+- [ ] No row exists with chosen_runtime_utc > asof_utc.
+- [ ] Re-running materialization is idempotent (unique key; upsert).
+- [ ] Every stored feature includes:
+  - asof_utc
+  - chosen_runtime_utc
+  - retrieved_at_utc
+- [ ] A “feature completeness report” is generated after the run:
+  - % missing per model per station
+  - top missing reasons
+## Source references
+- MOS variable definitions: `n_x` is max/min temp [F] (IEM MOS download interface).
+- MOS archives and models: IEM MOS pages.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-110 - Data quality & leakage audit reports (CLI vs MOS availability, missingness, and asOf correctness).md ===
+# WX-110 — Data quality & leakage audit reports (CLI vs MOS availability, missingness, and asOf correctness)
+## Objective
+- no forward-looking leakage
+- good coverage/completeness
+- consistent station/date alignment
+## Required checks (minimum)
+   - assert `chosen_runtime_utc <= asof_utc` for all rows
+   - each station has CLI rows for requested date range
+   - each station+model has mos_run coverage in expected eras
+   - % missing tmax_f by station+model
+   - count of days where tmax changed on re-ingest (optional)
+   - feature rows exist only when target date exists within the MOS run forecast horizon
+## Outputs
+- A human-readable report (Markdown or HTML) saved to disk
+- A machine-readable JSON report saved to disk
+## Acceptance Criteria
+- [ ] Running the report for a 1-year backfill produces both artifacts.
+- [ ] The report contains clear PASS/FAIL sections.
+- [ ] FAIL includes actionable diagnostics (e.g., sample offending rows).
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-111 - Epic #1 documentation pack (hardcore) + developer onboarding checklist.md ===
+# WX-111 — Epic #1 documentation pack (hardcore) + developer onboarding checklist
+## Objective
+## Required docs (must be committed)
+- `agents.md` — rules + guardrails for future agents
+- `docs/time-semantics.md` — final, canonical time definitions
+- `docs/station-mapping.md` — Kalshi → NWS CLI → IEM mapping
+- `docs/architecture.md` — modules, data flow, schemas
+- `docs/runbook.md` — how to run backfills + common failures
+- `docs/sql/` — example audit queries (no-leakage, completeness)
+## Acceptance Criteria
+- [ ] A brand-new dev can:
+  - build repo
+  - point to MySQL
+  - run a 30-day backfill for one station
+  - run the audit report
+  - without reading code
+- [ ] Documentation includes at least 2 worked examples:
+  - one station in DST season
+  - one station in standard time season
+- [ ] Every external dependency URL is listed (Kalshi + IEM)
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-105 - CLI truth ingestion (IEM json\cli.py) + idempotent upsert + revision handling.md ===
+# WX-105 — CLI truth ingestion (IEM json/cli.py) + idempotent upsert + revision handling
+## Objective
+- NWS Daily Climate Report (CLI) values, via IEM `json/cli.py` backend.
+## IEM endpoint (authoritative)
+- `GET https://mesonet.agron.iastate.edu/json/cli.py?station=<STATION>&year=<YYYY>&fmt=json`
+- station, year, fmt (json/csv)
+## Ingestion approach (scalable + resumable)
+## Revision handling (important for Kalshi)
+- The ingest must be able to re-run and overwrite prior stored values if the IEM-provided value changes.
+- Always upsert `tmax_f` and `tmin_f`
+- Keep `previous_value` history optional:
+  - If implementing history now: store changes into `cli_daily_revision` table.
+  - If deferring: at least store `last_updated_at_utc` each upsert.
+## Acceptance Criteria
+- [ ] For each of the 5 stations, CLI data for at least one full year is ingested successfully.
+- [ ] Re-running ingestion does not create duplicates (unique key enforced).
+- [ ] If an existing row’s `tmax_f` changes, it is overwritten and `updated_at_utc` changes.
+- [ ] Raw payload hash is stored.
+- [ ] End-to-end integration test:
+  - Pick a station/year (e.g., KMIA 2025)
+  - Assert row count > 300 and that tmax is present for most days.
+## Source references
+- IEM CLI JSON documentation: /json/cli.py?help=
+- Kalshi weather markets settlement and DST handling.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-106 - MOS raw run ingestion (IEM\cgi-bin\request\mos.py) for GFS\MEX\NAM\NBS\NBE with backfill windows.md ===
+# WX-106 — MOS raw run ingestion (IEM /cgi-bin/request/mos.py) for GFS/MEX/NAM/NBS/NBE with backfill windows
+## Objective
+## Authoritative IEM sources
+## Required models (start with these 5)
+- GFS
+- MEX (GFS-X)
+- NAM
+- NBS
+- NBE
+## Required variables (minimum)
+- `n_x` = Max/Min Temp [F]
+- We will parse `n_x` to extract the “max” component for each target day.
+## Backfill strategy (idempotent)
+### Recommended ingestion units
+- Choose a date window in UTC (e.g., per day: sts=YYYY-MM-DDT00:00Z, ets=YYYY-MM-(DD+1)T00:00Z)
+- Call:
+- This returns all runs in that period.
+### Critical: model cycle nuances (NBS)
+- After 25 Feb 2020: NBS archived only at 1, 7, 13, 19 UTC
+- Before 25 Feb 2020: NBS archived only at 0, 7, 12, 19 UTC
+## Storage
+- Upsert `mos_run` (station_id, model, runtime_utc)
+- Store raw payload hash + retrieved_at_utc
+- either normalized `mos_value` rows
+- or store the raw run payload and defer parsing until WX-107
+## Acceptance Criteria
+- [ ] Ingest succeeds for each station+model for a small date range (e.g., 7 days).
+- [ ] Upsert prevents duplicates: re-running ingests same window does not increase row count.
+- [ ] The service handles missing cycles gracefully (no failures if a cycle doesn’t exist).
+- [ ] Retries/backoff are used for transient failures (e.g., 503).
+- [ ] Raw payload hash stored.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-108 - Idempotent backfill runner + checkpoints (abort\resume exact) for multi-year, multi-station ingestion.md ===
+# WX-108 — Idempotent backfill runner + checkpoints (abort/resume exact) for multi-year, multi-station ingestion
+## Objective
+- can be terminated at any time
+- can be restarted and continue exactly from last checkpoint
+- guarantees no duplicates and no gaps
+## Jobs to support (Epic #1)
+- `kalshi_series_sync`
+- `cli_ingest_year`
+- `mos_ingest_window`
+- `mos_asof_materialize_range`
+## Checkpointing strategy
+- job_name
+- station_id
+- model (nullable)
+- update checkpoint after each successful unit of work (year, day window, or target day)
+- store:
+  - last completed date
+  - last completed runtime window (if relevant)
+  - status
+  - updated_at_utc
+## Restart semantics (must be exact)
+- If job restarts and checkpoint exists:
+  - resume from the next unprocessed unit
+- If partial unit was in-flight:
+  - safe to repeat it (idempotent upserts ensure no duplicates)
+## Acceptance Criteria
+- [ ] Demonstrate abort/resume:
+  - run a backfill for 365 days
+  - kill at ~30%
+  - restart and complete
+  - row counts match a clean one-shot run
+- [ ] Each job has clear “unit of work” granularity documented.
+- [ ] Checkpoints are updated at least once per minute during backfill.
+- [ ] Failures mark status FAILED and include error details.
+
+=== epic1_kalshi_weather_ingestion\jiras\WX-109 - HTTP client hardening_ retries\backoff\jitter, rate-limit handling, and payload hashing.md ===
+# WX-109 — HTTP client hardening: retries/backoff/jitter, rate-limit handling, and payload hashing
+## Objective
+- Kalshi API endpoints
+- IEM endpoints
+## Required behaviors
+- Timeouts:
+  - connect timeout
+  - read timeout
+- Retries with jittered exponential backoff for transient failures:
+  - 429
+  - 503
+  - network timeouts
+- Circuit breaker or max retry cap:
+  - avoid infinite retry storms
+## Payload hashing
+- compute SHA-256 over raw bytes
+- store hash in DB
+- optionally store raw payload only if new hash not seen before (dedupe)
+## Acceptance Criteria
+- [ ] Retries occur for 503 and eventually succeed in test with a mocked server.
+- [ ] 429/503 cause exponential backoff (with jitter).
+- [ ] Payload hash is stable and tested (same bytes → same hash).
+- [ ] Logging includes:
+  - endpoint
+  - status code
+  - retry count
+  - backoff delay
+  - correlation/job id
+
+=== epic2_kalshi_weather_ml_training\agents.md ===
+# agents.md (Epic #2) — ML Training Handoff Rules
+## Scope
+## Non-negotiables
+   - any record where chosen_runtime_utc > asof_utc must fail the run.
+   - set and store global random seed.
+   - metrics.json (machine)
+   - report.md (human)
+## Persistence safety
+- joblib is pickle-based; only load trusted artifacts.
+- store hashes and versions.
+
+=== epic2_kalshi_weather_ml_training\EPIC-2.md ===
+# EPIC #2 — ML Training & Evaluation (μ/σ probabilistic settlement predictor)
+## Goal (what “done” looks like)
+- **Target (label):** Daily maximum temperature used by Kalshi settlement (**NWS CLI daily climate report** value for the settlement station).
+- **Inputs (features, as-of T-1):** MOS as-of forecasts (from Epic #1) for multiple models:
+  - `GFS`, `MEX`, `NAM`, `NBS`, `NBE` daily-max guidance for target day **T** chosen from runs **≤ asOfUtc** (no leakage).
+- produce **high-quality metrics and calibration reports** (probability quality matters for trading)
+- persist models + metadata for later use (Epic #3 and live system)
+- be repeatable and auditable (dataset versioning + run metadata)
+- support multiple stations (KMIA, KNYC, KMDW, KPHL, KLAX) and arbitrary future Kalshi stations ingested by Epic #1.
+## Scope boundary (Epic #2 ONLY)
+- Python project scaffolding for training/evaluation
+- MySQL dataset extraction (from Epic #1 tables)
+- Data validation & leakage audits
+- Feature engineering (minimal + robust)
+- Train μ model + σ model
+- Build predictive distribution and bin probabilities
+- Probability calibration layer (bin-level)
+- Model persistence + model registry metadata
+- Detailed metrics + reports (MAE/RMSE + probabilistic scoring + calibration)
+- Pulling Kalshi historical orderbooks / price backtests (Epic #3)
+- Live trading execution
+## Why the μ/σ approach is recommended (for Kalshi)
+- `P(bin)` for each Kalshi bucket (e.g., 81–82)
+- expected value vs market prices (Epic #3)
+## External references (must be consistent with implementation)
+- Time series splitting to avoid leakage: TimeSeriesSplit (scikit-learn docs)
+- Probabilistic scoring: Brier score loss, log loss (scikit-learn docs)
+- Calibration diagnostics: calibration_curve (reliability diagram), CalibrationDisplay (scikit-learn docs)
+- Calibration method: IsotonicRegression (scikit-learn docs)
+- Persistence: scikit-learn model persistence guidance + joblib persistence warning (pickle security)
+## Deliverables
+   - dataset extraction (MySQL → Parquet/CSV snapshots)
+   - training pipeline
+   - evaluation suite
+   - artifact writer (models + metadata)
+   - μ model file
+   - σ model file
+   - calibration artifacts
+   - JSON metadata (feature list, date range, versions, metrics summary)
+   - Markdown report (human readable)
+   - JSON report (machine readable)
+   - Plots (calibration curves, residuals, etc.)
+   - created via Flyway migrations in the Java `models` module
+## Definition of Done (Epic-level)
+- Given a station list and date range:
+  - pipeline builds dataset from MySQL
+  - trains μ and σ models with leakage-safe time-based splits
+  - produces probabilities for each integer temperature and configured bins
+  - produces and saves metrics reports and plots
+  - persists artifacts and writes run metadata
+- A re-run with the same config produces:
+  - identical dataset snapshot hash (if DB hasn’t changed)
+  - deterministic model outputs (within floating tolerance) due to fixed random seeds
+- Documentation explains exactly how μ/σ are trained and used.
+
+=== epic2_kalshi_weather_ml_training\docs\architecture.md ===
+# Epic #2 Architecture (Python training inside the same repo)
+## Folder layout (recommended)
+## Main pipeline stages
+   - no leakage (chosen_runtime_utc <= asof_utc)
+   - no missing keys
+   - train / val / test based on target_date_local
+   - integer temperatures
+   - and/or Kalshi bins
+## Station strategy
+- Train one μ/σ model pair per station and as-of policy.
+- multi-station model with station_id categorical feature.
+
+=== epic2_kalshi_weather_ml_training\docs\data-contract.md ===
+# Data Contract (Epic #1 → Epic #2)
+- `station_registry`
+- `asof_policy`
+- `cli_daily`
+- `mos_asof_feature`
+## Required columns
+### cli_daily (label)
+- station_id (e.g., KMIA)
+- target_date_local (DATE)  <-- this is the settlement “day T”
+- tmax_f (DECIMAL)          <-- settlement label y(T)
+- retrieved_at_utc
+- raw_payload_hash
+- (station_id, target_date_local)
+### mos_asof_feature (features)
+- station_id
+- target_date_local (DATE)  <-- the forecast target day T
+- asof_policy_id
+- model (GFS/MEX/NAM/NBS/NBE)
+- asof_utc (TIMESTAMP)
+- chosen_runtime_utc (TIMESTAMP)  <-- must be <= asof_utc (no leakage)
+- tmax_f (DECIMAL)                <-- MOS daily max feature for day T (as-of T-1)
+- missing_reason (nullable)
+- retrieved_at_utc
+- (station_id, target_date_local, asof_policy_id, model)
+## Dataset extraction query shape
+## Leakage safety checks (MUST RUN)
+- For every feature record used:
+## Missing data
+- drop rows with missing any model feature (default)
+- or impute missing with:
+  - station climatology
+  - or per-model mean
+
+=== epic2_kalshi_weather_ml_training\docs\evaluation-metrics.md ===
+# Evaluation Metrics & What They Mean (for trading relevance)
+## 1) Point forecast accuracy (μ̂ only)
+- MAE (mean_absolute_error): lower is better
+- RMSE (root_mean_squared_error): penalizes big misses
+## 2) Probabilistic forecast quality (μ̂ + σ̂)
+### 2.1 Log loss / negative log-likelihood on discrete integer temperatures
+### 2.2 Brier score loss for each bin-event (e.g., “81–82°F”)
+- y_true = 1 if Tmax in bin else 0
+- y_prob = predicted P(bin)
+## 3) Calibration diagnostics (are probabilities honest?)
+## 4) Time-series split (avoid leakage)
+
+=== epic2_kalshi_weather_ml_training\docs\model-persistence.md ===
+# Model Persistence & Reproducibility Rules
+## 1) Default persistence mechanism
+## 2) Security warning (MUST DOCUMENT AND ENFORCE)
+- Only load artifacts produced by your own training pipeline.
+- Store strong hashes for artifacts and validate them.
+- Store environment versions used during training (python, sklearn).
+## 3) Version compatibility warning
+- python version
+- scikit-learn version
+- numpy version
+- git commit hash (if available)
+## 4) Artifact layout (required)
+## 5) Determinism
+
+=== epic2_kalshi_weather_ml_training\docs\references.md ===
+# References (primary)
+## Model persistence / security
+- scikit-learn: Model persistence guide (stable)
+- joblib persistence warning (pickle-based; arbitrary code execution risk)
+## Time-series safe splits
+- TimeSeriesSplit (stable)
+## Probabilistic scoring metrics
+- brier_score_loss (strictly proper scoring rule; lower is better)
+- log_loss (cross-entropy / negative log-likelihood for discrete class probs)
+## Regression accuracy metrics
+- mean_absolute_error
+- root_mean_squared_error
+## Calibration diagnostics and methods
+- calibration_curve (reliability diagram)
+- CalibrationDisplay (plotting reliability diagram)
+- Isotonic regression user guide
+- IsotonicRegression estimator
+
+=== epic2_kalshi_weather_ml_training\docs\runbook.md ===
+# Runbook (Epic #2)
+## 1) Inputs required
+- MySQL connection string
+- station list (e.g., KMIA,KNYC,KPHL,KMDW,KLAX)
+- date range (local dates)
+- asof_policy_id (from DB; default created in Epic #1)
+## 2) Typical commands (examples)
+- Build dataset snapshot:
+- Train models + report:
+- Evaluate only:
+## 3) Output artifacts
+- artifacts/<run_id>/{models,report,metrics,metadata}
+- datasets/<dataset_id>/{data.parquet,metadata.json} when running the dataset stage
+## 4) Safety checks
+- Pipeline should abort if any row violates:
+- Pipeline should log:
+
+=== epic2_kalshi_weather_ml_training\jiras\cc.md ===
+# WX-202 — Python DB access layer (MySQL) + strict data contract validation
+## Objective
+- CLI labels from `cli_daily`
+- MOS as-of features from `mos_asof_feature`
+## Requirements
+- Implement connection handling via SQLAlchemy engine (or equivalent).
+- Implement a dataset extraction function:
+- MUST validate:
+  - required columns exist
+  - station_id and date range are respected
+  - asof_policy_id filter applied
+## Mandatory leakage check (hard fail)
+- chosen_runtime_utc <= asof_utc
+## Output schema (minimum columns)
+- station_id
+- target_date_local
+- asof_policy_id
+- gfs_mos_tmax_f
+- mex_tmax_f
+- nam_mos_tmax_f
+- nbs_tmax_f
+- nbe_tmax_f
+- cli_tmax_f (label)
+## Acceptance Criteria
+- [ ] Works for at least one station (KMIA) and one full month.
+- [ ] Pivot from long (rows per model) to wide columns per model is correct.
+- [ ] Leakage check is implemented and tested.
+- [ ] Missing model rows result in NULL in corresponding columns (handled later by strategy).
+- [ ] Logs row counts and missing counts by model.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-203 - Dataset snapshot builder (MySQL → Parquet) with dataset versioning + metadata.json.md ===
+# WX-203 — Dataset snapshot builder (MySQL → Parquet) with dataset versioning + metadata.json
+## Objective
+## Requirements
+- Given a config (stations, date range, asOf policy, missing strategy), build a dataset and write:
+  - `datasets/<dataset_id>/data.parquet`
+  - `datasets/<dataset_id>/metadata.json`
+- dataset_id must be deterministic from:
+  - stations list
+  - date range
+  - asof_policy_id
+  - feature list
+  - missing strategy
+  - DB snapshot signature (at least: max(retrieved_at_utc) per input table)
+- metadata.json must include:
+  - created_at_utc
+  - dataset_id
+  - SQL query template + parameters
+  - row count
+  - missing fraction by feature
+  - leakage check summary
+  - library versions (python, pandas, numpy, sklearn)
+## Acceptance Criteria
+- [ ] Running dataset build twice (without DB changes) produces same dataset_id and identical parquet hash.
+- [ ] metadata.json fully documents the dataset.
+- [ ] If DB changes (new rows or updated), dataset_id changes OR metadata notes changed snapshot signature.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-204 - Baseline forecasters + baseline reports (climatology, simple MOS mean) for benchmarking.md ===
+# WX-204 — Baseline forecasters + baseline reports (climatology, simple MOS mean) for benchmarking
+## Objective
+## Baselines (minimum)
+   - predict mean CLI Tmax by day-of-year (computed from training history per station)
+   - average of available MOS model tmax features (GFS/MEX/NAM/NBS/NBE)
+## Evaluation
+- MAE, RMSE on test
+- (Optional) bin event Brier score using a fixed sigma assumption
+## Acceptance Criteria
+- [ ] Baseline predictions produced for test dates.
+- [ ] Baseline metrics written to:
+  - `artifacts/<run_id>/baseline_metrics.json`
+  - and included in report.md.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-205 - Mean model training (μ̂) with time-based splits + model selection + persistence.md ===
+# WX-205 — Mean model training (μ̂) with time-based splits + model selection + persistence
+## Objective
+## Requirements
+- Use time-based splitting (no shuffle).
+  - Either explicit date cutoffs or TimeSeriesSplit.
+  - Reference: scikit-learn TimeSeriesSplit.
+- Candidate estimators (minimum):
+- Support per-station training:
+  - either train separate models per station OR include station_id as feature.
+  - Start with separate models (simpler).
+- Persist the trained mean model:
+  - `artifacts/<run_id>/<station>/model_mean.joblib`
+  - include metadata.json with versions and feature list
+## Acceptance Criteria
+- [ ] Training produces a mean model for each station in config.
+- [ ] Report includes MAE/RMSE on validation and test.
+- [ ] Time-based split is proven (no leakage).
+- [ ] Artifacts saved with joblib and metadata includes sklearn version.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-206 - Sigma model training (σ̂) via squared residual prediction + positivity guarantees.md ===
+# WX-206 — Sigma model training (σ̂) via squared residual prediction + positivity guarantees
+## Objective
+## Definition (must follow exactly)
+- disagreement(T) = stddev([gfs, mex, nam, nbs, nbe])
+- mu_hat(T) = μ̂(T)
+- v̂(T) (predicted squared error)
+- σ̂(T) = sqrt(max(v̂(T), eps))
+## Requirements
+- sigma model must never output negative variance:
+  - clamp with eps or train on log(v+eps).
+- Persist sigma model artifact:
+  - `artifacts/<run_id>/<station>/model_sigma.joblib`
+## Acceptance Criteria
+- [ ] sigma training runs for each station.
+- [ ] σ̂(T) is always finite and > 0.
+- [ ] Evaluate sigma quality:
+  - coverage of 68%/90% intervals
+  - residual standardization checks (optional)
+- [ ] Persisted artifacts include metadata.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-208 - Probability calibration for bin events (isotonic regression per bin) + reliability outputs.md ===
+# WX-208 — Probability calibration for bin events (isotonic regression per bin) + reliability outputs
+## Objective
+- predicted probability ~ observed frequency
+## Method (minimum)
+- y_true_bin(T) = 1 if CLI Tmax in bin else 0
+- y_prob_bin(T) = model predicted P(bin)
+- scikit-learn IsotonicRegression and isotonic regression guide.
+## Requirements
+- Calibration must be trained on a validation split only (no test contamination).
+- Calibration artifacts persisted:
+  - `artifacts/<run_id>/<station>/calibrators/<bin_id>.joblib`
+## Acceptance Criteria
+- [ ] Calibration improves or maintains Brier score on validation.
+- [ ] Calibration curves are produced (reliability diagrams) pre- and post-calibration.
+- [ ] Calibrator does not produce probabilities outside [0,1].
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-210 - Model artifact writer + metadata + integrity hashes (joblib) compliant with sklearn guidance.md ===
+# WX-210 — Model artifact writer + metadata + integrity hashes (joblib) compliant with sklearn guidance
+## Objective
+## Requirements
+- Save artifacts under `artifacts/<run_id>/<station>/...`
+- Save metadata.json including:
+  - run_id
+  - created_at_utc
+  - station_id
+  - asof_policy_id
+  - train/val/test date ranges
+  - feature list + missing strategy
+  - model types and hyperparameters
+  - versions: python, sklearn, numpy, pandas
+- Compute SHA-256 hashes for:
+  - each model file
+  - metrics.json
+  - report.md
+## Security note (must be included)
+- joblib is pickle-based; do not load untrusted artifacts.
+- Include this note in metadata and documentation.
+- scikit-learn model persistence guidance.
+- joblib persistence warning.
+## Acceptance Criteria
+- [ ] Artifacts saved for each station.
+- [ ] Hashes computed and verified on load.
+- [ ] Loading artifacts reproduces identical predictions on a small test fixture.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-211 - DB model registry tables (Flyway + Java entities in models module) for ML training runs.md ===
+# WX-211 — DB model registry tables (Flyway + Java entities in models module) for ML training runs
+## Objective
+## Tables (minimum)
+### ml_training_run
+- run_id (PK, string)
+- created_at_utc
+- code_version (git hash)
+- config_hash
+- dataset_id
+- stations
+- asof_policy_id
+- status (SUCCESS/FAILED)
+- notes
+### ml_model_artifact
+- run_id (FK)
+- station_id
+- artifact_type (MEAN_MODEL, SIGMA_MODEL, CALIBRATOR, METRICS, REPORT)
+- artifact_path (filesystem path or s3 url)
+- sha256
+- created_at_utc
+- UNIQUE(run_id, station_id, artifact_type)
+## Requirements
+- Flyway migration lives in Java `models` module (per repo rule).
+- JPA entities/enums live in `models` module.
+## Acceptance Criteria
+- [ ] Schema migration applies cleanly.
+- [ ] JPA entities compile.
+- [ ] Java module tests pass and root `mvn clean install` passes.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-212 - Training CLI runner (YAML config) that runs dataset→train→eval→persist end-to-end.md ===
+# WX-212 — Training CLI runner (YAML config) that runs dataset→train→eval→persist end-to-end
+## Objective
+## Requirements
+- `python -m weather_ml.train --config <file> --stage <dataset|train|eval|all>`
+- YAML config includes:
+  - mysql connection params
+  - stations list
+  - date_start/date_end
+  - asof_policy_id
+  - missing strategy
+  - model hyperparams
+  - artifact output directory
+  - random seed
+## Acceptance Criteria
+- [ ] Running with `--stage all` produces:
+  - dataset snapshot
+  - mean + sigma models
+  - calibrated bin probs
+  - metrics.json and report.md
+- [ ] CLI prints a concise summary at end with key metrics and artifact locations.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-213 - Deterministic time-based cross-validation + hyperparameter tuning harness (no leakage).md ===
+# WX-213 — Deterministic time-based cross-validation + hyperparameter tuning harness (no leakage)
+## Objective
+## Requirements
+- Provide a tuning harness that:
+  - uses TimeSeriesSplit or explicit rolling windows
+  - evaluates candidates based on:
+    - MAE/RMSE
+    - log loss / Brier for bins
+  - selects champion model per station
+- Must be deterministic with fixed seed.
+- TimeSeriesSplit documentation (sklearn).
+## Acceptance Criteria
+- [ ] Re-running tuning with same seed and data produces the same champion selection.
+- [ ] Tuning results stored in metrics.json and report.md.
+- [ ] No random shuffle is used.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-201 - Python ML module scaffold (ml\) with pinned deps + test harness.md ===
+# WX-201 — Python ML module scaffold (ml/) with pinned deps + test harness
+## Objective
+## Requirements
+- Create `ml/` folder with:
+  - `pyproject.toml` (preferred) OR `requirements.txt` + `requirements.lock`
+  - `src/weather_ml/` python package structure (empty modules ok)
+  - `tests/` with pytest skeleton
+  - `configs/` with example YAML config
+- Add minimal README under `ml/` explaining how to:
+  - create venv
+  - install deps
+  - run unit tests
+  - run the training CLI
+- Ensure repo root `mvn clean install` still succeeds (Python folder must not break Maven).
+## Dependencies (minimum)
+- pandas
+- numpy
+- sqlalchemy + mysql driver (e.g., pymysql) OR mysqlclient
+- scikit-learn
+- matplotlib
+- pyyaml
+- joblib
+- pytest
+## Acceptance Criteria
+- [ ] `python -m pip install -r ...` succeeds (or `poetry install` / `uv sync`).
+- [ ] `pytest` runs and passes with at least one placeholder test.
+- [ ] A `python -m weather_ml.train --help` entrypoint exists (even if stubbed).
+- [ ] Root `mvn clean install` still passes.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-207 - Distribution builder_ integer-temperature probabilities + from μ̂\σ̂.md ===
+# WX-207 — Distribution builder: integer-temperature probabilities + Kalshi bin probabilities from μ̂/σ̂
+## Objective
+- probability for each integer temperature value
+- probability for configured Kalshi bins (e.g., 81–82)
+## Requirements
+- Implement integer discretization:
+  - P(Tmax = k) = CDF(k+0.5) - CDF(k-0.5) under Normal(μ̂, σ̂)
+- Implement bin aggregation:
+  - P(bin a–b) = sum_{k=a..b} P(Tmax=k)
+- Must support configurable integer range (e.g., 40..110 default)
+- Must return a normalized distribution (sum to 1 within range; track tail mass).
+## Acceptance Criteria
+- [ ] Distribution sums to 1 within tolerance when including tail handling.
+- [ ] Bin probabilities sum to 1 across a complete partition of bins.
+- [ ] Unit tests validate probability mass logic on simple numeric examples.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-209 - Metrics suite + report generator (MAE\RMSE + Brier + log loss + calibration plots).md ===
+# WX-209 — Metrics suite + report generator (MAE/RMSE + Brier + log loss + calibration plots)
+## Objective
+## Required metrics (per station and overall)
+- MAE
+- RMSE
+- log loss over integer temperature classes
+- Brier score per bin-event
+- calibration curves (reliability diagrams) for top bins and/or all bins
+## Implementation requirements
+- Save:
+  - metrics.json
+  - report.md
+  - plots/*.png
+- Report must include baselines from WX-204 for comparison.
+## Acceptance Criteria
+- [ ] Report is generated for a 1-year test period.
+- [ ] JSON contains per-station and aggregate metrics.
+- [ ] Calibration plots are present.
+- [ ] Metrics code is unit-tested.
+
+=== epic2_kalshi_weather_ml_training\jiras\WX-214 - Epic #2 documentation pack + worked examples (μ̂\σ̂ training + probability→bin→metric).md ===
+# WX-214 — Epic #2 documentation pack + worked examples (μ̂/σ̂ training + probability→bin→metric)
+## Objective
+## Required docs updates/additions
+- `ml/README.md`
+- `docs/data-contract.md` (confirm final)
+- `docs/evaluation-metrics.md` (confirm final)
+- `docs/model-persistence.md` (confirm final)
+- Add `docs/worked-example.md` with 2 numeric examples:
+## Acceptance Criteria
+- [ ] A dev can run the training CLI end-to-end using only docs.
+- [ ] Worked examples include explicit numbers and match implementation outputs.
+
+=== epic3_kalshi_weather_backtesting\agents.md ===
+# agents.md (Epic #3) — Backtesting Handoff Rules
+## Scope
+## Non‑negotiables
+   - Epic #1 `docs/time-semantics.md`
+   - Epic #2 `docs/model-contract.md` (inputs/outputs of μ̂, σ̂)
+   - Any forecast feature used at time `tDecisionUtc` must have `runtimeUtc <= tDecisionUtc`.
+   - Any price used must have `price_ts <= tDecisionUtc`.
+   - Backtest runs must set and store a global seed in the run manifest.
+   - Backfills and backtests must be restartable and must not duplicate rows.
+   - Every backtest trade must store: market ticker, side, qty, price, decision timestamp, fee, and the probability used.
+## Implementation defaults (unless a Jira overrides)
+- “Most frequent historical quote” = **1‑minute candlesticks** (Kalshi period_interval=1).
+- Execution model default = **taker** at the current best ask/bid (from candlestick).
+- Exit model default = **hold to settlement** (no early closing).
+
+=== epic3_kalshi_weather_backtesting\EPIC-3.md ===
+# EPIC #3 — Kalshi Market Backtesting (Weather Range Markets)
+## Goal
+## Non‑negotiables
+   - MOS / forecast features whose `runtimeUtc <= tDecisionUtc`
+   - Kalshi market prices whose timestamp `<= tDecisionUtc`
+   - Never use CLI settlement values before they are officially published.
+   - “Target date T” is the station **standard‑time day** used by NWS CLI.
+   - Default as‑of policy: `asOfLocal = (T-1) 23:00` in station timezone → `asOfUtc`.
+   - These rules are already defined in Epic #1 `docs/time-semantics.md`. Epic #3 must reuse them.
+   - A backfill or backtest run can be killed and restarted without duplication or corruption.
+   - Every stored row has a natural key and upsert logic.
+   - Every run writes a run manifest and deterministic seed.
+   - which Kalshi market tickers were considered
+   - what timestamps were used
+   - what prices/quotes were used
+   - what probabilities were used
+   - what fees were applied
+## What “Kalshi historical orderbook” means in this epic
+- **Current** orderbook snapshots (top-of-book + depth) via `/markets/{ticker}/orderbook`
+- **Historical** 1‑minute market quote/price series via **candlesticks** endpoints
+## Deliverables
+   - Series → events → markets metadata sync (for configured series tickers)
+   - Candlestick backfill for each event (1‑minute default, configurable)
+   - Optional trade prints backfill for higher‑fidelity fill modeling
+   - Deterministic time loop (minute cadence by default)
+   - +EV scanning logic across all markets in an event
+   - Configurable execution model (taker at ask/bid; maker optional later)
+   - Fee model applied per Kalshi published formula
+   - Portfolio + risk constraints
+   - Machine output: JSON metrics + CSV trades
+   - Human output: markdown report with charts and key diagnostics
+   - Metrics: P&L, profit factor, win%, drawdown, Sharpe (optional), calibration diagnostics
+## Data sources
+- List markets with filters/pagination (`GET /markets`)
+- Event candlesticks for historical best bid/ask (`GET /series/{series_ticker}/events/{event_ticker}/candlesticks`)
+- (Optional) Trade prints (`GET /markets/trades`)
+- Rate limits, pagination, and authenticated request signing are handled per Kalshi docs.
+- fees = round_up(0.07 × C × P × (1 − P)) for taker trades
+- maker fee variant where applicable
+## Out of scope (explicit)
+- Live trading execution (order placement) — that is a separate production trading epic.
+- Perfect historical L2 orderbook reconstruction (not feasible with official REST alone).
+- Alternative settlement sources (we settle to NWS CLI per Kalshi rules).
+## Definition of Done
+- A single command can backtest:
+  - one station series ticker (e.g., `KXHIGHMIA`)
+  - a date range
+  - using a configured as‑of policy
+- Results include a full audit trail and deterministic reproduction instructions.
+
+=== epic3_kalshi_weather_backtesting\docs\architecture.md ===
+# Architecture (Epic #3)
+## High-level components
+   - `weather_backtest.kalshi_client`:
+     - REST client with retry, pagination, throttling
+   - `weather_backtest.ingest`:
+     - series/events/markets metadata sync
+     - candlestick backfill (event candlesticks preferred)
+     - optional trades backfill
+   - `weather_backtest.features`:
+     - loads Epic #2 models (μ̂, σ̂) and produces bin probabilities as-of
+   - `weather_backtest.strategy`:
+     - scans markets for +EV trades vs current quotes
+     - risk / position sizing rules
+   - `weather_backtest.execution`:
+     - applies fill model + fees
+     - updates portfolio state
+   - `weather_backtest.settlement`:
+     - resolves trades using Kalshi market results (or CLI as verification)
+   - MySQL tables (defined in `models` module via Flyway + JPA entities):
+     - Kalshi series/events/markets
+     - candlesticks
+     - backtest runs + backtest trades
+   - Python reads/writes via SQLAlchemy (or JDBC if preferred, but SQLAlchemy recommended)
+   - `weather_backtest.reporting`:
+     - metrics.json
+     - report.md
+     - plots
+## Data flow (per run)
+   - compute asOfUtc
+   - compute bin probabilities for that event’s markets
+   - iterate time steps in trading window
+   - simulate trades
+   - compute P&L using settlement results
+   - write artifacts to disk + summary rows to DB
+## Scalability notes
+- Candlestick data volume can be large. Support:
+  - limiting trade window
+  - partitioning tables (by month or by event)
+  - optionally storing candlesticks in Parquet and only indexing DB metadata
+
+=== epic3_kalshi_weather_backtesting\docs\backtest-metrics.md ===
+# Backtest Metrics & Reports (Epic #3)
+## 1) Mandatory artifacts per run
+- `backtests/<run_id>/`
+  - `run_manifest.json`
+  - `config_resolved.yaml`
+  - `trades.csv`
+  - `positions_daily.csv`
+  - `metrics.json`
+  - `report.md`
+  - `plots/` (optional)
+## 2) Minimum metrics.json fields
+### Portfolio / P&L
+- `start_balance_usd`
+- `end_balance_usd`
+- `total_pnl_usd`
+- `total_fees_usd`
+- `roi_pct`
+- `max_drawdown_usd`
+- `max_drawdown_pct`
+### Trade-level
+- `num_trades`
+- `win_rate_pct`
+- `avg_profit_usd`
+- `avg_loss_usd`
+- `profit_factor` = gross_profit / gross_loss
+- `avg_r_multiple` (if we define a risk per trade)
+- `exposure_time_avg_minutes`
+### Calibration / forecast diagnostics (optional but recommended)
+- Brier score per event bucket set (if probabilities are available)
+- Reliability diagram bins (stored as arrays for plotting)
+## 3) report.md sections (human-readable)
+- Run summary (station(s), date range, as-of policy, trade window policy)
+- Key metrics table
+- Equity curve summary
+- Largest winners/losers (top 10)
+- Diagnostics:
+  - missing price candles
+  - missing probability inputs
+  - % of events skipped and why
+## 4) Determinism requirements
+- The report must record:
+  - Git commit SHA (if available)
+  - random seed
+  - data snapshot timestamps (DB watermark)
+
+=== epic3_kalshi_weather_backtesting\docs\fees-and-fills.md ===
+# Fees & Fill Modeling (Epic #3)
+## 1) Default execution model (taker)
+- We assume every trade is a **taker** trade that crosses the spread:
+  - Buy YES at best ask
+  - Sell YES at best bid (equivalently buy NO at best ask, depending on implementation)
+- We assume immediate fill at the quoted best price at that timestamp (no queue modeling).
+## 2) “Orderbook sampling frequency”
+- `period_interval = 1` minute (most frequent historical series exposed by Kalshi candlestick endpoints).
+## 3) Fee model (Kalshi published quadratic fee)
+### Taker fees (default)
+- `fee = ceil( 0.07 × C × P × (1 − P) )`
+- fee is in **dollars**
+### Maker fees (optional future)
+- `fee = ceil( 0.0175 × C × P × (1 − P) )`
+### Rounding rule
+- Use a strict “round up” (ceiling) to the smallest currency unit supported by the backtest engine:
+  - default: **$0.01** increments (cent rounding)
+  - if Kalshi fees are tracked with more precision, store raw float and a rounded display value
+- store the fee constants used in each backtest run manifest
+- optionally ingest `series_fee_changes` for future improvements
+## 4) P&L accounting (hold-to-settlement default)
+- Cost at entry: `C × P_entry`
+- Settlement payout: `C × 1` if YES occurs else `0`
+- Profit: `payout − cost − fee_entry`  (and fee_exit if we later implement exits)
+- Settlement payout: `C × 1` if NO occurs else `0`
+- Profit: `payout − (C × P_no_entry) − fee_entry`
+## 5) Optional higher-fidelity fill model (future)
+- A conservative fill assumption:
+  - A taker buy at time t fills at the first trade price >= ask within Δ seconds (configurable), else no fill.
+- This requires consistent trade timestamps and may reduce optimistic fills.
+
+=== epic3_kalshi_weather_backtesting\docs\kalshi-api.md ===
+# Kalshi API Usage Blueprint (Epic #3)
+## Base URLs
+### Production (real)
+- REST: `https://api.elections.kalshi.com/trade-api/v2`
+- WebSocket: `wss://api.elections.kalshi.com/trade-api/ws/v2`
+### Demo
+- REST: `https://demo-api.kalshi.co/trade-api/v2`
+- WebSocket: `wss://demo-api.kalshi.co/trade-api/ws/v2`
+## Authentication (when needed)
+- WebSockets
+- portfolio endpoints
+- order placement (out of scope for Epic #3)
+- `KALSHI-ACCESS-KEY`: API Key ID
+- `KALSHI-ACCESS-TIMESTAMP`: unix time **milliseconds**
+- `KALSHI-ACCESS-SIGNATURE`: base64(signature)
+- `timestamp + HTTP_METHOD + path_without_query`
+- Example:
+  - `1703123456789GET/trade-api/v2/portfolio/balance`
+- RSA‑PSS with SHA256
+- base64 encode the signature bytes
+## Pagination (cursor-based)
+- Make first request without `cursor`.
+- If response includes `"cursor": "<token>"`, request next page with `?cursor=<token>`.
+- Stop when cursor is empty/null.
+## Primary endpoints used
+### 1) List markets in a series (discover all daily bins)
+- market `ticker`
+- `event_ticker`
+- `title`
+- strike fields (`strike_type`, `floor_strike`, `cap_strike`, etc.)
+- trading windows (`open_time`, `close_time`, `expiration_time`)
+- settlement (`status`, `result`, `settlement_ts`)
+- `series_ticker=<SERIES>`
+- `status=open|closed|settled` (primarily `settled` for historical)
+- `limit=<1..1000>`
+- `cursor=<token>`
+### 2) Historical quotes & prices — event candlesticks (recommended)
+- `start_ts` (unix seconds)
+- `end_ts` (unix seconds)
+- `period_interval` ∈ {1, 60, 1440} minutes
+- Response may return `adjusted_end_ts` if too many candles; if present, call again starting from that ts.
+### 3) Historical quotes & prices — batch market candlesticks (optional)
+- `tickers=<comma separated market tickers>`
+- `start_ts`, `end_ts` (unix seconds)
+- `period_interval` (1/60/1440)
+- up to 100 tickers
+- up to 10,000 total candles per request
+- `include_latest_before_start=true` can create a synthetic first candle that may include `previous_price`
+### 4) Trades feed (optional, for fill modeling)
+- `ticker=<market_ticker>` (filter)
+- `min_ts`, `max_ts` (unix seconds)
+- `limit` (1..1000)
+- `cursor`
+### 5) Live orderbook (NOT historical, optional)
+## Rate limits
+- client-side throttling
+- 429 retry with exponential backoff
+## Practical ingestion strategy (recommended)
+   - nightly: `GET /markets?series_ticker=...` paginated
+   - iterate events from earliest available to latest
+   - fetch event candlesticks for the configured trade window
+   - store candlesticks idempotently
+   - only read from DB (no API calls during backtest) unless explicitly enabled
+
+=== epic3_kalshi_weather_backtesting\docs\references.md ===
+# References (primary)
+## Kalshi API docs (official)
+- API home: https://docs.kalshi.com/
+- Pagination: https://docs.kalshi.com/getting_started/pagination
+- Rate limits: https://docs.kalshi.com/getting_started/rate_limits
+- Market list (Get Markets): https://docs.kalshi.com/api-reference/market/get-markets
+- Market candlesticks: https://docs.kalshi.com/api-reference/market/get-market-candlesticks
+- Event candlesticks: https://docs.kalshi.com/api-reference/events/get-event-candlesticks
+- Batch market candlesticks: https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks
+- Trades: https://docs.kalshi.com/api-reference/market/get-trades
+- Orderbook: https://docs.kalshi.com/api-reference/market/get-market-orderbook
+- WebSockets quick start (for forward orderbook capture): https://docs.kalshi.com/getting_started/quick_start_websockets
+- Authenticated request signing: https://docs.kalshi.com/getting_started/quick_start_authenticated_requests
+- API keys: https://docs.kalshi.com/getting_started/api_keys
+- Series fee changes: https://docs.kalshi.com/api-reference/exchange/get-series-fee-changes
+- Get Series (series metadata): https://docs.kalshi.com/api-reference/market/get-series
+## Kalshi fees
+- Fee schedule page: https://kalshi.com/fee-schedule
+- Help Center “Fees”: https://help.kalshi.com/trading/fees
+- Fee schedule PDF (historical): https://www.cftc.gov/sites/default/files/filings/orgrules/22/09/rule091222kexdcm003.pdf
+## Notes
+- For *historical* backtesting, the most reliable official historical “quote” source is the candlestick endpoints.
+- Full historical depth orderbook snapshots are not provided via an official timestamped REST endpoint; to get full depth you must record WebSocket deltas going forward.
+
+=== epic3_kalshi_weather_backtesting\docs\runbook.md ===
+# Runbook (Epic #3)
+## 0) Prerequisites
+- Epic #1 data ingestion is running and populated (stations, CLI, MOS)
+- Epic #2 training has produced persisted model artifacts (μ̂ and σ̂ models)
+## 1) Environment variables
+- `KALSHI_ENV`: `prod` | `demo`
+- `KALSHI_API_KEY_ID`: optional for authenticated requests
+- `KALSHI_PRIVATE_KEY_PATH`: optional for authenticated requests
+- `MYSQL_URL`, `MYSQL_USER`, `MYSQL_PASSWORD`
+- `BACKTEST_OUTPUT_DIR`: default `backtests/`
+## 2) Configure what to backtest
+- series tickers (e.g., `KXHIGHMIA`)
+- stationId mapping (MIA → KMIA, etc) or read from DB station registry
+- date range
+- as-of policy
+- trade window policy
+- risk constraints:
+  - max contracts per event
+  - max exposure per station
+  - EV threshold
+## 3) Data backfill (recommended)
+- market catalog sync
+- candlestick backfill
+## 4) Backtest run
+- produces `run_manifest.json`, `trades.csv`, `metrics.json`, `report.md`
+## 5) Common failure modes
+- Missing candlesticks:
+  - backfill for the missing window
+- Event date mapping failures:
+  - inspect `kalshi_event_date_mapping_errors` table/logs
+- Rate limiting:
+  - throttle, add API key, reduce concurrency
+- Data leakage:
+  - ensure decision time is respected (asOfUtc) and no future MOS runs are used
+
+=== epic3_kalshi_weather_backtesting\docs\time-semantics-backtest.md ===
+# Time Semantics for Backtesting (Epic #3)
+## 1) Canonical definitions (from Epic #1)
+- Station timezone: `ZoneId` (e.g., America/New_York)
+- Station “standard-time day window” for CLI Tmax on local date T:
+  - Start = `T 00:00` at station **standard offset**
+  - End   = `(T+1) 00:00` at station **standard offset**
+- Default as-of time for forecasting day T:
+  - `asOfLocal = (T-1) 23:00` in station timezone
+  - `asOfUtc = toUtc(asOfLocal)`
+## 2) Kalshi event date mapping (critical)
+- `series_ticker` (e.g., `KXHIGHMIA`)
+- `event_ticker` (string)
+- each market belongs to an event
+### Required algorithm (robust)
+   - Many Kalshi weather tickers include a token like `25DEC11` (YYMMMDD).
+   - If parse succeeds, interpret it as station local date.
+   - call `GET /events/{event_ticker}` (or use event metadata available in market rows if present)
+   - parse `strike_date` and convert to station timezone
+   - use the **date component** as `targetDateLocal`
+   - compare `targetDateLocal` to the NWS CLI date list for the station
+   - log and quarantine any event that fails validation
+## 3) Trading window semantics (no-leakage)
+### Inputs
+- `asOfUtc` (from Epic #1)
+- Kalshi market `open_time` and `close_time` (UTC timestamps from API)
+- optional config:
+  - `tradeWindowEndPolicy = "market_close" | "station_day_end"`
+### Default policy
+- Start: `tradeStartUtc = max(asOfUtc, open_time_utc)`
+- End:   `tradeEndUtc = close_time_utc`
+### Safer (no “post-observation” trading) policy
+- End: `tradeEndUtc = min(close_time_utc, stationStandardDayEndUtc(T))`
+## 4) Candlestick timestamp interpretation
+- `end_period_ts` (unix seconds)
+- OHLC fields for bid/ask/price at that period
+- A 1-minute candle labeled with `end_period_ts = t` represents the interval `(t-60, t]`.
+- For decision-making at time `tDecisionUtc`, we only use candles where `end_period_ts <= tDecisionUtc`.
+## 5) Example (walkthrough)
+- (T-1) 23:00 local → 2026-01-09 23:00 America/New_York
+- 2026-01-10 04:00Z (because EST is UTC-5)
+- tradeStartUtc = max(asOfUtc, market_open)
+- tradeEndUtc = min(market_close, stationStandardDayEndUtc(T)) if using the safer policy
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-301 - Python backtesting module scaffold (backtest) with pinned deps + test harness.md ===
+# WX-301 — Python backtesting module scaffold (backtest/) with pinned deps + test harness
+## Objective
+## Why this matters
+- a clean module boundary
+- repeatable installs (pinned deps)
+- a deterministic test harness from day 1
+## Requirements
+### Folder structure
+- `backtest/`
+  - `pyproject.toml` (preferred) OR `requirements.txt` + lock file
+  - `src/weather_backtest/`
+    - `__init__.py`
+    - `cli.py` (or `run_backtest.py`)
+    - `kalshi_client/` (empty placeholder)
+    - `ingest/` (empty placeholder)
+    - `engine/` (empty placeholder)
+    - `reporting/` (empty placeholder)
+  - `tests/`
+    - `test_smoke.py` (placeholder)
+  - `configs/`
+    - `backtest.example.yaml`
+  - `README.md`
+### Dependencies (minimum)
+- requests or httpx
+- pydantic (optional but recommended)
+- python-dateutil
+- pytz or zoneinfo (py3.9+ zoneinfo ok)
+- pandas
+- numpy
+- sqlalchemy + mysql driver (pymysql or mysqlclient)
+- pyyaml
+- matplotlib (for optional plotting)
+- pytest
+### CLI entrypoint (stub is ok)
+- `python -m weather_backtest.cli --help`
+- Or `python -m weather_backtest.run_backtest --help`
+### Root build compatibility
+- Root `mvn clean install` must still pass.
+- Python module is not compiled by Maven; it must not break the Java build.
+## Acceptance Criteria
+- [ ] Installing deps succeeds in a clean environment (`pip install -r ...` or `uv sync` / `poetry install`).
+- [ ] `pytest` runs and passes with at least one smoke test.
+- [ ] CLI help command works and exits 0.
+- [ ] `backtest/README.md` includes:
+  - how to create venv
+  - how to install deps
+  - how to run tests
+  - how to run a backtest (placeholder ok)
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-302 - Kalshi REST market-data client (pagination throttling optional auth signing).md ===
+# WX-302 — Kalshi REST market-data client (pagination + throttling + optional auth signing)
+## Objective
+- cursor-based pagination
+- client-side rate limiting
+- retries/backoff on 429 + transient 5xx
+- optional authenticated signing (for endpoints that require auth, and for higher rate limits)
+## Why this matters
+- market catalogs for series (thousands+ markets)
+- candlestick history
+- optional trades
+## Must-follow references (official)
+- Pagination: https://docs.kalshi.com/getting_started/pagination
+- Rate limits: https://docs.kalshi.com/getting_started/rate_limits
+- Auth signing: https://docs.kalshi.com/getting_started/quick_start_authenticated_requests
+## Requirements
+### 1) Client configuration
+- `env`: `prod|demo`
+- `base_url`: default based on env
+- `timeout_seconds`
+- `max_retries`
+- `rate_limit_reads_per_sec` (default from tier; configurable)
+- optional auth:
+  - `api_key_id`
+  - `private_key_pem` OR `private_key_path`
+### 2) HTTP primitives
+- `get(path, query_params, auth_required=False)`:
+  - builds URL
+  - (if auth enabled) signs request:
+    - timestamp in **ms**
+    - message = `timestamp + HTTP_METHOD + path_without_query`
+    - signature = RSA-PSS SHA256 base64
+    - headers: `KALSHI-ACCESS-KEY`, `KALSHI-ACCESS-TIMESTAMP`, `KALSHI-ACCESS-SIGNATURE`
+  - applies rate-limiter
+  - retries:
+    - 429: exponential backoff with jitter
+    - 5xx: limited retries
+  - returns parsed JSON + response metadata (status, headers)
+### 3) Pagination helper
+- `paginate(endpoint, query_params, page_limit=1000)`:
+  - loops `cursor` until null
+  - yields pages/items
+  - logs progress
+- `/markets`
+- `/events` (optional)
+- `/series` (optional)
+- `/markets/trades`
+### 4) Endpoint wrappers (minimum)
+- `get_series(series_ticker)`
+- `list_markets(series_ticker, status, min_close_ts, max_close_ts, cursor, limit)`
+- `get_event_candlesticks(series_ticker, event_ticker, start_ts, end_ts, period_interval)`
+- `batch_market_candlesticks(tickers[], start_ts, end_ts, period_interval, include_latest_before_start)`
+- `list_trades(ticker, min_ts, max_ts, cursor, limit)`
+### 5) Logging + diagnostics
+- Each request logs:
+  - method, path, query (redact secrets)
+  - latency
+  - status code
+  - retry count
+- On persistent failure, raise a typed exception that includes the request context.
+## Acceptance Criteria
+- [ ] A unit test demonstrates cursor pagination using mocked responses.
+- [ ] A unit test demonstrates signature creation:
+  - query params are NOT included in the signed path
+  - timestamp uses ms
+- [ ] A “smoke” integration test script exists (manual run) that can:
+  - list the first page of markets for a series ticker (e.g., `KXHIGHNY`)
+- [ ] Client exposes a single place to configure read rate limit and concurrency.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-303 - Extend DB schema models module for Kalshi market data + backtests (Flyway + JPA).md ===
+# WX-303 — Extend DB schema + models module for Kalshi market data + backtest results (Flyway + JPA)
+## Objective
+## Why this matters
+- idempotent (restartable)
+- auditable (raw data + timestamps)
+- fast (backtest should read from DB, not call external APIs mid-run)
+## Requirements
+## A) Tables (minimum)
+### 1) `kalshi_event`
+- `event_ticker` (PK)
+- `series_ticker` (FK → existing `kalshi_series.series_ticker`)
+- `strike_date_utc` (TIMESTAMP NULL) — if available
+- `open_time_utc` (TIMESTAMP NULL)
+- `close_time_utc` (TIMESTAMP NULL)
+- `created_at_utc` (TIMESTAMP)
+- `updated_at_utc` (TIMESTAMP)
+- `raw_json` (JSON/TEXT optional)
+- `(series_ticker, close_time_utc)`
+- `(series_ticker, event_ticker)` unique implied by PK
+### 2) `kalshi_market`
+- `market_ticker` (PK)
+- `event_ticker` (FK → kalshi_event.event_ticker)
+- `series_ticker` (redundant FK for easier queries; keep consistent via app logic)
+- `title` (VARCHAR)
+- `subtitle` (VARCHAR NULL)
+- `strike_type` (VARCHAR) — e.g. between/lt/gt (exact values from API)
+- `floor_strike` (DECIMAL NULL)
+- `cap_strike` (DECIMAL NULL)
+- `functional_strike` (VARCHAR/DECIMAL NULL)
+- `open_time_utc` / `close_time_utc` / `expiration_time_utc` (TIMESTAMP NULL)
+- `status` (VARCHAR) — open/closed/settled
+- `result` (VARCHAR NULL) — yes/no (when settled)
+- `settlement_ts_utc` (TIMESTAMP NULL)
+- `last_price` (DECIMAL NULL)
+- `volume` (BIGINT NULL)
+- `open_interest` (BIGINT NULL)
+- `updated_at_utc` (TIMESTAMP)
+- `raw_json` (JSON/TEXT optional)
+- `(series_ticker, event_ticker)`
+- `(event_ticker, strike_type, floor_strike, cap_strike)`
+### 3) `kalshi_candlestick_1m`
+- `(market_ticker, end_period_ts_utc)` with `period_interval_minutes = 1`
+- `market_ticker` (FK)
+- `period_interval_minutes` (SMALLINT, default 1)
+- `end_period_ts_utc` (TIMESTAMP)
+- `yes_bid_open` / `yes_bid_high` / `yes_bid_low` / `yes_bid_close` (DECIMAL NULL)
+- `yes_ask_open` / `yes_ask_high` / `yes_ask_low` / `yes_ask_close` (DECIMAL NULL)
+- `price_open` / `price_high` / `price_low` / `price_close` (DECIMAL NULL)
+- `volume` (BIGINT NULL)
+- `open_interest` (BIGINT NULL)
+- `retrieved_at_utc` (TIMESTAMP)
+- `raw_json` (JSON/TEXT optional)
+- PK/unique: `(market_ticker, end_period_ts_utc, period_interval_minutes)`
+- `(end_period_ts_utc)` for time-sliced queries
+### 4) `kalshi_backfill_checkpoint`
+- `job_name` (PK part) — e.g. `KALSHI_EVENT_CANDLES_1M`
+- `series_ticker` (PK part)
+- `event_ticker` (PK part)
+- `window_start_ts_utc` (TIMESTAMP)
+- `window_end_ts_utc` (TIMESTAMP)
+- `last_success_ts_utc` (TIMESTAMP NULL)
+- `status` (ENUM: RUNNING, SUCCESS, FAILED)
+- `notes` (TEXT)
+### 5) `backtest_run`
+- `run_id` (PK; UUID)
+- `created_at_utc`
+- `git_sha` (VARCHAR NULL)
+- `random_seed` (BIGINT)
+- `config_yaml` (TEXT) — resolved config snapshot
+- `date_start_local` / `date_end_local` (DATE)
+- `series_tickers` (TEXT/JSON)
+- `asof_policy_id` (FK to asof_policy)
+- `trade_window_policy` (VARCHAR)
+- `status` (ENUM: RUNNING, SUCCESS, FAILED)
+- `metrics_json` (JSON/TEXT)
+- `artifact_path` (VARCHAR) — filesystem path for run artifacts
+### 6) `backtest_trade`
+- `run_id` (FK)
+- `trade_id` (PK; UUID)
+- `station_id` (FK to station_registry)
+- `series_ticker`
+- `event_ticker`
+- `market_ticker`
+- `decision_ts_utc`
+- `side` (ENUM: BUY_YES, BUY_NO)
+- `qty` (INT)
+- `entry_price` (DECIMAL) — dollars
+- `entry_fee` (DECIMAL) — dollars
+- `model_prob_yes` (DECIMAL)
+- `model_ev_per_contract` (DECIMAL)
+- `settled_result` (VARCHAR) — yes/no (copied from market)
+- `pnl` (DECIMAL)
+- `notes` (TEXT)
+- `(run_id, event_ticker)`
+- `(market_ticker, decision_ts_utc)`
+## B) Flyway + JPA deliverables
+- Flyway migration file(s) in models module:
+  - versioned, repeatable if needed
+- JPA entities with:
+  - correct PKs and indexes
+  - JSON raw payload stored as TEXT/JSON
+- README update: how to run migrations locally
+## Acceptance Criteria
+- [ ] `mvn clean install` passes with new Flyway migrations and entities.
+- [ ] Database can be migrated from empty to latest with Flyway.
+- [ ] Each table has correct unique constraints to prevent duplicates on retry.
+- [ ] A short schema doc is added under `models/docs/kalshi-backtest-schema.md`.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-304 - Kalshi market catalog sync (series events markets) idempotent upserts.md ===
+# WX-304 — Kalshi market catalog sync (series → events → markets) with idempotent upserts
+## Objective
+- identifying all historical events/dates available for backtesting
+- obtaining strike/bin definitions for probability mapping
+- obtaining settlement results (`result`) for P&L accounting
+## Data sources (official)
+- `GET /series/{series_ticker}` — series metadata
+- `GET /markets?series_ticker=...` — list markets in the series (paginated)
+## Requirements
+### 1) Inputs
+- A configuration list of series tickers we care about (at minimum):
+  - `KXHIGHMIA`, `KXHIGHNY`, `KXHIGHPHIL`, `KXHIGHCHI`, `KXHIGHLAX`
+- Environment config:
+  - Kalshi env (prod/demo)
+  - optional API key for higher rate limits
+### 2) Algorithm (required)
+   - store in existing `kalshi_series` (Epic #1 already has this table)
+   - call `GET /markets?series_ticker=<series>&limit=1000`
+   - follow cursor until complete
+   - preserve strike fields: `strike_type`, `floor_strike`, `cap_strike`, etc.
+   - preserve timestamps: `open_time`, `close_time`, `expiration_time`
+   - preserve settlement: `status`, `result`, `settlement_ts`
+   - create/update `kalshi_event` for every distinct `event_ticker` observed
+   - if event metadata is not included in the market list response, store minimal event rows (event_ticker + series_ticker)
+   - optional enhancement: call `GET /events/{event_ticker}` to enrich with strike_date/open/close
+### 3) Idempotency & correctness
+- Upserts must be keyed on:
+  - `kalshi_market.market_ticker`
+  - `kalshi_event.event_ticker`
+- Sync can be run multiple times; it should only update changed fields and timestamps.
+### 4) Auditing
+- Store `raw_json` for market rows (optional but strongly recommended).
+- Store `updated_at_utc` to show when we last synced each market.
+### 5) Output
+- A “catalog sync report” (log + summary JSON) with:
+  - # markets fetched per series
+  - # events discovered per series
+  - earliest and latest `close_time_utc` per series
+  - # markets updated vs inserted
+## Acceptance Criteria
+- [ ] Running the job twice produces the same row counts (idempotent).
+- [ ] Cursor pagination is used; job handles >1000 markets.
+- [ ] For a settled historical market, `result` is persisted (yes/no) and not overwritten with null.
+- [ ] A unit test verifies upsert logic preserves non-null settlement fields.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-305 - Kalshi event candlesticks backfill 1m with checkpoints + upserts.md ===
+# WX-305 — Kalshi event candlesticks backfill (1-minute top-of-book) with checkpoints + upserts
+## Objective
+## Data sources (official)
+- `GET /series/{series_ticker}/events/{event_ticker}/candlesticks`
+  - parameters: `start_ts`, `end_ts`, `period_interval`
+  - if the request would exceed the API’s max candles, response includes `adjusted_end_ts` → continue from there
+- `GET /markets/candlesticks` (batch market candlesticks)
+## Requirements
+### 1) Inputs
+- `series_ticker`
+- derived list of `event_ticker` from `kalshi_event` table
+- configuration:
+  - `period_interval_minutes` default **1**
+  - `window_policy`:
+    - `FULL_MARKET_WINDOW`: [open_time, close_time]
+    - `TRADE_WINDOW_ONLY`: [tradeStartUtc, tradeEndUtc] using Epic #1 as-of policy
+  - max concurrency
+### 2) Backfill algorithm (required)
+   - based on window_policy
+   - if `kalshi_backfill_checkpoint` indicates SUCCESS for this window, skip
+   - call event candlesticks endpoint
+   - if response includes `adjusted_end_ts`:
+     - persist returned candles
+     - set next `start_ts = adjusted_end_ts`
+     - loop until done
+   - key: `(market_ticker, end_period_ts_utc, period_interval_minutes)`
+   - store yes_bid/ask OHLC, volume, open_interest, retrieved_at_utc
+### 3) Idempotency
+- Backfill can be aborted mid-event and restarted:
+  - if partial rows exist, upsert must not duplicate
+  - checkpoint must move from RUNNING → SUCCESS only after the full window is complete
+### 4) Missing data handling
+### 5) Output & observability
+- log # candles saved per market
+- log # markets present in response
+- log missing-candle statistics (how many end_period_ts missing in the window)
+## Acceptance Criteria
+- [ ] Backfill can run for a multi-month range without exceeding rate limits (throttling works).
+- [ ] Killing the job mid-run and restarting does not increase row counts beyond expected (idempotent).
+- [ ] At least one integration run demonstrates candles persisted for an event and can be queried by (market_ticker, time range).
+- [ ] Code path supports both FULL_MARKET_WINDOW and TRADE_WINDOW_ONLY.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-306 - Fee model implementation + optional fee-change ingestion.md ===
+# WX-306 — Fee model implementation (Kalshi quadratic fees) + optional fee-change ingestion
+## Objective
+## References
+- Kalshi fee schedule (published): https://kalshi.com/fee-schedule
+- Kalshi API: series includes `fee_type` / `fee_multiplier`
+- Kalshi API: `GET /exchange/series_fee_changes?series_ticker=...&show_historical=true`
+## Requirements
+### 1) Fee calculation utility (required)
+- `fee_usd = calc_fee_usd(fee_policy, side, qty, price_usd, is_maker=False)`
+- `fee = ceil( 0.07 × qty × P × (1 − P) )`
+- `fee = ceil( 0.0175 × qty × P × (1 − P) )`
+- qty = number of contracts
+- P is the executed price in dollars (0..1)
+- ceil rounds up to the nearest cent (strictly conservative).
+### 2) Persist fee assumptions per backtest run (required)
+- fee coefficients used
+- rounding mode used (ceiling cents)
+- whether maker simulation is enabled (default false)
+### 3) Optional: ingest fee changes (recommended)
+- calls `GET /exchange/series_fee_changes` for each series ticker
+- stores a change timeline in a new table:
+  - `kalshi_series_fee_change(series_ticker, scheduled_ts_utc, fee_type, fee_multiplier, retrieved_at_utc, raw_json)`
+- backtest can then pick the effective fee policy at decision time.
+## Acceptance Criteria
+- [ ] Unit tests cover:
+  - P=0.5, qty=100 (max fee case)
+  - P close to 0 or 1 (near-zero fee)
+  - maker vs taker coefficients
+  - strict ceiling behavior
+- [ ] Backtest run manifest always includes fee settings.
+- [ ] (If optional ingestion is implemented) fee changes are persisted idempotently with a unique key.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-307 - Build decision inputs join ML forecast distribution with Kalshi bins.md ===
+# WX-307 — Build backtest “decision inputs”: join Epic #2 forecast distribution with Kalshi market bins (P_yes per market)
+## Objective
+- compute the Epic #2 probabilistic forecast distribution **as-of** T-1
+- map that distribution to **P(YES)** for every Kalshi market/bin in the event
+- persist (or compute on the fly) a structured “decision input” object used by the trading simulator
+## Why this matters
+- prices at time t
+- probabilities computed from information available at time t (no leakage)
+- probabilities aligned to Kalshi’s exact strike/bin definitions
+## Inputs
+- `station_id` (e.g., KMIA) — from station registry
+- `series_ticker` (e.g., KXHIGHMIA)
+- `event_ticker`
+- `targetDateLocal` (resolved from event)
+- `asOfUtc` (from Epic #1 time library)
+## Required algorithm
+   - μ̂ model (predict mean CLI Tmax)
+   - σ̂ model (predict uncertainty)
+   - MOS as-of features (must satisfy runtimeUtc <= asOfUtc)
+   - any lagged climatology features if implemented
+   - `mu_hat_f`
+   - `sigma_hat_f` (must be positive; enforce min floor like 0.25°F)
+   - read its strike definition from `kalshi_market`:
+     - `strike_type`
+     - `floor_strike` / `cap_strike` etc
+   - compute P_yes = Prob( Tmax falls in that strike )
+     - Example:
+       - between [a, b): `P = CDF((b-mu)/sigma) - CDF((a-mu)/sigma)`
+       - lt a: `P = CDF((a-mu)/sigma)`
+       - gt a: `P = 1 - CDF((a-mu)/sigma)`
+   - If the event is a mutually-exclusive range set:
+     - sum(P_yes over all markets in event) should be within [0.98, 1.02]
+     - if not, emit diagnostics (likely strike gaps/overlaps or wrong parsing)
+   - one row per market:
+     - station_id, series_ticker, event_ticker, market_ticker
+     - asOfUtc
+     - mu_hat_f, sigma_hat_f
+     - p_yes
+     - notes (missing features, etc)
+## No-leakage guardrails (hard)
+- Any MOS runtime used must satisfy `runtimeUtc <= asOfUtc`
+- If no valid MOS run exists for a feature:
+  - feature=NULL
+  - model still runs if it can handle nulls, else skip event
+## Acceptance Criteria
+- [ ] A unit test validates probability mapping for:
+  - between bin
+  - lt tail
+  - gt tail
+- [ ] For at least one real event with many bins, probabilities sum ~1 and are logged.
+- [ ] If any feature runtime is after asOfUtc, the computation fails fast (exception).
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-308 - Backtest simulation engine core deterministic time loop + portfolio state.md ===
+# WX-308 — Backtest simulation engine core (deterministic time loop + portfolio state)
+## Objective
+- iterates through time in fixed steps (default 1-minute)
+- maintains portfolio state (cash, positions, realized P&L, fees)
+- records every simulated trade with full audit fields
+- resolves positions at settlement using Kalshi market results
+## Requirements
+### 1) Core domain objects (Python)
+- `BacktestConfig`
+- `RunManifest`
+- `EventContext`
+- `MarketQuote` (bid/ask at time t)
+- `DecisionInput` (P_yes per market at asOf)
+- `SimTrade` (executed trade record)
+- `Position` (open position)
+- `PortfolioState` (cash, open positions, realized pnl, fees)
+### 2) Deterministic time loop
+   - default: every minute boundary, aligned to candlestick `end_period_ts`
+   - load quotes for all markets at that timestamp (from candlesticks table)
+   - call strategy module (WX-309) to get desired trades
+   - apply fill + fee model (from `docs/fees-and-fills.md`)
+   - update portfolio state
+   - resolve event settlement:
+     - use `kalshi_market.result` for each market
+     - compute payout and realized P&L
+   - close positions
+### 3) Persistence
+- Write:
+  - `backtest_run` row at start (RUNNING)
+  - `backtest_trade` rows as trades occur
+  - `backtest_run.metrics_json` + status SUCCESS/FAILED at end
+- Write run artifacts to `backtests/<run_id>/` as defined in `docs/backtest-metrics.md`.
+### 4) Failure handling
+- decision inputs (probabilities) OR
+- quote data (candles)
+- skip the event (configurable) OR fail (configurable)
+- always record the skip reason in the report
+## Acceptance Criteria
+- [ ] A deterministic unit test:
+  - fixed seed
+  - small synthetic event with 2 markets and 5 timestamps
+  - produces identical trades and P&L across runs
+- [ ] Engine writes a `run_manifest.json` including:
+  - seed
+  - config snapshot
+  - data watermark (latest candle timestamp used)
+- [ ] Engine resolves positions using Kalshi market results and computes correct payouts.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-309 - Strategy +EV trade selection vs quotes with risk limits.md ===
+# WX-309 — Strategy: +EV trade selection from bin probabilities vs Kalshi quotes (with risk limits)
+## Objective
+- current market quotes (best bid/ask) at time t
+- model probabilities P_yes per market (computed as-of)
+## Definitions (must be explicit)
+- `p = model_prob_yes` for a market
+- `a_yes = best YES ask price` at time t (dollars)
+- `a_no  = best NO ask price` at time t (dollars)
+- `fee(qty, price)` from WX-306
+- Buy YES: `EV_yes = p - a_yes`
+- Buy NO:  `EV_no  = (1 - p) - a_no`
+- `EV_net = EV_gross - fee_per_contract`
+## Requirements
+### 1) Input contract
+- yes_bid, yes_ask
+- no_bid, no_ask (if available; if not available, derive conservatively or skip)
+### 2) Trade candidate generation
+   - create a candidate trade with:
+     - side, price, qty (to be sized later)
+     - EV_net_per_contract
+     - implied_prob = ask (optional)
+### 3) Risk constraints (minimum)
+- `max_contracts_per_event`
+- `max_contracts_per_market`
+- `max_total_open_contracts`
+- `max_notional_per_event_usd` (optional)
+- `max_trades_per_event_per_day`
+- The selector must never propose trades that violate limits given current open positions.
+### 4) Position sizing (minimum viable)
+- `FIXED_QTY`: always trade N contracts when EV>threshold
+- `EV_PROPORTIONAL`: qty proportional to EV, capped by risk limits
+### 5) Conflict handling
+- Do not allow both BUY_YES and BUY_NO on the same market at the same timestamp.
+- Optional: prevent holding conflicting exposure across mutually-exclusive bins unless explicitly allowed.
+### 6) Traceability
+- decision_ts_utc
+- p_yes used
+- quote used (ask)
+- EV computed (gross & net)
+- fee assumed
+- reason code (e.g., EV_THRESHOLD, LIQUIDITY, RISK_LIMIT)
+## Acceptance Criteria
+- [ ] Unit tests for EV math with concrete numbers.
+- [ ] Unit test that risk limits cap trade qty.
+- [ ] Trade proposals include full traceability fields and deterministic ordering.
+- [ ] Strategy produces 0 trades when EV thresholds not met.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-310 - Backtest runner CLI YAML config + orchestration.md ===
+# WX-310 — Backtest runner CLI (YAML config) + orchestration (data checks, optional auto-backfill)
+## Objective
+- reads a YAML config
+- validates config
+- ensures required Kalshi data exists (catalog + candlesticks)
+- runs the backtest engine for the configured series/date range
+- writes artifacts + DB rows
+## Requirements
+### 1) CLI interface
+- `python -m weather_backtest.cli run --config backtest/configs/backtest.yaml`
+- `--dry-run` (validate config + show planned work)
+- `--no-fetch` (fail if data missing; never call Kalshi API)
+- `--auto-fetch` (default): run missing backfills before simulation
+- `--max-parallel-events N` (but obey global rate limits)
+### 2) YAML config (minimum fields)
+- `series_tickers: [KXHIGHMIA, ...]`
+- `date_start_local: YYYY-MM-DD`
+- `date_end_local: YYYY-MM-DD`
+- `asof_policy`:
+  - `local_time: "23:00"`
+  - `days_before: 1`
+- `trade_window_policy: "market_close" | "station_day_end"`
+- `cadence_minutes: 1`
+- `execution_model: "taker"`
+- `risk`:
+  - `start_balance_usd`
+  - `min_ev_per_contract`
+  - `fixed_qty`
+  - caps...
+- `output_dir`
+### 3) Orchestration logic
+   - ensure candlesticks exist for required window (WX-305)
+### 4) Concurrency & throttling
+- If fetching is enabled, enforce:
+  - global read rate limit
+  - max concurrent requests
+- Prefer fetching by event (event candlesticks) to reduce call count.
+### 5) Run ID + artifacts
+- Create UUID run_id at start
+- Write artifacts to `backtests/<run_id>/`
+- Store `artifact_path` in `backtest_run`
+## Acceptance Criteria
+- [ ] `--dry-run` prints a readable plan and exits 0.
+- [ ] `--no-fetch` fails clearly if any required candles are missing.
+- [ ] A successful run produces:
+  - run_manifest.json
+  - trades.csv
+  - metrics.json
+  - report.md
+- [ ] Config validation catches missing/invalid fields with clear errors.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-311 - Backtest reporting metrics.json report.md CSV exports.md ===
+# WX-311 — Backtest reporting: metrics.json + report.md + trade/position exports
+## Objective
+- `metrics.json` (machine-readable)
+- `report.md` (human-readable)
+- `trades.csv` and `positions_daily.csv`
+## Requirements
+### 1) Data inputs
+- trades list (from engine)
+- daily portfolio snapshots (cash, exposure, pnl)
+- config snapshot
+- run_id + metadata
+### 2) Required outputs
+- `metrics.json` with required fields
+- `report.md` with required sections
+- `trades.csv`
+- `positions_daily.csv`
+- optional plots:
+  - equity curve
+  - distribution of EV at entry
+  - histogram of P&L per trade
+### 3) Metrics calculations (minimum)
+- start/end balance
+- total pnl
+- total fees
+- ROI%
+- win rate
+- avg profit, avg loss
+- profit factor
+- max drawdown (absolute and %)
+### 4) Diagnostics section (must exist)
+- # events attempted
+- # events skipped
+- skip reasons counts:
+  - missing probabilities
+  - missing quotes
+  - event date mapping failure
+- % candles missing inside trade windows
+## Acceptance Criteria
+- [ ] A sample run generates all required artifacts.
+- [ ] Profit factor and win rate match hand-calculated values for a small synthetic test case.
+- [ ] Report includes a diagnostics section with skip counts.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-312 - Validation suite no-leakage + correctness checks.md ===
+# WX-312 — Validation & correctness suite (no-leakage + comparability checks)
+## Objective
+## Requirements
+### 1) Add a `weather_backtest.validate` module with checks
+   - For every decision, assert all MOS runtimes used satisfy `runtimeUtc <= decision_ts_utc`.
+   - For every decision at `t`, only use candles with `end_period_ts <= t`.
+   - Every event must map to exactly one `targetDateLocal`. If ambiguous → skip.
+   - For a range event, exactly one market should settle YES (others NO). If not, quarantine event.
+   - Sum P_yes across markets in an event is ~1 (configurable tolerance).
+   - Ensure there are no gaps/overlaps in strike intervals unless explicitly allowed.
+   - Fee must be >= 0 and <= (qty × 0.07 × 0.25) approx; assert bounds.
+   - Ask/bid prices must be within [0,1]; reject otherwise.
+   - Re-running catalog sync and candle backfill does not change row counts unexpectedly.
+   - Ensure `decision_ts` is within [tradeStartUtc, tradeEndUtc].
+   - At least one test date around DST start and end for NY/CHI/LA.
+   - For each series_ticker in config, station_registry mapping exists.
+### 2) Validation report output
+- counts of failed validations
+- list of quarantined events with reasons
+## Acceptance Criteria
+- [ ] The validation suite can be run standalone: `python -m weather_backtest.validate --config ...`
+- [ ] A failing validation fails the run (unless configured to skip) and leaves clear diagnostics.
+- [ ] At least 10 validations are implemented and covered by tests.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-313 - Documentation pack & onboarding for Epic 3.md ===
+# WX-313 — Documentation pack & onboarding for Epic #3 (runbook + assumptions + limitations)
+## Objective
+## Requirements
+### 1) Ensure these docs exist and are accurate
+- `EPIC-3.md`
+- `agents.md`
+- `docs/architecture.md`
+- `docs/kalshi-api.md`
+- `docs/time-semantics-backtest.md`
+- `docs/fees-and-fills.md`
+- `docs/backtest-metrics.md`
+- `docs/runbook.md`
+- `docs/references.md`
+### 2) Explicitly document key limitations
+- Historical backtests use candlestick best bid/ask (top-of-book) as proxy.
+- Full historical depth orderbook is not available via official timestamped REST.
+- If we want full depth, we must record WebSocket orderbook deltas going forward.
+### 3) Add a “How to reproduce a run” section
+- run_id
+- config snapshot
+- git sha
+- seed
+- DB watermark (latest candle ts used)
+## Acceptance Criteria
+- [ ] A new developer can run through the runbook end-to-end and produce a sample report.
+- [ ] Docs clearly specify all time semantics and fee assumptions.
+- [ ] Limitations are documented prominently to prevent overconfidence in backtest results.
+
+=== epic3_kalshi_weather_backtesting\jiras\WX-314 - Stretch WebSocket orderbook recorder forward full-depth snapshots.md ===
+# WX-314 (Stretch) — WebSocket orderbook recorder for forward data (full-depth snapshots for future backtests)
+## Objective
+- orderbook deltas (full depth)
+- trade prints (if subscribed)
+## References (official)
+- WebSocket quick start: https://docs.kalshi.com/getting_started/quick_start_websockets
+- Auth signing: https://docs.kalshi.com/getting_started/quick_start_authenticated_requests
+## Requirements
+### 1) Connection + auth
+- Use `wss://api.elections.kalshi.com/trade-api/ws/v2` (prod) or demo.
+- WebSocket requires the same signing headers:
+  - sign message: `timestamp + "GET" + "/trade-api/ws/v2"`
+  - timestamp in ms
+  - RSA-PSS SHA256 base64
+### 2) Subscriptions
+- Subscribe to:
+  - orderbook delta channel for the set of market tickers for weather events
+- Handle reconnects and resubscribe.
+### 3) Book reconstruction
+- Maintain an in-memory orderbook per market ticker:
+  - price → quantity for YES and NO
+- Apply deltas in-order.
+- Periodically snapshot (e.g., every 5 seconds) to storage.
+### 4) Storage
+- append-only compressed files (Parquet/JSONL.gz) on disk
+- DB only for snapshot indexes/metadata
+### 5) Acceptance Criteria
+- [ ] Recorder can run for 1 hour without crashing.
+- [ ] Snapshots are written and can be replayed to reconstruct book state.
+- [ ] Reconnect logic works (simulate network drop).
+

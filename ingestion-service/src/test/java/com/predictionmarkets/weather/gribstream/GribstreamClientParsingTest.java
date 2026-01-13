@@ -1,0 +1,116 @@
+package com.predictionmarkets.weather.gribstream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.predictionmarkets.weather.common.http.HttpClientSettings;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+class GribstreamClientParsingTest {
+  private static final MockWebServer SERVER = new MockWebServer();
+
+  @BeforeAll
+  static void startServer() throws IOException {
+    SERVER.start();
+  }
+
+  @AfterAll
+  static void shutdown() throws IOException {
+    SERVER.shutdown();
+  }
+
+  @Test
+  void parsesNdjsonArrayResponses() throws Exception {
+    String gfsBody = loadFixture("gribstream/gfs_history.json");
+    String gefsBody = loadFixture("gribstream/gefs_history.json");
+    for (int i = 0; i < 5; i++) {
+      SERVER.enqueue(new MockResponse()
+          .setResponseCode(200)
+          .setHeader("Content-Type", "application/ndjson")
+          .setBody(gfsBody));
+    }
+    SERVER.enqueue(new MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", "application/ndjson")
+        .setBody(gefsBody));
+
+    GribstreamProperties properties = new GribstreamProperties();
+    properties.setBaseUrl(SERVER.url("/").toString());
+    properties.setApiToken("test-token");
+    GribstreamClient client = new GribstreamClient(
+        properties,
+        new ObjectMapper(),
+        HttpClientSettings.defaultSettings());
+
+    GribstreamHistoryRequest request = new GribstreamHistoryRequest(
+        "2026-01-10T05:00:00Z",
+        "2026-01-11T05:00:00Z",
+        "2026-01-09T17:00:00Z",
+        0,
+        48,
+        List.of(new GribstreamCoordinate(40.77898, -73.96925, "KNYC")),
+        List.of(new GribstreamVariable("TMP", "2 m above ground", "", "tmpk")),
+        null);
+
+    List<String> models = List.of("gfs", "hrrr", "nbm", "rap", "gefsatmosmean", "gefsatmos");
+    List<GribstreamClientResponse> responses = new ArrayList<>();
+    for (String model : models) {
+      GribstreamHistoryRequest modelRequest = request;
+      if (model.equals("gefsatmos")) {
+        modelRequest = new GribstreamHistoryRequest(
+            request.fromTime(),
+            request.untilTime(),
+            request.asOf(),
+            request.minHorizon(),
+            request.maxHorizon(),
+            request.coordinates(),
+            request.variables(),
+            List.of(0, 1));
+      }
+      responses.add(client.fetchHistory(model, modelRequest));
+    }
+
+    GribstreamClientResponse gfsResponse = responses.get(0);
+    assertThat(gfsResponse.rows()).hasSize(2);
+    assertThat(gfsResponse.rows().get(0).forecastedAt())
+        .isEqualTo(Instant.parse("2026-01-09T12:00:00Z"));
+    assertThat(gfsResponse.rows().get(1).tmpk()).isEqualTo(282.0);
+
+    GribstreamClientResponse gefsResponse = responses.get(5);
+    assertThat(gefsResponse.rows()).hasSize(2);
+    assertThat(gefsResponse.rows().get(0).member()).isEqualTo(0);
+
+    List<String> paths = new ArrayList<>();
+    for (int i = 0; i < models.size(); i++) {
+      RecordedRequest recorded = SERVER.takeRequest();
+      paths.add(recorded.getPath());
+    }
+    assertThat(paths).containsExactly(
+        "/api/v2/gfs/history",
+        "/api/v2/hrrr/history",
+        "/api/v2/nbm/history",
+        "/api/v2/rap/history",
+        "/api/v2/gefsatmosmean/history",
+        "/api/v2/gefsatmos/history");
+  }
+
+  private static String loadFixture(String path) throws IOException {
+    try (InputStream input = GribstreamClientParsingTest.class.getClassLoader().getResourceAsStream(path)) {
+      if (input == null) {
+        throw new IllegalArgumentException("Fixture not found: " + path);
+      }
+      return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+    }
+  }
+}

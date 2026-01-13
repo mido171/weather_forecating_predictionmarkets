@@ -24,6 +24,7 @@ Natural uniqueness keys:
 - `cli_daily` unique on `(station_id, target_date_local)`
 - `mos_run` unique on `(station_id, model, runtime_utc)`
 - `mos_asof_feature` unique on `(station_id, target_date_local, asof_policy_id, model)`
+- `gribstream_daily_feature` unique on `(station_id, target_date_local, asof_utc, model_code, metric)`
 
 All ingestion writes use MySQL upserts to allow restarts without cleanup.
 
@@ -49,3 +50,14 @@ IEM (Iowa State Mesonet):
 - CLI JSON: https://mesonet.agron.iastate.edu/json/cli.py
 - CLI JSON help: https://mesonet.agron.iastate.edu/json/cli.py?help=
 - CLI day window notes: https://mesonet.agron.iastate.edu/nws/clitable.php
+
+GribStream (forecast opinions, time-travel history):
+- Endpoint: POST https://gribstream.com/api/v2/{model}/history
+- Headers: Content-Type application/json, Authorization Bearer <token>, Accept application/ndjson,
+  Accept-Encoding gzip (recommended)
+- Body fields used: fromTime, untilTime, asOf, minHorizon, maxHorizon, coordinates, variables, members
+- Response formats: text/csv, application/json (JSON objects per line), application/ndjson (JSON array)
+- Response fields used: forecasted_at, forecasted_time, and variable alias tmpk (TMP at 2 m)
+- Ensemble members: use members [0..30] for GEFS spread (control + 30 perturbed)
+- Kelvin to Fahrenheit: F = (K - 273.15) * 9/5 + 32; spreads multiply by 9/5
+- Ordering: response rows are not guaranteed ordered; sort by forecasted_time when needed

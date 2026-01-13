@@ -1,0 +1,432 @@
+#!/usr/bin/env python3
+"""
+POC Backtest: "Daily High Temperature" for Central Park (NWS CLI product CLINYC)
+================================================================================
+
+For each local calendar day T in 2025, this script:
+
+1) Uses a fixed "asOf" policy for ALL models:
+      asOf_run_utc = (T - 1 day) at 12:00Z
+
+2) Defines the NWS CLI "climate day" window in UTC for NYC:
+   IEM notes the CLI day is midnight LOCAL STANDARD TIME (DST shifts to 1AM–1AM).
+   For NYC (standard time UTC-5), we model the climate day as:
+      start_utc = T 05:00Z
+      end_utc   = (T+1) 05:00Z
+
+3) For each model (HRRR, NBM, GFS):
+   - Fetch 2m temperature forecasts at a single lat/lon (Central Park)
+   - For each valid time in the climate-day window, get TMP:2m
+   - Convert K -> F
+   - Take max -> forecasted daily high (°F)
+
+4) Fetch observed/settled daily high (°F) from IEM parsed CLI endpoint:
+      https://mesonet.agron.iastate.edu/json/cli.py
+
+IMPORTANT FIX:
+- For Central Park (CLINYC), IEM uses station id KNYC (not NYC).
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+import time
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, timezone
+from typing import Dict, Iterable, List, Optional, Tuple
+
+# Windows console encoding can choke on emojis logged by Herbie.
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
+    except Exception:
+        pass
+
+# Avoid accidentally importing user-site packages outside the conda env.
+# Set ALLOW_USER_SITE=1 if you intentionally want to use user-site packages.
+import site
+site.ENABLE_USER_SITE = os.environ.get("ALLOW_USER_SITE") == "1"
+
+import numpy as np
+import pandas as pd
+import requests
+from tqdm import tqdm
+
+try:
+    from herbie import Herbie
+except ImportError:
+    print(
+        "\nERROR: Missing dependency 'herbie-data'.\n"
+        "Install with:\n"
+        "  conda install -c conda-forge eccodes cfgrib -y\n"
+        "  pip install herbie-data pandas numpy requests tqdm\n",
+        file=sys.stderr,
+    )
+    raise
+
+# -----------------------------
+# CONFIG
+# -----------------------------
+
+# Central Park approximate coordinates
+CENTRAL_PARK_LAT = 40.7812
+CENTRAL_PARK_LON = -73.9665
+
+# IMPORTANT: IEM CLI station id for Central Park CLI product (CLINYC) is KNYC (not NYC)
+CLI_STATION = "KNYC"
+
+YEAR = 2025
+
+ASOF_CYCLE_HOUR_UTC = 12  # 12Z
+CLIMATE_DAY_START_UTC_HOUR = 5  # 05:00Z (NYC local standard midnight)
+
+HERBIE_SAVE_DIR = os.path.abspath("./herbie_cache")
+OUTPUT_CSV = f"nyc_cli_{YEAR}_backtest.csv"
+
+IEM_CLI_URL = "https://mesonet.agron.iastate.edu/json/cli.py"
+
+# -----------------------------
+# MODEL CONFIG
+# -----------------------------
+
+@dataclass(frozen=True)
+class ModelSpec:
+    label: str
+    herbie_model: str
+    product: str
+    step_hours: int
+
+
+MODELS: List[ModelSpec] = [
+    ModelSpec(label="HRRR", herbie_model="hrrr", product="sfc", step_hours=1),
+    ModelSpec(label="NBM", herbie_model="nbm", product="co", step_hours=1),
+    ModelSpec(label="GFS", herbie_model="gfs", product="pgrb2.0p25", step_hours=3),
+]
+
+TMP2M_SEARCH = "TMP:2 m"  # GRIB2 message selector used by Herbie
+
+# -----------------------------
+# UTIL
+# -----------------------------
+
+def requests_session() -> requests.Session:
+    s = requests.Session()
+    # Some APIs behave better with a user-agent
+    s.headers.update({"User-Agent": "wxbacktest/1.0 (ahmad; research)"})
+    return s
+
+
+def fetch_text_with_retries(
+    sess: requests.Session,
+    url: str,
+    params: Dict[str, str],
+    timeout_s: int = 60,
+    max_tries: int = 6,
+) -> str:
+    last_err: Optional[Exception] = None
+    for attempt in range(1, max_tries + 1):
+        try:
+            r = sess.get(url, params=params, timeout=timeout_s)
+            r.raise_for_status()
+            return r.text
+        except Exception as e:
+            last_err = e
+            time.sleep(min(2 ** attempt, 30))
+    raise RuntimeError(f"Failed to fetch {url} after {max_tries} tries: {last_err}")
+
+
+def daterange(d0: date, d1: date) -> Iterable[date]:
+    d = d0
+    while d <= d1:
+        yield d
+        d += timedelta(days=1)
+
+
+def parse_env_date(var_name: str) -> Optional[date]:
+    raw = os.environ.get(var_name)
+    if not raw:
+        return None
+    try:
+        return datetime.strptime(raw.strip(), "%Y-%m-%d").date()
+    except ValueError as e:
+        raise ValueError(f"{var_name} must be YYYY-MM-DD, got {raw!r}") from e
+
+
+def filter_models(models: List[ModelSpec]) -> List[ModelSpec]:
+    raw = os.environ.get("MODEL_FILTER")
+    if not raw:
+        return models
+    wanted = {s.strip().upper() for s in raw.split(",") if s.strip()}
+    filtered = [m for m in models if m.label.upper() in wanted]
+    if not filtered:
+        raise ValueError(f"MODEL_FILTER matched no models: {sorted(wanted)}")
+    return filtered
+
+
+def asof_run_time_utc(target_day_local: date) -> datetime:
+    run_day = target_day_local - timedelta(days=1)
+    return datetime(
+        run_day.year, run_day.month, run_day.day,
+        ASOF_CYCLE_HOUR_UTC, 0, 0,
+        tzinfo=timezone.utc
+    )
+
+
+def climate_day_window_utc(target_day_local: date) -> Tuple[datetime, datetime]:
+    start = datetime(
+        target_day_local.year, target_day_local.month, target_day_local.day,
+        CLIMATE_DAY_START_UTC_HOUR, 0, 0,
+        tzinfo=timezone.utc
+    )
+    end = start + timedelta(days=1)
+    return start, end
+
+
+def k_to_f(k: float) -> float:
+    return (k - 273.15) * 9.0 / 5.0 + 32.0
+
+
+# -----------------------------
+# CLI ACTUALS (IEM)
+# -----------------------------
+
+def load_cli_actuals_year(station: str, year: int, sess: requests.Session) -> Dict[str, float]:
+    """
+    Fetch daily climate data for a station/year from IEM's /json/cli.py
+    Use fmt=csv and auto-detect columns.
+
+    If you get a 422 here, it almost always means the station id is invalid.
+    For Central Park, IEM uses KNYC, not NYC.
+    """
+    try:
+        csv_text = fetch_text_with_retries(
+            sess,
+            IEM_CLI_URL,
+            params={"station": station, "year": str(year), "fmt": "csv"},
+            timeout_s=60,
+            max_tries=6,
+        )
+    except Exception as e:
+        raise RuntimeError(
+            f"IEM CLI fetch failed for station={station}, year={year}. "
+            f"If you used NYC, change it to KNYC. Original error: {e}"
+        )
+
+    from io import StringIO
+    # IEM CSV rows can have a trailing comma, so use the python engine to avoid column shifts.
+    df = pd.read_csv(StringIO(csv_text), engine="python", index_col=False)
+    df.columns = [c.strip() for c in df.columns]
+
+    def normalize_col(name: str) -> str:
+        return name.strip().lower()
+
+    normalized_cols: Dict[str, str] = {}
+    for col in df.columns:
+        key = normalize_col(col)
+        if key not in normalized_cols:
+            normalized_cols[key] = col
+
+    def pick_first_column(candidates: List[str]) -> Optional[str]:
+        for cand in candidates:
+            key = normalize_col(cand)
+            if key in normalized_cols:
+                return normalized_cols[key]
+        return None
+
+    def guess_date_column() -> Optional[str]:
+        best_col = None
+        best_ratio = 0.0
+        for col in df.columns:
+            series = df[col].dropna().astype(str)
+            if series.empty:
+                continue
+            sample = series.head(50)
+            parsed = pd.to_datetime(sample, errors="coerce")
+            ratio = float(parsed.notna().mean())
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_col = col
+        if best_col is not None and best_ratio >= 0.8:
+            return best_col
+        return None
+
+    # Try common date columns (case/whitespace-insensitive), then fall back to inference.
+    date_col_candidates = ["valid", "date", "day", "local_date"]
+    date_col = pick_first_column(date_col_candidates) or guess_date_column()
+    if date_col is None:
+        raise RuntimeError(f"Could not find a date column in CLI CSV. Columns: {list(df.columns)}")
+
+    # Try common max temp columns (case/whitespace-insensitive).
+    max_col_candidates = ["max_temp_f", "high", "max", "tmax", "maxt", "max_temp", "temp_max"]
+    max_col = pick_first_column(max_col_candidates)
+    if max_col is None:
+        raise RuntimeError(f"Could not find a max-temp column in CLI CSV. Columns: {list(df.columns)}")
+
+    out: Dict[str, float] = {}
+    for _, row in df.iterrows():
+        raw_d = row.get(date_col)
+        if raw_d is None or pd.isna(raw_d):
+            continue
+        parsed_d = pd.to_datetime(str(raw_d), errors="coerce")
+        if pd.isna(parsed_d):
+            continue
+        v = row.get(max_col)
+        v_num = pd.to_numeric(v, errors="coerce")
+        if v_num is None or pd.isna(v_num):
+            continue
+        out[parsed_d.date().isoformat()] = float(v_num)
+
+    return out
+
+
+# -----------------------------
+# FORECAST FETCH (Herbie)
+# -----------------------------
+
+def fetch_tmp2m_k_at_point(
+    run_time_utc: datetime,
+    model: ModelSpec,
+    fxx: int,
+    lat: float,
+    lon: float,
+) -> Optional[float]:
+    def debug(msg: str) -> None:
+        if os.environ.get("HERBIE_DEBUG") == "1":
+            sys.stderr.buffer.write((msg + "\n").encode("utf-8", errors="backslashreplace"))
+
+    run_time_naive = run_time_utc.replace(tzinfo=None)
+    try:
+        H = Herbie(
+            run_time_naive,
+            model=model.herbie_model,
+            product=model.product,
+            fxx=fxx,
+            save_dir=HERBIE_SAVE_DIR,
+            verbose=False,
+        )
+    except Exception as e:
+        debug(f"Herbie init failed: model={model.label} run={run_time_utc} fxx={fxx} err={e}")
+        return None
+
+    try:
+        ds = H.xarray(TMP2M_SEARCH, remove_grib=True)
+    except Exception as e:
+        debug(f"Herbie xarray failed: model={model.label} run={run_time_utc} fxx={fxx} err={e}")
+        return None
+
+    if isinstance(ds, list):
+        if not ds:
+            debug(f"Herbie xarray list empty: model={model.label} run={run_time_utc} fxx={fxx}")
+            return None
+        try:
+            import xarray as xr
+            ds = xr.merge(ds)
+        except Exception:
+            ds = ds[0]
+
+    if ds is None or len(ds.data_vars) == 0:
+        debug(f"Herbie xarray empty: model={model.label} run={run_time_utc} fxx={fxx}")
+        return None
+
+    varname = list(ds.data_vars)[0]
+
+    pts = pd.DataFrame(
+        {"longitude": [lon], "latitude": [lat], "stid": ["CENTRAL_PARK"]}
+    )
+
+    try:
+        dsp = ds.herbie.pick_points(pts, method="nearest")
+        val = np.asarray(dsp[varname].values).squeeze()
+        if val.size != 1 or not np.isfinite(val):
+            return None
+        return float(val)
+    except Exception as e:
+        debug(f"Herbie pick_points failed: model={model.label} run={run_time_utc} fxx={fxx} err={e}")
+        return None
+
+
+def forecast_daily_high_f(
+    target_day_local: date,
+    model: ModelSpec,
+    lat: float,
+    lon: float,
+) -> Optional[float]:
+    run_time = asof_run_time_utc(target_day_local)
+    start_utc, end_utc = climate_day_window_utc(target_day_local)
+
+    vals_f: List[float] = []
+    t = start_utc
+    while t < end_utc:
+        fxx = int(round((t - run_time).total_seconds() / 3600.0))
+        if fxx >= 0:
+            tmp_k = fetch_tmp2m_k_at_point(run_time, model, fxx, lat, lon)
+            if tmp_k is not None:
+                vals_f.append(k_to_f(tmp_k))
+        t += timedelta(hours=model.step_hours)
+
+    if not vals_f:
+        return None
+
+    return float(np.nanmax(np.array(vals_f, dtype=float)))
+
+
+# -----------------------------
+# MAIN
+# -----------------------------
+
+def main() -> None:
+    os.makedirs(HERBIE_SAVE_DIR, exist_ok=True)
+    sess = requests_session()
+
+    print(f"Loading CLI actuals from IEM for station={CLI_STATION}, year={YEAR} ...")
+    actuals = load_cli_actuals_year(CLI_STATION, YEAR, sess)
+    print(f"Loaded {len(actuals)} daily actuals.\n")
+
+    start_day = date(YEAR, 1, 1)
+    end_day = date(YEAR, 12, 31)
+    env_start = parse_env_date("START_DATE")
+    env_end = parse_env_date("END_DATE")
+    if env_start:
+        start_day = env_start
+    if env_end:
+        end_day = env_end
+    if end_day < start_day:
+        raise ValueError(f"END_DATE {end_day} is before START_DATE {start_day}")
+
+    models = filter_models(MODELS)
+
+    rows = []
+    for d in tqdm(list(daterange(start_day, end_day)), desc=f"Backtesting {YEAR}"):
+        run_time = asof_run_time_utc(d)
+        start_utc, end_utc = climate_day_window_utc(d)
+
+        row = {
+            "target_day_local": d.isoformat(),
+            "asof_run_utc": run_time.isoformat().replace("+00:00", "Z"),
+            "climate_window_start_utc": start_utc.isoformat().replace("+00:00", "Z"),
+            "climate_window_end_utc": end_utc.isoformat().replace("+00:00", "Z"),
+            "lat": CENTRAL_PARK_LAT,
+            "lon": CENTRAL_PARK_LON,
+            "cli_station": CLI_STATION,
+        }
+
+        for m in models:
+            fcst = forecast_daily_high_f(d, m, CENTRAL_PARK_LAT, CENTRAL_PARK_LON)
+            row[f"{m.label}_tmax_f"] = None if fcst is None else round(fcst, 2)
+
+        actual = actuals.get(d.isoformat())
+        row["CLI_actual_tmax_f"] = None if actual is None else float(actual)
+
+        rows.append(row)
+        print(json.dumps(row, sort_keys=True))
+
+    df = pd.DataFrame(rows)
+    df.to_csv(OUTPUT_CSV, index=False)
+    print(f"\nWrote CSV: {OUTPUT_CSV}")
+
+
+if __name__ == "__main__":
+    main()

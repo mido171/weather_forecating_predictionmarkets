@@ -25,3 +25,7 @@ tracks `updated_at_utc` to capture revision updates from the CLI source.
 
 `cli_daily` also stores `truth_source_url` to link directly to the NWS CLI
 product page associated with the daily truth value.
+
+`gribstream_daily_feature` stores request/response hashes, window bounds,
+horizons, and per-model metrics (`TMAX_F`, `TMP_SPREAD_F`) keyed by
+`(station_id, target_date_local, asof_utc, model_code, metric)`.

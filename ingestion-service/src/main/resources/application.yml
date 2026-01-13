@@ -16,12 +16,49 @@ spring:
 logging:
   level:
     root: INFO
+    org.springframework.boot.context.config: DEBUG
+    com.predictionmarkets.weather.gribstream: DEBUG
 
 kalshi:
   base-url: https://api.elections.kalshi.com/trade-api/v2
 
 iem:
   base-url: https://mesonet.agron.iastate.edu
+
+gribstream:
+  baseUrl: "https://gribstream.com"
+  apiToken: "${GRIBSTREAM_API_TOKEN:<PUT_TOKEN_HERE>}"
+  authScheme: "${GRIBSTREAM_AUTH_SCHEME:Bearer}"
+  connectTimeoutMillis: 5000
+  readTimeoutMillis: 30000
+  defaultAccept: "application/ndjson"
+  gzip: true
+  executor:
+    thread-count: 4
+  models:
+    defaultMinHorizonHours: 0
+    gfs:
+      maxHorizonHours: 384
+    hrrr:
+      maxHorizonHours: 48
+    nbm:
+      maxHorizonHours: 264
+    rap:
+      maxHorizonHours: 51
+    gefsatmosmean:
+      maxHorizonHours: 240
+    gefsatmos:
+      maxHorizonHours: 240
+  gefs:
+    members: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+
+app:
+  runners:
+    gribstream-example:
+      enabled: false
+      start-date-local: 2020-10-01
+      end-date-local: 2025-12-31
+      asof-utc: "2025-12-31T17:00:00Z"
 
 pipeline:
   series-tickers:

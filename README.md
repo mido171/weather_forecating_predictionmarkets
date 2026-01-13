@@ -26,3 +26,12 @@ SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 
 mvn -pl ingestion-service spring-boot:run
+
+## Gribstream credentials
+The Gribstream ingestion paths require an API token. Set these before running the
+Gribstream executors:
+
+```text
+GRIBSTREAM_API_TOKEN=your-token
+GRIBSTREAM_AUTH_SCHEME=Bearer
+```

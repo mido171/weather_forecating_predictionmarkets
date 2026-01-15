@@ -1,0 +1,80 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "ewm_mean(ens_std)",
+        "name": "ens_std_ewm_hl7_l1",
+        "params": {
+          "halflife": 7,
+          "lag": 1,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(ens_std)",
+        "name": "ens_std_ewm_hl30_l1",
+        "params": {
+          "halflife": 30,
+          "lag": 1,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ens_std - ens_std_ewm_hl30_l1",
+        "name": "ens_std_shock_hl30"
+      },
+      {
+        "formula": "ewm_mean(gefs_spread)",
+        "name": "gefs_spread_ewm_hl14_l1",
+        "params": {
+          "halflife": 14,
+          "lag": 1,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "gefs_spread - gefs_spread_ewm_hl14_l1",
+        "name": "gefs_spread_shock_hl14"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_std_ewm_hl30_l1": 1.9892920616511307,
+        "ens_std_ewm_hl7_l1": 1.9831301029894108,
+        "ens_std_shock_hl30": -0.17154117975468086,
+        "gefs_spread_ewm_hl14_l1": 2.2540014343037,
+        "gefs_spread_shock_hl14": -0.1487607473705197,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "EWMA spread baseline + shock features",
+  "experiment_id": "E06"
+}

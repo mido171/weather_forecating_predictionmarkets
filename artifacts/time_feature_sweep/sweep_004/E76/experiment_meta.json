@@ -1,0 +1,70 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_nbm_tmax_f_anom_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_gfs_tmax_f_anom_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_gefsatmosmean_tmax_f_anom_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_nam_tmax_f_anom_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_hrrr_tmax_f_anom_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_anom_regime",
+        "name": "mae_rap_tmax_f_anom_selected_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_gefsatmosmean_tmax_f_anom_selected_rm60_l2": 2.5341946024275264,
+        "mae_gfs_tmax_f_anom_selected_rm60_l2": 2.4324324324324325,
+        "mae_hrrr_tmax_f_anom_selected_rm60_l2": 2.850776755593029,
+        "mae_nam_tmax_f_anom_selected_rm60_l2": 2.6666666666666665,
+        "mae_nbm_tmax_f_anom_selected_rm60_l2": 2.030238396139675,
+        "mae_rap_tmax_f_anom_selected_rm60_l2": 3.235094146728492,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Anomaly-regime conditional MAE",
+  "experiment_id": "E76"
+}

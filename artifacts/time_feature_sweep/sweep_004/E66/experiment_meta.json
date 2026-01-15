@@ -1,0 +1,91 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "1[best_model_regime == nbm_tmax_f]",
+        "name": "best_reg_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_model_regime == gfs_tmax_f]",
+        "name": "best_reg_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_model_regime == gefsatmosmean_tmax_f]",
+        "name": "best_reg_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_model_regime == nam_tmax_f]",
+        "name": "best_reg_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_model_regime == hrrr_tmax_f]",
+        "name": "best_reg_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_model_regime == rap_tmax_f]",
+        "name": "best_reg_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_model_regime)",
+        "name": "best_regime_forecast_today"
+      },
+      {
+        "formula": "regime_sample_count",
+        "name": "n_regime_samples_selected_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_reg_is_gefsatmosmean_tmax_f": 0.0,
+        "best_reg_is_gfs_tmax_f": 0.0,
+        "best_reg_is_hrrr_tmax_f": 0.0,
+        "best_reg_is_nam_tmax_f": 0.0,
+        "best_reg_is_nbm_tmax_f": 1.0,
+        "best_reg_is_rap_tmax_f": 0.0,
+        "best_regime_forecast_today": 64.23801757812507,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "n_regime_samples_selected_l2": 33.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "fit_on": "train",
+        "name": "regime_thresholds",
+        "thr_spread": {
+          "KNYC": 2.465098209625438
+        },
+        "thr_temp": {
+          "KNYC": 63.284222166984335
+        }
+      }
+    ]
+  },
+  "description": "Regime-specific best model selector",
+  "experiment_id": "E66"
+}

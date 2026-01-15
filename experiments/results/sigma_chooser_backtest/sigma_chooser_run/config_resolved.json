@@ -1,0 +1,241 @@
+{
+  "binning": {
+    "min_samples_per_bin": 60,
+    "p_high": 0.666666,
+    "p_low": 0.333333,
+    "shrinkage": true
+  },
+  "config_source": "experiments\\configs\\sigma_chooser_backtest.json",
+  "dataset_hash": "ec850d6715df5451e93b6e147f0cf97ee2eed8ad5bb3f42314f49d4b2b853922",
+  "dataset_id": "032a85d788cb83fa9d2170560d23152c5aa7e28f8a79deb3b8455e97dd103a0e",
+  "dataset_path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\ingestion-service\\src\\main\\resources\\trainingdata_output\\gribstream_training_data.csv",
+  "derived_meta": {
+    "formulas": [
+      {
+        "formula": "roll_mean(|resid_nbm_tmax_f|)",
+        "name": "mae_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_gfs_tmax_f|)",
+        "name": "mae_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_gefsatmosmean_tmax_f|)",
+        "name": "mae_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_nam_tmax_f|)",
+        "name": "mae_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_hrrr_tmax_f|)",
+        "name": "mae_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_rap_tmax_f|)",
+        "name": "mae_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_ens_mean|)",
+        "name": "mae_ensmean_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_nbm_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_nbm_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "mae_gfs_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_gfs_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "mae_gefsatmosmean_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_gefsatmosmean_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "mae_nam_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_nam_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "mae_hrrr_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_hrrr_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "mae_rap_tmax_f_rm60_l2 - mae_ensmean_rm60_l2",
+        "name": "rel_mae_rap_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "1[best_model_id == nbm_tmax_f]",
+        "name": "best_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_model_id == gfs_tmax_f]",
+        "name": "best_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_model_id == gefsatmosmean_tmax_f]",
+        "name": "best_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_model_id == nam_tmax_f]",
+        "name": "best_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_model_id == hrrr_tmax_f]",
+        "name": "best_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_model_id == rap_tmax_f]",
+        "name": "best_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_model_id)",
+        "name": "best_model_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_is_gefsatmosmean_tmax_f": 0.0,
+        "best_is_gfs_tmax_f": 0.0,
+        "best_is_hrrr_tmax_f": 0.0,
+        "best_is_nam_tmax_f": 0.0,
+        "best_is_nbm_tmax_f": 1.0,
+        "best_is_rap_tmax_f": 0.0,
+        "best_model_forecast_today": 65.91202636718758,
+        "cos_doy": -0.05695101102736663,
+        "day_of_year": 190.0,
+        "gefsatmos_tmp_spread_f": 1.958086377902673,
+        "gefsatmosmean_tmax_f": 64.75672635773688,
+        "gfs_tmax_f": 66.0,
+        "hrrr_tmax_f": 65.02425964355473,
+        "is_weekend": 0.0,
+        "mae_ensmean_rm60_l2": 2.031771805837743,
+        "mae_gefsatmosmean_tmax_f_rm60_l2": 2.5915696404569757,
+        "mae_gfs_tmax_f_rm60_l2": 2.35,
+        "mae_hrrr_tmax_f_rm60_l2": 2.7181280110677135,
+        "mae_nam_tmax_f_rm60_l2": 2.716666666666667,
+        "mae_nbm_tmax_f_rm60_l2": 2.144235677083304,
+        "mae_rap_tmax_f_rm60_l2": 3.0888663126627542,
+        "month": 7.0,
+        "nam_tmax_f": 65.0,
+        "nbm_tmax_f": 64.4179736328125,
+        "rap_tmax_f": 63.79722412109379,
+        "rel_mae_gefsatmosmean_tmax_f_vs_ens_rm60_l2": 0.442149423370898,
+        "rel_mae_gfs_tmax_f_vs_ens_rm60_l2": 0.42440843940107875,
+        "rel_mae_hrrr_tmax_f_vs_ens_rm60_l2": 0.6153917284565456,
+        "rel_mae_nam_tmax_f_vs_ens_rm60_l2": 0.6128937708568161,
+        "rel_mae_nbm_tmax_f_vs_ens_rm60_l2": 0.05066378134448968,
+        "rel_mae_rap_tmax_f_vs_ens_rm60_l2": 1.1104461827650622,
+        "sin_doy": -0.05695216311707674
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "determinism": {
+    "seed": 1337,
+    "threads": 1
+  },
+  "feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend",
+    "mae_nbm_tmax_f_rm60_l2",
+    "mae_gfs_tmax_f_rm60_l2",
+    "mae_gefsatmosmean_tmax_f_rm60_l2",
+    "mae_nam_tmax_f_rm60_l2",
+    "mae_hrrr_tmax_f_rm60_l2",
+    "mae_rap_tmax_f_rm60_l2",
+    "mae_ensmean_rm60_l2",
+    "rel_mae_nbm_tmax_f_vs_ens_rm60_l2",
+    "rel_mae_gfs_tmax_f_vs_ens_rm60_l2",
+    "rel_mae_gefsatmosmean_tmax_f_vs_ens_rm60_l2",
+    "rel_mae_nam_tmax_f_vs_ens_rm60_l2",
+    "rel_mae_hrrr_tmax_f_vs_ens_rm60_l2",
+    "rel_mae_rap_tmax_f_vs_ens_rm60_l2",
+    "best_is_nbm_tmax_f",
+    "best_is_gfs_tmax_f",
+    "best_is_gefsatmosmean_tmax_f",
+    "best_is_nam_tmax_f",
+    "best_is_hrrr_tmax_f",
+    "best_is_rap_tmax_f",
+    "best_model_forecast_today"
+  ],
+  "feature_set_name": "E24",
+  "mean_model": {
+    "name": "lgbm",
+    "params": {
+      "bagging_fraction": 0.8,
+      "feature_fraction": 0.8,
+      "lambda_l1": 0.0,
+      "lambda_l2": 0.0,
+      "learning_rate": 0.05,
+      "min_data_in_leaf": 20,
+      "n_estimators": 300,
+      "num_leaves": 63
+    }
+  },
+  "r_feature": "gefsatmos_tmp_spread_f",
+  "run_id": "sigma_chooser_run",
+  "scoring": {
+    "bootstrap_samples": 1000,
+    "interval_levels": [
+      0.5,
+      0.8,
+      0.9,
+      0.95
+    ],
+    "reliability_bins": 10,
+    "threshold_max_offset": 5,
+    "threshold_min_offset": -5
+  },
+  "sigma_floor": 0.25,
+  "test_end": "2025-12-31",
+  "test_start": "2025-01-01",
+  "train_end": "2024-12-31",
+  "train_start": "2021-01-01",
+  "truth_lag": 2
+}

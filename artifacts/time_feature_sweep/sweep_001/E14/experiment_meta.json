@@ -1,0 +1,55 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "std(delta_model_last_l1)",
+        "name": "delta1_std_models_l1"
+      },
+      {
+        "formula": "max(delta_model_last_l1) - min(delta_model_last_l1)",
+        "name": "delta1_range_models_l1"
+      },
+      {
+        "formula": "mean(sign(delta_model_last_l1) == sign(median(delta_model_last_l1)))",
+        "name": "trend_agreement_frac_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "delta1_range_models_l1": 5.748121643066408,
+        "delta1_std_models_l1": 1.9856576024429562,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "trend_agreement_frac_l1": 1.0
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Dispersion of model trend signals",
+  "experiment_id": "E14"
+}

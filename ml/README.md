@@ -1,6 +1,8 @@
 # Weather ML (Epic 2)
 
 This package hosts the Python ML training pipeline for Kalshi weather markets.
+It trains mean and uncertainty models from the CSV snapshot produced by the
+ingestion service.
 
 ## Setup
 
@@ -10,61 +12,44 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
+Optional gradient-boosting dependencies:
+
+```powershell
+python -m pip install -e ".[gbdt]"
+```
+
 ## Run unit tests
 
 ```powershell
 pytest
 ```
 
-## Run training CLI
+## Train models
 
 ```powershell
-python -m weather_ml.train --help
-python -m weather_ml.train --config configs/train_kalshi_default.yaml --stage dataset
+python -m weather_ml.train --config configs/train_mean_sigma.yaml
 ```
 
-## Dataset extraction (WX-202)
+## Run inference
 
-The dataset extraction layer uses SQLAlchemy. Configure the database URL via
-`WEATHER_ML_DB_URL` or pass an engine to `weather_ml.dataset.build_dataset`.
-
-```python
-from datetime import date
-
-from weather_ml import dataset
-
-df = dataset.build_dataset(
-    ["KMIA"],
-    date(2024, 1, 1),
-    date(2024, 1, 31),
-    1,
-)
+```powershell
+python -m weather_ml.predict --run-dir artifacts/runs/<run_id> --csv <input.csv> --output predictions.parquet
 ```
 
-## Dataset snapshots (WX-203)
+## Input dataset
 
-The snapshot builder writes versioned Parquet datasets plus metadata for auditing.
-It is driven by the same config used by the CLI.
+CSV location (default config):
+`ingestion-service/src/main/resources/trainingdata_output/gribstream_training_data.csv`
 
-Outputs:
-- `datasets/<dataset_id>/data.parquet`
-- `datasets/<dataset_id>/metadata.json`
+Expected columns:
+- station_id, target_date_local, asof_utc
+- gfs_tmax_f, nam_tmax_f, gefsatmosmean_tmax_f, rap_tmax_f, hrrr_tmax_f, nbm_tmax_f
+- gefsatmos_tmp_spread_f, actual_tmax_f
 
-Example (Python):
+## Outputs
 
-```python
-from datetime import date
-
-from weather_ml import dataset
-
-snapshot = dataset.build_dataset_snapshot(
-    ["KMIA"],
-    date(2024, 1, 1),
-    date(2024, 1, 31),
-    1,
-    missing_strategy="drop",
-    datasets_dir="datasets",
-)
-
-print(snapshot.dataset_id, snapshot.data_path)
-```
+Artifacts are written under `artifacts/runs/<run_id>/` including:
+- resolved config, dataset metadata + hash, feature list
+- trained mean/sigma models (joblib)
+- metrics.json and report.md
+- plots and test-set predictions

@@ -1,0 +1,109 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_nbm_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "nbm_tmax_f_biascorr_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_gfs_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "gfs_tmax_f_biascorr_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_gefsatmosmean_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "gefsatmosmean_tmax_f_biascorr_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_nam_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "nam_tmax_f_biascorr_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_hrrr_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "hrrr_tmax_f_biascorr_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_by_temp",
+        "name": "bias_rap_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "forecast + bias_selected",
+        "name": "rap_tmax_f_biascorr_selected_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bias_gefsatmosmean_tmax_f_selected_rm60_l2": 1.3752876925879394,
+        "bias_gfs_tmax_f_selected_rm60_l2": 0.847457627118644,
+        "bias_hrrr_tmax_f_selected_rm60_l2": 1.6355012096057826,
+        "bias_nam_tmax_f_selected_rm60_l2": 1.511111111111111,
+        "bias_nbm_tmax_f_selected_rm60_l2": 1.484522999730531,
+        "bias_rap_tmax_f_selected_rm60_l2": 2.352080417209159,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gefsatmosmean_tmax_f_biascorr_selected_rm60_l2": 65.42548820217355,
+        "gfs_tmax_f": 64.5,
+        "gfs_tmax_f_biascorr_selected_rm60_l2": 66.69444444444444,
+        "hrrr_tmax_f": 63.429676513671915,
+        "hrrr_tmax_f_biascorr_selected_rm60_l2": 65.48661963144939,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nam_tmax_f_biascorr_selected_rm60_l2": 65.57446808510639,
+        "nbm_tmax_f": 63.175991210937525,
+        "nbm_tmax_f_biascorr_selected_rm60_l2": 65.68451500717477,
+        "rap_tmax_f": 62.58964813232426,
+        "rap_tmax_f_biascorr_selected_rm60_l2": 65.89754600524903,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "default": 63.284222166984335,
+        "fit_on": "train",
+        "name": "thr_temp_median",
+        "thresholds": {
+          "KNYC": 63.284222166984335
+        }
+      }
+    ]
+  },
+  "description": "Temp-regime conditional bias + corrected forecasts",
+  "experiment_id": "E62"
+}

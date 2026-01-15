@@ -1,0 +1,210 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(resid_nbm_tmax_f)",
+        "name": "bias_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_nbm_tmax_f_rm60_l2|",
+        "name": "abs_bias_nbm_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_gfs_tmax_f)",
+        "name": "bias_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_gfs_tmax_f_rm60_l2|",
+        "name": "abs_bias_gfs_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_gefsatmosmean_tmax_f)",
+        "name": "bias_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_gefsatmosmean_tmax_f_rm60_l2|",
+        "name": "abs_bias_gefsatmosmean_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_nam_tmax_f)",
+        "name": "bias_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_nam_tmax_f_rm60_l2|",
+        "name": "abs_bias_nam_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_hrrr_tmax_f)",
+        "name": "bias_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_hrrr_tmax_f_rm60_l2|",
+        "name": "abs_bias_hrrr_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_rap_tmax_f)",
+        "name": "bias_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_rap_tmax_f_rm60_l2|",
+        "name": "abs_bias_rap_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_ens_mean)",
+        "name": "bias_ensmean_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "|bias_ensmean_rm60_l2|",
+        "name": "abs_bias_ensmean_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_nbm_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_nbm_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_gfs_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_gfs_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_gefsatmosmean_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_gefsatmosmean_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_nam_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_nam_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_hrrr_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_hrrr_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "abs_bias_rap_tmax_f_rm60_l - abs_bias_ensmean_rm60_l",
+        "name": "rel_abs_bias_rap_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "1[best_bias_model_id == nbm_tmax_f]",
+        "name": "best_bias_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_bias_model_id == gfs_tmax_f]",
+        "name": "best_bias_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_bias_model_id == gefsatmosmean_tmax_f]",
+        "name": "best_bias_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_bias_model_id == nam_tmax_f]",
+        "name": "best_bias_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_bias_model_id == hrrr_tmax_f]",
+        "name": "best_bias_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_bias_model_id == rap_tmax_f]",
+        "name": "best_bias_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_bias_model_id)",
+        "name": "best_bias_model_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "abs_bias_ensmean_rm60_l2": 1.3529924368581134,
+        "abs_bias_gefsatmosmean_tmax_f_rm60_l2": 1.9356973748319442,
+        "abs_bias_gfs_tmax_f_rm60_l2": 0.75,
+        "abs_bias_hrrr_tmax_f_rm60_l2": 1.7686642456054271,
+        "abs_bias_nam_tmax_f_rm60_l2": 1.5,
+        "abs_bias_nbm_tmax_f_rm60_l2": 1.4753722330728531,
+        "abs_bias_rap_tmax_f_rm60_l2": 2.465282745361286,
+        "best_bias_is_gefsatmosmean_tmax_f": 0.0,
+        "best_bias_is_gfs_tmax_f": 0.0,
+        "best_bias_is_hrrr_tmax_f": 0.0,
+        "best_bias_is_nam_tmax_f": 0.0,
+        "best_bias_is_nbm_tmax_f": 0.0,
+        "best_bias_is_rap_tmax_f": 0.0,
+        "best_bias_model_forecast_today": 65.0,
+        "bias_ensmean_rm60_l2": 1.3529924368581134,
+        "bias_gefsatmosmean_tmax_f_rm60_l2": 1.28967427807874,
+        "bias_gfs_tmax_f_rm60_l2": 0.6833333333333333,
+        "bias_hrrr_tmax_f_rm60_l2": 1.6668624369302976,
+        "bias_nam_tmax_f_rm60_l2": 1.5,
+        "bias_nbm_tmax_f_rm60_l2": 1.4753722330728531,
+        "bias_rap_tmax_f_rm60_l2": 2.465282745361286,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "rel_abs_bias_gefsatmosmean_tmax_f_vs_ens_rm60_l2": 0.18574389637498867,
+        "rel_abs_bias_gfs_tmax_f_vs_ens_rm60_l2": -0.27117201880448527,
+        "rel_abs_bias_hrrr_tmax_f_vs_ens_rm60_l2": 0.32838849800137915,
+        "rel_abs_bias_nam_tmax_f_vs_ens_rm60_l2": -0.08788380771209825,
+        "rel_abs_bias_nbm_tmax_f_vs_ens_rm60_l2": 0.04843254474376879,
+        "rel_abs_bias_rap_tmax_f_vs_ens_rm60_l2": 0.9862939057271447,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Signed bias state + least-biased model identity",
+  "experiment_id": "E51"
+}

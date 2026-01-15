@@ -1,0 +1,41 @@
+{
+  "bins": {
+    "HIGH": {
+      "bias_mean_error_f": 0.08488499679323773,
+      "n": 366,
+      "shrunk": false,
+      "sigma_std_error_f": 3.2684304856729685
+    },
+    "LOW": {
+      "bias_mean_error_f": 0.07894558272662042,
+      "n": 365,
+      "shrunk": false,
+      "sigma_std_error_f": 3.0921465382386453
+    },
+    "MID": {
+      "bias_mean_error_f": -0.15772841077405425,
+      "n": 365,
+      "shrunk": false,
+      "sigma_std_error_f": 3.031261141567225
+    }
+  },
+  "calibration_window": {
+    "end": "2024-12-31",
+    "start": "2021-01-01"
+  },
+  "created_utc": "2026-01-15T06:58:09Z",
+  "global_fallback": {
+    "bias_mean_error_f": 0.002109650172455826,
+    "sigma_std_error_f": 3.1315334385313176
+  },
+  "method": "sigma_chooser",
+  "min_samples_per_bin": 60,
+  "r_feature": "gefsatmos_tmp_spread_f",
+  "r_thresholds": {
+    "p_high": 0.666666,
+    "p_low": 0.333333,
+    "t_high": 2.3811972916177355,
+    "t_low": 1.6603526089234553
+  },
+  "shrinkage": true
+}

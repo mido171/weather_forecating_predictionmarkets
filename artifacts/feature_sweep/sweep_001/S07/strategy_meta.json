@@ -1,0 +1,121 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [
+      {
+        "formula": "mean(F)",
+        "name": "ens_mean_5"
+      },
+      {
+        "formula": "median(F)",
+        "name": "ens_median_5"
+      },
+      {
+        "formula": "min(F)",
+        "name": "ens_min_5"
+      },
+      {
+        "formula": "max(F)",
+        "name": "ens_max_5"
+      },
+      {
+        "formula": "mean(sorted(F)[1:-1])",
+        "name": "ens_trimmed_mean_5_1"
+      },
+      {
+        "formula": "winsorize 1 each tail then mean",
+        "name": "ens_winsor_mean_5_1"
+      },
+      {
+        "formula": "std(F, ddof=0)",
+        "name": "ens_std_5"
+      },
+      {
+        "formula": "p75(F) - p25(F)",
+        "name": "ens_iqr_5"
+      },
+      {
+        "formula": "nbm_tmax_f - ens_median_5",
+        "name": "nbm_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|nbm_tmax_f - ens_median_5|",
+        "name": "nbm_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gfs_tmax_f - ens_median_5",
+        "name": "gfs_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gfs_tmax_f - ens_median_5|",
+        "name": "gfs_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gefsatmosmean_tmax_f - ens_median_5",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gefsatmosmean_tmax_f - ens_median_5|",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "nam_tmax_f - ens_median_5",
+        "name": "nam_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|nam_tmax_f - ens_median_5|",
+        "name": "nam_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "hrrr_tmax_f - ens_median_5",
+        "name": "hrrr_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|hrrr_tmax_f - ens_median_5|",
+        "name": "hrrr_tmax_f_minus_ens_median_abs"
+      }
+    ],
+    "train_fitted": []
+  },
+  "description": "drop_worst_rap_plus_derived",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "ens_mean_5",
+    "ens_median_5",
+    "ens_min_5",
+    "ens_max_5",
+    "ens_trimmed_mean_5_1",
+    "ens_winsor_mean_5_1",
+    "ens_std_5",
+    "ens_iqr_5",
+    "nbm_tmax_f_minus_ens_median",
+    "nbm_tmax_f_minus_ens_median_abs",
+    "gfs_tmax_f_minus_ens_median",
+    "gfs_tmax_f_minus_ens_median_abs",
+    "gefsatmosmean_tmax_f_minus_ens_median",
+    "gefsatmosmean_tmax_f_minus_ens_median_abs",
+    "nam_tmax_f_minus_ens_median",
+    "nam_tmax_f_minus_ens_median_abs",
+    "hrrr_tmax_f_minus_ens_median",
+    "hrrr_tmax_f_minus_ens_median_abs",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f"
+  ],
+  "strategy_id": "S07",
+  "uses_spread_feature": true
+}

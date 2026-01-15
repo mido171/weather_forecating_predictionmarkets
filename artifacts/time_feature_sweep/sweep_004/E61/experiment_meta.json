@@ -1,0 +1,114 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_nbm_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_gfs_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_gefsatmosmean_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_nam_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_hrrr_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_by_spread",
+        "name": "mae_rap_tmax_f_selected_rm60_l2"
+      },
+      {
+        "formula": "1[best_model_by_spread == nbm_tmax_f]",
+        "name": "best_model_by_spread_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_model_by_spread == gfs_tmax_f]",
+        "name": "best_model_by_spread_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_model_by_spread == gefsatmosmean_tmax_f]",
+        "name": "best_model_by_spread_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_model_by_spread == nam_tmax_f]",
+        "name": "best_model_by_spread_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_model_by_spread == hrrr_tmax_f]",
+        "name": "best_model_by_spread_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_model_by_spread == rap_tmax_f]",
+        "name": "best_model_by_spread_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_model_by_spread)",
+        "name": "best_model_by_spread_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_model_by_spread_forecast_today": 64.65198242187506,
+        "best_model_by_spread_is_gefsatmosmean_tmax_f": 0.0,
+        "best_model_by_spread_is_gfs_tmax_f": 0.0,
+        "best_model_by_spread_is_hrrr_tmax_f": 0.0,
+        "best_model_by_spread_is_nam_tmax_f": 0.0,
+        "best_model_by_spread_is_nbm_tmax_f": 1.0,
+        "best_model_by_spread_is_rap_tmax_f": 0.0,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_gefsatmosmean_tmax_f_selected_rm60_l2": 2.51565789046749,
+        "mae_gfs_tmax_f_selected_rm60_l2": 2.297872340425532,
+        "mae_hrrr_tmax_f_selected_rm60_l2": 2.504946400035523,
+        "mae_nam_tmax_f_selected_rm60_l2": 2.5135135135135136,
+        "mae_nbm_tmax_f_selected_rm60_l2": 2.14324416387645,
+        "mae_rap_tmax_f_selected_rm60_l2": 2.9532592496004715,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "default": 2.465098209625438,
+        "fit_on": "train",
+        "name": "thr_spread_q75",
+        "thresholds": {
+          "KNYC": 2.465098209625438
+        }
+      }
+    ]
+  },
+  "description": "Spread-regime conditional MAE + winner",
+  "experiment_id": "E61"
+}

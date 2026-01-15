@@ -1,0 +1,119 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "P(|resid_ens_mean| > q85_train)",
+        "name": "p_hard_day_q85"
+      },
+      {
+        "formula": "(1-p_hard)*ens_mean + p_hard*ens_median",
+        "name": "ens_shrink_mean_to_median"
+      },
+      {
+        "formula": "ens_std * p_hard",
+        "name": "spread_times_phard"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_shrink_mean_to_median": 63.23131544051114,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "p_hard_day_q85": 0.11107736402170568,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "spread_times_phard": 0.18400405705805528
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "coef": [
+          [
+            2.1196224797460688,
+            -0.40240660644580095,
+            0.3535354717793318,
+            -1.0546822706848165,
+            -0.1026377056888261,
+            -0.4045137488091378,
+            0.23500030960331975,
+            0.09921697339527516,
+            1.1708482630353716,
+            0.9093480750569631,
+            0.16986227553990327
+          ]
+        ],
+        "description": "logistic regression on forecast features",
+        "features": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f",
+          "ens_std",
+          "ens_range",
+          "sin_doy",
+          "cos_doy",
+          "month"
+        ],
+        "fit_on": "train",
+        "intercept": [
+          -2.1169957171897087
+        ],
+        "name": "hard_day_classifier_q85",
+        "scaler_mean": [
+          63.22669649011956,
+          63.84395424836601,
+          63.93225178197049,
+          63.30555555555556,
+          63.549676836799215,
+          62.38739490284644,
+          1.9724350522718126,
+          5.725624766265416,
+          0.076249519026095,
+          -0.03830601337952942,
+          6.2973856209150325
+        ],
+        "scaler_scale": [
+          16.744913671392055,
+          16.43538534849312,
+          17.715798139763308,
+          16.16064478057846,
+          18.04587973742932,
+          17.794629792899077,
+          0.8943820168637893,
+          2.6020079527995814,
+          0.7113279903785942,
+          0.6976612002191372,
+          3.3521224904776066
+        ],
+        "threshold": 4.286628699714871
+      }
+    ]
+  },
+  "description": "Hard-day shrinkage to median",
+  "experiment_id": "E93"
+}

@@ -1,0 +1,105 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_nbm_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_gfs_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_gefsatmosmean_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_nam_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_hrrr_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "corr(resid_model, resid_ens_mean)",
+        "name": "corr_resid_rap_tmax_f_ens_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mean(corr_resid_model_ens)",
+        "name": "mean_corr_models_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "corr_resid_gefsatmosmean_tmax_f_ens_rm60_l2": 0.8158044029244611,
+        "corr_resid_gfs_tmax_f_ens_rm60_l2": 0.763255326235363,
+        "corr_resid_hrrr_tmax_f_ens_rm60_l2": 0.7595771099229722,
+        "corr_resid_nam_tmax_f_ens_rm60_l2": 0.7623838978394227,
+        "corr_resid_nbm_tmax_f_ens_rm60_l2": 0.9031574996364321,
+        "corr_resid_rap_tmax_f_ens_rm60_l2": 0.7303269351887285,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mean_corr_models_rm60_l2": 0.7802702588995757,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Rolling corr of model residuals vs ensemble",
+  "experiment_id": "E31"
+}

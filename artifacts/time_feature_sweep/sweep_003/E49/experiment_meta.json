@@ -1,0 +1,95 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "days_since(cold_bust)",
+        "name": "days_since_cold_bust_l2",
+        "params": {
+          "cap": 365,
+          "lag": 2
+        }
+      },
+      {
+        "formula": "days_since(warm_bust)",
+        "name": "days_since_warm_bust_l2",
+        "params": {
+          "cap": 365,
+          "lag": 2
+        }
+      },
+      {
+        "formula": "roll_sum(cold_bust)",
+        "name": "cold_bust_count_60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_sum(warm_bust)",
+        "name": "warm_bust_count_60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "cold_bust_count_60_l - warm_bust_count_60_l",
+        "name": "bust_balance_60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bust_balance_60_l2": 1.0,
+        "cold_bust_count_60_l2": 2.0,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "days_since_cold_bust_l2": 15.0,
+        "days_since_warm_bust_l2": 22.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "warm_bust_count_60_l2": 2.0
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "description": "q05/q95_train(resid_ens_mean) per station",
+        "fit_on": "train",
+        "name": "thr_bust",
+        "thr_cold": {
+          "KNYC": -2.6133007195585836
+        },
+        "thr_warm": {
+          "KNYC": 5.680269374888397
+        }
+      }
+    ]
+  },
+  "description": "Cold/warm bust memory",
+  "experiment_id": "E49"
+}

@@ -1,0 +1,65 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "mean(resid_ens_mean | warm_regime)",
+        "name": "bias_warm_rm60_l2"
+      },
+      {
+        "formula": "mean(resid_ens_mean | cold_regime)",
+        "name": "bias_cold_rm60_l2"
+      },
+      {
+        "formula": "bias_warm/bias_cold selected by current ens_mean",
+        "name": "bias_selected_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bias_cold_rm60_l2": 1.9048812196792846,
+        "bias_selected_rm60_l2": 1.4273107396250797,
+        "bias_warm_rm60_l2": 0.8024471288924753,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "default": 63.284222166984335,
+        "description": "median_train(ens_mean) per station",
+        "fit_on": "train",
+        "name": "thr_temp",
+        "thresholds": {
+          "KNYC": 63.284222166984335
+        }
+      }
+    ]
+  },
+  "description": "Conditional bias by temperature regime",
+  "experiment_id": "E26"
+}

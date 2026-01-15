@@ -1,0 +1,85 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_nbm_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_gfs_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_gefsatmosmean_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_nam_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_hrrr_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "acf1(drift)",
+        "name": "acf1_drift_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "mean(acf1_drift)",
+        "name": "acf1_drift_mean_rm60_l1"
+      },
+      {
+        "formula": "min(acf1_drift)",
+        "name": "acf1_drift_min_rm60_l1"
+      },
+      {
+        "formula": "max(acf1_drift)",
+        "name": "acf1_drift_max_rm60_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "acf1_drift_gefsatmosmean_tmax_f_rm60_l1": 0.29517640211936497,
+        "acf1_drift_gfs_tmax_f_rm60_l1": 0.18245086873680635,
+        "acf1_drift_hrrr_tmax_f_rm60_l1": 0.21492064300670216,
+        "acf1_drift_max_rm60_l1": 0.3686170195665335,
+        "acf1_drift_mean_rm60_l1": 0.20752481665056668,
+        "acf1_drift_min_rm60_l1": 0.028510107907684434,
+        "acf1_drift_nam_tmax_f_rm60_l1": 0.2061923946161091,
+        "acf1_drift_nbm_tmax_f_rm60_l1": 0.14859941031649024,
+        "acf1_drift_rap_tmax_f_rm60_l1": 0.17756246923487698,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "ACF1 of model drift series",
+  "experiment_id": "E78"
+}

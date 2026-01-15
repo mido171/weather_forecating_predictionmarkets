@@ -1,0 +1,225 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_nbm_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_nbm_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_nbm_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_gfs_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_gfs_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_gfs_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_gefsatmosmean_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_gefsatmosmean_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_gefsatmosmean_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_nam_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_nam_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_nam_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_hrrr_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_hrrr_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_hrrr_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_rap_tmax_f_rm15_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "mae_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae_rm15 - mae_rm60",
+        "name": "skill_shift_mae_rap_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "skill_shift / std(|resid|)",
+        "name": "skill_shift_z_rap_tmax_f_15v60_l2"
+      },
+      {
+        "formula": "max(skill_shift_mae_15v60)",
+        "name": "worst_skill_shift_15v60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_gefsatmosmean_tmax_f_rm15_l2": 2.6307337218581823,
+        "mae_gefsatmosmean_tmax_f_rm60_l2": 2.6858807899384423,
+        "mae_gfs_tmax_f_rm15_l2": 2.466666666666667,
+        "mae_gfs_tmax_f_rm60_l2": 2.45,
+        "mae_hrrr_tmax_f_rm15_l2": 2.797131673177095,
+        "mae_hrrr_tmax_f_rm60_l2": 2.7992452697753674,
+        "mae_nam_tmax_f_rm15_l2": 2.6666666666666665,
+        "mae_nam_tmax_f_rm60_l2": 2.7333333333333334,
+        "mae_nbm_tmax_f_rm15_l2": 2.149468424479134,
+        "mae_nbm_tmax_f_rm60_l2": 2.2609038085937034,
+        "mae_rap_tmax_f_rm15_l2": 3.3035399169921615,
+        "mae_rap_tmax_f_rm60_l2": 3.2189987284342156,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "skill_shift_mae_gefsatmosmean_tmax_f_15v60_l2": -0.07915968763035375,
+        "skill_shift_mae_gfs_tmax_f_15v60_l2": -0.033333333333333215,
+        "skill_shift_mae_hrrr_tmax_f_15v60_l2": 0.0243340555826963,
+        "skill_shift_mae_nam_tmax_f_15v60_l2": -0.06666666666666643,
+        "skill_shift_mae_nbm_tmax_f_15v60_l2": 0.003501464843746138,
+        "skill_shift_mae_rap_tmax_f_15v60_l2": 0.029925679524720916,
+        "skill_shift_z_gefsatmosmean_tmax_f_15v60_l2": -0.029361241866814002,
+        "skill_shift_z_gfs_tmax_f_15v60_l2": 0.0,
+        "skill_shift_z_hrrr_tmax_f_15v60_l2": 0.0,
+        "skill_shift_z_nam_tmax_f_15v60_l2": -0.014331178719217914,
+        "skill_shift_z_nbm_tmax_f_15v60_l2": 0.0,
+        "skill_shift_z_rap_tmax_f_15v60_l2": 0.0006106403792973472,
+        "worst_skill_shift_15v60_l2": 0.5724199625651076
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Skill momentum (rm15 vs rm60) per model",
+  "experiment_id": "E54"
+}

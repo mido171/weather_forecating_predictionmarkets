@@ -1,15 +1,21 @@
 package com.predictionmarkets.weather.gribstream;
 
 import com.predictionmarkets.weather.common.TimeSemantics;
+import com.predictionmarkets.weather.executors.PipelineProperties;
 import com.predictionmarkets.weather.models.AsofTimeZone;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +28,17 @@ public class GribstreamExampleRunner implements CommandLineRunner {
 
   private final GribstreamDailyFeatureJob job;
   private final GribstreamRunnerProperties properties;
+  private final GribstreamProperties gribstreamProperties;
+  private final PipelineProperties pipelineProperties;
 
   public GribstreamExampleRunner(GribstreamDailyFeatureJob job,
-                                 GribstreamRunnerProperties properties) {
+                                 GribstreamRunnerProperties properties,
+                                 GribstreamProperties gribstreamProperties,
+                                 PipelineProperties pipelineProperties) {
     this.job = job;
     this.properties = properties;
+    this.gribstreamProperties = gribstreamProperties;
+    this.pipelineProperties = pipelineProperties;
   }
 
   @Override
@@ -34,26 +46,24 @@ public class GribstreamExampleRunner implements CommandLineRunner {
     if (!properties.isEnabled()) {
       return;
     }
-    StationSpec station = new StationSpec(
-        "KNYC",
-        "America/New_York",
-        40.77898,
-        -73.96925,
-        "KNYC");
+    List<StationSpec> stations = resolveStations();
+    List<StationSpec> selectedStations = filterStations(stations);
     LocalDate startDateLocal = requireStartDate();
     LocalDate endDateLocal = requireEndDate();
     GribstreamAsOfSupplier asOfSupplier = resolveAsOfSupplier();
-    snapshot("Starting Gribstream example runner station=" + station.stationId()
-        + " targetDateLocalRange=" + startDateLocal + ".." + endDateLocal
-        + " " + describeAsOf());
-    List<GribstreamDailyOpinionResult> results =
-        job.runRange(station, startDateLocal, endDateLocal, asOfSupplier);
-    if (results.isEmpty()) {
-      snapshot("No Gribstream results (already complete per checkpoint).");
-      return;
+    for (StationSpec station : selectedStations) {
+      snapshot("Starting Gribstream example runner station=" + station.stationId()
+          + " targetDateLocalRange=" + startDateLocal + ".." + endDateLocal
+          + " " + describeAsOf());
+      List<GribstreamDailyOpinionResult> results =
+          job.runRange(station, startDateLocal, endDateLocal, asOfSupplier);
+      if (results.isEmpty()) {
+        snapshot("No Gribstream results (already complete per checkpoint).");
+        continue;
+      }
+      GribstreamDailyOpinionResult result = results.get(results.size() - 1);
+      logSummary(result);
     }
-    GribstreamDailyOpinionResult result = results.get(results.size() - 1);
-    logSummary(result);
     snapshot("Gribstream example runner complete.");
   }
 
@@ -76,6 +86,59 @@ public class GribstreamExampleRunner implements CommandLineRunner {
     String payload = "[GRIBSTREAM-RUNNER] " + message;
     logger.info(payload);
     System.out.println(payload);
+  }
+
+  private List<StationSpec> resolveStations() {
+    List<GribstreamProperties.StationProperties> configured = gribstreamProperties.getStations();
+    if (configured == null || configured.isEmpty()) {
+      throw new IllegalArgumentException("gribstream.stations is required");
+    }
+    List<StationSpec> stations = new ArrayList<>(configured.size());
+    for (GribstreamProperties.StationProperties station : configured) {
+      stations.add(new StationSpec(
+          station.getStationId(),
+          station.getZoneId(),
+          station.getLatitude(),
+          station.getLongitude(),
+          station.getName()));
+    }
+    return stations;
+  }
+
+  private List<StationSpec> filterStations(List<StationSpec> stations) {
+    List<String> stationIds = parseStationIds(pipelineProperties.getStationIdsToRun());
+    if (stationIds.isEmpty()) {
+      return stations;
+    }
+    Map<String, StationSpec> byId = new HashMap<>();
+    for (StationSpec station : stations) {
+      byId.put(station.stationId(), station);
+    }
+    List<StationSpec> selected = new ArrayList<>(stationIds.size());
+    for (String stationId : stationIds) {
+      StationSpec station = byId.get(stationId);
+      if (station == null) {
+        throw new IllegalArgumentException(
+            "pipeline.station-ids-to-run includes stationId=" + stationId
+                + " but gribstream.stations does not define it");
+      }
+      selected.add(station);
+    }
+    return selected;
+  }
+
+  private static List<String> parseStationIds(String stationIdsToRun) {
+    if (stationIdsToRun == null || stationIdsToRun.isBlank()) {
+      return List.of();
+    }
+    Set<String> stationIds = new LinkedHashSet<>();
+    for (String token : Arrays.asList(stationIdsToRun.split(","))) {
+      String trimmed = token.trim();
+      if (!trimmed.isEmpty()) {
+        stationIds.add(trimmed.toUpperCase(Locale.ROOT));
+      }
+    }
+    return new ArrayList<>(stationIds);
   }
 
   private LocalDate requireStartDate() {

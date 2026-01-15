@@ -1,0 +1,285 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "mae(resid_nbm_tmax_f)",
+        "name": "mae_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_nbm_tmax_f)",
+        "name": "bias_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_nbm_tmax_f)",
+        "name": "rmse_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_nbm_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "mae(resid_gfs_tmax_f)",
+        "name": "mae_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_gfs_tmax_f)",
+        "name": "bias_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_gfs_tmax_f)",
+        "name": "rmse_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_gfs_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "mae(resid_gefsatmosmean_tmax_f)",
+        "name": "mae_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_gefsatmosmean_tmax_f)",
+        "name": "bias_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_gefsatmosmean_tmax_f)",
+        "name": "rmse_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_gefsatmosmean_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "mae(resid_nam_tmax_f)",
+        "name": "mae_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_nam_tmax_f)",
+        "name": "bias_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_nam_tmax_f)",
+        "name": "rmse_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_nam_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "mae(resid_hrrr_tmax_f)",
+        "name": "mae_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_hrrr_tmax_f)",
+        "name": "bias_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_hrrr_tmax_f)",
+        "name": "rmse_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_hrrr_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "mae(resid_rap_tmax_f)",
+        "name": "mae_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "bias(resid_rap_tmax_f)",
+        "name": "bias_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_rap_tmax_f)",
+        "name": "rmse_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mae + 0.5*|bias| + 0.2*rmse",
+        "name": "score_rap_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "1[best_score_model_id == nbm_tmax_f]",
+        "name": "best_score_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_score_model_id == gfs_tmax_f]",
+        "name": "best_score_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_score_model_id == gefsatmosmean_tmax_f]",
+        "name": "best_score_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_score_model_id == nam_tmax_f]",
+        "name": "best_score_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_score_model_id == hrrr_tmax_f]",
+        "name": "best_score_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_score_model_id == rap_tmax_f]",
+        "name": "best_score_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_score_model_id)",
+        "name": "best_score_model_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_score_is_gefsatmosmean_tmax_f": 0.0,
+        "best_score_is_gfs_tmax_f": 0.0,
+        "best_score_is_hrrr_tmax_f": 0.0,
+        "best_score_is_nam_tmax_f": 0.0,
+        "best_score_is_nbm_tmax_f": 0.0,
+        "best_score_is_rap_tmax_f": 0.0,
+        "best_score_model_forecast_today": 65.0,
+        "bias_gefsatmosmean_tmax_f_rm60_l2": 1.28967427807874,
+        "bias_gfs_tmax_f_rm60_l2": 0.6833333333333333,
+        "bias_hrrr_tmax_f_rm60_l2": 1.6668624369302976,
+        "bias_nam_tmax_f_rm60_l2": 1.5,
+        "bias_nbm_tmax_f_rm60_l2": 1.4753722330728531,
+        "bias_rap_tmax_f_rm60_l2": 2.465282745361286,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_gefsatmosmean_tmax_f_rm60_l2": 2.6858807899384423,
+        "mae_gfs_tmax_f_rm60_l2": 2.45,
+        "mae_hrrr_tmax_f_rm60_l2": 2.7992452697753674,
+        "mae_nam_tmax_f_rm60_l2": 2.7333333333333334,
+        "mae_nbm_tmax_f_rm60_l2": 2.2609038085937034,
+        "mae_rap_tmax_f_rm60_l2": 3.2189987284342156,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "rmse_gefsatmosmean_tmax_f_rm60_l2": 3.4368891108416544,
+        "rmse_gfs_tmax_f_rm60_l2": 3.2812599206199238,
+        "rmse_hrrr_tmax_f_rm60_l2": 3.484239426776739,
+        "rmse_nam_tmax_f_rm60_l2": 3.5683796509527026,
+        "rmse_nbm_tmax_f_rm60_l2": 2.885511629386308,
+        "rmse_rap_tmax_f_rm60_l2": 4.057840666999412,
+        "score_gefsatmosmean_tmax_f_rm60_l2": 4.303985161157906,
+        "score_gfs_tmax_f_rm60_l2": 3.519978991225741,
+        "score_hrrr_tmax_f_rm60_l2": 4.301305348411121,
+        "score_nam_tmax_f_rm60_l2": 4.128181803271844,
+        "score_nbm_tmax_f_rm60_l2": 3.510491056218922,
+        "score_rap_tmax_f_rm60_l2": 5.134037196147106,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Composite skill score (MAE + bias + RMSE)",
+  "experiment_id": "E53"
+}

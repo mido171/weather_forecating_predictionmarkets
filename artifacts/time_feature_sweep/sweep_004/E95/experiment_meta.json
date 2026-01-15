@@ -1,0 +1,190 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_nbm_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_nbm_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_nbm_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_nbm_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_nbm_tmax_f_asym_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_gfs_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_gfs_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_gfs_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_gfs_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_gfs_tmax_f_asym_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_gefsatmosmean_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_gefsatmosmean_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_gefsatmosmean_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_gefsatmosmean_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_gefsatmosmean_tmax_f_asym_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_nam_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_nam_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_nam_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_nam_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_nam_tmax_f_asym_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_hrrr_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_hrrr_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_hrrr_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_hrrr_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_hrrr_tmax_f_asym_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.10)",
+        "name": "resid_rap_tmax_f_q10_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.50)",
+        "name": "resid_rap_tmax_f_q50_rm60_l2"
+      },
+      {
+        "formula": "rolling_quantile(resid, q=0.90)",
+        "name": "resid_rap_tmax_f_q90_rm60_l2"
+      },
+      {
+        "formula": "resid_q90 - resid_q10",
+        "name": "resid_rap_tmax_f_iqr_rm60_l2"
+      },
+      {
+        "formula": "|q10| - |q90|",
+        "name": "resid_rap_tmax_f_asym_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "resid_gefsatmosmean_tmax_f_asym_rm60_l2": -2.9389040417086636,
+        "resid_gefsatmosmean_tmax_f_iqr_rm60_l2": 6.608345514112665,
+        "resid_gefsatmosmean_tmax_f_q10_rm60_l2": -1.8361726436490877,
+        "resid_gefsatmosmean_tmax_f_q50_rm60_l2": 1.3306907762097424,
+        "resid_gefsatmosmean_tmax_f_q90_rm60_l2": 4.685800604838702,
+        "resid_gfs_tmax_f_asym_rm60_l2": -1.9000000000000004,
+        "resid_gfs_tmax_f_iqr_rm60_l2": 7.100000000000001,
+        "resid_gfs_tmax_f_q10_rm60_l2": -3.0,
+        "resid_gfs_tmax_f_q50_rm60_l2": 1.0,
+        "resid_gfs_tmax_f_q90_rm60_l2": 4.100000000000001,
+        "resid_hrrr_tmax_f_asym_rm60_l2": -3.411673278808511,
+        "resid_hrrr_tmax_f_iqr_rm60_l2": 7.389031372070312,
+        "resid_hrrr_tmax_f_q10_rm60_l2": -2.0921029663086324,
+        "resid_hrrr_tmax_f_q50_rm60_l2": 1.463450927734332,
+        "resid_hrrr_tmax_f_q90_rm60_l2": 4.959398193359336,
+        "resid_nam_tmax_f_asym_rm60_l2": -3.1000000000000014,
+        "resid_nam_tmax_f_iqr_rm60_l2": 8.0,
+        "resid_nam_tmax_f_q10_rm60_l2": -2.0,
+        "resid_nam_tmax_f_q50_rm60_l2": 1.0,
+        "resid_nam_tmax_f_q90_rm60_l2": 5.100000000000001,
+        "resid_nbm_tmax_f_asym_rm60_l2": -2.9784228515622884,
+        "resid_nbm_tmax_f_iqr_rm60_l2": 5.397246582031231,
+        "resid_nbm_tmax_f_q10_rm60_l2": -1.1112070312500426,
+        "resid_nbm_tmax_f_q50_rm60_l2": 1.4070043945311674,
+        "resid_nbm_tmax_f_q90_rm60_l2": 4.109603515624951,
+        "resid_rap_tmax_f_asym_rm60_l2": -4.920300903320223,
+        "resid_rap_tmax_f_iqr_rm60_l2": 7.7687533569336065,
+        "resid_rap_tmax_f_q10_rm60_l2": -1.3362762451172228,
+        "resid_rap_tmax_f_q50_rm60_l2": 2.491603393554648,
+        "resid_rap_tmax_f_q90_rm60_l2": 6.213323974609337,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Residual quantiles per model",
+  "experiment_id": "E95"
+}

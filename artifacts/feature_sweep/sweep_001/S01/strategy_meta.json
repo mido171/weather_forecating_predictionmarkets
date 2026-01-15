@@ -1,0 +1,27 @@
+{
+  "calendar_enabled": false,
+  "derived_features": {
+    "rowwise": [],
+    "train_fitted": []
+  },
+  "description": "raw_all_6",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f"
+  ],
+  "strategy_id": "S01",
+  "uses_spread_feature": true
+}

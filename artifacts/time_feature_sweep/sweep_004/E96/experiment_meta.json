@@ -1,0 +1,71 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "ridge_intercept",
+        "name": "resid_reg_a_rm60_l2",
+        "params": {
+          "l2": 0.1,
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "ridge_coef_ens_std",
+        "name": "resid_reg_b_rm60_l2"
+      },
+      {
+        "formula": "ridge_coef_ens_mean",
+        "name": "resid_reg_c_rm60_l2"
+      },
+      {
+        "formula": "a + b*ens_std + c*ens_mean",
+        "name": "resid_pred_rm60_l2"
+      },
+      {
+        "formula": "ens_mean + resid_pred",
+        "name": "ens_mean_residreg_corr_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_residreg_corr_rm60_l2": 66.27882904218227,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "resid_pred_rm60_l2": 1.314666439612784,
+        "resid_reg_a_rm60_l2": 1.994455025286785,
+        "resid_reg_b_rm60_l2": 0.3194145409696629,
+        "resid_reg_c_rm60_l2": -0.018697770698437078,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Rolling residual regression on spread/level",
+  "experiment_id": "E96"
+}

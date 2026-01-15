@@ -1,0 +1,59 @@
+{
+  "dataset_path": "ingestion-service/src/main/resources/trainingdata_output/gribstream_training_data.csv",
+  "dataset_schema_version": 1,
+  "station_filter": ["KNYC"],
+  "asof_policy": {
+    "mode": "latest"
+  },
+  "train_start": "2021-01-01",
+  "train_end": "2024-12-31",
+  "test_start": "2025-01-01",
+  "test_end": "2025-12-31",
+  "validation": {
+    "enabled": false,
+    "val_start": null,
+    "val_end": null,
+    "strict_schema": false,
+    "forecast_min_f": -80.0,
+    "forecast_max_f": 140.0,
+    "spread_min_f": 0.0,
+    "require_asof_not_after_target": true
+  },
+  "feature_set_name": "E24",
+  "truth_lag": 2,
+  "mean_model": {
+    "name": "lgbm",
+    "params": {
+      "num_leaves": 63,
+      "min_data_in_leaf": 20,
+      "learning_rate": 0.05,
+      "n_estimators": 300,
+      "feature_fraction": 0.8,
+      "bagging_fraction": 0.8,
+      "lambda_l1": 0.0,
+      "lambda_l2": 0.0
+    }
+  },
+  "r_feature": "gefsatmos_tmp_spread_f",
+  "ddof": 1,
+  "sigma_floor": 0.25,
+  "binning": {
+    "p_low": 0.333333,
+    "p_high": 0.666666,
+    "min_samples_per_bin": 60,
+    "shrinkage": true
+  },
+  "scoring": {
+    "interval_levels": [0.5, 0.8, 0.9, 0.95],
+    "reliability_bins": 10,
+    "threshold_min_offset": -5,
+    "threshold_max_offset": 5,
+    "bootstrap_samples": 1000
+  },
+  "determinism": {
+    "seed": 1337,
+    "threads": 1
+  },
+  "output_root": "experiments/results/sigma_chooser_backtest",
+  "overwrite": false
+}

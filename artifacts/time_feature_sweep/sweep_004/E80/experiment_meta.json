@@ -1,0 +1,92 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "pc1(delta)",
+        "name": "pc_delta1_l1"
+      },
+      {
+        "formula": "pc2(delta)",
+        "name": "pc_delta2_l1"
+      },
+      {
+        "formula": "roll_mean(pc_delta1_l1)",
+        "name": "pc_delta1_rm30_l1"
+      },
+      {
+        "formula": "roll_std(pc_delta1_l1)",
+        "name": "pc_delta1_rs30_l1"
+      },
+      {
+        "formula": "roll_mean(pc_delta2_l1)",
+        "name": "pc_delta2_rm30_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "pc_delta1_l1": 1.2001253953712525,
+        "pc_delta1_rm30_l1": -0.013077394213431362,
+        "pc_delta1_rs30_l1": 16.335297408159718,
+        "pc_delta2_l1": -0.15835885728625326,
+        "pc_delta2_rm30_l1": 0.0004866932293333459,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "components": [
+          [
+            0.3868012263656926,
+            0.3593527740780469,
+            0.38207749815437564,
+            0.3567592988757255,
+            0.47276760325673994,
+            0.4737940232053164
+          ],
+          [
+            -0.013522607466938107,
+            0.5645994143395286,
+            0.040904823670698864,
+            0.5444256336537422,
+            -0.35164323820756777,
+            -0.5092339327449051
+          ]
+        ],
+        "explained_variance": [
+          0.903470257185607,
+          0.04474692875209934
+        ],
+        "fit_on": "train",
+        "name": "pca_delta"
+      }
+    ]
+  },
+  "description": "PCA on forecast-change vectors",
+  "experiment_id": "E80"
+}

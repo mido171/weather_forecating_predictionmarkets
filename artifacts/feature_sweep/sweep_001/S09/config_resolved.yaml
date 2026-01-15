@@ -1,0 +1,160 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2021-02-23
+  train_end: 2024-12-31
+  test_start: 2025-01-01
+  test_end: 2025-12-31
+  gap_dates: []
+  validation:
+    enabled: true
+    val_start: 2024-07-01
+    val_end: 2024-12-31
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+features:
+  base_features:
+  - gfs_tmax_f
+  - nam_tmax_f
+  - gefsatmosmean_tmax_f
+  - rap_tmax_f
+  - hrrr_tmax_f
+  - nbm_tmax_f
+  - gefsatmos_tmp_spread_f
+  ensemble_stats: true
+  pairwise_deltas: true
+  model_vs_ens_deltas: true
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - lgbm
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+  sigma:
+    method: two_stage
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: true
+    cal_start: 2025-01-01
+    cal_end: 2025-12-31
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: true
+    cal_start: 2021-02-23
+    cal_end: 2025-12-31
+    ddof: 1
+    station_scope: null
+    forecast_columns: []
+strategy:
+  strategy_id: S09
+  description: bias_corrected_inputs_and_blends
+  model_cols:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  include_spread: true
+  calendar: true
+  feature_columns:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  - gefsatmos_tmp_spread_f
+  - ens_mean_6
+  - ens_median_6
+  - nbm_tmax_f_bc
+  - gfs_tmax_f_bc
+  - gefsatmosmean_tmax_f_bc
+  - nam_tmax_f_bc
+  - hrrr_tmax_f_bc
+  - rap_tmax_f_bc
+  - ens_mean_bc_6
+  - ens_median_bc_6
+  - ens_trimmed_mean_bc_6_1
+  - month
+  - day_of_year
+  - sin_doy
+  - cos_doy
+  - is_weekend

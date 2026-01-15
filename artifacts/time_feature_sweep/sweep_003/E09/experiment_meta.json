@@ -1,0 +1,170 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_std(nbm_tmax_f)",
+        "name": "nbm_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(nbm_tmax_f)",
+        "name": "nbm_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(gfs_tmax_f)",
+        "name": "gfs_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(gfs_tmax_f)",
+        "name": "gfs_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(gefsatmosmean_tmax_f)",
+        "name": "gefsatmosmean_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(gefsatmosmean_tmax_f)",
+        "name": "gefsatmosmean_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(nam_tmax_f)",
+        "name": "nam_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(nam_tmax_f)",
+        "name": "nam_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(hrrr_tmax_f)",
+        "name": "hrrr_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(hrrr_tmax_f)",
+        "name": "hrrr_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(rap_tmax_f)",
+        "name": "rap_tmax_f_roll_std_15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "roll_std(rap_tmax_f)",
+        "name": "rap_tmax_f_roll_std_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "mean({model}_roll_std_15_l1)",
+        "name": "model_vol_mean_15"
+      },
+      {
+        "formula": "max({model}_roll_std_15_l1)",
+        "name": "model_vol_max_15"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gefsatmosmean_tmax_f_roll_std_15_l1": 6.230013002169559,
+        "gefsatmosmean_tmax_f_roll_std_60_l1": 8.740882577880416,
+        "gfs_tmax_f": 64.5,
+        "gfs_tmax_f_roll_std_15_l1": 6.280835047101035,
+        "gfs_tmax_f_roll_std_60_l1": 8.61132161521893,
+        "hrrr_tmax_f": 63.429676513671915,
+        "hrrr_tmax_f_roll_std_15_l1": 7.303277344202559,
+        "hrrr_tmax_f_roll_std_60_l1": 9.778430731045592,
+        "is_weekend": 0.0,
+        "model_vol_max_15": 7.664874869464849,
+        "model_vol_mean_15": 6.50695914811043,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nam_tmax_f_roll_std_15_l1": 5.852255025960838,
+        "nam_tmax_f_roll_std_60_l1": 8.059637983868946,
+        "nbm_tmax_f": 63.175991210937525,
+        "nbm_tmax_f_roll_std_15_l1": 6.245688450144451,
+        "nbm_tmax_f_roll_std_60_l1": 8.541881601503905,
+        "rap_tmax_f": 62.58964813232426,
+        "rap_tmax_f_roll_std_15_l1": 7.391928536033707,
+        "rap_tmax_f_roll_std_60_l1": 9.72495568781575,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Per-model forecast volatility (15/60)",
+  "experiment_id": "E09"
+}

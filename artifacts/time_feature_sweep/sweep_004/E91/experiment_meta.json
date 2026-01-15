@@ -1,0 +1,215 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(delta)",
+        "name": "delta_rap_minus_nbm_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(delta)",
+        "name": "delta_rap_minus_nbm_rs30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_slope(delta)",
+        "name": "delta_rap_minus_nbm_slope15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "delta - delta_rm30",
+        "name": "delta_rap_minus_nbm_dev_rm30"
+      },
+      {
+        "formula": "roll_mean(delta)",
+        "name": "delta_hrrr_minus_nbm_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(delta)",
+        "name": "delta_hrrr_minus_nbm_rs30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_slope(delta)",
+        "name": "delta_hrrr_minus_nbm_slope15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "delta - delta_rm30",
+        "name": "delta_hrrr_minus_nbm_dev_rm30"
+      },
+      {
+        "formula": "roll_mean(delta)",
+        "name": "delta_nam_minus_nbm_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(delta)",
+        "name": "delta_nam_minus_nbm_rs30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_slope(delta)",
+        "name": "delta_nam_minus_nbm_slope15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "delta - delta_rm30",
+        "name": "delta_nam_minus_nbm_dev_rm30"
+      },
+      {
+        "formula": "roll_mean(delta)",
+        "name": "delta_gfs_minus_nbm_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(delta)",
+        "name": "delta_gfs_minus_nbm_rs30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_slope(delta)",
+        "name": "delta_gfs_minus_nbm_slope15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "delta - delta_rm30",
+        "name": "delta_gfs_minus_nbm_dev_rm30"
+      },
+      {
+        "formula": "roll_mean(delta)",
+        "name": "delta_gefsatmosmean_minus_nbm_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(delta)",
+        "name": "delta_gefsatmosmean_minus_nbm_rs30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_slope(delta)",
+        "name": "delta_gefsatmosmean_minus_nbm_slope15_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 11,
+          "window": 15
+        }
+      },
+      {
+        "formula": "delta - delta_rm30",
+        "name": "delta_gefsatmosmean_minus_nbm_dev_rm30"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "delta_gefsatmosmean_minus_nbm_dev_rm30": -0.03785982232874385,
+        "delta_gefsatmosmean_minus_nbm_rm30_l1": 0.1503625819052272,
+        "delta_gefsatmosmean_minus_nbm_rs30_l1": 1.5307563684675065,
+        "delta_gefsatmosmean_minus_nbm_slope15_l1": -0.006067650804649333,
+        "delta_gfs_minus_nbm_dev_rm30": 0.18224820963543303,
+        "delta_gfs_minus_nbm_rm30_l1": 0.7028149414061995,
+        "delta_gfs_minus_nbm_rs30_l1": 2.2057307034952234,
+        "delta_gfs_minus_nbm_slope15_l1": 0.0017273472377221464,
+        "delta_hrrr_minus_nbm_dev_rm30": 0.005471374511736821,
+        "delta_hrrr_minus_nbm_rm30_l1": 0.08309271240233258,
+        "delta_hrrr_minus_nbm_rs30_l1": 2.3208142549583286,
+        "delta_hrrr_minus_nbm_slope15_l1": 0.006885838099889,
+        "delta_nam_minus_nbm_dev_rm30": 0.0813025716145972,
+        "delta_nam_minus_nbm_rm30_l1": 0.14768277994785492,
+        "delta_nam_minus_nbm_rs30_l1": 2.429883692704318,
+        "delta_nam_minus_nbm_slope15_l1": -0.0050066092354892535,
+        "delta_rap_minus_nbm_dev_rm30": -0.02022491455085995,
+        "delta_rap_minus_nbm_rm30_l1": -0.9612511596679906,
+        "delta_rap_minus_nbm_rs30_l1": 2.5209564955944375,
+        "delta_rap_minus_nbm_slope15_l1": 0.00048186819893964686,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Pairwise delta time structure",
+  "experiment_id": "E91"
+}

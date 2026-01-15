@@ -1,0 +1,318 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2021-02-23
+  train_end: 2025-01-30
+  test_start: 2025-02-01
+  test_end: 2025-12-31
+  gap_dates:
+  - 2025-01-31
+  validation:
+    enabled: true
+    val_start: 2024-07-01
+    val_end: 2025-01-30
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+features:
+  base_features:
+  - gfs_tmax_f
+  - nam_tmax_f
+  - gefsatmosmean_tmax_f
+  - rap_tmax_f
+  - hrrr_tmax_f
+  - nbm_tmax_f
+  - gefsatmos_tmp_spread_f
+  ensemble_stats: true
+  pairwise_deltas: true
+  model_vs_ens_deltas: true
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - ridge
+    - random_forest
+    - gbr
+    - lgbm
+    - xgb
+    - catboost
+    primary: lgbm
+    param_grid:
+      ridge:
+        alpha:
+        - 0.1
+        - 1.0
+        - 10.0
+      random_forest:
+        n_estimators:
+        - 200
+        max_depth:
+        - 8
+        - 16
+        - null
+        min_samples_leaf:
+        - 1
+        - 3
+      gbr:
+        n_estimators:
+        - 200
+        max_depth:
+        - 3
+        - 5
+        learning_rate:
+        - 0.05
+        - 0.1
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+      xgb:
+        max_depth:
+        - 4
+        - 6
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+        subsample:
+        - 0.8
+        colsample_bytree:
+        - 0.8
+        min_child_weight:
+        - 1
+        - 5
+        reg_lambda:
+        - 1.0
+      catboost:
+        depth:
+        - 6
+        - 8
+        learning_rate:
+        - 0.05
+        - 0.1
+        iterations:
+        - 500
+        l2_leaf_reg:
+        - 3
+        - 10
+  sigma:
+    method: two_stage
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+    forecast_columns: []
+experiment:
+  experiment_id: E10
+  description: Rolling mean/std of model drift vs ensemble
+  feature_columns:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  - gefsatmos_tmp_spread_f
+  - month
+  - day_of_year
+  - sin_doy
+  - cos_doy
+  - is_weekend
+  - drift_nbm_tmax_f_roll_mean_30_l1
+  - drift_nbm_tmax_f_roll_std_30_l1
+  - drift_gfs_tmax_f_roll_mean_30_l1
+  - drift_gfs_tmax_f_roll_std_30_l1
+  - drift_gefsatmosmean_tmax_f_roll_mean_30_l1
+  - drift_gefsatmosmean_tmax_f_roll_std_30_l1
+  - drift_nam_tmax_f_roll_mean_30_l1
+  - drift_nam_tmax_f_roll_std_30_l1
+  - drift_hrrr_tmax_f_roll_mean_30_l1
+  - drift_hrrr_tmax_f_roll_std_30_l1
+  - drift_rap_tmax_f_roll_mean_30_l1
+  - drift_rap_tmax_f_roll_std_30_l1
+  - drift_abs_max_rm30
+  derived_features:
+    formulas:
+    - name: drift_nbm_tmax_f_roll_mean_30_l1
+      formula: roll_mean(nbm_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_nbm_tmax_f_roll_std_30_l1
+      formula: roll_std(nbm_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_gfs_tmax_f_roll_mean_30_l1
+      formula: roll_mean(gfs_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_gfs_tmax_f_roll_std_30_l1
+      formula: roll_std(gfs_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_gefsatmosmean_tmax_f_roll_mean_30_l1
+      formula: roll_mean(gefsatmosmean_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_gefsatmosmean_tmax_f_roll_std_30_l1
+      formula: roll_std(gefsatmosmean_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_nam_tmax_f_roll_mean_30_l1
+      formula: roll_mean(nam_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_nam_tmax_f_roll_std_30_l1
+      formula: roll_std(nam_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_hrrr_tmax_f_roll_mean_30_l1
+      formula: roll_mean(hrrr_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_hrrr_tmax_f_roll_std_30_l1
+      formula: roll_std(hrrr_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_rap_tmax_f_roll_mean_30_l1
+      formula: roll_mean(rap_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_rap_tmax_f_roll_std_30_l1
+      formula: roll_std(rap_tmax_f - ens_mean)
+      params:
+        window: 30
+        lag: 1
+        min_periods: 21
+    - name: drift_abs_max_rm30
+      formula: max(|drift_*_roll_mean_30_l1|)
+    train_fitted: []
+    imputation:
+      method: train_median
+      fill_values:
+        nbm_tmax_f: 63.175991210937525
+        gfs_tmax_f: 64.5
+        gefsatmosmean_tmax_f: 63.38288233996978
+        nam_tmax_f: 63.0
+        hrrr_tmax_f: 63.429676513671915
+        rap_tmax_f: 62.58964813232426
+        gefsatmos_tmp_spread_f: 1.985091821481542
+        month: 6.0
+        day_of_year: 167.0
+        sin_doy: 0.15951094710994368
+        cos_doy: -0.06553708331203101
+        is_weekend: 0.0
+        drift_nbm_tmax_f_roll_mean_30_l1: -0.12215695982352864
+        drift_nbm_tmax_f_roll_std_30_l1: 0.9839151596045611
+        drift_gfs_tmax_f_roll_mean_30_l1: 0.43253269215789253
+        drift_gfs_tmax_f_roll_std_30_l1: 1.918482060000408
+        drift_gefsatmosmean_tmax_f_roll_mean_30_l1: 0.26206700905421854
+        drift_gefsatmosmean_tmax_f_roll_std_30_l1: 1.5806536096177695
+        drift_nam_tmax_f_roll_mean_30_l1: 0.08687819758586694
+        drift_nam_tmax_f_roll_std_30_l1: 2.1435083620699404
+        drift_hrrr_tmax_f_roll_mean_30_l1: -0.06341540450775299
+        drift_hrrr_tmax_f_roll_std_30_l1: 1.9337237441635184
+        drift_rap_tmax_f_roll_mean_30_l1: -1.04372807306542
+        drift_rap_tmax_f_roll_std_30_l1: 2.195176237364876
+        drift_abs_max_rm30: 1.4910936685322513

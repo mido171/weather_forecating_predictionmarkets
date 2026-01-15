@@ -1,0 +1,85 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "rolling_quantile(ens_mean, q=0.10)",
+        "name": "ens_mean_q10_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rolling_quantile(ens_mean, q=0.50)",
+        "name": "ens_mean_q50_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rolling_quantile(ens_mean, q=0.90)",
+        "name": "ens_mean_q90_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "ens_mean_q90_60_l1 - ens_mean_q10_60_l1",
+        "name": "ens_mean_envelope_width_60"
+      },
+      {
+        "formula": "percent_rank(ens_mean)",
+        "name": "ens_mean_prank_60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_envelope_width_60": 21.46773754971411,
+        "ens_mean_prank_60_l1": 0.5580188679245284,
+        "ens_mean_q10_60_l1": 50.06420727624382,
+        "ens_mean_q50_60_l1": 62.45198803563276,
+        "ens_mean_q90_60_l1": 74.62427185055314,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Trailing quantiles of ens_mean + percentile rank",
+  "experiment_id": "E04"
+}

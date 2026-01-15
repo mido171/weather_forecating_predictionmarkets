@@ -1,0 +1,72 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "sum(w_dma * model)",
+        "name": "fcst_dma_wmean_l2"
+      },
+      {
+        "formula": "entropy(w_dma)",
+        "name": "w_dma_entropy_l2"
+      },
+      {
+        "formula": "max(w_dma)",
+        "name": "w_dma_max_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "fcst_dma_wmean_l2": 63.96888373608434,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "w_dma_entropy_l2": 0.6923225364545516,
+        "w_dma_max_l2": 0.7415600620645895
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "alpha": 0.98,
+        "fit_on": "train",
+        "name": "dma_weights",
+        "sigma0_map": {
+          "KNYC": [
+            2.96576047450781,
+            3.5266260793097945,
+            3.513779204995923,
+            3.75951950761059,
+            3.7658415777834313,
+            4.35657495168371
+          ]
+        },
+        "truth_lag": 2
+      }
+    ]
+  },
+  "description": "DMA-style sequential weights",
+  "experiment_id": "E58"
+}

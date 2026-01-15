@@ -1,0 +1,175 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "rmse(resid_nbm_tmax_f)",
+        "name": "rmse_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_gfs_tmax_f)",
+        "name": "rmse_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_gefsatmosmean_tmax_f)",
+        "name": "rmse_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_nam_tmax_f)",
+        "name": "rmse_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_hrrr_tmax_f)",
+        "name": "rmse_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_rap_tmax_f)",
+        "name": "rmse_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse(resid_ens_mean)",
+        "name": "rmse_ensmean_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "rmse_nbm_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_nbm_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "rmse_gfs_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_gfs_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "rmse_gefsatmosmean_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_gefsatmosmean_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "rmse_nam_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_nam_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "rmse_hrrr_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_hrrr_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "rmse_rap_tmax_f_rm60_l - rmse_ensmean_rm60_l",
+        "name": "rel_rmse_rap_tmax_f_vs_ens_rm60_l2"
+      },
+      {
+        "formula": "1[best_rmse_model_id == nbm_tmax_f]",
+        "name": "best_rmse_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_rmse_model_id == gfs_tmax_f]",
+        "name": "best_rmse_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_rmse_model_id == gefsatmosmean_tmax_f]",
+        "name": "best_rmse_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_rmse_model_id == nam_tmax_f]",
+        "name": "best_rmse_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_rmse_model_id == hrrr_tmax_f]",
+        "name": "best_rmse_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_rmse_model_id == rap_tmax_f]",
+        "name": "best_rmse_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_rmse_model_id)",
+        "name": "best_rmse_model_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_rmse_is_gefsatmosmean_tmax_f": 0.0,
+        "best_rmse_is_gfs_tmax_f": 0.0,
+        "best_rmse_is_hrrr_tmax_f": 0.0,
+        "best_rmse_is_nam_tmax_f": 0.0,
+        "best_rmse_is_nbm_tmax_f": 1.0,
+        "best_rmse_is_rap_tmax_f": 0.0,
+        "best_rmse_model_forecast_today": 64.81400878906254,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "rel_rmse_gefsatmosmean_tmax_f_vs_ens_rm60_l2": 0.5918105615575158,
+        "rel_rmse_gfs_tmax_f_vs_ens_rm60_l2": 0.6308745385901351,
+        "rel_rmse_hrrr_tmax_f_vs_ens_rm60_l2": 0.7331007696556653,
+        "rel_rmse_nam_tmax_f_vs_ens_rm60_l2": 0.794706514187816,
+        "rel_rmse_nbm_tmax_f_vs_ens_rm60_l2": 0.05701316392065259,
+        "rel_rmse_rap_tmax_f_vs_ens_rm60_l2": 1.3434134775491202,
+        "rmse_ensmean_rm60_l2": 2.750153993450365,
+        "rmse_gefsatmosmean_tmax_f_rm60_l2": 3.4368891108416544,
+        "rmse_gfs_tmax_f_rm60_l2": 3.2812599206199238,
+        "rmse_hrrr_tmax_f_rm60_l2": 3.484239426776739,
+        "rmse_nam_tmax_f_rm60_l2": 3.5683796509527026,
+        "rmse_nbm_tmax_f_rm60_l2": 2.885511629386308,
+        "rmse_rap_tmax_f_rm60_l2": 4.057840666999412,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "RMSE skill state + best-RMSE selector",
+  "experiment_id": "E52"
+}

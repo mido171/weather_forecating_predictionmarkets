@@ -1,0 +1,100 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "HMM filtered P(state0)",
+        "name": "p_state0_l2"
+      },
+      {
+        "formula": "HMM filtered P(state1)",
+        "name": "p_state1_l2"
+      },
+      {
+        "formula": "p_state * mean_resid",
+        "name": "hmm_bias_l2"
+      },
+      {
+        "formula": "ens_mean + hmm_bias",
+        "name": "ens_mean_hmm_biascorr_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_hmm_biascorr_l2": 64.81565719724136,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hmm_bias_l2": 0.5219970309341209,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "p_state0_l2": 0.9881941646391555,
+        "p_state1_l2": 0.011805835360844457,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "A": [
+          [
+            0.8215301350585963,
+            0.17846986494140377
+          ],
+          [
+            0.4721163170097384,
+            0.5278836829902617
+          ]
+        ],
+        "covars": [
+          [
+            2.683447075572679,
+            0.999400701217625
+          ],
+          [
+            11.115115644138623,
+            2.256633509458158
+          ]
+        ],
+        "fit_on": "train",
+        "means": [
+          [
+            0.4821588107701039,
+            1.3843856013258347
+          ],
+          [
+            3.8566104227369635,
+            4.871542475175994
+          ]
+        ],
+        "name": "hmm_residual_state",
+        "pi": [
+          1.5406167544491763e-16,
+          0.3536724786819873
+        ],
+        "station_id": "KNYC"
+      }
+    ]
+  },
+  "description": "Truth-based HMM state probabilities",
+  "experiment_id": "E71"
+}

@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.gribstream;
 
 import com.predictionmarkets.weather.common.StandardTimeClimateWindow;
+import com.predictionmarkets.weather.executors.GribstreamTaskExecutor;
 import com.predictionmarkets.weather.models.GribstreamDailyFeatureEntity;
 import com.predictionmarkets.weather.models.GribstreamMetric;
 import com.predictionmarkets.weather.repository.GribstreamDailyFeatureRepository;

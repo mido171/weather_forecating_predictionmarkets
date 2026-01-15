@@ -1,0 +1,235 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_nbm_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_nbm_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_gfs_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_gfs_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_gefsatmosmean_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_gefsatmosmean_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_nam_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_nam_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_hrrr_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_hrrr_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_rap_tmax_f_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid|)",
+        "name": "ewm_mae_rap_tmax_f_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(|resid_ens_mean|)",
+        "name": "ewm_mae_ensmean_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_nbm_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_gfs_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_gefsatmosmean_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_nam_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_hrrr_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "ewm_mae_model - ewm_mae_ensmean",
+        "name": "rel_ewm_mae_rap_tmax_f_vs_ens_hl14_l2"
+      },
+      {
+        "formula": "1[best_ewm_model_id == nbm_tmax_f]",
+        "name": "best_ewm_is_nbm_tmax_f"
+      },
+      {
+        "formula": "1[best_ewm_model_id == gfs_tmax_f]",
+        "name": "best_ewm_is_gfs_tmax_f"
+      },
+      {
+        "formula": "1[best_ewm_model_id == gefsatmosmean_tmax_f]",
+        "name": "best_ewm_is_gefsatmosmean_tmax_f"
+      },
+      {
+        "formula": "1[best_ewm_model_id == nam_tmax_f]",
+        "name": "best_ewm_is_nam_tmax_f"
+      },
+      {
+        "formula": "1[best_ewm_model_id == hrrr_tmax_f]",
+        "name": "best_ewm_is_hrrr_tmax_f"
+      },
+      {
+        "formula": "1[best_ewm_model_id == rap_tmax_f]",
+        "name": "best_ewm_is_rap_tmax_f"
+      },
+      {
+        "formula": "forecast(best_ewm_model_id)",
+        "name": "best_ewm_model_forecast_today"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "best_ewm_is_gefsatmosmean_tmax_f": 0.0,
+        "best_ewm_is_gfs_tmax_f": 0.0,
+        "best_ewm_is_hrrr_tmax_f": 0.0,
+        "best_ewm_is_nam_tmax_f": 0.0,
+        "best_ewm_is_nbm_tmax_f": 1.0,
+        "best_ewm_is_rap_tmax_f": 0.0,
+        "best_ewm_model_forecast_today": 64.0,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ewm_mae_ensmean_hl14_l2": 2.133131215672137,
+        "ewm_mae_gefsatmosmean_tmax_f_hl14_l2": 2.6834674010470576,
+        "ewm_mae_gefsatmosmean_tmax_f_hl30_l2": 2.727334159880652,
+        "ewm_mae_gfs_tmax_f_hl14_l2": 2.46611648011901,
+        "ewm_mae_gfs_tmax_f_hl30_l2": 2.51068303907906,
+        "ewm_mae_hrrr_tmax_f_hl14_l2": 2.7460840600560124,
+        "ewm_mae_hrrr_tmax_f_hl30_l2": 2.748288690683307,
+        "ewm_mae_nam_tmax_f_hl14_l2": 2.745951237806988,
+        "ewm_mae_nam_tmax_f_hl30_l2": 2.7513154420701156,
+        "ewm_mae_nbm_tmax_f_hl14_l2": 2.2183441518170586,
+        "ewm_mae_nbm_tmax_f_hl30_l2": 2.3037461154591266,
+        "ewm_mae_rap_tmax_f_hl14_l2": 3.254565032816094,
+        "ewm_mae_rap_tmax_f_hl30_l2": 3.232383589532951,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "rel_ewm_mae_gefsatmosmean_tmax_f_vs_ens_hl14_l2": 0.45824015575290966,
+        "rel_ewm_mae_gfs_tmax_f_vs_ens_hl14_l2": 0.41865345179135915,
+        "rel_ewm_mae_hrrr_tmax_f_vs_ens_hl14_l2": 0.6341888379658798,
+        "rel_ewm_mae_nam_tmax_f_vs_ens_hl14_l2": 0.5708563784598026,
+        "rel_ewm_mae_nbm_tmax_f_vs_ens_hl14_l2": 0.05684001522789561,
+        "rel_ewm_mae_rap_tmax_f_vs_ens_hl14_l2": 1.1051286988062623,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "EWMA(|resid|) skill state + best EWMA model",
+  "experiment_id": "E56"
+}

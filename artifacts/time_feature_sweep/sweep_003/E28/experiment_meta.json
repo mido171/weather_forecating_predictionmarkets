@@ -1,0 +1,65 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "ewm_mean(resid_ens_mean)",
+        "name": "r_ewm_mean_hl14_l2",
+        "params": {
+          "halflife": 14,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ewm_mean(resid_ens_mean)",
+        "name": "r_ewm_mean_hl30_l2",
+        "params": {
+          "halflife": 30,
+          "lag": 2,
+          "min_periods": 10
+        }
+      },
+      {
+        "formula": "ens_mean + r_ewm_mean_hl14",
+        "name": "ens_mean_biascorr_hl14"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_biascorr_hl14": 65.21949562070664,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "r_ewm_mean_hl14_l2": 1.3104892914704787,
+        "r_ewm_mean_hl30_l2": 1.3583046238103333,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "EWMA residual bias correction",
+  "experiment_id": "E28"
+}

@@ -1,0 +1,100 @@
+data:
+  csv_path: "ingestion-service/src/main/resources/trainingdata_output/gribstream_training_data.csv"
+  dataset_schema_version: 1
+
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+
+split:
+  train_start: "2021-02-23"
+  train_end: "2025-01-30"
+  gap_dates:
+    - "2025-01-31"
+  test_start: "2025-02-01"
+  test_end: "2025-12-31"
+  validation:
+    enabled: true
+    val_start: "2024-07-01"
+    val_end: "2025-01-30"
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+
+features:
+  base_features:
+    - gfs_tmax_f
+    - nam_tmax_f
+    - gefsatmosmean_tmax_f
+    - rap_tmax_f
+    - hrrr_tmax_f
+    - nbm_tmax_f
+    - gefsatmos_tmp_spread_f
+  derived:
+    ensemble_stats: true
+    pairwise_deltas: true
+    model_vs_ens_deltas: true
+    calendar: true
+    station_onehot: true
+    climatology:
+      enabled: false
+      label_lag_days: 2
+      rolling_windows_days: [7, 30]
+
+models:
+  mean:
+    candidates: ["catboost"]
+    primary: "catboost"
+    param_grid:
+      catboost:
+        depth: [6, 8]
+        learning_rate: [0.05, 0.1]
+        iterations: [500]
+        l2_leaf_reg: [3, 10]
+  sigma:
+    method: "two_stage"
+    primary: "catboost"
+    sigma_floor: 0.25
+    eps: 0.000001
+    param_grid:
+      catboost:
+        depth: [6, 8]
+        learning_rate: [0.05, 0.1]
+        iterations: [500]
+        l2_leaf_reg: [3, 10]
+
+artifacts:
+  root_dir: "artifacts"
+  run_id: null
+  overwrite: false
+
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+
+calibration:
+  enabled: true
+  method: "isotonic"
+  bins_to_calibrate:
+    - name: "lt_52"
+      type: "threshold"
+      lt: 52
+    - name: "ge_90"
+      type: "threshold"
+      ge: 90
+
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: "ALL"

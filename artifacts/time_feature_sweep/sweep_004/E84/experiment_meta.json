@@ -1,0 +1,118 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "analog_resid_q10",
+        "name": "analog_resid_q10_k30_l2"
+      },
+      {
+        "formula": "analog_resid_q50",
+        "name": "analog_resid_q50_k30_l2"
+      },
+      {
+        "formula": "analog_resid_q90",
+        "name": "analog_resid_q90_k30_l2"
+      },
+      {
+        "formula": "analog_resid_iqr",
+        "name": "analog_resid_iqr_k30_l2"
+      },
+      {
+        "formula": "ens_mean + analog_resid_q50",
+        "name": "ens_mean_analog_q50_corr_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "analog_resid_iqr_k30_l2": 5.001894629923505,
+        "analog_resid_q10_k30_l2": -1.1281616882980954,
+        "analog_resid_q50_k30_l2": 1.0693296198690785,
+        "analog_resid_q90_k30_l2": 4.006735024729043,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_analog_q50_corr_l2": 65.20587090342532,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "features": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f",
+          "ens_std",
+          "sin_doy",
+          "cos_doy"
+        ],
+        "fit_on": "train",
+        "k": 30,
+        "lookback_days": 365,
+        "name": "knn_analog_quantiles",
+        "scaler": {
+          "cols": [
+            "nbm_tmax_f",
+            "gfs_tmax_f",
+            "gefsatmosmean_tmax_f",
+            "nam_tmax_f",
+            "hrrr_tmax_f",
+            "rap_tmax_f",
+            "ens_std",
+            "sin_doy",
+            "cos_doy"
+          ],
+          "mean": [
+            63.22669649011956,
+            63.84395424836601,
+            63.93225178197049,
+            63.30555555555556,
+            63.549676836799215,
+            62.38739490284644,
+            1.9724350522718126,
+            0.076249519026095,
+            -0.03830601337952942
+          ],
+          "scale": [
+            16.744913671392055,
+            16.43538534849312,
+            17.715798139763308,
+            16.16064478057846,
+            18.04587973742932,
+            17.794629792899077,
+            0.8943820168637893,
+            0.7113279903785942,
+            0.6976612002191372
+          ]
+        }
+      }
+    ]
+  },
+  "description": "Analog residual quantiles",
+  "experiment_id": "E84"
+}

@@ -1,0 +1,65 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(shape_ratio)",
+        "name": "shape_ratio_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(shape_ratio,7) - roll_mean(shape_ratio,60)",
+        "name": "shape_ratio_shift_7v60"
+      },
+      {
+        "formula": "roll_mean(ens_outlier_gap)",
+        "name": "outlier_gap_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "outlier_gap_rm30_l1": 3.723799970794997,
+        "rap_tmax_f": 62.58964813232426,
+        "shape_ratio_rm30_l1": 2.6121064489854575,
+        "shape_ratio_shift_7v60": -0.10229829211383401,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Disagreement shape ratio evolution",
+  "experiment_id": "E20"
+}

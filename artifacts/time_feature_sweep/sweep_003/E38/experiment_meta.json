@@ -1,0 +1,165 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_nbm_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_nbm_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_gfs_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_gfs_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_gefsatmosmean_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_gefsatmosmean_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_nam_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_nam_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_hrrr_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_hrrr_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_mean(|model - ens_median|)",
+        "name": "outmag_rap_tmax_f_rm30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "rolling_quantile(|model - ens_median|, q=0.90)",
+        "name": "outmag_rap_tmax_f_q90_rm60_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "max(outmag_*_rm30_l1)",
+        "name": "outmag_max_rm30_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "outmag_gefsatmosmean_tmax_f_q90_rm60_l1": 2.6885334382088626,
+        "outmag_gefsatmosmean_tmax_f_rm30_l1": 1.2301123320548824,
+        "outmag_gfs_tmax_f_q90_rm60_l1": 3.422058135986295,
+        "outmag_gfs_tmax_f_rm30_l1": 1.6088961610855506,
+        "outmag_hrrr_tmax_f_q90_rm60_l1": 3.602412491336913,
+        "outmag_hrrr_tmax_f_rm30_l1": 1.662069426899571,
+        "outmag_max_rm30_l1": 2.4358277023479826,
+        "outmag_nam_tmax_f_q90_rm60_l1": 3.9363366029800106,
+        "outmag_nam_tmax_f_rm30_l1": 1.81552369424144,
+        "outmag_nbm_tmax_f_q90_rm60_l1": 1.5382804549678788,
+        "outmag_nbm_tmax_f_rm30_l1": 0.7184813577631393,
+        "outmag_rap_tmax_f_q90_rm60_l1": 4.3253522732642145,
+        "outmag_rap_tmax_f_rm30_l1": 1.9894794339087596,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Outlier magnitude persistence",
+  "experiment_id": "E38"
+}

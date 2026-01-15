@@ -1,0 +1,107 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "KNN Mahalanobis mean(resid)",
+        "name": "knnM_resid_mean_k20_l2"
+      },
+      {
+        "formula": "KNN Mahalanobis std(resid)",
+        "name": "knnM_resid_std_k20_l2"
+      },
+      {
+        "formula": "KNN Mahalanobis mean distance",
+        "name": "knnM_dist_mean_k20_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "knnM_dist_mean_k20_l2": 1.2045857504648163,
+        "knnM_resid_mean_k20_l2": 1.2401342212963824,
+        "knnM_resid_std_k20_l2": 2.013925555612408,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "features": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f",
+          "ens_std",
+          "sin_doy",
+          "cos_doy"
+        ],
+        "fit_on": "train",
+        "name": "knn_mahalanobis",
+        "scaler": {
+          "cols": [
+            "nbm_tmax_f",
+            "gfs_tmax_f",
+            "gefsatmosmean_tmax_f",
+            "nam_tmax_f",
+            "hrrr_tmax_f",
+            "rap_tmax_f",
+            "ens_std",
+            "sin_doy",
+            "cos_doy"
+          ],
+          "mean": [
+            63.22669649011956,
+            63.84395424836601,
+            63.93225178197049,
+            63.30555555555556,
+            63.549676836799215,
+            62.38739490284644,
+            1.9724350522718126,
+            0.076249519026095,
+            -0.03830601337952942
+          ],
+          "scale": [
+            16.744913671392055,
+            16.43538534849312,
+            17.715798139763308,
+            16.16064478057846,
+            18.04587973742932,
+            17.794629792899077,
+            0.8943820168637893,
+            0.7113279903785942,
+            0.6976612002191372
+          ]
+        },
+        "shrinkage": 0.1
+      }
+    ]
+  },
+  "description": "Mahalanobis analog residual correction",
+  "experiment_id": "E81"
+}

@@ -9,15 +9,23 @@ description = "Weather ML training pipeline for Kalshi."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+  "numpy==1.26.4",
   "pandas==2.2.2",
   "pyarrow==16.1.0",
-  "numpy==1.26.4",
-  "SQLAlchemy==2.0.32",
-  "PyMySQL==1.1.1",
+  "PyYAML==6.0.2",
   "scikit-learn==1.5.1",
   "matplotlib==3.9.2",
-  "PyYAML==6.0.2",
   "joblib==1.4.2",
+]
+
+[project.optional-dependencies]
+gbdt = [
+  "lightgbm==4.5.0",
+  "xgboost==2.1.1",
+  "catboost==1.2.5",
+  "scipy==1.14.1",
+]
+dev = [
   "pytest==8.3.2",
 ]
 

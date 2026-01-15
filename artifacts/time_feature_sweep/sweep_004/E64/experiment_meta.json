@@ -1,0 +1,113 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "count_doy_neighbors",
+        "name": "n_doy_samples_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_nbm_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_nbm_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_gfs_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_gfs_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_gefsatmosmean_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_gefsatmosmean_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_nam_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_nam_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_hrrr_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_hrrr_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "mae_doy_neighborhood",
+        "name": "mae_rap_tmax_f_doy15_l2"
+      },
+      {
+        "formula": "bias_doy_neighborhood",
+        "name": "bias_rap_tmax_f_doy15_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bias_gefsatmosmean_tmax_f_doy15_l2": 1.1646605471848088,
+        "bias_gfs_tmax_f_doy15_l2": 0.8888888888888888,
+        "bias_hrrr_tmax_f_doy15_l2": 1.3689515686034748,
+        "bias_nam_tmax_f_doy15_l2": 1.3770491803278688,
+        "bias_nbm_tmax_f_doy15_l2": 1.4326294487846534,
+        "bias_rap_tmax_f_doy15_l2": 2.0708524410059783,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_gefsatmosmean_tmax_f_doy15_l2": 2.666119349238332,
+        "mae_gfs_tmax_f_doy15_l2": 2.622950819672131,
+        "mae_hrrr_tmax_f_doy15_l2": 2.709789621988913,
+        "mae_nam_tmax_f_doy15_l2": 2.6885245901639343,
+        "mae_nbm_tmax_f_doy15_l2": 2.0847938012294747,
+        "mae_rap_tmax_f_doy15_l2": 2.9928599073066158,
+        "month": 6.0,
+        "n_doy_samples_l2": 45.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "fit_on": "train",
+        "lookback_days": 730,
+        "min_samples": 30,
+        "name": "doy_skill",
+        "radius": 15
+      }
+    ]
+  },
+  "description": "DOY-localized skill state",
+  "experiment_id": "E64"
+}

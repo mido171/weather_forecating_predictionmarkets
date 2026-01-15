@@ -1,0 +1,200 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_nbm_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_gfs_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_gefsatmosmean_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_nam_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_hrrr_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(|resid|)",
+        "name": "abs_err_mean_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "roll_std(|resid|)",
+        "name": "abs_err_std_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "abs_err_std / (abs_err_mean+eps)",
+        "name": "abs_err_cv_rap_tmax_f_rm60_l2"
+      },
+      {
+        "formula": "min(abs_err_cv)",
+        "name": "min_cv_model_rm60_l2"
+      },
+      {
+        "formula": "mean(abs_err_cv)",
+        "name": "mean_cv_models_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "abs_err_cv_gefsatmosmean_tmax_f_rm60_l2": 0.709097973642532,
+        "abs_err_cv_gfs_tmax_f_rm60_l2": 0.802971485492165,
+        "abs_err_cv_hrrr_tmax_f_rm60_l2": 0.7036595653015434,
+        "abs_err_cv_nam_tmax_f_rm60_l2": 0.7949260028059453,
+        "abs_err_cv_nbm_tmax_f_rm60_l2": 0.7317045826333981,
+        "abs_err_cv_rap_tmax_f_rm60_l2": 0.6741881106195895,
+        "abs_err_mean_gefsatmosmean_tmax_f_rm60_l2": 2.6858807899384423,
+        "abs_err_mean_gfs_tmax_f_rm60_l2": 2.45,
+        "abs_err_mean_hrrr_tmax_f_rm60_l2": 2.7992452697753674,
+        "abs_err_mean_nam_tmax_f_rm60_l2": 2.7333333333333334,
+        "abs_err_mean_nbm_tmax_f_rm60_l2": 2.2609038085937034,
+        "abs_err_mean_rap_tmax_f_rm60_l2": 3.2189987284342156,
+        "abs_err_std_gefsatmosmean_tmax_f_rm60_l2": 2.0249114250493627,
+        "abs_err_std_gfs_tmax_f_rm60_l2": 2.1558061137310096,
+        "abs_err_std_hrrr_tmax_f_rm60_l2": 2.0659928867810713,
+        "abs_err_std_nam_tmax_f_rm60_l2": 2.281020726682583,
+        "abs_err_std_nbm_tmax_f_rm60_l2": 1.7443807904807263,
+        "abs_err_std_rap_tmax_f_rm60_l2": 2.3133170835962353,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mean_cv_models_rm60_l2": 0.743881658650754,
+        "min_cv_model_rm60_l2": 0.6388090377912863,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Error volatility state (std/CV)",
+  "experiment_id": "E55"
+}

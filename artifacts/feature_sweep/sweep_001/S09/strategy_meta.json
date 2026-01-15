@@ -1,0 +1,89 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [
+      {
+        "formula": "mean(F)",
+        "name": "ens_mean_6"
+      },
+      {
+        "formula": "median(F)",
+        "name": "ens_median_6"
+      },
+      {
+        "formula": "mean(F) on bias-corrected inputs",
+        "name": "ens_mean_bc_6"
+      },
+      {
+        "formula": "median(F) on bias-corrected inputs",
+        "name": "ens_median_bc_6"
+      },
+      {
+        "formula": "mean(sorted(F)[1:-1]) on bias-corrected inputs",
+        "name": "ens_trimmed_mean_bc_6_1"
+      }
+    ],
+    "train_fitted": [
+      {
+        "description": "bias_m_train = mean(y - m); m_bc = m + bias_m_train",
+        "features_added": [
+          "nbm_tmax_f_bc",
+          "gfs_tmax_f_bc",
+          "gefsatmosmean_tmax_f_bc",
+          "nam_tmax_f_bc",
+          "hrrr_tmax_f_bc",
+          "rap_tmax_f_bc",
+          "ens_mean_bc_6",
+          "ens_median_bc_6",
+          "ens_trimmed_mean_bc_6_1"
+        ],
+        "fit_on": "train",
+        "models": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f"
+        ],
+        "name": "bias_correction"
+      }
+    ]
+  },
+  "description": "bias_corrected_inputs_and_blends",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "ens_mean_6",
+    "ens_median_6",
+    "nbm_tmax_f_bc",
+    "gfs_tmax_f_bc",
+    "gefsatmosmean_tmax_f_bc",
+    "nam_tmax_f_bc",
+    "hrrr_tmax_f_bc",
+    "rap_tmax_f_bc",
+    "ens_mean_bc_6",
+    "ens_median_bc_6",
+    "ens_trimmed_mean_bc_6_1",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f"
+  ],
+  "strategy_id": "S09",
+  "uses_spread_feature": true
+}

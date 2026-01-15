@@ -1,0 +1,95 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "P(state0 | obs<=T-1)",
+        "name": "p_state0_l1"
+      },
+      {
+        "formula": "P(state1 | obs<=T-1)",
+        "name": "p_state1_l1"
+      },
+      {
+        "formula": "argmax(p_state)",
+        "name": "hmm_state_argmax_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hmm_state_argmax_l1": 0.0,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "p_state0_l1": 0.976889351536906,
+        "p_state1_l1": 0.023110648463093943,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "A": [
+          [
+            0.8887408467113971,
+            0.11125915328860293
+          ],
+          [
+            0.8298898035499355,
+            0.17011019645006456
+          ]
+        ],
+        "covars": [
+          [
+            0.671921311366181,
+            48.14150219900824
+          ],
+          [
+            1.776663562000019,
+            102.00521571886452
+          ]
+        ],
+        "fit_on": "train",
+        "means": [
+          [
+            1.9302003093780369,
+            0.16075516522578512
+          ],
+          [
+            3.532356062288442,
+            -7.918003339576811
+          ]
+        ],
+        "name": "hmm_forecast_only",
+        "pi": [
+          0.8781566969903176,
+          0.000765696627806164
+        ],
+        "station_id": "KNYC"
+      }
+    ]
+  },
+  "description": "Forecast-only HMM state probabilities",
+  "experiment_id": "E97"
+}

@@ -1,0 +1,326 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2021-02-23
+  train_end: 2025-01-30
+  test_start: 2025-02-01
+  test_end: 2025-12-31
+  gap_dates:
+  - 2025-01-31
+  validation:
+    enabled: true
+    val_start: 2024-07-01
+    val_end: 2025-01-30
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+features:
+  base_features:
+  - gfs_tmax_f
+  - nam_tmax_f
+  - gefsatmosmean_tmax_f
+  - rap_tmax_f
+  - hrrr_tmax_f
+  - nbm_tmax_f
+  - gefsatmos_tmp_spread_f
+  ensemble_stats: true
+  pairwise_deltas: true
+  model_vs_ens_deltas: true
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - ridge
+    - random_forest
+    - gbr
+    - lgbm
+    - xgb
+    - catboost
+    primary: lgbm
+    param_grid:
+      ridge:
+        alpha:
+        - 0.1
+        - 1.0
+        - 10.0
+      random_forest:
+        n_estimators:
+        - 200
+        max_depth:
+        - 8
+        - 16
+        - null
+        min_samples_leaf:
+        - 1
+        - 3
+      gbr:
+        n_estimators:
+        - 200
+        max_depth:
+        - 3
+        - 5
+        learning_rate:
+        - 0.05
+        - 0.1
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+      xgb:
+        max_depth:
+        - 4
+        - 6
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+        subsample:
+        - 0.8
+        colsample_bytree:
+        - 0.8
+        min_child_weight:
+        - 1
+        - 5
+        reg_lambda:
+        - 1.0
+      catboost:
+        depth:
+        - 6
+        - 8
+        learning_rate:
+        - 0.05
+        - 0.1
+        iterations:
+        - 500
+        l2_leaf_reg:
+        - 3
+        - 10
+  sigma:
+    method: two_stage
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+    forecast_columns: []
+experiment:
+  experiment_id: E52
+  description: RMSE skill state + best-RMSE selector
+  feature_columns:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  - gefsatmos_tmp_spread_f
+  - month
+  - day_of_year
+  - sin_doy
+  - cos_doy
+  - is_weekend
+  - rmse_nbm_tmax_f_rm60_l2
+  - rmse_gfs_tmax_f_rm60_l2
+  - rmse_gefsatmosmean_tmax_f_rm60_l2
+  - rmse_nam_tmax_f_rm60_l2
+  - rmse_hrrr_tmax_f_rm60_l2
+  - rmse_rap_tmax_f_rm60_l2
+  - rmse_ensmean_rm60_l2
+  - rel_rmse_nbm_tmax_f_vs_ens_rm60_l2
+  - rel_rmse_gfs_tmax_f_vs_ens_rm60_l2
+  - rel_rmse_gefsatmosmean_tmax_f_vs_ens_rm60_l2
+  - rel_rmse_nam_tmax_f_vs_ens_rm60_l2
+  - rel_rmse_hrrr_tmax_f_vs_ens_rm60_l2
+  - rel_rmse_rap_tmax_f_vs_ens_rm60_l2
+  - best_rmse_is_nbm_tmax_f
+  - best_rmse_is_gfs_tmax_f
+  - best_rmse_is_gefsatmosmean_tmax_f
+  - best_rmse_is_nam_tmax_f
+  - best_rmse_is_hrrr_tmax_f
+  - best_rmse_is_rap_tmax_f
+  - best_rmse_model_forecast_today
+  derived_features:
+    formulas:
+    - name: rmse_nbm_tmax_f_rm60_l2
+      formula: rmse(resid_nbm_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_gfs_tmax_f_rm60_l2
+      formula: rmse(resid_gfs_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_gefsatmosmean_tmax_f_rm60_l2
+      formula: rmse(resid_gefsatmosmean_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_nam_tmax_f_rm60_l2
+      formula: rmse(resid_nam_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_hrrr_tmax_f_rm60_l2
+      formula: rmse(resid_hrrr_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_rap_tmax_f_rm60_l2
+      formula: rmse(resid_rap_tmax_f)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rmse_ensmean_rm60_l2
+      formula: rmse(resid_ens_mean)
+      params:
+        window: 60
+        lag: 2
+        min_periods: 42
+    - name: rel_rmse_nbm_tmax_f_vs_ens_rm60_l2
+      formula: rmse_nbm_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: rel_rmse_gfs_tmax_f_vs_ens_rm60_l2
+      formula: rmse_gfs_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: rel_rmse_gefsatmosmean_tmax_f_vs_ens_rm60_l2
+      formula: rmse_gefsatmosmean_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: rel_rmse_nam_tmax_f_vs_ens_rm60_l2
+      formula: rmse_nam_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: rel_rmse_hrrr_tmax_f_vs_ens_rm60_l2
+      formula: rmse_hrrr_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: rel_rmse_rap_tmax_f_vs_ens_rm60_l2
+      formula: rmse_rap_tmax_f_rm60_l - rmse_ensmean_rm60_l
+    - name: best_rmse_is_nbm_tmax_f
+      formula: 1[best_rmse_model_id == nbm_tmax_f]
+    - name: best_rmse_is_gfs_tmax_f
+      formula: 1[best_rmse_model_id == gfs_tmax_f]
+    - name: best_rmse_is_gefsatmosmean_tmax_f
+      formula: 1[best_rmse_model_id == gefsatmosmean_tmax_f]
+    - name: best_rmse_is_nam_tmax_f
+      formula: 1[best_rmse_model_id == nam_tmax_f]
+    - name: best_rmse_is_hrrr_tmax_f
+      formula: 1[best_rmse_model_id == hrrr_tmax_f]
+    - name: best_rmse_is_rap_tmax_f
+      formula: 1[best_rmse_model_id == rap_tmax_f]
+    - name: best_rmse_model_forecast_today
+      formula: forecast(best_rmse_model_id)
+    train_fitted: []
+    imputation:
+      method: train_median
+      fill_values:
+        nbm_tmax_f: 63.175991210937525
+        gfs_tmax_f: 64.5
+        gefsatmosmean_tmax_f: 63.38288233996978
+        nam_tmax_f: 63.0
+        hrrr_tmax_f: 63.429676513671915
+        rap_tmax_f: 62.58964813232426
+        gefsatmos_tmp_spread_f: 1.985091821481542
+        month: 6.0
+        day_of_year: 167.0
+        sin_doy: 0.15951094710994368
+        cos_doy: -0.06553708331203101
+        is_weekend: 0.0
+        rmse_nbm_tmax_f_rm60_l2: 2.885511629386308
+        rmse_gfs_tmax_f_rm60_l2: 3.2812599206199238
+        rmse_gefsatmosmean_tmax_f_rm60_l2: 3.4368891108416544
+        rmse_nam_tmax_f_rm60_l2: 3.5683796509527026
+        rmse_hrrr_tmax_f_rm60_l2: 3.484239426776739
+        rmse_rap_tmax_f_rm60_l2: 4.057840666999412
+        rmse_ensmean_rm60_l2: 2.750153993450365
+        rel_rmse_nbm_tmax_f_vs_ens_rm60_l2: 0.05701316392065259
+        rel_rmse_gfs_tmax_f_vs_ens_rm60_l2: 0.6308745385901351
+        rel_rmse_gefsatmosmean_tmax_f_vs_ens_rm60_l2: 0.5918105615575158
+        rel_rmse_nam_tmax_f_vs_ens_rm60_l2: 0.794706514187816
+        rel_rmse_hrrr_tmax_f_vs_ens_rm60_l2: 0.7331007696556653
+        rel_rmse_rap_tmax_f_vs_ens_rm60_l2: 1.3434134775491202
+        best_rmse_is_nbm_tmax_f: 1.0
+        best_rmse_is_gfs_tmax_f: 0.0
+        best_rmse_is_gefsatmosmean_tmax_f: 0.0
+        best_rmse_is_nam_tmax_f: 0.0
+        best_rmse_is_hrrr_tmax_f: 0.0
+        best_rmse_is_rap_tmax_f: 0.0
+        best_rmse_model_forecast_today: 64.81400878906254

@@ -1,0 +1,79 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_sum(hi_spread)",
+        "name": "hi_spread_count_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(hi_spread)",
+        "name": "hi_spread_frac_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "streak_length(hi_spread)",
+        "name": "hi_spread_streak_len_l1",
+        "params": {
+          "cap": 60,
+          "lag": 1
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hi_spread_count_7_l1": 0.0,
+        "hi_spread_frac_30_l1": 0.1,
+        "hi_spread_streak_len_l1": 7.0,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "default": 3.1720867543728715,
+        "description": "q90_train(ens_std) per station",
+        "fit_on": "train",
+        "name": "thr_spread_hi",
+        "thresholds": {
+          "KNYC": 3.1720867543728715
+        }
+      }
+    ]
+  },
+  "description": "High-spread burstiness counts + streak length",
+  "experiment_id": "E08"
+}

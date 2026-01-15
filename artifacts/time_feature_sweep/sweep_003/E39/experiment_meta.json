@@ -1,0 +1,100 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_nbm_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_gfs_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_gefsatmosmean_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_nam_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_hrrr_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(dom_outlier_id == model)",
+        "name": "dom_outlier_is_rap_tmax_f_freq_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "dom_outlier_is_gefsatmosmean_tmax_f_freq_30_l1": 0.1,
+        "dom_outlier_is_gfs_tmax_f_freq_30_l1": 0.16666666666666666,
+        "dom_outlier_is_hrrr_tmax_f_freq_30_l1": 0.13333333333333333,
+        "dom_outlier_is_nam_tmax_f_freq_30_l1": 0.2,
+        "dom_outlier_is_nbm_tmax_f_freq_30_l1": 0.0,
+        "dom_outlier_is_rap_tmax_f_freq_30_l1": 0.23333333333333334,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Dominant outlier identity counts",
+  "experiment_id": "E39"
+}

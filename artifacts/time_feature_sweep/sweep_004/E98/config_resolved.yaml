@@ -1,0 +1,363 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2021-02-23
+  train_end: 2025-01-30
+  test_start: 2025-02-01
+  test_end: 2025-12-31
+  gap_dates:
+  - 2025-01-31
+  validation:
+    enabled: true
+    val_start: 2024-07-01
+    val_end: 2025-01-30
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+features:
+  base_features:
+  - gfs_tmax_f
+  - nam_tmax_f
+  - gefsatmosmean_tmax_f
+  - rap_tmax_f
+  - hrrr_tmax_f
+  - nbm_tmax_f
+  - gefsatmos_tmp_spread_f
+  ensemble_stats: true
+  pairwise_deltas: true
+  model_vs_ens_deltas: true
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - ridge
+    - random_forest
+    - gbr
+    - lgbm
+    - xgb
+    - catboost
+    primary: lgbm
+    param_grid:
+      ridge:
+        alpha:
+        - 0.1
+        - 1.0
+        - 10.0
+      random_forest:
+        n_estimators:
+        - 200
+        max_depth:
+        - 8
+        - 16
+        - null
+        min_samples_leaf:
+        - 1
+        - 3
+      gbr:
+        n_estimators:
+        - 200
+        max_depth:
+        - 3
+        - 5
+        learning_rate:
+        - 0.05
+        - 0.1
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+      xgb:
+        max_depth:
+        - 4
+        - 6
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+        subsample:
+        - 0.8
+        colsample_bytree:
+        - 0.8
+        min_child_weight:
+        - 1
+        - 5
+        reg_lambda:
+        - 1.0
+      catboost:
+        depth:
+        - 6
+        - 8
+        learning_rate:
+        - 0.05
+        - 0.1
+        iterations:
+        - 500
+        l2_leaf_reg:
+        - 3
+        - 10
+  sigma:
+    method: two_stage
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+    forecast_columns: []
+experiment:
+  experiment_id: E98
+  description: Best-model probability classifier
+  feature_columns:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  - gefsatmos_tmp_spread_f
+  - month
+  - day_of_year
+  - sin_doy
+  - cos_doy
+  - is_weekend
+  - p_best_nbm_tmax_f
+  - p_best_gfs_tmax_f
+  - p_best_gefsatmosmean_tmax_f
+  - p_best_nam_tmax_f
+  - p_best_hrrr_tmax_f
+  - p_best_rap_tmax_f
+  - fcst_expected_bestprob
+  - bestprob_entropy
+  derived_features:
+    formulas:
+    - name: p_best_nbm_tmax_f
+      formula: P(best_model == nbm_tmax_f)
+    - name: p_best_gfs_tmax_f
+      formula: P(best_model == gfs_tmax_f)
+    - name: p_best_gefsatmosmean_tmax_f
+      formula: P(best_model == gefsatmosmean_tmax_f)
+    - name: p_best_nam_tmax_f
+      formula: P(best_model == nam_tmax_f)
+    - name: p_best_hrrr_tmax_f
+      formula: P(best_model == hrrr_tmax_f)
+    - name: p_best_rap_tmax_f
+      formula: P(best_model == rap_tmax_f)
+    - name: fcst_expected_bestprob
+      formula: sum(p_best * model)
+    - name: bestprob_entropy
+      formula: entropy(p_best)
+    train_fitted:
+    - name: best_model_classifier
+      fit_on: train
+      description: multinomial logistic regression
+      features:
+      - nbm_tmax_f
+      - gfs_tmax_f
+      - gefsatmosmean_tmax_f
+      - nam_tmax_f
+      - hrrr_tmax_f
+      - rap_tmax_f
+      - ens_std
+      - ens_range
+      - sin_doy
+      - cos_doy
+      - month
+      coef:
+      - - 1.1599247077819934
+        - -0.1843013042669481
+        - -0.3681057777398184
+        - -0.4954652437803356
+        - -1.0023957361102533
+        - 0.3274815958432149
+        - 0.7333029425595861
+        - -0.6502782324545173
+        - -0.4057070327593679
+        - -0.48907744376069817
+        - -0.0279745676937471
+      - - -0.7108747535694859
+        - 2.1269914051522902
+        - -0.15977609105399948
+        - -0.3137917079851882
+        - -0.45203350156873573
+        - -0.5256738760639479
+        - 0.16883360617078258
+        - -0.25965406433636373
+        - 0.0700257305349739
+        - 0.0658270031170206
+        - -0.030914785109990794
+      - - 0.3748973251745396
+        - -0.6885212974694013
+        - 1.5499610118681042
+        - -0.22858564469818785
+        - -1.3695446863364544
+        - 0.1729256207703692
+        - 0.26478496479186153
+        - -0.07030587606272583
+        - -0.16224048145456824
+        - -0.1080854508988318
+        - 0.04429405445995809
+      - - -0.1880097276389995
+        - -0.4695745131552942
+        - 0.051115172647982425
+        - 2.3884670078598296
+        - -0.21218579038931634
+        - -1.4878862191673627
+        - -0.8557014500448671
+        - 0.7744880919050521
+        - 0.11484955964246821
+        - 0.19073575264108245
+        - -0.0874248624947516
+      - - -0.7071592705149883
+        - -0.8028122636003032
+        - 0.20185716463378311
+        - -0.6252637525341174
+        - 2.5086842986255773
+        - -0.25207220060019087
+        - -0.26037875028850227
+        - 0.14135913164232486
+        - 0.23586952884237086
+        - 0.3519938600417825
+        - 0.05304684566780748
+      - - 0.07122171876693731
+        - 0.018217973339663386
+        - -1.2750514803560524
+        - -0.7253606588619986
+        - 0.5274754157791886
+        - 1.7652250792179227
+        - -0.05084131318885825
+        - 0.06439094930623722
+        - 0.14720269519412504
+        - -0.011393721140356559
+        - 0.04897331517072242
+      intercept:
+      - 0.15420200985457364
+      - 0.4921769602908641
+      - 0.01787068852392743
+      - -0.030246524992933163
+      - -0.10908852777841538
+      - -0.5249146058979969
+      scaler_mean:
+      - 63.22669649011956
+      - 63.84395424836601
+      - 63.93225178197049
+      - 63.30555555555556
+      - 63.549676836799215
+      - 62.38739490284644
+      - 1.9724350522718126
+      - 5.725624766265416
+      - 0.076249519026095
+      - -0.03830601337952942
+      - 6.2973856209150325
+      scaler_scale:
+      - 16.744913671392055
+      - 16.43538534849312
+      - 17.715798139763308
+      - 16.16064478057846
+      - 18.04587973742932
+      - 17.794629792899077
+      - 0.8943820168637893
+      - 2.6020079527995814
+      - 0.7113279903785942
+      - 0.6976612002191372
+      - 3.3521224904776066
+    imputation:
+      method: train_median
+      fill_values:
+        nbm_tmax_f: 63.175991210937525
+        gfs_tmax_f: 64.5
+        gefsatmosmean_tmax_f: 63.38288233996978
+        nam_tmax_f: 63.0
+        hrrr_tmax_f: 63.429676513671915
+        rap_tmax_f: 62.58964813232426
+        gefsatmos_tmp_spread_f: 1.985091821481542
+        month: 6.0
+        day_of_year: 167.0
+        sin_doy: 0.15951094710994368
+        cos_doy: -0.06553708331203101
+        is_weekend: 0.0
+        p_best_nbm_tmax_f: 0.17536313925503344
+        p_best_gfs_tmax_f: 0.25062541775434294
+        p_best_gefsatmosmean_tmax_f: 0.1483741709630612
+        p_best_nam_tmax_f: 0.15159218055540546
+        p_best_hrrr_tmax_f: 0.13932802497332364
+        p_best_rap_tmax_f: 0.0854113589343507
+        fcst_expected_bestprob: 64.09475617617397
+        bestprob_entropy: 1.6899574493984209

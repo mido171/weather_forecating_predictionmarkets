@@ -1,0 +1,101 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "conditional_bias_regime",
+        "name": "bias_reg0_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_regime",
+        "name": "mae_reg0_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_regime",
+        "name": "bias_reg1_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_regime",
+        "name": "mae_reg1_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_regime",
+        "name": "bias_reg2_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_regime",
+        "name": "mae_reg2_rm60_l2"
+      },
+      {
+        "formula": "conditional_bias_regime",
+        "name": "bias_reg3_rm60_l2"
+      },
+      {
+        "formula": "conditional_mae_regime",
+        "name": "mae_reg3_rm60_l2"
+      },
+      {
+        "formula": "bias_selected_by_regime",
+        "name": "bias_reg_selected_rm60_l2"
+      },
+      {
+        "formula": "mae_selected_by_regime",
+        "name": "mae_reg_selected_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bias_reg0_rm60_l2": 1.656911019273954,
+        "bias_reg1_rm60_l2": 2.5280102531051574,
+        "bias_reg2_rm60_l2": 0.7187714003696067,
+        "bias_reg3_rm60_l2": 1.0894673296528155,
+        "bias_reg_selected_rm60_l2": 1.292785770504742,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_reg0_rm60_l2": 2.2712111842699487,
+        "mae_reg1_rm60_l2": 3.237240132902151,
+        "mae_reg2_rm60_l2": 1.7739841980636668,
+        "mae_reg3_rm60_l2": 2.3381835291708626,
+        "mae_reg_selected_rm60_l2": 2.0567283768981404,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "fit_on": "train",
+        "name": "regime_thresholds",
+        "thr_spread": {
+          "KNYC": 2.465098209625438
+        },
+        "thr_temp": {
+          "KNYC": 63.284222166984335
+        }
+      }
+    ]
+  },
+  "description": "4-regime residual bias/MAE for ensemble mean",
+  "experiment_id": "E65"
+}

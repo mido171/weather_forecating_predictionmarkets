@@ -1,0 +1,87 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [
+      {
+        "formula": "mean(F)",
+        "name": "ens_mean_3"
+      },
+      {
+        "formula": "median(F)",
+        "name": "ens_median_3"
+      },
+      {
+        "formula": "min(F)",
+        "name": "ens_min_3"
+      },
+      {
+        "formula": "max(F)",
+        "name": "ens_max_3"
+      },
+      {
+        "formula": "std(F, ddof=0)",
+        "name": "ens_std_3"
+      },
+      {
+        "formula": "max(F) - min(F)",
+        "name": "ens_range_3"
+      },
+      {
+        "formula": "nbm_tmax_f - ens_median_3",
+        "name": "nbm_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|nbm_tmax_f - ens_median_3|",
+        "name": "nbm_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gfs_tmax_f - ens_median_3",
+        "name": "gfs_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gfs_tmax_f - ens_median_3|",
+        "name": "gfs_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gefsatmosmean_tmax_f - ens_median_3",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gefsatmosmean_tmax_f - ens_median_3|",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+      }
+    ],
+    "train_fitted": []
+  },
+  "description": "top3_only_plus_robust (ens_closest3_mean omitted)",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "ens_mean_3",
+    "ens_median_3",
+    "ens_min_3",
+    "ens_max_3",
+    "ens_std_3",
+    "ens_range_3",
+    "nbm_tmax_f_minus_ens_median",
+    "nbm_tmax_f_minus_ens_median_abs",
+    "gfs_tmax_f_minus_ens_median",
+    "gfs_tmax_f_minus_ens_median_abs",
+    "gefsatmosmean_tmax_f_minus_ens_median",
+    "gefsatmosmean_tmax_f_minus_ens_median_abs",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f"
+  ],
+  "strategy_id": "S08",
+  "uses_spread_feature": true
+}

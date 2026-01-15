@@ -1,0 +1,80 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "y lag",
+        "name": "y_lag2"
+      },
+      {
+        "formula": "y lag",
+        "name": "y_lag3"
+      },
+      {
+        "formula": "roll_mean(y)",
+        "name": "y_roll_mean_7_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(y)",
+        "name": "y_roll_mean_30_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "y(T-2)-y(T-3)",
+        "name": "y_delta_l2"
+      },
+      {
+        "formula": "y(T-2)-roll_mean_7",
+        "name": "y_anom_vs_recent7_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "y_anom_vs_recent7_l2": 0.1428571428571388,
+        "y_delta_l2": 1.0,
+        "y_lag2": 65.0,
+        "y_lag3": 65.0,
+        "y_roll_mean_30_l2": 64.93333333333334,
+        "y_roll_mean_7_l2": 64.64285714285714
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Lagged actual Tmax state",
+  "experiment_id": "E72"
+}

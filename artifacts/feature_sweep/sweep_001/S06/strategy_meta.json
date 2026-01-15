@@ -1,0 +1,163 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [
+      {
+        "formula": "mean(F)",
+        "name": "ens_mean_6"
+      },
+      {
+        "formula": "median(F)",
+        "name": "ens_median_6"
+      },
+      {
+        "formula": "nbm_tmax_f - ens_mean_6",
+        "name": "nbm_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|nbm_tmax_f - ens_mean_6|",
+        "name": "nbm_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "nbm_tmax_f - ens_median_6",
+        "name": "nbm_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|nbm_tmax_f - ens_median_6|",
+        "name": "nbm_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gfs_tmax_f - ens_mean_6",
+        "name": "gfs_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|gfs_tmax_f - ens_mean_6|",
+        "name": "gfs_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "gfs_tmax_f - ens_median_6",
+        "name": "gfs_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gfs_tmax_f - ens_median_6|",
+        "name": "gfs_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "gefsatmosmean_tmax_f - ens_mean_6",
+        "name": "gefsatmosmean_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|gefsatmosmean_tmax_f - ens_mean_6|",
+        "name": "gefsatmosmean_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "gefsatmosmean_tmax_f - ens_median_6",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|gefsatmosmean_tmax_f - ens_median_6|",
+        "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "nam_tmax_f - ens_mean_6",
+        "name": "nam_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|nam_tmax_f - ens_mean_6|",
+        "name": "nam_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "nam_tmax_f - ens_median_6",
+        "name": "nam_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|nam_tmax_f - ens_median_6|",
+        "name": "nam_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "hrrr_tmax_f - ens_mean_6",
+        "name": "hrrr_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|hrrr_tmax_f - ens_mean_6|",
+        "name": "hrrr_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "hrrr_tmax_f - ens_median_6",
+        "name": "hrrr_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|hrrr_tmax_f - ens_median_6|",
+        "name": "hrrr_tmax_f_minus_ens_median_abs"
+      },
+      {
+        "formula": "rap_tmax_f - ens_mean_6",
+        "name": "rap_tmax_f_minus_ens_mean"
+      },
+      {
+        "formula": "|rap_tmax_f - ens_mean_6|",
+        "name": "rap_tmax_f_minus_ens_mean_abs"
+      },
+      {
+        "formula": "rap_tmax_f - ens_median_6",
+        "name": "rap_tmax_f_minus_ens_median"
+      },
+      {
+        "formula": "|rap_tmax_f - ens_median_6|",
+        "name": "rap_tmax_f_minus_ens_median_abs"
+      }
+    ],
+    "train_fitted": []
+  },
+  "description": "add_model_vs_consensus_deltas",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "ens_mean_6",
+    "ens_median_6",
+    "nbm_tmax_f_minus_ens_mean",
+    "nbm_tmax_f_minus_ens_mean_abs",
+    "nbm_tmax_f_minus_ens_median",
+    "nbm_tmax_f_minus_ens_median_abs",
+    "gfs_tmax_f_minus_ens_mean",
+    "gfs_tmax_f_minus_ens_mean_abs",
+    "gfs_tmax_f_minus_ens_median",
+    "gfs_tmax_f_minus_ens_median_abs",
+    "gefsatmosmean_tmax_f_minus_ens_mean",
+    "gefsatmosmean_tmax_f_minus_ens_mean_abs",
+    "gefsatmosmean_tmax_f_minus_ens_median",
+    "gefsatmosmean_tmax_f_minus_ens_median_abs",
+    "nam_tmax_f_minus_ens_mean",
+    "nam_tmax_f_minus_ens_mean_abs",
+    "nam_tmax_f_minus_ens_median",
+    "nam_tmax_f_minus_ens_median_abs",
+    "hrrr_tmax_f_minus_ens_mean",
+    "hrrr_tmax_f_minus_ens_mean_abs",
+    "hrrr_tmax_f_minus_ens_median",
+    "hrrr_tmax_f_minus_ens_median_abs",
+    "rap_tmax_f_minus_ens_mean",
+    "rap_tmax_f_minus_ens_mean_abs",
+    "rap_tmax_f_minus_ens_median",
+    "rap_tmax_f_minus_ens_median_abs",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f"
+  ],
+  "strategy_id": "S06",
+  "uses_spread_feature": true
+}

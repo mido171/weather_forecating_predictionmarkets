@@ -1,0 +1,76 @@
+Metadata-Version: 2.4
+Name: weather-ml
+Version: 0.1.0
+Summary: Weather ML training pipeline for Kalshi.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy==1.26.4
+Requires-Dist: pandas==2.2.2
+Requires-Dist: pyarrow==16.1.0
+Requires-Dist: PyYAML==6.0.2
+Requires-Dist: scikit-learn==1.5.1
+Requires-Dist: matplotlib==3.9.2
+Requires-Dist: joblib==1.4.2
+Provides-Extra: gbdt
+Requires-Dist: lightgbm==4.5.0; extra == "gbdt"
+Requires-Dist: xgboost==2.1.1; extra == "gbdt"
+Requires-Dist: catboost==1.2.5; extra == "gbdt"
+Requires-Dist: scipy==1.14.1; extra == "gbdt"
+Provides-Extra: dev
+Requires-Dist: pytest==8.3.2; extra == "dev"
+
+# Weather ML (Epic 2)
+
+This package hosts the Python ML training pipeline for Kalshi weather markets.
+It trains mean and uncertainty models from the CSV snapshot produced by the
+ingestion service.
+
+## Setup
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
+
+Optional gradient-boosting dependencies:
+
+```powershell
+python -m pip install -e ".[gbdt]"
+```
+
+## Run unit tests
+
+```powershell
+pytest
+```
+
+## Train models
+
+```powershell
+python -m weather_ml.train --config configs/train_mean_sigma.yaml
+```
+
+## Run inference
+
+```powershell
+python -m weather_ml.predict --run-dir artifacts/runs/<run_id> --csv <input.csv> --output predictions.parquet
+```
+
+## Input dataset
+
+CSV location (default config):
+`ingestion-service/src/main/resources/trainingdata_output/gribstream_training_data.csv`
+
+Expected columns:
+- station_id, target_date_local, asof_utc
+- gfs_tmax_f, nam_tmax_f, gefsatmosmean_tmax_f, rap_tmax_f, hrrr_tmax_f, nbm_tmax_f
+- gefsatmos_tmp_spread_f, actual_tmax_f
+
+## Outputs
+
+Artifacts are written under `artifacts/runs/<run_id>/` including:
+- resolved config, dataset metadata + hash, feature list
+- trained mean/sigma models (joblib)
+- metrics.json and report.md
+- plots and test-set predictions

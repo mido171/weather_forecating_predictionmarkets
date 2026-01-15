@@ -1,0 +1,170 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(rank_nbm_tmax_f)",
+        "name": "rank_nbm_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_nbm_tmax_f)",
+        "name": "rank_nbm_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(rank_gfs_tmax_f)",
+        "name": "rank_gfs_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_gfs_tmax_f)",
+        "name": "rank_gfs_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(rank_gefsatmosmean_tmax_f)",
+        "name": "rank_gefsatmosmean_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_gefsatmosmean_tmax_f)",
+        "name": "rank_gefsatmosmean_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(rank_nam_tmax_f)",
+        "name": "rank_nam_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_nam_tmax_f)",
+        "name": "rank_nam_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(rank_hrrr_tmax_f)",
+        "name": "rank_hrrr_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_hrrr_tmax_f)",
+        "name": "rank_hrrr_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(rank_rap_tmax_f)",
+        "name": "rank_rap_tmax_f_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(rank_rap_tmax_f)",
+        "name": "rank_rap_tmax_f_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "entropy(top_model_freq_30_l1)",
+        "name": "top_identity_entropy_30_l1",
+        "params": {
+          "eps": 1e-09,
+          "lag": 1,
+          "window": 30
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rank_gefsatmosmean_tmax_f_roll_mean_30_l1": 3.6,
+        "rank_gefsatmosmean_tmax_f_roll_std_30_l1": 1.4282856857085735,
+        "rank_gfs_tmax_f_roll_mean_30_l1": 3.8333333333333335,
+        "rank_gfs_tmax_f_roll_std_30_l1": 1.5807874268505866,
+        "rank_hrrr_tmax_f_roll_mean_30_l1": 3.533333333333333,
+        "rank_hrrr_tmax_f_roll_std_30_l1": 1.5860503004493747,
+        "rank_nam_tmax_f_roll_mean_30_l1": 3.7666666666666666,
+        "rank_nam_tmax_f_roll_std_30_l1": 1.7307673314329568,
+        "rank_nbm_tmax_f_roll_mean_30_l1": 3.3666666666666667,
+        "rank_nbm_tmax_f_roll_std_30_l1": 1.0749676997731406,
+        "rank_rap_tmax_f_roll_mean_30_l1": 2.566666666666667,
+        "rank_rap_tmax_f_roll_std_30_l1": 1.6428295373802138,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368,
+        "top_identity_entropy_30_l1": 1.3825947200942477
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Rank stability stats + top identity entropy",
+  "experiment_id": "E11"
+}

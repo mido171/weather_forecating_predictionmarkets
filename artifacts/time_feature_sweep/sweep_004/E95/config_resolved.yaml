@@ -1,0 +1,338 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: true
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2021-02-23
+  train_end: 2025-01-30
+  test_start: 2025-02-01
+  test_end: 2025-12-31
+  gap_dates:
+  - 2025-01-31
+  validation:
+    enabled: true
+    val_start: 2024-07-01
+    val_end: 2025-01-30
+  cv:
+    enabled: true
+    n_splits: 5
+    gap_days: 2
+features:
+  base_features:
+  - gfs_tmax_f
+  - nam_tmax_f
+  - gefsatmosmean_tmax_f
+  - rap_tmax_f
+  - hrrr_tmax_f
+  - nbm_tmax_f
+  - gefsatmos_tmp_spread_f
+  ensemble_stats: true
+  pairwise_deltas: true
+  model_vs_ens_deltas: true
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - ridge
+    - random_forest
+    - gbr
+    - lgbm
+    - xgb
+    - catboost
+    primary: lgbm
+    param_grid:
+      ridge:
+        alpha:
+        - 0.1
+        - 1.0
+        - 10.0
+      random_forest:
+        n_estimators:
+        - 200
+        max_depth:
+        - 8
+        - 16
+        - null
+        min_samples_leaf:
+        - 1
+        - 3
+      gbr:
+        n_estimators:
+        - 200
+        max_depth:
+        - 3
+        - 5
+        learning_rate:
+        - 0.05
+        - 0.1
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+      xgb:
+        max_depth:
+        - 4
+        - 6
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+        subsample:
+        - 0.8
+        colsample_bytree:
+        - 0.8
+        min_child_weight:
+        - 1
+        - 5
+        reg_lambda:
+        - 1.0
+      catboost:
+        depth:
+        - 6
+        - 8
+        learning_rate:
+        - 0.05
+        - 0.1
+        iterations:
+        - 500
+        l2_leaf_reg:
+        - 3
+        - 10
+  sigma:
+    method: two_stage
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+    forecast_columns: []
+experiment:
+  experiment_id: E95
+  description: Residual quantiles per model
+  feature_columns:
+  - nbm_tmax_f
+  - gfs_tmax_f
+  - gefsatmosmean_tmax_f
+  - nam_tmax_f
+  - hrrr_tmax_f
+  - rap_tmax_f
+  - gefsatmos_tmp_spread_f
+  - month
+  - day_of_year
+  - sin_doy
+  - cos_doy
+  - is_weekend
+  - resid_nbm_tmax_f_q10_rm60_l2
+  - resid_nbm_tmax_f_q50_rm60_l2
+  - resid_nbm_tmax_f_q90_rm60_l2
+  - resid_nbm_tmax_f_iqr_rm60_l2
+  - resid_nbm_tmax_f_asym_rm60_l2
+  - resid_gfs_tmax_f_q10_rm60_l2
+  - resid_gfs_tmax_f_q50_rm60_l2
+  - resid_gfs_tmax_f_q90_rm60_l2
+  - resid_gfs_tmax_f_iqr_rm60_l2
+  - resid_gfs_tmax_f_asym_rm60_l2
+  - resid_gefsatmosmean_tmax_f_q10_rm60_l2
+  - resid_gefsatmosmean_tmax_f_q50_rm60_l2
+  - resid_gefsatmosmean_tmax_f_q90_rm60_l2
+  - resid_gefsatmosmean_tmax_f_iqr_rm60_l2
+  - resid_gefsatmosmean_tmax_f_asym_rm60_l2
+  - resid_nam_tmax_f_q10_rm60_l2
+  - resid_nam_tmax_f_q50_rm60_l2
+  - resid_nam_tmax_f_q90_rm60_l2
+  - resid_nam_tmax_f_iqr_rm60_l2
+  - resid_nam_tmax_f_asym_rm60_l2
+  - resid_hrrr_tmax_f_q10_rm60_l2
+  - resid_hrrr_tmax_f_q50_rm60_l2
+  - resid_hrrr_tmax_f_q90_rm60_l2
+  - resid_hrrr_tmax_f_iqr_rm60_l2
+  - resid_hrrr_tmax_f_asym_rm60_l2
+  - resid_rap_tmax_f_q10_rm60_l2
+  - resid_rap_tmax_f_q50_rm60_l2
+  - resid_rap_tmax_f_q90_rm60_l2
+  - resid_rap_tmax_f_iqr_rm60_l2
+  - resid_rap_tmax_f_asym_rm60_l2
+  derived_features:
+    formulas:
+    - name: resid_nbm_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_nbm_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_nbm_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_nbm_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_nbm_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    - name: resid_gfs_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_gfs_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_gfs_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_gfs_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_gfs_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    - name: resid_gefsatmosmean_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_gefsatmosmean_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_gefsatmosmean_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_gefsatmosmean_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_gefsatmosmean_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    - name: resid_nam_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_nam_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_nam_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_nam_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_nam_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    - name: resid_hrrr_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_hrrr_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_hrrr_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_hrrr_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_hrrr_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    - name: resid_rap_tmax_f_q10_rm60_l2
+      formula: rolling_quantile(resid, q=0.10)
+    - name: resid_rap_tmax_f_q50_rm60_l2
+      formula: rolling_quantile(resid, q=0.50)
+    - name: resid_rap_tmax_f_q90_rm60_l2
+      formula: rolling_quantile(resid, q=0.90)
+    - name: resid_rap_tmax_f_iqr_rm60_l2
+      formula: resid_q90 - resid_q10
+    - name: resid_rap_tmax_f_asym_rm60_l2
+      formula: '|q10| - |q90|'
+    train_fitted: []
+    imputation:
+      method: train_median
+      fill_values:
+        nbm_tmax_f: 63.175991210937525
+        gfs_tmax_f: 64.5
+        gefsatmosmean_tmax_f: 63.38288233996978
+        nam_tmax_f: 63.0
+        hrrr_tmax_f: 63.429676513671915
+        rap_tmax_f: 62.58964813232426
+        gefsatmos_tmp_spread_f: 1.985091821481542
+        month: 6.0
+        day_of_year: 167.0
+        sin_doy: 0.15951094710994368
+        cos_doy: -0.06553708331203101
+        is_weekend: 0.0
+        resid_nbm_tmax_f_q10_rm60_l2: -1.1112070312500426
+        resid_nbm_tmax_f_q50_rm60_l2: 1.4070043945311674
+        resid_nbm_tmax_f_q90_rm60_l2: 4.109603515624951
+        resid_nbm_tmax_f_iqr_rm60_l2: 5.397246582031231
+        resid_nbm_tmax_f_asym_rm60_l2: -2.9784228515622884
+        resid_gfs_tmax_f_q10_rm60_l2: -3.0
+        resid_gfs_tmax_f_q50_rm60_l2: 1.0
+        resid_gfs_tmax_f_q90_rm60_l2: 4.100000000000001
+        resid_gfs_tmax_f_iqr_rm60_l2: 7.100000000000001
+        resid_gfs_tmax_f_asym_rm60_l2: -1.9000000000000004
+        resid_gefsatmosmean_tmax_f_q10_rm60_l2: -1.8361726436490877
+        resid_gefsatmosmean_tmax_f_q50_rm60_l2: 1.3306907762097424
+        resid_gefsatmosmean_tmax_f_q90_rm60_l2: 4.685800604838702
+        resid_gefsatmosmean_tmax_f_iqr_rm60_l2: 6.608345514112665
+        resid_gefsatmosmean_tmax_f_asym_rm60_l2: -2.9389040417086636
+        resid_nam_tmax_f_q10_rm60_l2: -2.0
+        resid_nam_tmax_f_q50_rm60_l2: 1.0
+        resid_nam_tmax_f_q90_rm60_l2: 5.100000000000001
+        resid_nam_tmax_f_iqr_rm60_l2: 8.0
+        resid_nam_tmax_f_asym_rm60_l2: -3.1000000000000014
+        resid_hrrr_tmax_f_q10_rm60_l2: -2.0921029663086324
+        resid_hrrr_tmax_f_q50_rm60_l2: 1.463450927734332
+        resid_hrrr_tmax_f_q90_rm60_l2: 4.959398193359336
+        resid_hrrr_tmax_f_iqr_rm60_l2: 7.389031372070312
+        resid_hrrr_tmax_f_asym_rm60_l2: -3.411673278808511
+        resid_rap_tmax_f_q10_rm60_l2: -1.3362762451172228
+        resid_rap_tmax_f_q50_rm60_l2: 2.491603393554648
+        resid_rap_tmax_f_q90_rm60_l2: 6.213323974609337
+        resid_rap_tmax_f_iqr_rm60_l2: 7.7687533569336065
+        resid_rap_tmax_f_asym_rm60_l2: -4.920300903320223

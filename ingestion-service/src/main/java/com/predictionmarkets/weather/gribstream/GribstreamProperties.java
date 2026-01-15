@@ -20,6 +20,7 @@ public class GribstreamProperties {
   private int logBodyLimit = 2000;
   private Map<String, ModelProperties> models = new HashMap<>();
   private GefsProperties gefs = new GefsProperties();
+  private List<StationProperties> stations = new ArrayList<>();
 
   @Value("${gribstream.models.defaultMinHorizonHours:0}")
   private int defaultMinHorizonHours;
@@ -116,6 +117,14 @@ public class GribstreamProperties {
     this.gefs = gefs;
   }
 
+  public List<StationProperties> getStations() {
+    return stations;
+  }
+
+  public void setStations(List<StationProperties> stations) {
+    this.stations = stations;
+  }
+
   public static class ModelProperties {
     private int maxHorizonHours;
 
@@ -154,6 +163,54 @@ public class GribstreamProperties {
         defaults.add(i);
       }
       return defaults;
+    }
+  }
+
+  public static class StationProperties {
+    private String stationId;
+    private String zoneId;
+    private double latitude;
+    private double longitude;
+    private String name;
+
+    public String getStationId() {
+      return stationId;
+    }
+
+    public void setStationId(String stationId) {
+      this.stationId = stationId;
+    }
+
+    public String getZoneId() {
+      return zoneId;
+    }
+
+    public void setZoneId(String zoneId) {
+      this.zoneId = zoneId;
+    }
+
+    public double getLatitude() {
+      return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+      this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+      return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+      this.longitude = longitude;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
     }
   }
 }

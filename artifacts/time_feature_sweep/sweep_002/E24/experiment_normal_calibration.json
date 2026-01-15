@@ -1,0 +1,40 @@
+{
+  "bias_mean_error_f": -0.058531518612253815,
+  "calibration_window": {
+    "end": "2025-12-31",
+    "start": "2025-02-01"
+  },
+  "created_utc": "2026-01-14T23:31:36Z",
+  "dataset_ref": {
+    "dataset_hash": "ec850d6715df5451e93b6e147f0cf97ee2eed8ad5bb3f42314f49d4b2b853922",
+    "dataset_id": "89e8f8746d7d570de566c87db9a1da0cd3d088b3ed789036ca2120fa2ef4d2ee",
+    "rows_used": 332
+  },
+  "ddof": 1,
+  "error_definition": "e = actual_tmax_f - mu_hat",
+  "experiment_id": "E24",
+  "mae_f": 1.6960850219758976,
+  "method": "global_normal_residual",
+  "model_ref": {
+    "mean_model_artifact": "mean_model.joblib",
+    "model_hash": "132caac3c36225b21862458dd9dfe941b9818d35d5407f3d3f929717d53a203a",
+    "run_dir": "artifacts\\time_feature_sweep\\sweep_002\\E24"
+  },
+  "n": 332,
+  "residual_quantiles_f": {
+    "p01": -6.078305901914228,
+    "p05": -3.6543297781090347,
+    "p10": -2.8367208702846596,
+    "p50": 0.16175763284070044,
+    "p90": 2.426994818109601,
+    "p95": 3.417868177613122,
+    "p99": 4.663228859207957
+  },
+  "rmse_f": 2.1912052911368995,
+  "sigma_std_error_f": 2.1937297054611595,
+  "station_scope": {
+    "mode": "ALL",
+    "stations": []
+  },
+  "truth_lag_days": 2
+}

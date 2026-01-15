@@ -1,0 +1,59 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "page_hinkley_stat",
+        "name": "ph_stat_l2"
+      },
+      {
+        "formula": "page_hinkley_alarm",
+        "name": "ph_alarm_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "ph_alarm_l2": 0.0,
+        "ph_stat_l2": 32.36591972539449,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "delta": 0.05,
+        "fit_on": "train",
+        "name": "page_hinkley_thresholds",
+        "thresholds": {
+          "KNYC": 290.3385025055613
+        }
+      }
+    ]
+  },
+  "description": "Page-Hinkley drift statistic",
+  "experiment_id": "E68"
+}

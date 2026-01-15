@@ -1,0 +1,65 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "P(hi->hi) over 60d",
+        "name": "p11_rm60_l1"
+      },
+      {
+        "formula": "P(lo->hi) over 60d",
+        "name": "p01_rm60_l1"
+      },
+      {
+        "formula": "p11_rm60_l1 - p01_rm60_l1",
+        "name": "regime_stickiness"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "p01_rm60_l1": 0.09090908925619838,
+        "p11_rm60_l1": 0.11111109876543349,
+        "rap_tmax_f": 62.58964813232426,
+        "regime_stickiness": -0.016949152255099114,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "default": 3.1720867543728715,
+        "description": "q90_train(ens_std) per station",
+        "fit_on": "train",
+        "name": "thr_spread_hi",
+        "thresholds": {
+          "KNYC": 3.1720867543728715
+        }
+      }
+    ]
+  },
+  "description": "Spread regime transition rates",
+  "experiment_id": "E36"
+}

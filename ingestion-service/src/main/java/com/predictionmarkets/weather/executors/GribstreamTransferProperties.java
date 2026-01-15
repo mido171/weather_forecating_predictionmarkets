@@ -57,8 +57,9 @@ public class GribstreamTransferProperties {
 
   public static class Import {
     private String inputPath =
-        "D:\\Ahmed\\git\\weather\\weather_forecating_predictionmarkets"
-            + "\\ingestion-service\\src\\main\\resources\\gribstream_daily_feature.csv";
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets"
+            + "\\weather_forecating_predictionmarkets\\ingestion-service\\src\\main\\resources"
+            + "\\gribstream_daily_feature.csv";
     private int batchSize = 1000;
     private boolean hasHeader = true;
 

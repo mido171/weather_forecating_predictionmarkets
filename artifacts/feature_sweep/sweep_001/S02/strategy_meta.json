@@ -1,0 +1,32 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [],
+    "train_fitted": []
+  },
+  "description": "raw_all_6_plus_calendar",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f"
+  ],
+  "strategy_id": "S02",
+  "uses_spread_feature": true
+}

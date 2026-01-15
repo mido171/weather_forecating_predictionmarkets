@@ -1,0 +1,190 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(ens_std)",
+        "name": "ens_std_roll_mean_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(ens_std)",
+        "name": "ens_std_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(ens_std)",
+        "name": "ens_std_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(ens_range)",
+        "name": "ens_range_roll_mean_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(ens_range)",
+        "name": "ens_range_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(ens_range)",
+        "name": "ens_range_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(ens_iqr)",
+        "name": "ens_iqr_roll_mean_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(ens_iqr)",
+        "name": "ens_iqr_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(ens_iqr)",
+        "name": "ens_iqr_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(ens_mad)",
+        "name": "ens_mad_roll_mean_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(ens_mad)",
+        "name": "ens_mad_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(ens_mad)",
+        "name": "ens_mad_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(gefs_spread)",
+        "name": "gefs_spread_roll_mean_7_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 5,
+          "window": 7
+        }
+      },
+      {
+        "formula": "roll_mean(gefs_spread)",
+        "name": "gefs_spread_roll_mean_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_std(gefs_spread)",
+        "name": "gefs_spread_roll_std_30_l1",
+        "params": {
+          "lag": 1,
+          "min_periods": 21,
+          "window": 30
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_iqr_roll_mean_30_l1": 2.4585471201906945,
+        "ens_iqr_roll_mean_7_l1": 2.3930878197454604,
+        "ens_iqr_roll_std_30_l1": 1.3068724814419577,
+        "ens_mad_roll_mean_30_l1": 1.3008622614378553,
+        "ens_mad_roll_mean_7_l1": 1.2583586434219163,
+        "ens_mad_roll_std_30_l1": 0.7067771668756314,
+        "ens_range_roll_mean_30_l1": 5.786487379504808,
+        "ens_range_roll_mean_7_l1": 5.635514515678947,
+        "ens_range_roll_std_30_l1": 2.285874770412398,
+        "ens_std_roll_mean_30_l1": 2.006495234105432,
+        "ens_std_roll_mean_7_l1": 1.9378670095756092,
+        "ens_std_roll_std_30_l1": 0.7779065789454376,
+        "gefs_spread_roll_mean_30_l1": 2.2867835397862035,
+        "gefs_spread_roll_mean_7_l1": 2.2096908887337707,
+        "gefs_spread_roll_std_30_l1": 0.8378548808425025,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Rolling level/volatility of disagreement metrics",
+  "experiment_id": "E05"
+}

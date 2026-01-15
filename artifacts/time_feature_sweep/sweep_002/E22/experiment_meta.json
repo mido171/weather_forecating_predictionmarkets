@@ -1,0 +1,80 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(|resid_ens_mean|)",
+        "name": "mae_ensmean_rm30_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "sqrt(roll_mean(resid_ens_mean^2))",
+        "name": "rmse_ensmean_rm30_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "roll_mean(|resid_ens_median|)",
+        "name": "mae_ensmedian_rm30_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 21,
+          "window": 30
+        }
+      },
+      {
+        "formula": "sqrt(roll_mean(resid_ens_median^2))",
+        "name": "rmse_ensmedian_rm30_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 21,
+          "window": 30
+        }
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "mae_ensmean_rm30_l2": 2.1132737178351206,
+        "mae_ensmedian_rm30_l2": 2.1042229461144837,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "rmse_ensmean_rm30_l2": 2.7090162062084566,
+        "rmse_ensmedian_rm30_l2": 2.7128056366691,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Rolling MAE/RMSE of ensemble mean/median",
+  "experiment_id": "E22"
+}

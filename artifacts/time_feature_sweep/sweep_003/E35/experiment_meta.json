@@ -1,0 +1,105 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "P(|resid_ens_mean| > q90_train)",
+        "name": "p_hard_day"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "p_hard_day": 0.06654461865036299,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "coef": [
+          [
+            1.6710152758417056,
+            -0.14259937241930407,
+            0.9838640163289288,
+            -1.2246150503106747,
+            0.07477723622649249,
+            -0.5954269774303133,
+            0.3287777262823564,
+            1.2895840088283415,
+            1.0174983462952187,
+            0.16436777187459634
+          ]
+        ],
+        "description": "logistic regression on forecast features",
+        "features": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f",
+          "ens_std",
+          "sin_doy",
+          "cos_doy",
+          "month"
+        ],
+        "fit_on": "train",
+        "intercept": [
+          -2.64286946242343
+        ],
+        "name": "hard_day_classifier",
+        "scaler_mean": [
+          63.22669649011956,
+          63.84395424836601,
+          63.93225178197049,
+          63.30555555555556,
+          63.549676836799215,
+          62.38739490284644,
+          1.9724350522718126,
+          0.076249519026095,
+          -0.03830601337952942,
+          6.2973856209150325
+        ],
+        "scaler_scale": [
+          16.744913671392055,
+          16.43538534849312,
+          17.715798139763308,
+          16.16064478057846,
+          18.04587973742932,
+          17.794629792899077,
+          0.8943820168637893,
+          0.7113279903785942,
+          0.6976612002191372,
+          3.3521224904776066
+        ],
+        "threshold": 4.85868793059317
+      }
+    ]
+  },
+  "description": "Predicted hard-day probability",
+  "experiment_id": "E35"
+}

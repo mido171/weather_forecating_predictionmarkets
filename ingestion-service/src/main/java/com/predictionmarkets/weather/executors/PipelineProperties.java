@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "pipeline")
 public class PipelineProperties {
   private List<String> seriesTickers;
+  private String stationIdsToRun;
   private LocalDate dateStartLocal;
   private LocalDate dateEndLocal;
   private List<MosModel> models;
@@ -28,6 +29,14 @@ public class PipelineProperties {
 
   public void setSeriesTickers(List<String> seriesTickers) {
     this.seriesTickers = seriesTickers;
+  }
+
+  public String getStationIdsToRun() {
+    return stationIdsToRun;
+  }
+
+  public void setStationIdsToRun(String stationIdsToRun) {
+    this.stationIdsToRun = stationIdsToRun;
   }
 
   public LocalDate getDateStartLocal() {

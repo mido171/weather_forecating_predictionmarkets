@@ -1,0 +1,68 @@
+{
+  "calendar_enabled": true,
+  "derived_features": {
+    "rowwise": [
+      {
+        "formula": "std(F, ddof=0)",
+        "name": "ens_std_6"
+      },
+      {
+        "formula": "max(F) - min(F)",
+        "name": "ens_range_6"
+      },
+      {
+        "formula": "p25(F)",
+        "name": "ens_p25_6"
+      },
+      {
+        "formula": "p75(F)",
+        "name": "ens_p75_6"
+      },
+      {
+        "formula": "p75(F) - p25(F)",
+        "name": "ens_iqr_6"
+      },
+      {
+        "formula": "median(|F - median(F)|)",
+        "name": "ens_mad_6"
+      },
+      {
+        "formula": "max(|F - median(F)|)",
+        "name": "ens_outlier_gap_6"
+      }
+    ],
+    "train_fitted": []
+  },
+  "description": "add_dispersion_robust_spread",
+  "final_feature_columns": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "ens_std_6",
+    "ens_range_6",
+    "ens_p25_6",
+    "ens_p75_6",
+    "ens_iqr_6",
+    "ens_mad_6",
+    "ens_outlier_gap_6",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "raw_model_cols_used": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f"
+  ],
+  "strategy_id": "S05",
+  "uses_spread_feature": true
+}

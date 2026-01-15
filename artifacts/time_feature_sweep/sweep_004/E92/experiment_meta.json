@@ -1,0 +1,140 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_nbm_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "nbm_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_gfs_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "gfs_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_gefsatmosmean_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "gefsatmosmean_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_nam_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "nam_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_hrrr_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "hrrr_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid)",
+        "name": "bias_rap_tmax_f_rm60_l2",
+        "params": {
+          "lag": 2,
+          "min_periods": 42,
+          "window": 60
+        }
+      },
+      {
+        "formula": "forecast + bias_rm60",
+        "name": "rap_tmax_f_corr_rm60_l2"
+      },
+      {
+        "formula": "roll_mean(resid_ens_mean)",
+        "name": "bias_ensmean_rm60_l2"
+      },
+      {
+        "formula": "ens_mean + bias_ensmean",
+        "name": "ensmean_corr_rm60_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "bias_ensmean_rm60_l2": 1.3529924368581134,
+        "bias_gefsatmosmean_tmax_f_rm60_l2": 1.28967427807874,
+        "bias_gfs_tmax_f_rm60_l2": 0.6833333333333333,
+        "bias_hrrr_tmax_f_rm60_l2": 1.6668624369302976,
+        "bias_nam_tmax_f_rm60_l2": 1.5,
+        "bias_nbm_tmax_f_rm60_l2": 1.4753722330728531,
+        "bias_rap_tmax_f_rm60_l2": 2.465282745361286,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ensmean_corr_rm60_l2": 65.76211564005094,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gefsatmosmean_tmax_f_corr_rm60_l2": 65.55475351457498,
+        "gfs_tmax_f": 64.5,
+        "gfs_tmax_f_corr_rm60_l2": 66.7,
+        "hrrr_tmax_f": 63.429676513671915,
+        "hrrr_tmax_f_corr_rm60_l2": 65.70532694498698,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nam_tmax_f_corr_rm60_l2": 65.45,
+        "nbm_tmax_f": 63.175991210937525,
+        "nbm_tmax_f_corr_rm60_l2": 65.6434991244612,
+        "rap_tmax_f": 62.58964813232426,
+        "rap_tmax_f_corr_rm60_l2": 66.01780202229817,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Bias-corrected model forecasts",
+  "experiment_id": "E92"
+}

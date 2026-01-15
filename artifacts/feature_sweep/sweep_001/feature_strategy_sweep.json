@@ -1,0 +1,2347 @@
+{
+  "baseline_strategy_id": "S02",
+  "created_utc": "2026-01-14T15:30:50Z",
+  "dataset_ref": {
+    "csv_hash": "ec850d6715df5451e93b6e147f0cf97ee2eed8ad5bb3f42314f49d4b2b853922",
+    "csv_path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\ingestion-service\\src\\main\\resources\\trainingdata_output\\gribstream_training_data.csv",
+    "schema_version": 1
+  },
+  "leaderboard_test_mae": [
+    {
+      "mae": 1.8233745428060484,
+      "strategy_id": "S02"
+    },
+    {
+      "mae": 1.8374159232180316,
+      "strategy_id": "S05"
+    },
+    {
+      "mae": 1.8374441406752196,
+      "strategy_id": "S04"
+    },
+    {
+      "mae": 1.8551391799815056,
+      "strategy_id": "S09"
+    },
+    {
+      "mae": 1.85817982790556,
+      "strategy_id": "S10"
+    },
+    {
+      "mae": 1.8655549165814835,
+      "strategy_id": "S03"
+    },
+    {
+      "mae": 1.872457679331737,
+      "strategy_id": "S07"
+    },
+    {
+      "mae": 1.8787520415560641,
+      "strategy_id": "S06"
+    },
+    {
+      "mae": 1.8888495566676802,
+      "strategy_id": "S08"
+    },
+    {
+      "mae": 1.947112265926818,
+      "strategy_id": "S01"
+    }
+  ],
+  "leaderboard_val_mae": [
+    {
+      "mae": 1.8111215433893493,
+      "strategy_id": "S05"
+    },
+    {
+      "mae": 1.8200836963639961,
+      "strategy_id": "S06"
+    },
+    {
+      "mae": 1.8339419771433099,
+      "strategy_id": "S04"
+    },
+    {
+      "mae": 1.8517082377266942,
+      "strategy_id": "S07"
+    },
+    {
+      "mae": 1.856153391821289,
+      "strategy_id": "S03"
+    },
+    {
+      "mae": 1.8778786516906167,
+      "strategy_id": "S08"
+    },
+    {
+      "mae": 1.8849966628132042,
+      "strategy_id": "S02"
+    },
+    {
+      "mae": 1.8976530777914777,
+      "strategy_id": "S09"
+    },
+    {
+      "mae": 1.9205627707567388,
+      "strategy_id": "S10"
+    },
+    {
+      "mae": 1.9413685482712653,
+      "strategy_id": "S01"
+    }
+  ],
+  "model_ref": {
+    "allow_tuning": false,
+    "fixed_params": {
+      "bagging_fraction": 0.8,
+      "feature_fraction": 0.8,
+      "lambda_l1": 0.0,
+      "lambda_l2": 0.0,
+      "learning_rate": 0.05,
+      "min_data_in_leaf": 20,
+      "n_estimators": 300,
+      "num_leaves": 31
+    },
+    "model": "lgbm",
+    "seed": 1337
+  },
+  "split_ref": {
+    "gap_dates": [],
+    "test_end": "2025-12-31",
+    "test_start": "2025-01-01",
+    "train_end": "2024-12-31",
+    "train_start": "2021-02-23",
+    "val_end": "2024-12-31",
+    "val_start": "2024-07-01"
+  },
+  "strategies": [
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\config_resolved.yaml": "51dbe69ba0a8a73f9dd612bebb97db6ae6f33f40fa336066cf4b8e0467356180",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\feature_list.json": "6f1049f6d7cf410328c2d1e7f9326d84fb63641d6c8dbe2f63e2a41ce80bc16d",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\feature_state.joblib": "7c7751ed4a86d79c5d0a8eec5eb422d5e9dc34f834a8ba74dba6a1c5c23e6722",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\mean_model.joblib": "02d82075d0e01345d0058b544ee69a2fbcb52f1aa897114f1367da92d440ff52",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\metrics.json": "9715c5e28e4e44b11bc330df9395013eed04389bf9a70db62879a9466a501097",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\plots\\residual_hist.png": "fade0ce8aba886d9cbb3b47a89f19af8f13b03d0a0a6303907b8cbf202f71b57",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\plots\\residual_vs_pred.png": "e32ea418fa8b12dba8d89fb50763a5688847bd4428af3aa6f5bfb50c0d639299",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\predictions_test.parquet": "8719c867410b2da635cc320c7cfe3d09c6c983db6854e9e4507e004630e0953d",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\report.md": "bdb24b4777beb035920115e7fab7efda9af1d7ac458406f68e24ecbdf9b87520",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\strategy_feature_columns.json": "6f1049f6d7cf410328c2d1e7f9326d84fb63641d6c8dbe2f63e2a41ce80bc16d",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01\\strategy_meta.json": "343ba2e744b3f818434a55cbbe34650c19614d878daaed2bb0b447e2f5809b6c"
+      },
+      "calendar_enabled": false,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.05616408847779114,
+        "delta_test_corr": -0.000970875157531359,
+        "delta_test_mae": 0.1237377231207697,
+        "delta_test_rmse": 0.14266065643845183
+      },
+      "derived_features": {
+        "rowwise": [],
+        "train_fitted": []
+      },
+      "description": "raw_all_6",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.39537441614286395,
+          "corr": 0.9907997386321128,
+          "mae": 1.947112265926818,
+          "maxAE": 8.495011275067952,
+          "medianAE": 1.5734465156860722,
+          "n": 363,
+          "rmse": 2.5365183374057447
+        },
+        "train": {
+          "bias": -4.2768217435224e-11,
+          "corr": 0.9975243158812409,
+          "mae": 0.8789706022503544,
+          "maxAE": 9.332089504376338,
+          "medianAE": 0.6990897127463818,
+          "n": 1224,
+          "rmse": 1.164196668507446
+        },
+        "val": {
+          "bias": 0.031317055868185326,
+          "corr": 0.9884806035138802,
+          "mae": 1.9413685482712653,
+          "maxAE": 8.689494848888529,
+          "medianAE": 1.5200993656920794,
+          "n": 184,
+          "rmse": 2.5256258226647224
+        }
+      },
+      "num_features": 7,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S01",
+      "strategy_id": "S01",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 8.495011275067952,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 8.495011275067952,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 56.49501127506795,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 7.872695674276088,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 7.872695674276088,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 54.87269567427609,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 7.640959032515013,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 7.640959032515013,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 56.64095903251501,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 7.183715979879196,
+          "asof_utc": "2025-05-27 12:00:00+00:00",
+          "error": 7.183715979879196,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-28",
+          "y_pred": 72.1837159798792,
+          "y_true": 65.0
+        },
+        {
+          "abs_error": 6.471240648604677,
+          "asof_utc": "2025-03-20 12:00:00+00:00",
+          "error": 6.471240648604677,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-21",
+          "y_pred": 57.47124064860468,
+          "y_true": 51.0
+        },
+        {
+          "abs_error": 6.458672405980959,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.458672405980959,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.45867240598096,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.442677733113349,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -6.442677733113349,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 57.55732226688665,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.196106609620571,
+          "asof_utc": "2025-06-08 12:00:00+00:00",
+          "error": 6.196106609620571,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-09",
+          "y_pred": 70.19610660962057,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.122884936695559,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.122884936695559,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.12288493669556,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 5.986123111992342,
+          "asof_utc": "2025-05-28 12:00:00+00:00",
+          "error": 5.986123111992342,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-29",
+          "y_pred": 72.98612311199234,
+          "y_true": 67.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\config_resolved.yaml": "b2af3b6d0c93cf5b0bc1edbf69b9aebb5c94d75198576b79a9c9bb2628d87a31",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\feature_list.json": "e1811c8b4294206ba883c70a0bc224d3c62d3f296d648020c6bcc0e8a561f2ee",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\feature_state.joblib": "ba6b2e17b412f80337565614a688ba0f461e79180da0bbc4ba50b2adfb47add4",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\mean_model.joblib": "45fb226434e11cf1c56b06f6918ec46d9ca4f0eec4da01d379b6e7927161e60d",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\metrics.json": "ab4e39491f3fd0d818227097507cad9a6d5bfd4e4b7ae4e0de1012d706e71085",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\plots\\residual_hist.png": "26d9eb1bf369a2719eca5c4b0c24664cffa568c52293e6f9bcb90ac5922d4b00",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\plots\\residual_vs_pred.png": "31cbc1f379f19f9f5e2c88f49ad7aba9390fdc808f37574547406dc24aecc9fa",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\predictions_test.parquet": "4effc05ac9bee4543bcbed4d9b015d0d91732f3113a71243a1822685391c53e5",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\report.md": "f52ccad1e978d43a767c39b57a51725c50fc65eb32fe2c8c84b57e5645389033",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\strategy_feature_columns.json": "e1811c8b4294206ba883c70a0bc224d3c62d3f296d648020c6bcc0e8a561f2ee",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02\\strategy_meta.json": "d55c893c2384c1c3bacd7d31d2b3085e60c3b54b508d8d6a76af5d44e53e82f1"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.0,
+        "delta_test_corr": 0.0,
+        "delta_test_mae": 0.0,
+        "delta_test_rmse": 0.0
+      },
+      "derived_features": {
+        "rowwise": [],
+        "train_fitted": []
+      },
+      "description": "raw_all_6_plus_calendar",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.3392103276650728,
+          "corr": 0.9917706137896442,
+          "mae": 1.8233745428060484,
+          "maxAE": 9.315850611441917,
+          "medianAE": 1.4450810317990346,
+          "n": 363,
+          "rmse": 2.393857680967293
+        },
+        "train": {
+          "bias": 2.299526233916733e-10,
+          "corr": 0.9984278332481824,
+          "mae": 0.7054075988897202,
+          "maxAE": 6.967873671449375,
+          "medianAE": 0.5626503520827111,
+          "n": 1224,
+          "rmse": 0.928239448349184
+        },
+        "val": {
+          "bias": -0.34791659544399606,
+          "corr": 0.9892267412669103,
+          "mae": 1.8849966628132042,
+          "maxAE": 7.856461689708539,
+          "medianAE": 1.558761547881133,
+          "n": 184,
+          "rmse": 2.4714029954850343
+        }
+      },
+      "num_features": 12,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02",
+      "strategy_id": "S02",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 9.315850611441917,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 9.315850611441917,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 57.31585061144192,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 8.344676810906648,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -8.344676810906648,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 55.65532318909335,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 7.01800714654847,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 7.01800714654847,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 68.01800714654847,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.966507835577069,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 6.966507835577069,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 53.96650783557707,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 6.921279849807387,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.921279849807387,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.921279849807387,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.780773029965275,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 6.780773029965275,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 37.780773029965275,
+          "y_true": 31.0
+        },
+        {
+          "abs_error": 6.514226306301595,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.514226306301595,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.514226306301595,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 6.189606432652859,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.189606432652859,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.18960643265286,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.148063324648675,
+          "asof_utc": "2025-05-05 12:00:00+00:00",
+          "error": 6.148063324648675,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-06",
+          "y_pred": 70.14806332464867,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.032636655727856,
+          "asof_utc": "2025-12-07 12:00:00+00:00",
+          "error": -6.032636655727856,
+          "station_id": "KNYC",
+          "target_date_local": "2025-12-08",
+          "y_pred": 31.967363344272144,
+          "y_true": 38.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\config_resolved.yaml": "b6162a6ea5b4b6e748f8c8768d4edf33fc1b71df514a67a9757fb635c84ed2cc",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\feature_list.json": "94f0512406d13a54b3cf71d7af970329505a1c88a595751e629d44f7bb7dd02a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\feature_state.joblib": "8f14ca8922a7e86348c28cce447f63cc31e12cc720d8d11962de79d2900340de",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\mean_model.joblib": "f2a90add740b6fc5845bf6afa754e9de39652375722419a82845c3a604077fcd",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\metrics.json": "6b6f9e07477cbc4d37c34649fa20ab2e9d03ade81fc58ef640697a587459d7bc",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\plots\\residual_hist.png": "bb389888762dbd4c72f66556873a005676ea9632303bf2c61e5bb62c333f1038",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\plots\\residual_vs_pred.png": "b21a2a59a65510eb30bca95a462b6038f9b0296d09d8ec1620e53ccad04f8439",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\predictions_test.parquet": "32ab0f9ebe1f917364d92a27af4b6048d76aa8bda3b7f4fe2cabb7b0d068578d",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\report.md": "6ec73d5488444fcedb6471eff4a10de5ba69dec622a10b78e7d6b87dfe29d5c5",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\strategy_feature_columns.json": "94f0512406d13a54b3cf71d7af970329505a1c88a595751e629d44f7bb7dd02a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03\\strategy_meta.json": "2324607aa72eee6146905f808207c516924f81f77a870f3154df8743268328ae"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.02071019871525087,
+        "delta_test_corr": -0.0004669624617549273,
+        "delta_test_mae": 0.042180373775435154,
+        "delta_test_rmse": 0.06886329337866082
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_6"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_6"
+          },
+          {
+            "formula": "min(F)",
+            "name": "ens_min_6"
+          },
+          {
+            "formula": "max(F)",
+            "name": "ens_max_6"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "add_blends_center",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_6",
+        "ens_median_6",
+        "ens_min_6",
+        "ens_max_6",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.3599205263803237,
+          "corr": 0.9913036513278892,
+          "mae": 1.8655549165814835,
+          "maxAE": 10.759737443234492,
+          "medianAE": 1.4672711860687073,
+          "n": 363,
+          "rmse": 2.4627209743459537
+        },
+        "train": {
+          "bias": -8.394600918532601e-12,
+          "corr": 0.9985883738867668,
+          "mae": 0.6580803152213309,
+          "maxAE": 6.835239993949571,
+          "medianAE": 0.5261712149350508,
+          "n": 1224,
+          "rmse": 0.8798336312077021
+        },
+        "val": {
+          "bias": -0.4317836800203416,
+          "corr": 0.9895098469961376,
+          "mae": 1.856153391821289,
+          "maxAE": 8.751814338543447,
+          "medianAE": 1.4931231470921702,
+          "n": 184,
+          "rmse": 2.444869006454786
+        }
+      },
+      "num_features": 16,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S03",
+      "strategy_id": "S03",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 10.759737443234492,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 10.759737443234492,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 58.75973744323449,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 8.90619312295015,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 8.90619312295015,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 55.90619312295015,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 8.3451672277018,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -8.3451672277018,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 55.6548327722982,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 7.519957646176451,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 7.519957646176451,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 56.51995764617645,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 6.8606396173248925,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 6.8606396173248925,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 67.86063961732489,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.689023904307817,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 6.689023904307817,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 37.68902390430782,
+          "y_true": 31.0
+        },
+        {
+          "abs_error": 6.613258343574888,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.613258343574888,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.613258343574888,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.408790507590638,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.408790507590638,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.408790507590638,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.053095955155925,
+          "asof_utc": "2025-06-21 12:00:00+00:00",
+          "error": 6.053095955155925,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-22",
+          "y_pred": 94.05309595515592,
+          "y_true": 88.0
+        },
+        {
+          "abs_error": 5.89659464618849,
+          "asof_utc": "2025-06-16 12:00:00+00:00",
+          "error": 5.89659464618849,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-17",
+          "y_pred": 72.89659464618849,
+          "y_true": 67.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\config_resolved.yaml": "004ed11f1a4bd8942f7dcfae800793ec43050a25f51986509baaaa1f4683c336",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\feature_list.json": "b3e55a425e3d65ad8dc275fbefce780266bcd1f2192af33d2d9690a29e6dcdaf",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\feature_state.joblib": "247c55ad726ca9660caaf6dc217a6486cd139424ee5bbfbb2330fc9492c79da5",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\mean_model.joblib": "722b162d81acc4f24c5d3fb9c306550817d4d960f1f72d5d4e26ca38ad511195",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\metrics.json": "6082f27b23135bc15b4e7db8d68abfd7f96061627a395c8b730175c4e9f6c558",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\plots\\residual_hist.png": "6935e5c3458619a0594babf76566cefa480bb8053f842db87e2e80f5f5a644b0",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\plots\\residual_vs_pred.png": "ff55a83dcd1dea02953a48b8e87e7e144122d36c4c3f1a7ad1da0a98a97f88e8",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\predictions_test.parquet": "df15120206029a14228bfc0afde5db28b97deb114fb2faff4bdc812464a26369",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\report.md": "42ad74465765b894b22a1510411c836f8cbcab86bb4d3313b24943a6139403c1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\strategy_feature_columns.json": "b3e55a425e3d65ad8dc275fbefce780266bcd1f2192af33d2d9690a29e6dcdaf",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04\\strategy_meta.json": "6eda05dcf0ae6009bbd5192ed87f71851431203ece5fcb6eeab0417d2f859ea8"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.0153075835295986,
+        "delta_test_corr": -0.0003471921659512489,
+        "delta_test_mae": 0.014069597869171169,
+        "delta_test_rmse": 0.05095106469902344
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_6"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_6"
+          },
+          {
+            "formula": "min(F)",
+            "name": "ens_min_6"
+          },
+          {
+            "formula": "max(F)",
+            "name": "ens_max_6"
+          },
+          {
+            "formula": "mean(sorted(F)[1:-1])",
+            "name": "ens_trimmed_mean_6_1"
+          },
+          {
+            "formula": "winsorize 1 each tail then mean",
+            "name": "ens_winsor_mean_6_1"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "add_robust_blends",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_6",
+        "ens_median_6",
+        "ens_min_6",
+        "ens_max_6",
+        "ens_trimmed_mean_6_1",
+        "ens_winsor_mean_6_1",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.3545179111946714,
+          "corr": 0.9914234216236929,
+          "mae": 1.8374441406752196,
+          "maxAE": 10.921719463515402,
+          "medianAE": 1.3982459855929363,
+          "n": 363,
+          "rmse": 2.4448087456663163
+        },
+        "train": {
+          "bias": 8.893978944754612e-11,
+          "corr": 0.998571837343503,
+          "mae": 0.6602977308371885,
+          "maxAE": 6.669339528483018,
+          "medianAE": 0.5216033278991503,
+          "n": 1224,
+          "rmse": 0.8849126940126014
+        },
+        "val": {
+          "bias": -0.44650850521487195,
+          "corr": 0.9896467973182573,
+          "mae": 1.8339419771433099,
+          "maxAE": 8.96077063054598,
+          "medianAE": 1.422463374747391,
+          "n": 184,
+          "rmse": 2.42998399884983
+        }
+      },
+      "num_features": 18,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S04",
+      "strategy_id": "S04",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 10.921719463515402,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 10.921719463515402,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 58.9217194635154,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 8.41619476132962,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -8.41619476132962,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 55.58380523867038,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 8.276048493457154,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 8.276048493457154,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 55.276048493457154,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 7.298076972521798,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 7.298076972521798,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 68.2980769725218,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 7.090103695861764,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 7.090103695861764,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 56.090103695861764,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 6.331367220802246,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.331367220802246,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.331367220802246,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.282262656207436,
+          "asof_utc": "2025-06-21 12:00:00+00:00",
+          "error": 6.282262656207436,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-22",
+          "y_pred": 94.28226265620744,
+          "y_true": 88.0
+        },
+        {
+          "abs_error": 6.26687752899738,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.26687752899738,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.26687752899738,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.215304459194023,
+          "asof_utc": "2025-02-05 12:00:00+00:00",
+          "error": 6.215304459194023,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-06",
+          "y_pred": 44.21530445919402,
+          "y_true": 38.0
+        },
+        {
+          "abs_error": 6.085477149698882,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 6.085477149698882,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 37.08547714969888,
+          "y_true": 31.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\config_resolved.yaml": "9f90ab6f834a71cfbb22ec11b24b2ab447e375b5e68442625a43b80239faba4f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\feature_list.json": "4d531ff7921d4fef5f124a88b5c554f6a523f5eb2ff60dff8784455c8067798c",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\feature_state.joblib": "b8c4c01db263ff98df0c2e9bc9bc92eb78124d93b5b5d157f0c8768d07131a14",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\mean_model.joblib": "307301f69949fa9b247d5e7971225bea8b3ef88e55dee002c85af2b17c29603f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\metrics.json": "1d73a4aa96587381ab8b325d5384594b821799c77ac619ab514673a9bf11a1c5",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\plots\\residual_hist.png": "29921b454ccab0ee31e3824f8896b7b152f3be8e4bea5ea0c4ed88f06760ebe8",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\plots\\residual_vs_pred.png": "f65a28792d06c9d8efd3dcf67424fedb1651391be23bf218631c316d4847d995",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\predictions_test.parquet": "f525f09b38aa26d72d34e439abc7fa31a1473d6125f0a1a81f9cfcc1ac67af51",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\report.md": "e1a1d637ed3293bbbcf627d12e4c4e3822c0437b9fa7096500dcb6eb94b4f8b0",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\strategy_feature_columns.json": "4d531ff7921d4fef5f124a88b5c554f6a523f5eb2ff60dff8784455c8067798c",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05\\strategy_meta.json": "d975492f6859d098e1d665549f1882cbd10928eb3c5296daeb2981f07d44a613"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.009228231892733252,
+        "delta_test_corr": -7.848793487919004e-06,
+        "delta_test_mae": 0.014041380411983218,
+        "delta_test_rmse": 0.0021562506458581154
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "std(F, ddof=0)",
+            "name": "ens_std_6"
+          },
+          {
+            "formula": "max(F) - min(F)",
+            "name": "ens_range_6"
+          },
+          {
+            "formula": "p25(F)",
+            "name": "ens_p25_6"
+          },
+          {
+            "formula": "p75(F)",
+            "name": "ens_p75_6"
+          },
+          {
+            "formula": "p75(F) - p25(F)",
+            "name": "ens_iqr_6"
+          },
+          {
+            "formula": "median(|F - median(F)|)",
+            "name": "ens_mad_6"
+          },
+          {
+            "formula": "max(|F - median(F)|)",
+            "name": "ens_outlier_gap_6"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "add_dispersion_robust_spread",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_std_6",
+        "ens_range_6",
+        "ens_p25_6",
+        "ens_p75_6",
+        "ens_iqr_6",
+        "ens_mad_6",
+        "ens_outlier_gap_6",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.34843855955780606,
+          "corr": 0.9917627649961562,
+          "mae": 1.8374159232180316,
+          "maxAE": 8.625584452208258,
+          "medianAE": 1.433675608773214,
+          "n": 363,
+          "rmse": 2.396013931613151
+        },
+        "train": {
+          "bias": 1.610609975091244e-11,
+          "corr": 0.9990028824418004,
+          "mae": 0.5262434645258992,
+          "maxAE": 7.064211214294524,
+          "medianAE": 0.4109193686803856,
+          "n": 1224,
+          "rmse": 0.7399925901860464
+        },
+        "val": {
+          "bias": -0.2845501256594513,
+          "corr": 0.9899752250908121,
+          "mae": 1.8111215433893493,
+          "maxAE": 7.923432812910136,
+          "medianAE": 1.40079794654784,
+          "n": 184,
+          "rmse": 2.3851195063118333
+        }
+      },
+      "num_features": 19,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S05",
+      "strategy_id": "S05",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 8.625584452208258,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 8.625584452208258,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 55.62558445220826,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 8.272736299757653,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 8.272736299757653,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 56.27273629975765,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 7.121757725791603,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -7.121757725791603,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 56.8782422742084,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.4883994695181,
+          "asof_utc": "2025-05-28 12:00:00+00:00",
+          "error": 6.4883994695181,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-29",
+          "y_pred": 73.4883994695181,
+          "y_true": 67.0
+        },
+        {
+          "abs_error": 6.480322986237276,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.480322986237276,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.480322986237276,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.467184114000176,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 6.467184114000176,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 67.46718411400018,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.365702772671966,
+          "asof_utc": "2025-12-07 12:00:00+00:00",
+          "error": -6.365702772671966,
+          "station_id": "KNYC",
+          "target_date_local": "2025-12-08",
+          "y_pred": 31.634297227328034,
+          "y_true": 38.0
+        },
+        {
+          "abs_error": 6.30319530906543,
+          "asof_utc": "2025-07-30 12:00:00+00:00",
+          "error": -6.30319530906543,
+          "station_id": "KNYC",
+          "target_date_local": "2025-07-31",
+          "y_pred": 82.69680469093457,
+          "y_true": 89.0
+        },
+        {
+          "abs_error": 6.269773612879334,
+          "asof_utc": "2025-03-20 12:00:00+00:00",
+          "error": 6.269773612879334,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-21",
+          "y_pred": 57.269773612879334,
+          "y_true": 51.0
+        },
+        {
+          "abs_error": 6.033110988014094,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.033110988014094,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.033110988014094,
+          "y_true": 49.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\config_resolved.yaml": "25445757a567b139e2637f632f14d3cd05d8d0f88a1c84aada39680e218f3d0a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\feature_list.json": "c549536e385f5b28d15992dfa2f488e6023ff902aaef23e0670b18e010220e1a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\feature_state.joblib": "44f67be72d80f93bb9e13eb4a308e8e3d783eb646ecd5d78ef58c2cf93bf1607",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\mean_model.joblib": "acae99f6fd6dcb622f63eac28e0218f54cd68a20209597d0ae5b3f36007a6c67",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\metrics.json": "28506d7a5b1ca04a6cb35666af12fe4aea0b5113e9ebc7f2fd950267c6e39506",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\plots\\residual_hist.png": "fea9ac771e7798b09e4d953f1c78cdc7a7577828cb4f2092f9fc4bedd5d2c746",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\plots\\residual_vs_pred.png": "266b7f9b7b398e33b442efd673c58bf3f3d011f31058253410eb715667114e44",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\predictions_test.parquet": "e21ec0250c21f1d097cb2d4cec85e2747aa3c007edb4991118c33e2f46aaa90b",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\report.md": "4291fcd7a56e29c48e0c84f3e3412e1673096bb3baf976ef973db77def834121",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\strategy_feature_columns.json": "c549536e385f5b28d15992dfa2f488e6023ff902aaef23e0670b18e010220e1a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06\\strategy_meta.json": "ef2caf677a52edc9e5f06e75436754f8897365e63939190cff52b12145812d77"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.0937829419491335,
+        "delta_test_corr": -0.000283323119039669,
+        "delta_test_mae": 0.05537749875001574,
+        "delta_test_rmse": 0.056580348626183774
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_6"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_6"
+          },
+          {
+            "formula": "nbm_tmax_f - ens_mean_6",
+            "name": "nbm_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|nbm_tmax_f - ens_mean_6|",
+            "name": "nbm_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "nbm_tmax_f - ens_median_6",
+            "name": "nbm_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|nbm_tmax_f - ens_median_6|",
+            "name": "nbm_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gfs_tmax_f - ens_mean_6",
+            "name": "gfs_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|gfs_tmax_f - ens_mean_6|",
+            "name": "gfs_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "gfs_tmax_f - ens_median_6",
+            "name": "gfs_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gfs_tmax_f - ens_median_6|",
+            "name": "gfs_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gefsatmosmean_tmax_f - ens_mean_6",
+            "name": "gefsatmosmean_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|gefsatmosmean_tmax_f - ens_mean_6|",
+            "name": "gefsatmosmean_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "gefsatmosmean_tmax_f - ens_median_6",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gefsatmosmean_tmax_f - ens_median_6|",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "nam_tmax_f - ens_mean_6",
+            "name": "nam_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|nam_tmax_f - ens_mean_6|",
+            "name": "nam_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "nam_tmax_f - ens_median_6",
+            "name": "nam_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|nam_tmax_f - ens_median_6|",
+            "name": "nam_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "hrrr_tmax_f - ens_mean_6",
+            "name": "hrrr_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|hrrr_tmax_f - ens_mean_6|",
+            "name": "hrrr_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "hrrr_tmax_f - ens_median_6",
+            "name": "hrrr_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|hrrr_tmax_f - ens_median_6|",
+            "name": "hrrr_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "rap_tmax_f - ens_mean_6",
+            "name": "rap_tmax_f_minus_ens_mean"
+          },
+          {
+            "formula": "|rap_tmax_f - ens_mean_6|",
+            "name": "rap_tmax_f_minus_ens_mean_abs"
+          },
+          {
+            "formula": "rap_tmax_f - ens_median_6",
+            "name": "rap_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|rap_tmax_f - ens_median_6|",
+            "name": "rap_tmax_f_minus_ens_median_abs"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "add_model_vs_consensus_deltas",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_6",
+        "ens_median_6",
+        "nbm_tmax_f_minus_ens_mean",
+        "nbm_tmax_f_minus_ens_mean_abs",
+        "nbm_tmax_f_minus_ens_median",
+        "nbm_tmax_f_minus_ens_median_abs",
+        "gfs_tmax_f_minus_ens_mean",
+        "gfs_tmax_f_minus_ens_mean_abs",
+        "gfs_tmax_f_minus_ens_median",
+        "gfs_tmax_f_minus_ens_median_abs",
+        "gefsatmosmean_tmax_f_minus_ens_mean",
+        "gefsatmosmean_tmax_f_minus_ens_mean_abs",
+        "gefsatmosmean_tmax_f_minus_ens_median",
+        "gefsatmosmean_tmax_f_minus_ens_median_abs",
+        "nam_tmax_f_minus_ens_mean",
+        "nam_tmax_f_minus_ens_mean_abs",
+        "nam_tmax_f_minus_ens_median",
+        "nam_tmax_f_minus_ens_median_abs",
+        "hrrr_tmax_f_minus_ens_mean",
+        "hrrr_tmax_f_minus_ens_mean_abs",
+        "hrrr_tmax_f_minus_ens_median",
+        "hrrr_tmax_f_minus_ens_median_abs",
+        "rap_tmax_f_minus_ens_mean",
+        "rap_tmax_f_minus_ens_mean_abs",
+        "rap_tmax_f_minus_ens_median",
+        "rap_tmax_f_minus_ens_median_abs",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.4329932696142063,
+          "corr": 0.9914872906706045,
+          "mae": 1.8787520415560641,
+          "maxAE": 9.82349589639994,
+          "medianAE": 1.4520667995452925,
+          "n": 363,
+          "rmse": 2.4504380295934767
+        },
+        "train": {
+          "bias": -5.175795014074508e-11,
+          "corr": 0.9995913115593564,
+          "mae": 0.32652091059955246,
+          "maxAE": 6.494724946535687,
+          "medianAE": 0.255158491239186,
+          "n": 1224,
+          "rmse": 0.47431800675479735
+        },
+        "val": {
+          "bias": -0.352660258202876,
+          "corr": 0.9896994815088618,
+          "mae": 1.8200836963639961,
+          "maxAE": 7.981292726818978,
+          "medianAE": 1.3341346271735262,
+          "n": 184,
+          "rmse": 2.4272428128560155
+        }
+      },
+      "num_features": 38,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S06",
+      "strategy_id": "S06",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 9.82349589639994,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 9.82349589639994,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 57.82349589639994,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 8.73505296702892,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 8.73505296702892,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 55.73505296702892,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 8.08130352301778,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -8.08130352301778,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 55.91869647698222,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 7.355688410405051,
+          "asof_utc": "2025-07-30 12:00:00+00:00",
+          "error": -7.355688410405051,
+          "station_id": "KNYC",
+          "target_date_local": "2025-07-31",
+          "y_pred": 81.64431158959495,
+          "y_true": 89.0
+        },
+        {
+          "abs_error": 7.111702190317239,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 7.111702190317239,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 38.11170219031724,
+          "y_true": 31.0
+        },
+        {
+          "abs_error": 6.585525052228494,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.585525052228494,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.585525052228494,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.388218375124737,
+          "asof_utc": "2025-05-05 12:00:00+00:00",
+          "error": 6.388218375124737,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-06",
+          "y_pred": 70.38821837512474,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.0228068820864635,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.0228068820864635,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.02280688208646,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 5.977582911439903,
+          "asof_utc": "2025-04-11 12:00:00+00:00",
+          "error": 5.977582911439903,
+          "station_id": "KNYC",
+          "target_date_local": "2025-04-12",
+          "y_pred": 45.9775829114399,
+          "y_true": 40.0
+        },
+        {
+          "abs_error": 5.963216284430359,
+          "asof_utc": "2025-03-19 12:00:00+00:00",
+          "error": 5.963216284430359,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-20",
+          "y_pred": 57.96321628443036,
+          "y_true": 52.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\config_resolved.yaml": "1d5ba5ecc2ddfefcdf9310ba6d389acc9c08679ce3f32c09fcccdece2bd319b7",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\feature_list.json": "a0b06415c254e16029d173de24b62f5bf94ad0a131172ffe1951ef8d717f1a38",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\feature_state.joblib": "7c75321ca3faeb96f78d7bd6163482e25b2dc9e54da35b4c09ec8a3c0ef97327",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\mean_model.joblib": "2abc0273a713046935b9d67d0570cf87f14ac54b7e629c1b8421e355c158417f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\metrics.json": "df702e8ab4337d96c92eb538d47b04b87d2169e71d7d45dedd29df0e36706400",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\plots\\residual_hist.png": "dfa0f35cc915c4632253a708d9b74e7b4b7305e60dab4f204da3a708989611f9",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\plots\\residual_vs_pred.png": "1960b6f2d7331f9574e8a1461869bd4b84902278cfc4dc6341bd03ea9fc1d59f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\predictions_test.parquet": "8489888dd2f6b9f946650dcd08412b0d9fb9d4f67b94204fb8f5d54a4221e997",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\report.md": "dca29a5de975203743a3f20dc3f07b304b66aeff273ed86243dda8804cfeb340",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\strategy_feature_columns.json": "a0b06415c254e16029d173de24b62f5bf94ad0a131172ffe1951ef8d717f1a38",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07\\strategy_meta.json": "98f24d5be1d61271607eee9041139fcfc3dabb9b87d084d7b63e61de3bbea526"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.08989619816349542,
+        "delta_test_corr": -0.00011824978189856061,
+        "delta_test_mae": 0.04908313652568852,
+        "delta_test_rmse": 0.030980814697333603
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_5"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_5"
+          },
+          {
+            "formula": "min(F)",
+            "name": "ens_min_5"
+          },
+          {
+            "formula": "max(F)",
+            "name": "ens_max_5"
+          },
+          {
+            "formula": "mean(sorted(F)[1:-1])",
+            "name": "ens_trimmed_mean_5_1"
+          },
+          {
+            "formula": "winsorize 1 each tail then mean",
+            "name": "ens_winsor_mean_5_1"
+          },
+          {
+            "formula": "std(F, ddof=0)",
+            "name": "ens_std_5"
+          },
+          {
+            "formula": "p75(F) - p25(F)",
+            "name": "ens_iqr_5"
+          },
+          {
+            "formula": "nbm_tmax_f - ens_median_5",
+            "name": "nbm_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|nbm_tmax_f - ens_median_5|",
+            "name": "nbm_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gfs_tmax_f - ens_median_5",
+            "name": "gfs_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gfs_tmax_f - ens_median_5|",
+            "name": "gfs_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gefsatmosmean_tmax_f - ens_median_5",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gefsatmosmean_tmax_f - ens_median_5|",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "nam_tmax_f - ens_median_5",
+            "name": "nam_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|nam_tmax_f - ens_median_5|",
+            "name": "nam_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "hrrr_tmax_f - ens_median_5",
+            "name": "hrrr_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|hrrr_tmax_f - ens_median_5|",
+            "name": "hrrr_tmax_f_minus_ens_median_abs"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "drop_worst_rap_plus_derived",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_5",
+        "ens_median_5",
+        "ens_min_5",
+        "ens_max_5",
+        "ens_trimmed_mean_5_1",
+        "ens_winsor_mean_5_1",
+        "ens_std_5",
+        "ens_iqr_5",
+        "nbm_tmax_f_minus_ens_median",
+        "nbm_tmax_f_minus_ens_median_abs",
+        "gfs_tmax_f_minus_ens_median",
+        "gfs_tmax_f_minus_ens_median_abs",
+        "gefsatmosmean_tmax_f_minus_ens_median",
+        "gefsatmosmean_tmax_f_minus_ens_median_abs",
+        "nam_tmax_f_minus_ens_median",
+        "nam_tmax_f_minus_ens_median_abs",
+        "hrrr_tmax_f_minus_ens_median",
+        "hrrr_tmax_f_minus_ens_median_abs",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.42910652582856823,
+          "corr": 0.9916523640077456,
+          "mae": 1.872457679331737,
+          "maxAE": 10.848910351534812,
+          "medianAE": 1.5235665583826403,
+          "n": 363,
+          "rmse": 2.4248384956646265
+        },
+        "train": {
+          "bias": 9.037357354843296e-11,
+          "corr": 0.9993879322710026,
+          "mae": 0.41009601910099064,
+          "maxAE": 7.219652365291417,
+          "medianAE": 0.3141988415008896,
+          "n": 1224,
+          "rmse": 0.580239316352962
+        },
+        "val": {
+          "bias": -0.3697793366579188,
+          "corr": 0.9898099348182251,
+          "mae": 1.8517082377266942,
+          "maxAE": 7.787370003716703,
+          "medianAE": 1.3648172177862392,
+          "n": 184,
+          "rmse": 2.4194047207142684
+        }
+      },
+      "num_features": 29,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S07",
+      "strategy_id": "S07",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 10.848910351534812,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 10.848910351534812,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 58.84891035153481,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 7.0291925242888595,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 7.0291925242888595,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 54.02919252428886,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 6.760752725182286,
+          "asof_utc": "2025-05-05 12:00:00+00:00",
+          "error": 6.760752725182286,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-06",
+          "y_pred": 70.76075272518229,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.414549404074805,
+          "asof_utc": "2025-05-04 12:00:00+00:00",
+          "error": 6.414549404074805,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-05",
+          "y_pred": 67.4145494040748,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.353054138756299,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -6.353054138756299,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 57.6469458612437,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.290044559556684,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.290044559556684,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.290044559556684,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.027315975573465,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 6.027315975573465,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 37.027315975573465,
+          "y_true": 31.0
+        },
+        {
+          "abs_error": 5.902753231062174,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 5.902753231062174,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 25.902753231062174,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 5.898721801230586,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 5.898721801230586,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 54.898721801230586,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 5.894084145834512,
+          "asof_utc": "2025-07-30 12:00:00+00:00",
+          "error": -5.894084145834512,
+          "station_id": "KNYC",
+          "target_date_local": "2025-07-31",
+          "y_pred": 83.10591585416549,
+          "y_true": 89.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\config_resolved.yaml": "ee7a5ba798c90d4e4e7ac6643eed353d80dc789afd2327934657fe199d8d3fdd",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\feature_list.json": "0dc8af2fc6e1d9a17735bc921af75afa7c54fb76ce35493129a0912951a1be8f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\feature_state.joblib": "d3d01a0fd832669b3315b0277b456b5fe76ba2f3e0b51d6ac6c90d14bc49d316",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\mean_model.joblib": "8a9af8692f97aaa18779d0372ba75241791150c8e1eafa99409e3ea358c3bdad",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\metrics.json": "cd22ad4fafd335c04dc9d59f7cb32d361067c5fd80834e6db7a6f36f1b35f8e7",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\plots\\residual_hist.png": "8cd14d81c84f4507420c76de452a0bf6d5adad71a5bb19eac41fc62b218c8e3c",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\plots\\residual_vs_pred.png": "412da23d2c3db2944e60bfb7c28bfbceab5dbe15dfaa0273c9578504d360de68",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\predictions_test.parquet": "d8375b2c513356702885a701e25f9f66003c70069289bb97bc3966b95793fb2c",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\report.md": "5860fab29316026cdb66db3800d3f72b3ace205736a8ca205df633f82db13a0b",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\strategy_feature_columns.json": "0dc8af2fc6e1d9a17735bc921af75afa7c54fb76ce35493129a0912951a1be8f",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08\\strategy_meta.json": "1cdc03e7042d991d7a103502d971b5d692df792ee8da132314f07678946452f5"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": 0.05553596963581919,
+        "delta_test_corr": -0.00036175498012880336,
+        "delta_test_mae": 0.06547501386163179,
+        "delta_test_rmse": 0.05879039531142238
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_3"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_3"
+          },
+          {
+            "formula": "min(F)",
+            "name": "ens_min_3"
+          },
+          {
+            "formula": "max(F)",
+            "name": "ens_max_3"
+          },
+          {
+            "formula": "std(F, ddof=0)",
+            "name": "ens_std_3"
+          },
+          {
+            "formula": "max(F) - min(F)",
+            "name": "ens_range_3"
+          },
+          {
+            "formula": "nbm_tmax_f - ens_median_3",
+            "name": "nbm_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|nbm_tmax_f - ens_median_3|",
+            "name": "nbm_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gfs_tmax_f - ens_median_3",
+            "name": "gfs_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gfs_tmax_f - ens_median_3|",
+            "name": "gfs_tmax_f_minus_ens_median_abs"
+          },
+          {
+            "formula": "gefsatmosmean_tmax_f - ens_median_3",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median"
+          },
+          {
+            "formula": "|gefsatmosmean_tmax_f - ens_median_3|",
+            "name": "gefsatmosmean_tmax_f_minus_ens_median_abs"
+          }
+        ],
+        "train_fitted": []
+      },
+      "description": "top3_only_plus_robust (ens_closest3_mean omitted)",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_3",
+        "ens_median_3",
+        "ens_min_3",
+        "ens_max_3",
+        "ens_std_3",
+        "ens_range_3",
+        "nbm_tmax_f_minus_ens_median",
+        "nbm_tmax_f_minus_ens_median_abs",
+        "gfs_tmax_f_minus_ens_median",
+        "gfs_tmax_f_minus_ens_median_abs",
+        "gefsatmosmean_tmax_f_minus_ens_median",
+        "gefsatmosmean_tmax_f_minus_ens_median_abs",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.394746297300892,
+          "corr": 0.9914088588095153,
+          "mae": 1.8888495566676802,
+          "maxAE": 8.259472280102088,
+          "medianAE": 1.5376025046669781,
+          "n": 363,
+          "rmse": 2.4526480762787153
+        },
+        "train": {
+          "bias": -9.336217202388195e-11,
+          "corr": 0.998945662965711,
+          "mae": 0.5654046709674955,
+          "maxAE": 6.031895736537162,
+          "medianAE": 0.46151000332276126,
+          "n": 1224,
+          "rmse": 0.7608643982377872
+        },
+        "val": {
+          "bias": -0.1542156160782601,
+          "corr": 0.9888574956928762,
+          "mae": 1.8778786516906167,
+          "maxAE": 8.930470111658025,
+          "medianAE": 1.4362598539819693,
+          "n": 184,
+          "rmse": 2.4745581395788654
+        }
+      },
+      "num_features": 21,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S08",
+      "strategy_id": "S08",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 8.259472280102088,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -8.259472280102088,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 55.74052771989791,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 7.964672220773409,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 7.964672220773409,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 54.96467222077341,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 7.247541778696764,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 7.247541778696764,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 55.247541778696764,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 6.72210803651987,
+          "asof_utc": "2025-06-16 12:00:00+00:00",
+          "error": 6.72210803651987,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-17",
+          "y_pred": 73.72210803651987,
+          "y_true": 67.0
+        },
+        {
+          "abs_error": 6.5669604559015795,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.5669604559015795,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.56696045590158,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 6.470638472635429,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.470638472635429,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.47063847263543,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.352774941889717,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.352774941889717,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.352774941889717,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.315212755505442,
+          "asof_utc": "2025-07-30 12:00:00+00:00",
+          "error": -6.315212755505442,
+          "station_id": "KNYC",
+          "target_date_local": "2025-07-31",
+          "y_pred": 82.68478724449456,
+          "y_true": 89.0
+        },
+        {
+          "abs_error": 6.2201915668418195,
+          "asof_utc": "2025-05-05 12:00:00+00:00",
+          "error": 6.2201915668418195,
+          "station_id": "KNYC",
+          "target_date_local": "2025-05-06",
+          "y_pred": 70.22019156684182,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.135195776504901,
+          "asof_utc": "2025-06-21 12:00:00+00:00",
+          "error": 6.135195776504901,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-22",
+          "y_pred": 94.1351957765049,
+          "y_true": 88.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\config_resolved.yaml": "c3602939a49bc0ac3d8d13691432dee1e23c40d0790f87bafea0abc88cd8ff47",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\feature_list.json": "bdc66f3f51fa7887eedebe2214d3db90dd42c60efa70cb641c21b6f4bba56d5e",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\feature_state.joblib": "d3fd92860468638e2720c9069c0e69e69a6f611a44fb660ad593257c78d0837e",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\mean_model.joblib": "eb25814895860851476989783f15c1a9eb85da1f7c5ed997fc830df50f54fc3a",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\metrics.json": "0913240f9c91ba8321feebfe59478825f59ea2ab9812b59ff82a84770cd19fe7",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\plots\\residual_hist.png": "b65444baaaff1b8542ceca95094f8969476ef28b895678f0c53267acabf7b681",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\plots\\residual_vs_pred.png": "a087a3f225afadf3af7fd5fc58f9e2bfd794b9e834c5408e65a976d7bbece5a0",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\predictions_test.parquet": "a08dd00756f43416e667583443218e56acd14e2ad0751e805aab3f035e292392",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\report.md": "b9bc41cd004be71f098d7e55fc929f902be12cf32e55ee81189d6e53dd4ae3db",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\strategy_feature_columns.json": "bdc66f3f51fa7887eedebe2214d3db90dd42c60efa70cb641c21b6f4bba56d5e",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09\\strategy_meta.json": "8b775cd4e5295305bd359550aa290c49592f3b70b1bb2ea9641f59c5b9e96d4b"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": -0.018081081830043866,
+        "delta_test_corr": -0.00029149412870654867,
+        "delta_test_mae": 0.03176463717545719,
+        "delta_test_rmse": 0.03830251898756876
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "mean(F)",
+            "name": "ens_mean_6"
+          },
+          {
+            "formula": "median(F)",
+            "name": "ens_median_6"
+          },
+          {
+            "formula": "mean(F) on bias-corrected inputs",
+            "name": "ens_mean_bc_6"
+          },
+          {
+            "formula": "median(F) on bias-corrected inputs",
+            "name": "ens_median_bc_6"
+          },
+          {
+            "formula": "mean(sorted(F)[1:-1]) on bias-corrected inputs",
+            "name": "ens_trimmed_mean_bc_6_1"
+          }
+        ],
+        "train_fitted": [
+          {
+            "description": "bias_m_train = mean(y - m); m_bc = m + bias_m_train",
+            "features_added": [
+              "nbm_tmax_f_bc",
+              "gfs_tmax_f_bc",
+              "gefsatmosmean_tmax_f_bc",
+              "nam_tmax_f_bc",
+              "hrrr_tmax_f_bc",
+              "rap_tmax_f_bc",
+              "ens_mean_bc_6",
+              "ens_median_bc_6",
+              "ens_trimmed_mean_bc_6_1"
+            ],
+            "fit_on": "train",
+            "models": [
+              "nbm_tmax_f",
+              "gfs_tmax_f",
+              "gefsatmosmean_tmax_f",
+              "nam_tmax_f",
+              "hrrr_tmax_f",
+              "rap_tmax_f"
+            ],
+            "name": "bias_correction"
+          }
+        ]
+      },
+      "description": "bias_corrected_inputs_and_blends",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_mean_6",
+        "ens_median_6",
+        "nbm_tmax_f_bc",
+        "gfs_tmax_f_bc",
+        "gefsatmosmean_tmax_f_bc",
+        "nam_tmax_f_bc",
+        "hrrr_tmax_f_bc",
+        "rap_tmax_f_bc",
+        "ens_mean_bc_6",
+        "ens_median_bc_6",
+        "ens_trimmed_mean_bc_6_1",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.32112924583502894,
+          "corr": 0.9914791196609376,
+          "mae": 1.8551391799815056,
+          "maxAE": 9.061260886099546,
+          "medianAE": 1.415031042200411,
+          "n": 363,
+          "rmse": 2.4321601999548617
+        },
+        "train": {
+          "bias": -3.151753658349674e-11,
+          "corr": 0.998527717766329,
+          "mae": 0.6748585021104346,
+          "maxAE": 6.8450999731316,
+          "medianAE": 0.5316810146705464,
+          "n": 1224,
+          "rmse": 0.898532485916865
+        },
+        "val": {
+          "bias": -0.4193476008815299,
+          "corr": 0.9892887917705406,
+          "mae": 1.8976530777914777,
+          "maxAE": 8.396994467112197,
+          "medianAE": 1.517371665503326,
+          "n": 184,
+          "rmse": 2.46950361566835
+        }
+      },
+      "num_features": 23,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S09",
+      "strategy_id": "S09",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 9.061260886099546,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 9.061260886099546,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 57.06126088609955,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 8.301913515298153,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 8.301913515298153,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 55.30191351529815,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 7.766824643803226,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -7.766824643803226,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 56.233175356196774,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.9698434824361755,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.9698434824361755,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.969843482436175,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.682271580241348,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 6.682271580241348,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 67.68227158024135,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.593232221408513,
+          "asof_utc": "2025-02-01 12:00:00+00:00",
+          "error": 6.593232221408513,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-02",
+          "y_pred": 37.59323222140851,
+          "y_true": 31.0
+        },
+        {
+          "abs_error": 6.307831060659019,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.307831060659019,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.30783106065902,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.22102249445058,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.22102249445058,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.22102249445058,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 6.158752132292122,
+          "asof_utc": "2025-06-16 12:00:00+00:00",
+          "error": 6.158752132292122,
+          "station_id": "KNYC",
+          "target_date_local": "2025-06-17",
+          "y_pred": 73.15875213229212,
+          "y_true": 67.0
+        },
+        {
+          "abs_error": 6.136479082904721,
+          "asof_utc": "2025-12-07 12:00:00+00:00",
+          "error": -6.136479082904721,
+          "station_id": "KNYC",
+          "target_date_local": "2025-12-08",
+          "y_pred": 31.86352091709528,
+          "y_true": 38.0
+        }
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\config_resolved.yaml": "f3eba7a08d4a71c666ff3861324c2a9aaeb2cefbac80a30fe0d7c02625c1abb5",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\feature_list.json": "fd0291f49a986dfb2e68610a54412fabd4363952f51da2b1d02e54e0063bdfba",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\feature_state.joblib": "5c95cf011e13e8d40c69dfbdd3093b4ecc6db02d8870257847c9c9e1ff98ed73",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\mean_model.joblib": "fb428178c5043141b10bfa457286bed14aee42d985fa96d596361e517e235cdf",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\metrics.json": "27c1bdd8b76ee0638ac7bfd8bc65fe5ab19ab371369cec413b50df730629ab83",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\plots\\residual_hist.png": "a3754d1620536df20daeb683293e14f7bae6d54cdac18b32e5a916d040de0eed",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\plots\\residual_vs_pred.png": "50c475e5b78d083c09aac7dfb6d9899f53354f925c84254032ec3188d2da362e",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\predictions_test.parquet": "2f99ce76cf777a24a50f5993aaae055e35fc5d7af0bd2a7a63cfe75ba5a2f28b",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\report.md": "08dd4b668bf8d391996019702d217e97aeeba33f5fafba5e58b8ff8f6f9d25c3",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\sigma_model.joblib": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\strategy_feature_columns.json": "fd0291f49a986dfb2e68610a54412fabd4363952f51da2b1d02e54e0063bdfba",
+        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10\\strategy_meta.json": "599ec97ca7778eb44714a0d7e9eecf05ade8087735927aa05227d3eae3ceb837"
+      },
+      "calendar_enabled": true,
+      "deltas_vs_baseline": {
+        "baseline_strategy_id": "S02",
+        "delta_test_bias": -0.06349746202021195,
+        "delta_test_corr": -0.00026056617774772306,
+        "delta_test_mae": 0.03480528509951153,
+        "delta_test_rmse": 0.030001361602275622
+      },
+      "derived_features": {
+        "rowwise": [
+          {
+            "formula": "median(F)",
+            "name": "ens_median_6"
+          }
+        ],
+        "train_fitted": [
+          {
+            "description": "mae_m_train; w_m=1/(mae+1e-6) normalized; ens_wmean",
+            "features_added": [
+              "w_nbm",
+              "w_gfs",
+              "w_gefsatmosmean",
+              "w_nam",
+              "w_hrrr",
+              "w_rap",
+              "ens_wmean_6",
+              "ens_wmean_minus_median"
+            ],
+            "fit_on": "train",
+            "name": "reliability_weights",
+            "weights_norm": {
+              "gefsatmosmean_tmax_f": 0.1683770372022246,
+              "gfs_tmax_f": 0.1776356706998782,
+              "hrrr_tmax_f": 0.1561584059583061,
+              "nam_tmax_f": 0.1626018078709885,
+              "nbm_tmax_f": 0.20166174684914312,
+              "rap_tmax_f": 0.1335653314194594
+            }
+          },
+          {
+            "description": "Ridge meta-model OOF on train; full-train for val/test",
+            "fallback_rows": 204,
+            "features_added": [
+              "stack_ridge_pred",
+              "ens_wmean_minus_stack",
+              "stack_minus_median"
+            ],
+            "fit_on": "train",
+            "name": "stack_ridge_pred"
+          }
+        ]
+      },
+      "description": "reliability_weighted_and_stacking_meta",
+      "final_feature_columns": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f",
+        "gefsatmos_tmp_spread_f",
+        "ens_median_6",
+        "w_nbm",
+        "w_gfs",
+        "w_gefsatmosmean",
+        "w_nam",
+        "w_hrrr",
+        "w_rap",
+        "ens_wmean_6",
+        "ens_wmean_minus_median",
+        "stack_ridge_pred",
+        "ens_wmean_minus_stack",
+        "stack_minus_median",
+        "month",
+        "day_of_year",
+        "sin_doy",
+        "cos_doy",
+        "is_weekend"
+      ],
+      "metrics": {
+        "test": {
+          "bias": 0.27571286564486086,
+          "corr": 0.9915100476118964,
+          "mae": 1.85817982790556,
+          "maxAE": 9.888158590562888,
+          "medianAE": 1.4314280623427749,
+          "n": 363,
+          "rmse": 2.4238590425695685
+        },
+        "train": {
+          "bias": -2.0163449704383085e-12,
+          "corr": 0.9989791623987561,
+          "mae": 0.5602237767715336,
+          "maxAE": 6.779867891264285,
+          "medianAE": 0.4458125287354342,
+          "n": 1224,
+          "rmse": 0.7484718794221134
+        },
+        "val": {
+          "bias": -0.3561979504028229,
+          "corr": 0.9891749072125152,
+          "mae": 1.9205627707567388,
+          "maxAE": 8.563915153574499,
+          "medianAE": 1.5407785848886775,
+          "n": 184,
+          "rmse": 2.4688641160846507
+        }
+      },
+      "num_features": 24,
+      "raw_model_cols_used": [
+        "nbm_tmax_f",
+        "gfs_tmax_f",
+        "gefsatmosmean_tmax_f",
+        "nam_tmax_f",
+        "hrrr_tmax_f",
+        "rap_tmax_f"
+      ],
+      "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S10",
+      "strategy_id": "S10",
+      "uses_spread_feature": true,
+      "worst_test_days": [
+        {
+          "abs_error": 9.888158590562888,
+          "asof_utc": "2025-02-15 12:00:00+00:00",
+          "error": 9.888158590562888,
+          "station_id": "KNYC",
+          "target_date_local": "2025-02-16",
+          "y_pred": 56.88815859056289,
+          "y_true": 47.0
+        },
+        {
+          "abs_error": 8.877504825446074,
+          "asof_utc": "2025-03-29 12:00:00+00:00",
+          "error": 8.877504825446074,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-30",
+          "y_pred": 56.877504825446074,
+          "y_true": 48.0
+        },
+        {
+          "abs_error": 7.104818241874284,
+          "asof_utc": "2025-07-30 12:00:00+00:00",
+          "error": -7.104818241874284,
+          "station_id": "KNYC",
+          "target_date_local": "2025-07-31",
+          "y_pred": 81.89518175812572,
+          "y_true": 89.0
+        },
+        {
+          "abs_error": 6.904593900628626,
+          "asof_utc": "2025-02-28 12:00:00+00:00",
+          "error": -6.904593900628626,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-01",
+          "y_pred": 57.095406099371374,
+          "y_true": 64.0
+        },
+        {
+          "abs_error": 6.444533610336162,
+          "asof_utc": "2025-12-07 12:00:00+00:00",
+          "error": -6.444533610336162,
+          "station_id": "KNYC",
+          "target_date_local": "2025-12-08",
+          "y_pred": 31.555466389663838,
+          "y_true": 38.0
+        },
+        {
+          "abs_error": 6.396190793711437,
+          "asof_utc": "2025-01-20 12:00:00+00:00",
+          "error": 6.396190793711437,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-21",
+          "y_pred": 25.396190793711437,
+          "y_true": 19.0
+        },
+        {
+          "abs_error": 6.312302117608709,
+          "asof_utc": "2025-03-15 12:00:00+00:00",
+          "error": 6.312302117608709,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-16",
+          "y_pred": 67.31230211760871,
+          "y_true": 61.0
+        },
+        {
+          "abs_error": 6.284429160305084,
+          "asof_utc": "2025-01-21 12:00:00+00:00",
+          "error": 6.284429160305084,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-22",
+          "y_pred": 26.284429160305084,
+          "y_true": 20.0
+        },
+        {
+          "abs_error": 6.115439051800223,
+          "asof_utc": "2025-03-14 12:00:00+00:00",
+          "error": 6.115439051800223,
+          "station_id": "KNYC",
+          "target_date_local": "2025-03-15",
+          "y_pred": 55.11543905180022,
+          "y_true": 49.0
+        },
+        {
+          "abs_error": 5.975988212322715,
+          "asof_utc": "2025-01-07 12:00:00+00:00",
+          "error": -5.975988212322715,
+          "station_id": "KNYC",
+          "target_date_local": "2025-01-08",
+          "y_pred": 24.024011787677285,
+          "y_true": 30.0
+        }
+      ]
+    }
+  ],
+  "sweep_id": "sweep_001"
+}

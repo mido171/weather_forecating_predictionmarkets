@@ -1,0 +1,35 @@
+{
+  "bias_mean_error_f": -0.3392103276650728,
+  "calibration_window": {
+    "end": "2025-12-31",
+    "start": "2025-01-01"
+  },
+  "created_utc": "2026-01-14T17:42:11Z",
+  "dataset_ref": {
+    "dataset_hash": "ec850d6715df5451e93b6e147f0cf97ee2eed8ad5bb3f42314f49d4b2b853922",
+    "dataset_id": "fb710340bacc59df4f74b4de885443db18888186319dcd52a6e2525a646de53a",
+    "rows_used": 363
+  },
+  "ddof": 1,
+  "error_definition": "e = actual_tmax_f - mu_hat",
+  "mae_f": 1.8233745428060484,
+  "method": "strategy_normal_residual",
+  "model_ref": {
+    "mean_model_artifact": "mean_model.joblib",
+    "model_hash": "45fb226434e11cf1c56b06f6918ec46d9ca4f0eec4da01d379b6e7927161e60d",
+    "run_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets\\weather_forecating_predictionmarkets\\artifacts\\feature_sweep\\sweep_001\\S02"
+  },
+  "n": 363,
+  "residual_quantiles_f": {
+    "p01": -6.834165621505277,
+    "p05": -4.421825629648563,
+    "p10": -3.272957705764952,
+    "p50": -0.19055698091185036,
+    "p90": 2.5778037136866634,
+    "p95": 3.272580228965571,
+    "p99": 4.72124013182249
+  },
+  "rmse_f": 2.393857680967293,
+  "sigma_std_error_f": 2.3729735262475224,
+  "strategy_id": "S02"
+}

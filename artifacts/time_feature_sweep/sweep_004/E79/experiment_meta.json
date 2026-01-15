@@ -1,0 +1,135 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nbm_tmax_f_gfs_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nbm_tmax_f_gefsatmosmean_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nbm_tmax_f_nam_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nbm_tmax_f_hrrr_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nbm_tmax_f_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gfs_tmax_f_gefsatmosmean_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gfs_tmax_f_nam_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gfs_tmax_f_hrrr_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gfs_tmax_f_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gefsatmosmean_tmax_f_nam_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gefsatmosmean_tmax_f_hrrr_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_gefsatmosmean_tmax_f_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nam_tmax_f_hrrr_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_nam_tmax_f_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "rolling_corr",
+        "name": "corr_hrrr_tmax_f_rap_tmax_f_rm60_l1"
+      },
+      {
+        "formula": "mean(corr_synoptic)",
+        "name": "corr_synoptic_mean_rm60_l1"
+      },
+      {
+        "formula": "mean(corr_meso)",
+        "name": "corr_meso_mean_rm60_l1"
+      },
+      {
+        "formula": "mean(corr_cross)",
+        "name": "corr_cross_mean_rm60_l1"
+      },
+      {
+        "formula": "std(pairwise_corr)",
+        "name": "corr_pairwise_std_rm60_l1"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "corr_cross_mean_rm60_l1": 0.9420332974643965,
+        "corr_gefsatmosmean_tmax_f_hrrr_tmax_f_rm60_l1": 0.9523558654212283,
+        "corr_gefsatmosmean_tmax_f_nam_tmax_f_rm60_l1": 0.9409727192783839,
+        "corr_gefsatmosmean_tmax_f_rap_tmax_f_rm60_l1": 0.9481294973463124,
+        "corr_gfs_tmax_f_gefsatmosmean_tmax_f_rm60_l1": 0.9600528901951324,
+        "corr_gfs_tmax_f_hrrr_tmax_f_rm60_l1": 0.9262941958701504,
+        "corr_gfs_tmax_f_nam_tmax_f_rm60_l1": 0.947535603532041,
+        "corr_gfs_tmax_f_rap_tmax_f_rm60_l1": 0.9184371069261862,
+        "corr_hrrr_tmax_f_rap_tmax_f_rm60_l1": 0.9797383039891066,
+        "corr_meso_mean_rm60_l1": 0.9732945859772335,
+        "corr_nam_tmax_f_hrrr_tmax_f_rm60_l1": 0.929102959934574,
+        "corr_nam_tmax_f_rap_tmax_f_rm60_l1": 0.9215110179961188,
+        "corr_nbm_tmax_f_gefsatmosmean_tmax_f_rm60_l1": 0.9848574384729042,
+        "corr_nbm_tmax_f_gfs_tmax_f_rm60_l1": 0.9615461686986373,
+        "corr_nbm_tmax_f_hrrr_tmax_f_rm60_l1": 0.9731459481109367,
+        "corr_nbm_tmax_f_nam_tmax_f_rm60_l1": 0.9545867771272969,
+        "corr_nbm_tmax_f_rap_tmax_f_rm60_l1": 0.9683505708109613,
+        "corr_pairwise_std_rm60_l1": 0.022194318194687937,
+        "corr_synoptic_mean_rm60_l1": 0.948373122892433,
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": []
+  },
+  "description": "Pairwise forecast correlation structure",
+  "experiment_id": "E79"
+}

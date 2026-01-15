@@ -68,7 +68,7 @@ Notes:
 - All jobs are restartable; checkpoints are stored in `ingest_checkpoint`.
 
 ## 6) Run the full ingestion pipeline (all configured series)
-Use `com.predictionmarkets.weather.executors.FullIngestionExecutor` as the entry point.
+Use `com.predictionmarkets.weather.executors.FullIngestionPipelineExecutor` as the entry point.
 Pipeline settings live in `ingestion-service/src/main/resources/application.yml` under `pipeline.*`.
 Key settings:
 - `pipeline.series-tickers` (stations to ingest)

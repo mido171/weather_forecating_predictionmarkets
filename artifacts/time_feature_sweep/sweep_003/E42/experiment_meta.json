@@ -1,0 +1,130 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "KNN mean(resid)",
+        "name": "knn_resid_mean_k10_l2",
+        "params": {
+          "k": 10,
+          "lookback_days": 365,
+          "truth_lag": 2
+        }
+      },
+      {
+        "formula": "KNN q10(resid)",
+        "name": "knn_resid_q10_k10_l2",
+        "params": {
+          "k": 10,
+          "lookback_days": 365,
+          "truth_lag": 2
+        }
+      },
+      {
+        "formula": "KNN q90(resid)",
+        "name": "knn_resid_q90_k10_l2",
+        "params": {
+          "k": 10,
+          "lookback_days": 365,
+          "truth_lag": 2
+        }
+      },
+      {
+        "formula": "ens_mean + knn_resid_mean",
+        "name": "ens_mean_knn_corr"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "day_of_year": 167.0,
+        "ens_mean_knn_corr": 65.39392660519181,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "knn_resid_mean_k10_l2": 1.1458567273539633,
+        "knn_resid_q10_k10_l2": -0.9327956564626625,
+        "knn_resid_q90_k10_l2": 3.47061164432645,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "description": "KNN residual analogs on standardized forecast vector",
+        "features": [
+          "nbm_tmax_f",
+          "gfs_tmax_f",
+          "gefsatmosmean_tmax_f",
+          "nam_tmax_f",
+          "hrrr_tmax_f",
+          "rap_tmax_f",
+          "ens_std",
+          "sin_doy",
+          "cos_doy"
+        ],
+        "fit_on": "train",
+        "k": 10,
+        "lookback_days": 365,
+        "name": "knn_residual",
+        "scaler": {
+          "cols": [
+            "nbm_tmax_f",
+            "gfs_tmax_f",
+            "gefsatmosmean_tmax_f",
+            "nam_tmax_f",
+            "hrrr_tmax_f",
+            "rap_tmax_f",
+            "ens_std",
+            "sin_doy",
+            "cos_doy"
+          ],
+          "mean": [
+            63.22669649011956,
+            63.84395424836601,
+            63.93225178197049,
+            63.30555555555556,
+            63.549676836799215,
+            62.38739490284644,
+            1.9724350522718126,
+            0.076249519026095,
+            -0.03830601337952942
+          ],
+          "scale": [
+            16.744913671392055,
+            16.43538534849312,
+            17.715798139763308,
+            16.16064478057846,
+            18.04587973742932,
+            17.794629792899077,
+            0.8943820168637893,
+            0.7113279903785942,
+            0.6976612002191372
+          ]
+        },
+        "truth_lag": 2
+      }
+    ]
+  },
+  "description": "KNN analog residual correction",
+  "experiment_id": "E42"
+}

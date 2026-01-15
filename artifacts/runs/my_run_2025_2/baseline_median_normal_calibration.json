@@ -1,0 +1,41 @@
+{
+  "bias_mean_error_f": 1.2650826472566772,
+  "calibration_window": {
+    "end": "2025-12-31",
+    "start": "2021-02-23"
+  },
+  "created_utc": "2026-01-14T12:50:09Z",
+  "dataset_ref": {
+    "dataset_hash": "f6b85f651688c71dae39804536b17739674ba99558b3d58188f79fcd51a1bb29",
+    "dataset_id": "37e63ed3c15b93d8df31499e4c2818ee1f509b767b9c51bf0ab3019e021370bd",
+    "rows_used": 1771
+  },
+  "ddof": 1,
+  "error_definition": "e = actual_tmax_f - median_forecast_f",
+  "forecast_columns": [
+    "gfs_tmax_f",
+    "nam_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "rap_tmax_f",
+    "hrrr_tmax_f",
+    "nbm_tmax_f"
+  ],
+  "mae_f": 2.154745109210591,
+  "method": "baseline_median_residual",
+  "n": 1771,
+  "residual_quantiles_f": {
+    "p01": -4.4575614013672435,
+    "p05": -2.6714450073242517,
+    "p10": -1.7534118652344262,
+    "p50": 1.0990087890624665,
+    "p90": 4.424562200730833,
+    "p95": 5.436510162353475,
+    "p99": 8.177164459228495
+  },
+  "rmse_f": 2.8144026779797136,
+  "sigma_std_error_f": 2.5147562889656676,
+  "station_scope": {
+    "mode": "ALL",
+    "stations": []
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "base_features": [
+    "nbm_tmax_f",
+    "gfs_tmax_f",
+    "gefsatmosmean_tmax_f",
+    "nam_tmax_f",
+    "hrrr_tmax_f",
+    "rap_tmax_f",
+    "gefsatmos_tmp_spread_f",
+    "month",
+    "day_of_year",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend"
+  ],
+  "derived_features": {
+    "formulas": [
+      {
+        "formula": "cusum_positive",
+        "name": "cusum_pos_l2"
+      },
+      {
+        "formula": "cusum_negative",
+        "name": "cusum_neg_l2"
+      },
+      {
+        "formula": "cusum_alarm",
+        "name": "cusum_alarm_l2"
+      }
+    ],
+    "imputation": {
+      "fill_values": {
+        "cos_doy": -0.06553708331203101,
+        "cusum_alarm_l2": 1.0,
+        "cusum_neg_l2": 0.0,
+        "cusum_pos_l2": 57.86012272175452,
+        "day_of_year": 167.0,
+        "gefsatmos_tmp_spread_f": 1.985091821481542,
+        "gefsatmosmean_tmax_f": 63.38288233996978,
+        "gfs_tmax_f": 64.5,
+        "hrrr_tmax_f": 63.429676513671915,
+        "is_weekend": 0.0,
+        "month": 6.0,
+        "nam_tmax_f": 63.0,
+        "nbm_tmax_f": 63.175991210937525,
+        "rap_tmax_f": 62.58964813232426,
+        "sin_doy": 0.15951094710994368
+      },
+      "method": "train_median"
+    },
+    "train_fitted": [
+      {
+        "fit_on": "train",
+        "name": "cusum_params",
+        "params": {
+          "KNYC": {
+            "h": 13.147219221262356,
+            "k": 1.3147219221262356,
+            "sigma": 2.6294438442524712
+          }
+        },
+        "truth_lag": 2
+      }
+    ]
+  },
+  "description": "CUSUM drift stats on residuals",
+  "experiment_id": "E67"
+}

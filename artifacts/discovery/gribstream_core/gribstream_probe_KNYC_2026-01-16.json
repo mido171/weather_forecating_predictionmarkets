@@ -1,0 +1,440 @@
+{
+  "asof_utc": "2026-01-16T12:00:00+00:00",
+  "base_url": "https://gribstream.com",
+  "catalog_endpoints": {
+    "skipped": true
+  },
+  "openapi": {
+    "skipped": true
+  },
+  "probes": {
+    "gefsatmos": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 240,
+      "success": []
+    },
+    "gefsatmosmean": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 240,
+      "success": []
+    },
+    "gfs": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 384,
+      "success": []
+    },
+    "hrrr": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 48,
+      "success": []
+    },
+    "nam": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 48,
+      "success": []
+    },
+    "nbm": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 264,
+      "success": []
+    },
+    "rap": {
+      "failed": [
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "tmpk",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "TMP"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "rh",
+            "info": "",
+            "level": "2 m above ground",
+            "name": "RH"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wind",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WIND"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "wdir",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "WDIR"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "ugrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "UGRD"
+          }
+        },
+        {
+          "error": "<urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>",
+          "variable": {
+            "alias": "vgrd10",
+            "info": "",
+            "level": "10 m above ground",
+            "name": "VGRD"
+          }
+        }
+      ],
+      "max_horizon": 51,
+      "success": []
+    }
+  },
+  "station": {
+    "latitude": 40.77898,
+    "longitude": -73.96925,
+    "name": "New York City",
+    "stationId": "KNYC",
+    "zoneId": "America/New_York"
+  },
+  "target_date_local": "2026-01-16"
+}

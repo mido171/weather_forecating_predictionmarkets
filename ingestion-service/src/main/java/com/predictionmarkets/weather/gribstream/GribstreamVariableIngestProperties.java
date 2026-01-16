@@ -10,6 +10,10 @@ public class GribstreamVariableIngestProperties {
   private String catalogResource = "classpath:gribstream_data";
   private String whitelistResource = "classpath:gribstream_variable_whitelist.csv";
   private boolean whitelistRequired = true;
+  private boolean storeRaw = false;
+  private boolean storeSummary = true;
+  private boolean collapseEnsembleMembers = true;
+  private double minCoverageRatio = 0.5;
   private int batchSize = 20;
   private int maxVariablesPerModel = 0;
   private List<String> models = new ArrayList<>();
@@ -44,6 +48,38 @@ public class GribstreamVariableIngestProperties {
 
   public void setWhitelistRequired(boolean whitelistRequired) {
     this.whitelistRequired = whitelistRequired;
+  }
+
+  public boolean isStoreRaw() {
+    return storeRaw;
+  }
+
+  public void setStoreRaw(boolean storeRaw) {
+    this.storeRaw = storeRaw;
+  }
+
+  public boolean isStoreSummary() {
+    return storeSummary;
+  }
+
+  public void setStoreSummary(boolean storeSummary) {
+    this.storeSummary = storeSummary;
+  }
+
+  public boolean isCollapseEnsembleMembers() {
+    return collapseEnsembleMembers;
+  }
+
+  public void setCollapseEnsembleMembers(boolean collapseEnsembleMembers) {
+    this.collapseEnsembleMembers = collapseEnsembleMembers;
+  }
+
+  public double getMinCoverageRatio() {
+    return minCoverageRatio;
+  }
+
+  public void setMinCoverageRatio(double minCoverageRatio) {
+    this.minCoverageRatio = minCoverageRatio;
   }
 
   public int getBatchSize() {

@@ -98,6 +98,10 @@ gribstream:
     catalog-resource: classpath:gribstream_data
     whitelist-resource: classpath:gribstream_variable_whitelist.csv
     whitelist-required: true
+    store-raw: false
+    store-summary: true
+    collapse-ensemble-members: true
+    min-coverage-ratio: 0.5
     batch-size: 20
     max-variables-per-model: 0
     models:

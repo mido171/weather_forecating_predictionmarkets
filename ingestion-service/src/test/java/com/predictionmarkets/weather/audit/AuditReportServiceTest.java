@@ -18,6 +18,7 @@ import com.predictionmarkets.weather.repository.AsofPolicyRepository;
 import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
+import com.predictionmarkets.weather.repository.MosForecastValueUpsertRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.math.BigDecimal;
@@ -55,6 +56,9 @@ class AuditReportServiceTest {
   private StationRegistryRepository stationRegistryRepository;
 
   @Autowired
+  private MosForecastValueUpsertRepository mosForecastValueUpsertRepository;
+
+  @Autowired
   private KalshiSeriesRepository kalshiSeriesRepository;
 
   @Autowired
@@ -70,6 +74,7 @@ class AuditReportServiceTest {
     mosAsofFeatureRepository.deleteAll();
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
+    mosForecastValueUpsertRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();
     asofPolicyRepository.deleteAll();

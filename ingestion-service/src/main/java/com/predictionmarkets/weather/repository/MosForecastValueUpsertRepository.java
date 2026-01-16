@@ -55,6 +55,10 @@ public class MosForecastValueUpsertRepository {
     return jdbcTemplate.batchUpdate(UPSERT_SQL, batch);
   }
 
+  public void deleteAll() {
+    jdbcTemplate.update("delete from mos_forecast_value", new MapSqlParameterSource());
+  }
+
   private static SqlParameterSource toParams(UpsertRow row) {
     return new MapSqlParameterSource()
         .addValue("stationId", row.stationId)

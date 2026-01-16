@@ -18,6 +18,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +40,7 @@ public class BackfillOrchestrator {
   private final MosRunIngestService mosRunIngestService;
   private final MosAsofMaterializeService mosAsofMaterializeService;
   private final MosAsofFeatureReportService mosAsofFeatureReportService;
+  private final BackfillConcurrencyProperties concurrencyProperties;
   private final IngestCheckpointService checkpointService;
 
   public BackfillOrchestrator(KalshiSeriesResolver kalshiSeriesResolver,
@@ -40,6 +49,7 @@ public class BackfillOrchestrator {
                               MosRunIngestService mosRunIngestService,
                               MosAsofMaterializeService mosAsofMaterializeService,
                               MosAsofFeatureReportService mosAsofFeatureReportService,
+                              BackfillConcurrencyProperties concurrencyProperties,
                               IngestCheckpointService checkpointService) {
     this.kalshiSeriesResolver = kalshiSeriesResolver;
     this.stationRegistryRepository = stationRegistryRepository;
@@ -47,6 +57,7 @@ public class BackfillOrchestrator {
     this.mosRunIngestService = mosRunIngestService;
     this.mosAsofMaterializeService = mosAsofMaterializeService;
     this.mosAsofFeatureReportService = mosAsofFeatureReportService;
+    this.concurrencyProperties = concurrencyProperties;
     this.checkpointService = checkpointService;
   }
 
@@ -217,30 +228,60 @@ public class BackfillOrchestrator {
         checkpointService.markComplete(jobName, stationId, model, null, cursorRuntime);
         continue;
       }
-      long totalWindows = windowCount(effectiveStart, rangeEndUtc, windowSize);
+      List<WindowRange> windows = buildWindows(effectiveStart, rangeEndUtc, windowSize);
+      long totalWindows = windows.size();
       long processedWindows = 0;
       AtomicReference<Instant> cursorRef = new AtomicReference<>(cursorRuntime);
       CheckpointHeartbeat heartbeat = CheckpointHeartbeat.start(() ->
           checkpointService.markRunning(jobName, stationId, model, null, cursorRef.get()));
       try {
         checkpointService.markRunning(jobName, stationId, model, null, cursorRef.get());
-        Instant windowStart = effectiveStart;
-        while (windowStart.isBefore(rangeEndUtc)) {
-          Instant windowEnd = windowStart.plus(windowSize);
-          if (windowEnd.isAfter(rangeEndUtc)) {
-            windowEnd = rangeEndUtc;
+        int threadCount = Math.max(1, concurrencyProperties.getMosWindowThreads());
+        if (threadCount == 1 || windows.size() <= 1) {
+          for (WindowRange window : windows) {
+            mosRunIngestService.ingestWindow(stationId, model, window.start(), window.end());
+            processedWindows += 1;
+            snapshot("job=mos_ingest_window station=" + stationId
+                + " model=" + model.name()
+                + " window=" + window.start() + ".." + window.end()
+                + " progress=" + processedWindows + "/" + totalWindows
+                + " remaining=" + (totalWindows - processedWindows));
+            cursorRuntime = window.end();
+            cursorRef.set(cursorRuntime);
+            checkpointService.markRunning(jobName, stationId, model, null, cursorRuntime);
           }
-          mosRunIngestService.ingestWindow(stationId, model, windowStart, windowEnd);
-          processedWindows += 1;
-          snapshot("job=mos_ingest_window station=" + stationId
-              + " model=" + model.name()
-              + " window=" + windowStart + ".." + windowEnd
-              + " progress=" + processedWindows + "/" + totalWindows
-              + " remaining=" + (totalWindows - processedWindows));
-          cursorRuntime = windowEnd;
-          cursorRef.set(cursorRuntime);
-          checkpointService.markRunning(jobName, stationId, model, null, cursorRuntime);
-          windowStart = windowEnd;
+        } else {
+          ExecutorService executor = Executors.newFixedThreadPool(
+              threadCount, namedThreadFactory("mos-window"));
+          try {
+            int index = 0;
+            while (index < windows.size()) {
+              int endIndex = Math.min(index + threadCount, windows.size());
+              List<WindowRange> batch = windows.subList(index, endIndex);
+              List<Future<?>> futures = new ArrayList<>(batch.size());
+              for (WindowRange window : batch) {
+                futures.add(executor.submit(() -> {
+                  mosRunIngestService.ingestWindow(stationId, model, window.start(), window.end());
+                  return null;
+                }));
+              }
+              waitAllOrFail(futures);
+              processedWindows += batch.size();
+              WindowRange last = batch.get(batch.size() - 1);
+              snapshot("job=mos_ingest_window station=" + stationId
+                  + " model=" + model.name()
+                  + " window=" + batch.get(0).start() + ".." + last.end()
+                  + " progress=" + processedWindows + "/" + totalWindows
+                  + " remaining=" + (totalWindows - processedWindows)
+                  + " threads=" + threadCount);
+              cursorRuntime = last.end();
+              cursorRef.set(cursorRuntime);
+              checkpointService.markRunning(jobName, stationId, model, null, cursorRuntime);
+              index = endIndex;
+            }
+          } finally {
+            shutdownExecutor(executor);
+          }
         }
         cursorRuntime = rangeEndUtc;
         cursorRef.set(cursorRuntime);
@@ -299,19 +340,62 @@ public class BackfillOrchestrator {
     try {
       checkpointService.markRunning(jobName, stationId, null, cursorRef.get(), null);
       LocalDate current = effectiveStart;
-      while (!current.isAfter(end)) {
-        mosAsofMaterializeService.materializeForTargetDate(
-            stationId, current, request.asofPolicyId(), models);
-        processedDays += 1;
-        cursorDate = current;
-        cursorRef.set(cursorDate);
-        checkpointService.markRunning(jobName, stationId, null, cursorDate, null);
-        snapshot("job=mos_asof_materialize_range station=" + stationId
-            + " targetDate=" + current
-            + " progress=" + processedDays + "/" + totalDays
-            + " remaining=" + (totalDays - processedDays)
-            + " asofPolicyId=" + request.asofPolicyId());
-        current = current.plusDays(1);
+      int threadCount = Math.max(1, concurrencyProperties.getMosAsofThreads());
+      if (threadCount == 1) {
+        while (!current.isAfter(end)) {
+          mosAsofMaterializeService.materializeForTargetDate(
+              stationId, current, request.asofPolicyId(), models);
+          processedDays += 1;
+          cursorDate = current;
+          cursorRef.set(cursorDate);
+          checkpointService.markRunning(jobName, stationId, null, cursorDate, null);
+          snapshot("job=mos_asof_materialize_range station=" + stationId
+              + " targetDate=" + current
+              + " progress=" + processedDays + "/" + totalDays
+              + " remaining=" + (totalDays - processedDays)
+              + " asofPolicyId=" + request.asofPolicyId());
+          current = current.plusDays(1);
+        }
+      } else {
+        ExecutorService executor = Executors.newFixedThreadPool(
+            threadCount, namedThreadFactory("mos-asof"));
+        try {
+          List<LocalDate> days = new ArrayList<>();
+          LocalDate cursor = current;
+          while (!cursor.isAfter(end)) {
+            days.add(cursor);
+            cursor = cursor.plusDays(1);
+          }
+          int index = 0;
+          while (index < days.size()) {
+            int endIndex = Math.min(index + threadCount, days.size());
+            List<LocalDate> batch = days.subList(index, endIndex);
+            List<Future<?>> futures = new ArrayList<>(batch.size());
+            for (LocalDate day : batch) {
+              futures.add(executor.submit(() -> {
+                mosAsofMaterializeService.materializeForTargetDate(
+                    stationId, day, request.asofPolicyId(), models);
+                return null;
+              }));
+            }
+            waitAllOrFail(futures);
+            processedDays += batch.size();
+            LocalDate last = batch.get(batch.size() - 1);
+            cursorDate = last;
+            cursorRef.set(cursorDate);
+            checkpointService.markRunning(jobName, stationId, null, cursorDate, null);
+            snapshot("job=mos_asof_materialize_range station=" + stationId
+                + " targetDate=" + batch.get(0) + ".." + last
+                + " progress=" + processedDays + "/" + totalDays
+                + " remaining=" + (totalDays - processedDays)
+                + " asofPolicyId=" + request.asofPolicyId()
+                + " threads=" + threadCount);
+            index = endIndex;
+          }
+          current = end.plusDays(1);
+        } finally {
+          shutdownExecutor(executor);
+        }
       }
       cursorDate = end;
       cursorRef.set(cursorDate);
@@ -387,6 +471,75 @@ public class BackfillOrchestrator {
     }
     long totalMillis = Duration.between(start, end).toMillis();
     return (totalMillis + windowMillis - 1) / windowMillis;
+  }
+
+  private List<WindowRange> buildWindows(Instant start, Instant end, Duration windowSize) {
+    if (!start.isBefore(end)) {
+      return List.of();
+    }
+    List<WindowRange> windows = new ArrayList<>();
+    Instant cursor = start;
+    while (cursor.isBefore(end)) {
+      Instant windowEnd = cursor.plus(windowSize);
+      if (windowEnd.isAfter(end)) {
+        windowEnd = end;
+      }
+      windows.add(new WindowRange(cursor, windowEnd));
+      cursor = windowEnd;
+    }
+    return windows;
+  }
+
+  private void waitAllOrFail(List<Future<?>> futures) {
+    for (Future<?> future : futures) {
+      try {
+        future.get();
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        cancelRemaining(futures);
+        throw new IllegalStateException("Backfill parallel task interrupted", ex);
+      } catch (ExecutionException ex) {
+        cancelRemaining(futures);
+        Throwable cause = ex.getCause() == null ? ex : ex.getCause();
+        if (cause instanceof RuntimeException runtimeException) {
+          throw runtimeException;
+        }
+        throw new IllegalStateException("Backfill parallel task failed", cause);
+      }
+    }
+  }
+
+  private void cancelRemaining(List<? extends Future<?>> futures) {
+    for (Future<?> future : futures) {
+      if (!future.isDone()) {
+        future.cancel(true);
+      }
+    }
+  }
+
+  private void shutdownExecutor(ExecutorService executor) {
+    executor.shutdown();
+    try {
+      if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+        executor.shutdownNow();
+      }
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      executor.shutdownNow();
+    }
+  }
+
+  private ThreadFactory namedThreadFactory(String prefix) {
+    AtomicInteger counter = new AtomicInteger(1);
+    return runnable -> {
+      Thread thread = new Thread(runnable);
+      thread.setName(prefix + "-" + counter.getAndIncrement());
+      thread.setDaemon(false);
+      return thread;
+    };
+  }
+
+  private record WindowRange(Instant start, Instant end) {
   }
 
   private void snapshot(String message) {

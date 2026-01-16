@@ -16,6 +16,7 @@ import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
+import com.predictionmarkets.weather.repository.MosForecastValueUpsertRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.io.IOException;
@@ -73,6 +74,9 @@ class MosAsofMaterializeServiceTest {
   private StationRegistryRepository stationRegistryRepository;
 
   @Autowired
+  private MosForecastValueUpsertRepository mosForecastValueUpsertRepository;
+
+  @Autowired
   private KalshiSeriesRepository kalshiSeriesRepository;
 
   @Autowired
@@ -86,6 +90,7 @@ class MosAsofMaterializeServiceTest {
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
     ingestCheckpointRepository.deleteAll();
+    mosForecastValueUpsertRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();
     asofPolicyRepository.deleteAll();

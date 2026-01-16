@@ -135,3 +135,8 @@ pipeline:
   asof-local-time: "12:00"
   asof-time-zone: UTC
   reset-checkpoints: true
+
+backfill:
+  concurrency:
+    mos-window-threads: 6
+    mos-asof-threads: 6

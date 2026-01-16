@@ -8,6 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class GribstreamVariableIngestProperties {
   private boolean enabled = false;
   private String catalogResource = "classpath:gribstream_data";
+  private String whitelistResource = "classpath:gribstream_variable_whitelist.csv";
+  private boolean whitelistRequired = true;
   private int batchSize = 20;
   private int maxVariablesPerModel = 0;
   private List<String> models = new ArrayList<>();
@@ -26,6 +28,22 @@ public class GribstreamVariableIngestProperties {
 
   public void setCatalogResource(String catalogResource) {
     this.catalogResource = catalogResource;
+  }
+
+  public String getWhitelistResource() {
+    return whitelistResource;
+  }
+
+  public void setWhitelistResource(String whitelistResource) {
+    this.whitelistResource = whitelistResource;
+  }
+
+  public boolean isWhitelistRequired() {
+    return whitelistRequired;
+  }
+
+  public void setWhitelistRequired(boolean whitelistRequired) {
+    this.whitelistRequired = whitelistRequired;
   }
 
   public int getBatchSize() {

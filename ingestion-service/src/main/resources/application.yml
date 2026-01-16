@@ -96,6 +96,8 @@ gribstream:
   variable-ingest:
     enabled: true
     catalog-resource: classpath:gribstream_data
+    whitelist-resource: classpath:gribstream_variable_whitelist.csv
+    whitelist-required: true
     batch-size: 20
     max-variables-per-model: 0
     models:

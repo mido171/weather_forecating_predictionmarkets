@@ -37,17 +37,20 @@ public class GribstreamVariableIngestService {
   private final GribstreamProperties gribstreamProperties;
   private final GribstreamVariableIngestProperties ingestProperties;
   private final GribstreamVariableCatalogLoader catalogLoader;
+  private final GribstreamVariableWhitelistLoader whitelistLoader;
   private final GribstreamForecastValueUpsertRepository repository;
   private final GribstreamTaskExecutor taskExecutor;
   private final ObjectMapper objectMapper;
 
   private final Object batchLock = new Object();
   private volatile Map<String, List<VariableBatch>> cachedBatches;
+  private volatile Map<String, List<GribstreamVariableWhitelistEntry>> cachedWhitelist;
 
   public GribstreamVariableIngestService(GribstreamClient client,
                                          GribstreamProperties gribstreamProperties,
                                          GribstreamVariableIngestProperties ingestProperties,
                                          GribstreamVariableCatalogLoader catalogLoader,
+                                         GribstreamVariableWhitelistLoader whitelistLoader,
                                          GribstreamForecastValueUpsertRepository repository,
                                          GribstreamTaskExecutor taskExecutor,
                                          ObjectMapper objectMapper) {
@@ -55,6 +58,7 @@ public class GribstreamVariableIngestService {
     this.gribstreamProperties = gribstreamProperties;
     this.ingestProperties = ingestProperties;
     this.catalogLoader = catalogLoader;
+    this.whitelistLoader = whitelistLoader;
     this.repository = repository;
     this.taskExecutor = taskExecutor;
     this.objectMapper = objectMapper;
@@ -197,6 +201,11 @@ public class GribstreamVariableIngestService {
         cachedBatches = Collections.emptyMap();
         return cachedBatches;
       }
+      Map<String, List<GribstreamVariableWhitelistEntry>> whitelist = resolveWhitelist();
+      boolean whitelistEnabled = whitelist != null && !whitelist.isEmpty();
+      if (ingestProperties.isWhitelistRequired() && !whitelistEnabled) {
+        throw new IllegalStateException("gribstream.variable-ingest.whitelist-resource is required");
+      }
       Map<String, List<GribstreamVariableSpec>> catalog =
           catalogLoader.loadCatalog(ingestProperties.getCatalogResource(), models);
       Map<String, List<VariableBatch>> batches = new LinkedHashMap<>();
@@ -207,6 +216,18 @@ public class GribstreamVariableIngestService {
           continue;
         }
         List<GribstreamVariableSpec> filtered = filterSpecs(model, specs);
+        if (whitelistEnabled) {
+          List<GribstreamVariableWhitelistEntry> modelWhitelist = whitelist.get(model);
+          if (modelWhitelist == null || modelWhitelist.isEmpty()) {
+            logger.warn("[GRIBSTREAM-VARS] Whitelist has no entries for model={}; skipping.", model);
+            continue;
+          }
+          filtered = applyWhitelist(model, filtered, modelWhitelist);
+          if (filtered.isEmpty()) {
+            logger.warn("[GRIBSTREAM-VARS] Whitelist filtered all variables for model={}", model);
+            continue;
+          }
+        }
         if (filtered.isEmpty()) {
           logger.warn("[GRIBSTREAM-VARS] No usable variables for model={}", model);
           continue;
@@ -217,6 +238,56 @@ public class GribstreamVariableIngestService {
       cachedBatches = batches;
       return cachedBatches;
     }
+  }
+
+  private Map<String, List<GribstreamVariableWhitelistEntry>> resolveWhitelist() {
+    Map<String, List<GribstreamVariableWhitelistEntry>> cached = cachedWhitelist;
+    if (cached != null) {
+      return cached;
+    }
+    Map<String, List<GribstreamVariableWhitelistEntry>> loaded =
+        whitelistLoader.loadWhitelist(ingestProperties.getWhitelistResource());
+    cachedWhitelist = loaded;
+    return loaded;
+  }
+
+  private List<GribstreamVariableSpec> applyWhitelist(String model,
+                                                      List<GribstreamVariableSpec> specs,
+                                                      List<GribstreamVariableWhitelistEntry> whitelistEntries) {
+    Map<String, GribstreamVariableSpec> byKey = new HashMap<>();
+    for (GribstreamVariableSpec spec : specs) {
+      String key = GribstreamVariableWhitelistLoader.normalizeKey(
+          spec.name(), spec.level(), spec.info());
+      byKey.put(key, spec);
+    }
+    List<GribstreamVariableSpec> filtered = new ArrayList<>();
+    List<GribstreamVariableWhitelistEntry> missing = new ArrayList<>();
+    Set<String> seen = new LinkedHashSet<>();
+    for (GribstreamVariableWhitelistEntry entry : whitelistEntries) {
+      String key = entry.normalizedKey();
+      if (!seen.add(key)) {
+        continue;
+      }
+      GribstreamVariableSpec spec = byKey.get(key);
+      if (spec == null) {
+        missing.add(entry);
+        continue;
+      }
+      filtered.add(spec);
+    }
+    if (!missing.isEmpty()) {
+      int limit = Math.min(10, missing.size());
+      StringBuilder preview = new StringBuilder();
+      for (int i = 0; i < limit; i++) {
+        if (i > 0) {
+          preview.append("; ");
+        }
+        preview.append(missing.get(i).describe());
+      }
+      logger.warn("[GRIBSTREAM-VARS] Whitelist entries not found model={} missingCount={} sample={}",
+          model, missing.size(), preview);
+    }
+    return filtered;
   }
 
   private List<String> resolveModels() {

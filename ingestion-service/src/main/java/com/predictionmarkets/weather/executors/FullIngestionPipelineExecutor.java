@@ -4,6 +4,12 @@ import com.predictionmarkets.weather.IngestionServiceApplication;
 import com.predictionmarkets.weather.backfill.BackfillJobType;
 import com.predictionmarkets.weather.backfill.BackfillOrchestrator;
 import com.predictionmarkets.weather.backfill.BackfillRequest;
+import com.predictionmarkets.weather.common.TimeSemantics;
+import com.predictionmarkets.weather.gribstream.GribstreamAsOfSupplier;
+import com.predictionmarkets.weather.gribstream.GribstreamProperties;
+import com.predictionmarkets.weather.gribstream.GribstreamVariableIngestJob;
+import com.predictionmarkets.weather.gribstream.GribstreamVariableIngestProperties;
+import com.predictionmarkets.weather.gribstream.StationSpec;
 import com.predictionmarkets.weather.models.AsofPolicy;
 import com.predictionmarkets.weather.models.AsofTimeZone;
 import com.predictionmarkets.weather.models.StationRegistry;
@@ -13,6 +19,7 @@ import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,23 +60,32 @@ public final class FullIngestionPipelineExecutor {
       IngestCheckpointRepository checkpointRepository =
           context.getBean(IngestCheckpointRepository.class);
       PipelineProperties config = context.getBean(PipelineProperties.class);
+      GribstreamVariableIngestJob gribstreamVariableIngestJob =
+          context.getBean(GribstreamVariableIngestJob.class);
+      GribstreamVariableIngestProperties gribstreamVariableIngestProperties =
+          context.getBean(GribstreamVariableIngestProperties.class);
+      GribstreamProperties gribstreamProperties = context.getBean(GribstreamProperties.class);
       validateConfig(config);
 
       List<String> stationIdsToRun = parseStationIds(config.getStationIdsToRun());
       List<String> seriesTickers =
           resolveSeriesTickers(config.getSeriesTickers(), stationIdsToRun, stationRegistryRepository);
+      GribstreamAsOfSupplier gribstreamAsOfSupplier = resolveGribstreamAsOfSupplier(config);
       snapshot("Full ingestion starting seriesTickers=" + seriesTickers
           + " stationIdsToRun=" + (stationIdsToRun.isEmpty() ? "[ALL]" : stationIdsToRun)
           + " models=" + config.getModels()
           + " mosWindowDays=" + config.getMosWindowDays()
-          + " threadCount=" + config.getThreadCount());
+          + " threadCount=" + config.getThreadCount()
+          + " gribstreamVarIngest=" + gribstreamVariableIngestProperties.isEnabled()
+          + " gribstreamModels=" + gribstreamVariableIngestProperties.getModels()
+          + " gribstreamBatchSize=" + gribstreamVariableIngestProperties.getBatchSize());
 
       if (config.isResetCheckpoints()) {
         snapshot("Resetting ingest checkpoints");
         checkpointRepository.deleteAll();
       }
 
-      snapshot("Step 1/4: Kalshi series sync starting");
+      snapshot("Step 1/5: Kalshi series sync starting");
       orchestrator.run(new BackfillRequest(
           BackfillJobType.KALSHI_SERIES_SYNC,
           seriesTickers,
@@ -78,7 +94,7 @@ public final class FullIngestionPipelineExecutor {
           null,
           null,
           0));
-      snapshot("Step 1/4: Kalshi series sync complete");
+      snapshot("Step 1/5: Kalshi series sync complete");
 
       Long asofPolicyId = resolveAsofPolicyId(config, asofPolicyRepository);
       snapshot("Using asofPolicyId=" + asofPolicyId
@@ -86,7 +102,8 @@ public final class FullIngestionPipelineExecutor {
           + " asofLocalTime=" + config.getAsofLocalTime()
           + " asofTimeZone=" + resolveAsofTimeZone(config.getAsofTimeZone()));
       runStationsInParallel(seriesTickers, stationRegistryRepository, orchestrator,
-          config, asofPolicyId);
+          config, asofPolicyId, gribstreamVariableIngestJob, gribstreamVariableIngestProperties,
+          gribstreamProperties, gribstreamAsOfSupplier);
       snapshot("Full ingestion pipeline complete.");
     }
   }
@@ -253,11 +270,17 @@ public final class FullIngestionPipelineExecutor {
                                             StationRegistryRepository stationRegistryRepository,
                                             BackfillOrchestrator orchestrator,
                                             PipelineProperties config,
-                                            Long asofPolicyId) {
+                                            Long asofPolicyId,
+                                            GribstreamVariableIngestJob gribstreamVariableIngestJob,
+                                            GribstreamVariableIngestProperties gribstreamVariableIngestProperties,
+                                            GribstreamProperties gribstreamProperties,
+                                            GribstreamAsOfSupplier gribstreamAsOfSupplier) {
     int threadCount = config.getThreadCount();
     if (threadCount == 1) {
       for (String seriesTicker : seriesTickers) {
-        runStationPipeline(seriesTicker, stationRegistryRepository, orchestrator, config, asofPolicyId);
+        runStationPipeline(seriesTicker, stationRegistryRepository, orchestrator, config, asofPolicyId,
+            gribstreamVariableIngestJob, gribstreamVariableIngestProperties, gribstreamProperties,
+            gribstreamAsOfSupplier);
       }
       return;
     }
@@ -266,7 +289,9 @@ public final class FullIngestionPipelineExecutor {
     try {
       for (String seriesTicker : seriesTickers) {
         futures.add(executor.submit(() -> {
-          runStationPipeline(seriesTicker, stationRegistryRepository, orchestrator, config, asofPolicyId);
+          runStationPipeline(seriesTicker, stationRegistryRepository, orchestrator, config, asofPolicyId,
+              gribstreamVariableIngestJob, gribstreamVariableIngestProperties, gribstreamProperties,
+              gribstreamAsOfSupplier);
           return null;
         }));
       }
@@ -294,7 +319,11 @@ public final class FullIngestionPipelineExecutor {
                                          StationRegistryRepository stationRegistryRepository,
                                          BackfillOrchestrator orchestrator,
                                          PipelineProperties config,
-                                         Long asofPolicyId) {
+                                         Long asofPolicyId,
+                                         GribstreamVariableIngestJob gribstreamVariableIngestJob,
+                                         GribstreamVariableIngestProperties gribstreamVariableIngestProperties,
+                                         GribstreamProperties gribstreamProperties,
+                                         GribstreamAsOfSupplier gribstreamAsOfSupplier) {
     String normalizedTicker = normalizeSeriesTicker(seriesTicker);
     StationRegistry station = stationRegistryRepository.findBySeriesTicker(normalizedTicker)
         .orElseThrow(() -> new IllegalArgumentException(
@@ -308,7 +337,7 @@ public final class FullIngestionPipelineExecutor {
         + " dateRange=" + start + ".." + end
         + " zoneId=" + station.getZoneId());
 
-    snapshot("Step 2/4: CLI ingest starting station=" + station.getStationId());
+    snapshot("Step 2/5: CLI ingest starting station=" + station.getStationId());
     orchestrator.run(new BackfillRequest(
         BackfillJobType.CLI_INGEST_YEAR,
         List.of(normalizedTicker),
@@ -317,9 +346,9 @@ public final class FullIngestionPipelineExecutor {
         null,
         null,
         0));
-    snapshot("Step 2/4: CLI ingest complete station=" + station.getStationId());
+    snapshot("Step 2/5: CLI ingest complete station=" + station.getStationId());
 
-    snapshot("Step 3/4: MOS ingest starting station=" + station.getStationId()
+    snapshot("Step 3/5: MOS ingest starting station=" + station.getStationId()
         + " models=" + config.getModels()
         + " windowDays=" + config.getMosWindowDays());
     orchestrator.run(new BackfillRequest(
@@ -330,9 +359,20 @@ public final class FullIngestionPipelineExecutor {
         null,
         config.getModels(),
         config.getMosWindowDays()));
-    snapshot("Step 3/4: MOS ingest complete station=" + station.getStationId());
+    snapshot("Step 3/5: MOS ingest complete station=" + station.getStationId());
 
-    snapshot("Step 4/4: MOS as-of materialize starting station=" + station.getStationId()
+    if (gribstreamVariableIngestProperties.isEnabled()) {
+      StationSpec gribstreamStation =
+          resolveGribstreamStation(station.getStationId(), gribstreamProperties);
+      snapshot("Step 4/5: Gribstream variable ingest starting station=" + station.getStationId());
+      gribstreamVariableIngestJob.runRange(gribstreamStation, start, end, gribstreamAsOfSupplier);
+      snapshot("Step 4/5: Gribstream variable ingest complete station=" + station.getStationId());
+    } else {
+      snapshot("Step 4/5: Gribstream variable ingest skipped (disabled) station="
+          + station.getStationId());
+    }
+
+    snapshot("Step 5/5: MOS as-of materialize starting station=" + station.getStationId()
         + " asofPolicyId=" + asofPolicyId);
     orchestrator.run(new BackfillRequest(
         BackfillJobType.MOS_ASOF_MATERIALIZE_RANGE,
@@ -342,7 +382,51 @@ public final class FullIngestionPipelineExecutor {
         asofPolicyId,
         config.getModels(),
         0));
-    snapshot("Step 4/4: MOS as-of materialize complete station=" + station.getStationId());
+    snapshot("Step 5/5: MOS as-of materialize complete station=" + station.getStationId());
+  }
+
+  private static GribstreamAsOfSupplier resolveGribstreamAsOfSupplier(PipelineProperties config) {
+    LocalTime asOfLocalTime = config.getAsofLocalTime();
+    if (asOfLocalTime == null) {
+      throw new IllegalArgumentException("pipeline.asof-local-time is required");
+    }
+    AsofTimeZone asofTimeZone = resolveAsofTimeZone(config.getAsofTimeZone());
+    return (station, targetDateLocal) -> {
+      ZoneId stationZoneId = ZoneId.of(station.zoneId());
+      ZoneId asOfZoneId = asofTimeZone == AsofTimeZone.UTC ? ZoneOffset.UTC : stationZoneId;
+      return TimeSemantics.computeAsOfTimes(
+          targetDateLocal,
+          asOfLocalTime,
+          stationZoneId,
+          asOfZoneId).asOfUtc();
+    };
+  }
+
+  private static StationSpec resolveGribstreamStation(String stationId,
+                                                      GribstreamProperties gribstreamProperties) {
+    if (stationId == null || stationId.isBlank()) {
+      throw new IllegalArgumentException("stationId is required");
+    }
+    List<GribstreamProperties.StationProperties> stations = gribstreamProperties.getStations();
+    if (stations == null || stations.isEmpty()) {
+      throw new IllegalArgumentException("gribstream.stations is required");
+    }
+    String normalized = stationId.trim().toUpperCase(Locale.ROOT);
+    for (GribstreamProperties.StationProperties station : stations) {
+      if (station == null || station.getStationId() == null) {
+        continue;
+      }
+      if (normalized.equals(station.getStationId().trim().toUpperCase(Locale.ROOT))) {
+        return new StationSpec(
+            station.getStationId(),
+            station.getZoneId(),
+            station.getLatitude(),
+            station.getLongitude(),
+            station.getName());
+      }
+    }
+    throw new IllegalArgumentException(
+        "Gribstream station config missing for stationId=" + normalized);
   }
 
   private static ThreadFactory namedThreadFactory() {

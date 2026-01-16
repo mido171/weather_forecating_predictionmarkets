@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
 import com.predictionmarkets.weather.common.http.HttpRetryPolicy;
+import com.predictionmarkets.weather.gribstream.GribstreamRawResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -98,6 +99,24 @@ public class GribstreamClient {
         responseSha256,
         retrievedAtUtc,
         GribstreamResponseParser.parseRows(objectMapper, responseBytes, modelCode, requestSha256));
+  }
+
+  public GribstreamRawResponse fetchHistoryRaw(String modelCode, GribstreamHistoryRequest request) {
+    if (modelCode == null || modelCode.isBlank()) {
+      throw new IllegalArgumentException("modelCode is required");
+    }
+    Objects.requireNonNull(request, "request is required");
+    String requestJson = serializeRequest(request, modelCode);
+    String requestSha256 = Hashing.sha256Hex(requestJson);
+    byte[] responseBytes = executeRequest(modelCode, requestJson, requestSha256);
+    String responseSha256 = Hashing.sha256Hex(responseBytes);
+    Instant retrievedAtUtc = Instant.now();
+    return new GribstreamRawResponse(
+        requestJson,
+        requestSha256,
+        responseSha256,
+        retrievedAtUtc,
+        responseBytes);
   }
 
   private String serializeRequest(GribstreamHistoryRequest request, String modelCode) {

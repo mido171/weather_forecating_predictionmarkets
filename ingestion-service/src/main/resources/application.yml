@@ -93,6 +93,18 @@ gribstream:
     page-size: 5000
     append: true
     mos-asof-policy-id: 2
+  variable-ingest:
+    enabled: true
+    catalog-resource: classpath:gribstream_data
+    batch-size: 20
+    max-variables-per-model: 0
+    models:
+      - gfs
+      - hrrr
+      - rap
+      - nbm
+      - gefsatmosmean
+      - gefsatmos
 
 app:
   runners:

@@ -170,7 +170,7 @@ public class DefaultMosAsofMaterializeService implements MosAsofMaterializeServi
       if (!forecastDate.equals(targetDate)) {
         continue;
       }
-      values.add(entry.nX());
+      values.add(entry.numericValue(IemMosEntry.KEY_TMAX));
     }
     if (values.isEmpty()) {
       return new TMaxSelection(null, MISSING_NO_FORECAST_FOR_DATE);

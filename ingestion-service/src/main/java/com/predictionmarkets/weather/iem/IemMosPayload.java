@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 public record IemMosPayload(
@@ -57,8 +59,8 @@ public record IemMosPayload(
       }
       Instant runtimeUtc = Instant.ofEpochMilli(requireEpochMillis(entry, "runtime"));
       Instant forecastTimeUtc = optionalEpochMillis(entry, "ftime");
-      BigDecimal nX = parseDecimal(entry, "n_x");
-      entries.add(new IemMosEntry(runtimeUtc, forecastTimeUtc, nX));
+      Map<String, IemMosValue> values = parseValues(entry);
+      entries.add(new IemMosEntry(runtimeUtc, forecastTimeUtc, values));
     }
     String payloadHash = Hashing.sha256Hex(rawBytes);
     return new IemMosPayload(
@@ -127,33 +129,62 @@ public record IemMosPayload(
     throw new IllegalArgumentException("Expected numeric field: " + field);
   }
 
-  private static BigDecimal parseDecimal(JsonNode node, String field) {
-    JsonNode value = node.get(field);
+  private static Map<String, IemMosValue> parseValues(JsonNode entry) {
+    Map<String, IemMosValue> values = new HashMap<>();
+    entry.fields().forEachRemaining(field -> {
+      String key = field.getKey();
+      if (key == null) {
+        return;
+      }
+      String normalized = key.trim().toLowerCase(Locale.ROOT);
+      if (normalized.isEmpty()
+          || normalized.equals("station")
+          || normalized.equals("model")
+          || normalized.equals("runtime")
+          || normalized.equals("ftime")) {
+        return;
+      }
+      IemMosValue value = parseValue(field.getValue());
+      values.put(normalized, value);
+    });
+    return values;
+  }
+
+  private static IemMosValue parseValue(JsonNode value) {
     if (value == null || value.isNull()) {
-      return null;
+      return new IemMosValue(null, null);
     }
     if (value.isNumber()) {
-      return value.decimalValue();
+      return new IemMosValue(value.asText(), value.decimalValue());
     }
     if (value.isTextual()) {
-      String text = value.asText().trim();
-      if (text.isEmpty() || text.equalsIgnoreCase("M") || text.equalsIgnoreCase("T")) {
+      String raw = value.asText().trim();
+      if (raw.isEmpty()) {
+        return new IemMosValue(null, null);
+      }
+      BigDecimal numeric = parseNumeric(raw);
+      return new IemMosValue(raw, numeric);
+    }
+    return new IemMosValue(value.asText(), null);
+  }
+
+  private static BigDecimal parseNumeric(String text) {
+    String raw = text.trim();
+    if (raw.isEmpty() || raw.equalsIgnoreCase("M") || raw.equalsIgnoreCase("T")) {
+      return null;
+    }
+    int slash = raw.indexOf('/');
+    if (slash > 0) {
+      raw = raw.substring(0, slash).trim();
+      if (raw.isEmpty() || raw.equalsIgnoreCase("M") || raw.equalsIgnoreCase("T")) {
         return null;
       }
-      int slash = text.indexOf('/');
-      if (slash > 0) {
-        text = text.substring(0, slash).trim();
-        if (text.isEmpty() || text.equalsIgnoreCase("M") || text.equalsIgnoreCase("T")) {
-          return null;
-        }
-      }
-      try {
-        return new BigDecimal(text);
-      } catch (NumberFormatException ex) {
-        throw new IllegalArgumentException("Invalid decimal for field: " + field + " value=" + text, ex);
-      }
     }
-    throw new IllegalArgumentException("Expected numeric field: " + field);
+    try {
+      return new java.math.BigDecimal(raw);
+    } catch (NumberFormatException ex) {
+      return null;
+    }
   }
 
   private static MosModel parseModel(String value) {

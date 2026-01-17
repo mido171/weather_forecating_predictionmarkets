@@ -34,6 +34,16 @@ CALENDAR_COLS = [
     "asof_sin_hour",
     "asof_cos_hour",
 ]
+SLOW_EXPERIMENT_IDS = {
+    "E31",
+    "E32",
+    "E33",
+    "E34",
+    "E35",
+    "E36",
+    "E37",
+    "E38",
+}
 
 
 @dataclass(frozen=True)
@@ -61,6 +71,7 @@ class ExperimentContext:
     group_station_asof: pd.Series
     truth_lag: int
     seed: int
+    split_info: dict
 
 def setup_logging() -> None:
     logging.basicConfig(
@@ -3349,6 +3360,7 @@ def run_standard_experiment(
     pred_test = model.predict(X_test)
 
     metrics_summary = {
+        "split": ctx.split_info,
         "train": regression_metrics(y_train, pred_train),
         "validation": regression_metrics(y_val, pred_val) if len(y_val) else None,
         "test": regression_metrics(y_test, pred_test),
@@ -3495,6 +3507,7 @@ def run_e10(ctx: ExperimentContext, run_dir: Path, model_name: str) -> dict:
     final_test = pred_test_stage1 + pred_test_stage2
 
     metrics_summary = {
+        "split": ctx.split_info,
         "train": regression_metrics(y_train, final_train),
         "validation": regression_metrics(y_val, final_val) if len(y_val) else None,
         "test": regression_metrics(y_test, final_test),
@@ -3607,6 +3620,7 @@ def run_e47(ctx: ExperimentContext, run_dir: Path, model_name: str) -> dict:
     pred_test = df.loc[ctx.test_mask, "nx_ens"].to_numpy(dtype=float) + resid_pred_test
 
     metrics_summary = {
+        "split": ctx.split_info,
         "train": regression_metrics(df.loc[ctx.train_mask, "actual_tmax_f"].to_numpy(dtype=float), pred_train),
         "validation": regression_metrics(df.loc[ctx.val_mask, "actual_tmax_f"].to_numpy(dtype=float), pred_val) if len(pred_val) else None,
         "test": regression_metrics(y_test, pred_test),
@@ -3760,6 +3774,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--bootstrap-samples", type=int, default=DEFAULT_BOOTSTRAP)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--experiment-ids", nargs="*", help="Optional experiment ids")
+    parser.add_argument(
+        "--include-slow",
+        action="store_true",
+        help="Include slow analog/trajectory experiments (E31-E38).",
+    )
     args = parser.parse_args(argv)
 
     df = load_mos_csv(args.csv)
@@ -3834,6 +3853,7 @@ def main(argv: list[str] | None = None) -> int:
         group_station_asof=group_station_asof,
         truth_lag=args.truth_lag,
         seed=args.seed,
+        split_info=split,
     )
 
     suite_id = args.suite_id or default_suite_id()
@@ -3845,6 +3865,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.experiment_ids:
         exp_set = {eid.upper() for eid in args.experiment_ids}
         experiments = [exp for exp in experiments if exp.experiment_id.upper() in exp_set]
+    if not args.include_slow:
+        experiments = [
+            exp for exp in experiments if exp.experiment_id not in SLOW_EXPERIMENT_IDS
+        ]
+        LOGGER.info(
+            "Skipping slow experiments by default: %s",
+            ", ".join(sorted(SLOW_EXPERIMENT_IDS)),
+        )
 
     results: list[dict] = []
 

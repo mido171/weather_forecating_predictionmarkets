@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.executors;
 
 import com.predictionmarkets.weather.IngestionServiceApplication;
+import com.predictionmarkets.weather.config.GribstreamTransferProperties;
 import com.predictionmarkets.weather.gribstream.GribstreamDailyFeatureCsv;
 import com.predictionmarkets.weather.models.GribstreamDailyFeatureEntity;
 import com.predictionmarkets.weather.repository.GribstreamDailyFeatureRepository;

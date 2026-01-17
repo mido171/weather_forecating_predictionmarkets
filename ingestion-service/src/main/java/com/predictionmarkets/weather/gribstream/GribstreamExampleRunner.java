@@ -1,7 +1,7 @@
 package com.predictionmarkets.weather.gribstream;
 
 import com.predictionmarkets.weather.common.TimeSemantics;
-import com.predictionmarkets.weather.executors.PipelineProperties;
+import com.predictionmarkets.weather.config.PipelineProperties;
 import com.predictionmarkets.weather.models.AsofTimeZone;
 import java.time.Instant;
 import java.time.LocalDate;

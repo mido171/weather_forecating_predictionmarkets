@@ -106,5 +106,17 @@ public class MosForecastValueUpsertRepository {
       this.rawPayloadHashRef = rawPayloadHashRef;
       this.retrievedAtUtc = retrievedAtUtc;
     }
+
+    public Instant getRuntimeUtc() {
+      return runtimeUtc;
+    }
+
+    public Instant getForecastTimeUtc() {
+      return forecastTimeUtc;
+    }
+
+    public String getVariableCode() {
+      return variableCode;
+    }
   }
 }

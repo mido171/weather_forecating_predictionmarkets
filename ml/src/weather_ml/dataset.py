@@ -29,6 +29,10 @@ def load_csv(path: str | Path) -> pd.DataFrame:
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
     df = pd.read_csv(csv_path, dtype={"station_id": "string"})
+    if "actual_tmax_f" not in df.columns and "target_tmax_f" in df.columns:
+        df = df.rename(columns={"target_tmax_f": "actual_tmax_f"})
+    elif "actual_tmax_f" in df.columns and "target_tmax_f" in df.columns:
+        df = df.drop(columns=["target_tmax_f"])
     df = _coerce_types(df)
     _log_dataset_stats(df)
     return df

@@ -25,6 +25,7 @@ import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
 import com.predictionmarkets.weather.repository.MosForecastValueUpsertRepository;
+import com.predictionmarkets.weather.repository.MosDailyValueRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
@@ -64,6 +65,9 @@ class BackfillOrchestratorTest {
   private MosForecastValueUpsertRepository mosForecastValueUpsertRepository;
 
   @Autowired
+  private MosDailyValueRepository mosDailyValueRepository;
+
+  @Autowired
   private KalshiSeriesRepository kalshiSeriesRepository;
 
   @MockBean
@@ -88,6 +92,7 @@ class BackfillOrchestratorTest {
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
     mosForecastValueUpsertRepository.deleteAll();
+    mosDailyValueRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();
     seedStation();

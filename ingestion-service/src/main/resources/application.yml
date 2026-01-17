@@ -25,6 +25,12 @@ kalshi:
 iem:
   base-url: https://mesonet.agron.iastate.edu
 
+cli-settlement:
+  station-ids:
+    - KMIA
+  start-date-local: 2007-01-01
+  end-date-local: 2025-12-31
+
 gribstream:
   baseUrl: "https://gribstream.com"
   apiToken: "a379b700999ff2263bc5816c3ca21d25427ce5f7"
@@ -111,6 +117,11 @@ gribstream:
       - gefsatmosmean
       - gefsatmos
 
+mos:
+  training-data:
+    station-id: KMIA
+    append: true
+
 app:
   runners:
     gribstream-example:
@@ -127,14 +138,14 @@ pipeline:
     - KXHIGHMIA
     - KXHIGHCHI
     - KXHIGHLAX
-  station-ids-to-run: "KMDW"
+  station-ids-to-run: "KMIA"
   models:
     - GFS
     - NAM
-  date-start-local: 2015-01-01
+  date-start-local: 2007-01-01
   date-end-local: 2025-12-31
   mos-window-days: 1
-  thread-count: 20
+  thread-count: 60
   default-range-days: 30
   asof-policy-name: utc-12
   asof-local-time: "12:00"

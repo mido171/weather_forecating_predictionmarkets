@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public final class HardenedWebClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(HardenedWebClient.class);
 
-  private final OkHttpClient httpClient;
+  private final ThreadLocal<OkHttpClient> httpClientByThread;
   private final HttpClientSettings settings;
   private final Sleeper sleeper;
   private final HttpUrl baseUrl;
@@ -35,7 +35,7 @@ public final class HardenedWebClient {
     this.baseUrl = parseBaseUrl(baseUrl);
     this.settings = Objects.requireNonNull(settings, "settings must not be null");
     this.sleeper = Objects.requireNonNull(sleeper, "sleeper must not be null");
-    this.httpClient = buildClient(settings);
+    this.httpClientByThread = ThreadLocal.withInitial(() -> buildClient(settings));
   }
 
   public byte[] getBytes(String endpoint,
@@ -52,7 +52,7 @@ public final class HardenedWebClient {
         .url(url)
         .get()
         .build();
-    try (Response response = httpClient.newCall(request).execute()) {
+    try (Response response = client().newCall(request).execute()) {
       ResponseBody body = response.body();
       byte[] payload = body == null ? new byte[0] : body.bytes();
       return new HttpResult(response.code(), payload);
@@ -169,6 +169,10 @@ public final class HardenedWebClient {
         .writeTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
         .retryOnConnectionFailure(true)
         .build();
+  }
+
+  private OkHttpClient client() {
+    return httpClientByThread.get();
   }
 
   private static HttpUrl parseBaseUrl(String baseUrl) {

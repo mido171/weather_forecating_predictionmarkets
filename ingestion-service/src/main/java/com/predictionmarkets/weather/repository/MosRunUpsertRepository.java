@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.repository;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -27,6 +28,7 @@ public class MosRunUpsertRepository {
         raw_payload_hash = VALUES(raw_payload_hash),
         retrieved_at_utc = VALUES(retrieved_at_utc)
       """;
+  private static final int DEFAULT_BATCH_SIZE = 200;
 
   private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -34,11 +36,20 @@ public class MosRunUpsertRepository {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public int[] upsertAll(List<UpsertRow> rows) {
-    SqlParameterSource[] batch = rows.stream()
-        .map(MosRunUpsertRepository::toParams)
-        .toArray(SqlParameterSource[]::new);
-    return jdbcTemplate.batchUpdate(UPSERT_SQL, batch);
+  public int upsertAll(List<UpsertRow> rows) {
+    if (rows == null || rows.isEmpty()) {
+      return 0;
+    }
+    int updated = 0;
+    for (int start = 0; start < rows.size(); start += DEFAULT_BATCH_SIZE) {
+      int end = Math.min(start + DEFAULT_BATCH_SIZE, rows.size());
+      List<UpsertRow> slice = rows.subList(start, end);
+      SqlParameterSource[] batch = slice.stream()
+          .map(MosRunUpsertRepository::toParams)
+          .toArray(SqlParameterSource[]::new);
+      updated += Arrays.stream(jdbcTemplate.batchUpdate(UPSERT_SQL, batch)).sum();
+    }
+    return updated;
   }
 
   private static SqlParameterSource toParams(UpsertRow row) {

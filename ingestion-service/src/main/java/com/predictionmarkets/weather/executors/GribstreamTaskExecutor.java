@@ -2,6 +2,7 @@ package com.predictionmarkets.weather.executors;
 
 import com.predictionmarkets.weather.IngestionServiceApplication;
 import com.predictionmarkets.weather.common.TimeSemantics;
+import com.predictionmarkets.weather.config.PipelineProperties;
 import com.predictionmarkets.weather.gribstream.GribstreamAsOfSupplier;
 import com.predictionmarkets.weather.gribstream.GribstreamExecutorProperties;
 import com.predictionmarkets.weather.gribstream.GribstreamProperties;

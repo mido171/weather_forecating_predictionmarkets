@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.executors;
 
 import com.predictionmarkets.weather.IngestionServiceApplication;
+import com.predictionmarkets.weather.config.GribstreamTrainingDataProperties;
 import com.predictionmarkets.weather.models.CliDaily;
 import com.predictionmarkets.weather.models.CliDailyId;
 import com.predictionmarkets.weather.models.GribstreamDailyFeatureEntity;

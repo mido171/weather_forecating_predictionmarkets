@@ -41,10 +41,10 @@ def build_features(
     missing_indicators = _missing_indicators(df, base_features)
     df = _impute_base_features(df, base_features, fit_state.base_impute_means)
 
-    features = pd.DataFrame(index=df.index)
-    for name, values in missing_indicators.items():
-        features[name] = values
-    features[base_features] = df[base_features].astype(float)
+    features = pd.concat(
+        [missing_indicators, df[base_features].astype(float)],
+        axis=1,
+    )
 
     model_columns = [col for col in base_features if col.endswith("_tmax_f")]
     if config.features.ensemble_stats:
@@ -105,11 +105,12 @@ def _build_state(df: pd.DataFrame, config) -> FeatureState:
     )
 
 
-def _missing_indicators(df: pd.DataFrame, base_features: list[str]) -> dict[str, np.ndarray]:
-    indicators: dict[str, np.ndarray] = {}
-    for column in base_features:
-        indicators[f"{column}_missing"] = df[column].isna().astype(float).to_numpy()
-    return indicators
+def _missing_indicators(df: pd.DataFrame, base_features: list[str]) -> pd.DataFrame:
+    if not base_features:
+        return pd.DataFrame(index=df.index)
+    missing = df[base_features].isna().astype(float)
+    missing.columns = [f"{column}_missing" for column in base_features]
+    return missing
 
 
 def _impute_base_features(
@@ -141,15 +142,22 @@ def _add_ensemble_stats(
     df: pd.DataFrame,
     model_columns: list[str],
 ) -> pd.DataFrame:
+    if not model_columns:
+        return features
     values = df[model_columns]
-    features["ens_mean"] = values.mean(axis=1)
-    features["ens_median"] = values.median(axis=1)
-    features["ens_min"] = values.min(axis=1)
-    features["ens_max"] = values.max(axis=1)
-    features["ens_range"] = features["ens_max"] - features["ens_min"]
-    features["ens_std"] = values.std(axis=1, ddof=0)
-    features["ens_iqr"] = values.quantile(0.75, axis=1) - values.quantile(0.25, axis=1)
-    return features
+    ens_df = pd.DataFrame(
+        {
+            "ens_mean": values.mean(axis=1),
+            "ens_median": values.median(axis=1),
+            "ens_min": values.min(axis=1),
+            "ens_max": values.max(axis=1),
+            "ens_std": values.std(axis=1, ddof=0),
+            "ens_iqr": values.quantile(0.75, axis=1) - values.quantile(0.25, axis=1),
+        },
+        index=df.index,
+    )
+    ens_df["ens_range"] = ens_df["ens_max"] - ens_df["ens_min"]
+    return pd.concat([features, ens_df], axis=1)
 
 
 def _add_pairwise_deltas(
@@ -167,10 +175,14 @@ def _add_pairwise_deltas(
             ["hrrr_tmax_f", "gfs_tmax_f"],
             ["nam_tmax_f", "nbm_tmax_f"],
         ]
+    deltas: dict[str, pd.Series] = {}
     for left, right in pairs:
         if left in df.columns and right in df.columns:
-            features[f"{left}_minus_{right}"] = df[left] - df[right]
-    return features
+            deltas[f"{left}_minus_{right}"] = df[left] - df[right]
+    if not deltas:
+        return features
+    delta_df = pd.DataFrame(deltas, index=df.index)
+    return pd.concat([features, delta_df], axis=1)
 
 
 def _add_model_vs_ens_deltas(
@@ -180,22 +192,46 @@ def _add_model_vs_ens_deltas(
 ) -> pd.DataFrame:
     if "ens_mean" not in features.columns:
         features = _add_ensemble_stats(features, df, model_columns)
+    if not model_columns:
+        return features
+    if "ens_mean" not in features.columns:
+        return features
+    ens_mean = features["ens_mean"]
+    deltas: dict[str, pd.Series] = {}
     for column in model_columns:
-        delta = df[column] - features["ens_mean"]
-        features[f"{column}_minus_ens_mean"] = delta
-        features[f"{column}_minus_ens_mean_abs"] = delta.abs()
-    return features
+        delta = df[column] - ens_mean
+        deltas[f"{column}_minus_ens_mean"] = delta
+        deltas[f"{column}_minus_ens_mean_abs"] = delta.abs()
+    if not deltas:
+        return features
+    delta_df = pd.DataFrame(deltas, index=df.index)
+    return pd.concat([features, delta_df], axis=1)
 
 
 def _add_calendar_features(features: pd.DataFrame, df: pd.DataFrame) -> pd.DataFrame:
     dates = pd.to_datetime(df["target_date_local"])
-    features["month"] = dates.dt.month.astype(int)
-    features["day_of_year"] = dates.dt.dayofyear.astype(int)
-    radians = 2 * np.pi * features["day_of_year"] / 365.25
-    features["sin_doy"] = np.sin(radians)
-    features["cos_doy"] = np.cos(radians)
-    features["is_weekend"] = dates.dt.dayofweek.isin([5, 6]).astype(int)
-    return features
+    calendar_df = pd.DataFrame(
+        {
+            "month": dates.dt.month.astype(int),
+            "day_of_year": dates.dt.dayofyear.astype(int),
+            "is_weekend": dates.dt.dayofweek.isin([5, 6]).astype(int),
+        },
+        index=df.index,
+    )
+    radians = 2 * np.pi * calendar_df["day_of_year"] / 365.25
+    calendar_df["sin_doy"] = np.sin(radians)
+    calendar_df["cos_doy"] = np.cos(radians)
+    if "asof_utc" in df.columns:
+        asof = pd.to_datetime(df["asof_utc"], utc=True, errors="coerce")
+        hour = (
+            asof.dt.hour.astype(float)
+            + asof.dt.minute.astype(float) / 60.0
+            + asof.dt.second.astype(float) / 3600.0
+        )
+        hour_radians = 2 * np.pi * hour / 24.0
+        calendar_df["asof_sin_hour"] = np.sin(hour_radians)
+        calendar_df["asof_cos_hour"] = np.cos(hour_radians)
+    return pd.concat([features, calendar_df], axis=1)
 
 
 def _add_station_onehot(
@@ -204,10 +240,14 @@ def _add_station_onehot(
     station_categories: list[str],
 ) -> pd.DataFrame:
     categories = pd.Categorical(df["station_id"], categories=station_categories)
-    dummies = pd.get_dummies(categories, prefix="station", dtype=float)
-    for column in dummies.columns:
-        features[column] = dummies[column].values
-    return features
+    dummies = pd.get_dummies(
+        pd.Series(categories, index=df.index),
+        prefix="station",
+        dtype=float,
+    )
+    if dummies.empty:
+        return features
+    return pd.concat([features, dummies], axis=1)
 
 
 def _build_climatology_series(
@@ -266,8 +306,13 @@ def _add_climatology_features(
         else:
             climo_mean.append(float(subset.mean()))
             climo_std.append(float(subset.std(ddof=0)))
-    features["climo_mean_doy"] = climo_mean
-    features["climo_std_doy"] = climo_std
+    climo_df = pd.DataFrame(
+        {
+            "climo_mean_doy": climo_mean,
+            "climo_std_doy": climo_std,
+        },
+        index=df.index,
+    )
 
     if feature_config.climatology.rolling_windows_days:
         rolling = _compute_rolling_features(
@@ -276,9 +321,9 @@ def _add_climatology_features(
             feature_config.climatology.rolling_windows_days,
             fit_state.label_lag_days,
         )
-        for column, values in rolling.items():
-            features[column] = values
-    return features
+        rolling_df = pd.DataFrame(rolling, index=df.index)
+        climo_df = pd.concat([climo_df, rolling_df], axis=1)
+    return pd.concat([features, climo_df], axis=1)
 
 
 def _compute_rolling_features(

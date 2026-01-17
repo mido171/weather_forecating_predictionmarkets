@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.predictionmarkets.weather.common.Hashing;
 import com.predictionmarkets.weather.models.KalshiSeries;
+import com.predictionmarkets.weather.models.MosDailyValue;
 import com.predictionmarkets.weather.models.MosModel;
 import com.predictionmarkets.weather.models.MosRun;
 import com.predictionmarkets.weather.models.StationMappingStatus;
@@ -12,11 +13,13 @@ import com.predictionmarkets.weather.repository.CliDailyRepository;
 import com.predictionmarkets.weather.repository.IngestCheckpointRepository;
 import com.predictionmarkets.weather.repository.KalshiSeriesRepository;
 import com.predictionmarkets.weather.repository.MosForecastValueUpsertRepository;
+import com.predictionmarkets.weather.repository.MosDailyValueRepository;
 import com.predictionmarkets.weather.repository.MosAsofFeatureRepository;
 import com.predictionmarkets.weather.repository.MosRunRepository;
 import com.predictionmarkets.weather.repository.StationRegistryRepository;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -69,6 +72,9 @@ class MosRunIngestServiceTest {
   private MosForecastValueUpsertRepository mosForecastValueUpsertRepository;
 
   @Autowired
+  private MosDailyValueRepository mosDailyValueRepository;
+
+  @Autowired
   private KalshiSeriesRepository kalshiSeriesRepository;
 
   @BeforeEach
@@ -78,6 +84,7 @@ class MosRunIngestServiceTest {
     mosRunRepository.deleteAll();
     cliDailyRepository.deleteAll();
     mosForecastValueUpsertRepository.deleteAll();
+    mosDailyValueRepository.deleteAll();
     stationRegistryRepository.deleteAll();
     kalshiSeriesRepository.deleteAll();
     seedStation();
@@ -109,6 +116,25 @@ class MosRunIngestServiceTest {
       assertThat(run.getRawPayloadHash()).isEqualTo(expectedHash);
       assertThat(run.getRetrievedAtUtc()).isNotNull();
     });
+
+    List<MosDailyValue> dailyValues = mosDailyValueRepository
+        .findByStationIdAndModelOrderByRuntimeUtcAscTargetDateLocalAscVariableCodeAsc("KMIA", "GFS");
+    assertThat(dailyValues).hasSize(2);
+    MosDailyValue first = dailyValues.get(0);
+    assertThat(first.getTargetDateLocal()).isEqualTo(LocalDate.of(2023, 12, 14));
+    assertThat(first.getVariableCode()).isEqualTo("n_x");
+    assertThat(first.getValueMin()).isEqualByComparingTo("71");
+    assertThat(first.getValueMax()).isEqualByComparingTo("72");
+    assertThat(first.getValueMean()).isEqualByComparingTo("71.5");
+    assertThat(first.getSampleCount()).isEqualTo(2);
+
+    MosDailyValue second = dailyValues.get(1);
+    assertThat(second.getTargetDateLocal()).isEqualTo(LocalDate.of(2023, 12, 15));
+    assertThat(second.getVariableCode()).isEqualTo("n_x");
+    assertThat(second.getValueMin()).isEqualByComparingTo("75");
+    assertThat(second.getValueMax()).isEqualByComparingTo("75");
+    assertThat(second.getValueMean()).isEqualByComparingTo("75");
+    assertThat(second.getSampleCount()).isEqualTo(1);
 
     SERVER.enqueue(new MockResponse()
         .setResponseCode(200)

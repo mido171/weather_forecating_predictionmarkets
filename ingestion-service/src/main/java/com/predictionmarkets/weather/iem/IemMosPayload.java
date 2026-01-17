@@ -189,6 +189,9 @@ public record IemMosPayload(
 
   private static MosModel parseModel(String value) {
     String normalized = normalizeText(value);
+    if ("ETA".equals(normalized)) {
+      normalized = "NAM";
+    }
     try {
       return MosModel.valueOf(normalized);
     } catch (IllegalArgumentException ex) {

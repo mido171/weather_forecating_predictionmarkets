@@ -164,9 +164,13 @@ def main(argv: list[str] | None = None) -> int:
         val_pred_inner = mean_model_inner.predict(X_val)
         val_metrics_inner = metrics.regression_metrics(y_val, val_pred_inner)
 
+    sigma_enabled = config.models.sigma.method == "two_stage"
+    if not sigma_enabled:
+        LOGGER.info("Sigma modeling disabled; skipping probabilistic outputs.")
+
     sigma_model_inner = None
     sigma_val = None
-    if config.models.sigma.method == "two_stage":
+    if sigma_enabled:
         sigma_model_inner = _train_sigma_model(
             model_name=config.models.sigma.primary,
             mean_model_name=best_model_name,
@@ -247,7 +251,7 @@ def main(argv: list[str] | None = None) -> int:
     mu_test = mean_model_full.predict(X_test)
     sigma_test = None
     sigma_model_full = None
-    if config.models.sigma.method == "two_stage":
+    if sigma_enabled:
         sigma_model_full = _train_sigma_model(
             model_name=config.models.sigma.primary,
             mean_model_name=best_model_name,
@@ -269,27 +273,31 @@ def main(argv: list[str] | None = None) -> int:
                 sigma_floor=config.models.sigma.sigma_floor,
             )
 
-    if sigma_test is None:
+    if sigma_enabled and sigma_test is None:
         raise RuntimeError("Sigma model training failed; sigma predictions missing.")
 
-    test_probabilities = _build_probabilities(
-        mu=mu_test,
-        sigma=sigma_test,
-        support_min=config.distribution.support_min_f,
-        support_max=config.distribution.support_max_f,
-        bin_specs=config.calibration.bins_to_calibrate,
-    )
-    bin_probs_test = test_probabilities["bin_probs"]
-    if calibrators:
-        bin_probs_test = calibration.apply_calibrators(bin_probs_test, calibrators)
+    test_probabilities = None
+    bin_probs_test = None
+    test_prob_metrics = None
+    if sigma_test is not None:
+        test_probabilities = _build_probabilities(
+            mu=mu_test,
+            sigma=sigma_test,
+            support_min=config.distribution.support_min_f,
+            support_max=config.distribution.support_max_f,
+            bin_specs=config.calibration.bins_to_calibrate,
+        )
+        bin_probs_test = test_probabilities["bin_probs"]
+        if calibrators:
+            bin_probs_test = calibration.apply_calibrators(bin_probs_test, calibrators)
 
-    test_prob_metrics = _probabilistic_metrics(
-        y_true=y_test,
-        pmf=test_probabilities["pmf"],
-        support_min=config.distribution.support_min_f,
-        bin_probs=bin_probs_test,
-        bin_specs=config.calibration.bins_to_calibrate,
-    )
+        test_prob_metrics = _probabilistic_metrics(
+            y_true=y_test,
+            pmf=test_probabilities["pmf"],
+            support_min=config.distribution.support_min_f,
+            bin_probs=bin_probs_test,
+            bin_specs=config.calibration.bins_to_calibrate,
+        )
 
     test_metrics = metrics.regression_metrics(y_test, mu_test)
     test_station_metrics = metrics.per_station_metrics(
@@ -302,7 +310,8 @@ def main(argv: list[str] | None = None) -> int:
         "selected_model": best_model_name,
         "best_params": best_params,
         "candidates": candidate_results,
-        "sigma_model": config.models.sigma.primary,
+        "sigma_model": config.models.sigma.primary if sigma_enabled else None,
+        "sigma_method": config.models.sigma.method,
     }
 
     metrics_summary = {
@@ -335,8 +344,10 @@ def main(argv: list[str] | None = None) -> int:
 
     mean_model_path = run_dir / "mean_model.joblib"
     joblib.dump(mean_model_full, mean_model_path)
-    sigma_model_path = run_dir / "sigma_model.joblib"
-    joblib.dump(sigma_model_full, sigma_model_path)
+    sigma_model_path = None
+    if sigma_enabled:
+        sigma_model_path = run_dir / "sigma_model.joblib"
+        joblib.dump(sigma_model_full, sigma_model_path)
     feature_state_path = run_dir / "feature_state.joblib"
     joblib.dump(state_full, feature_state_path)
 
@@ -493,20 +504,21 @@ def main(argv: list[str] | None = None) -> int:
         test_df,
         mu_test,
         sigma_test,
-        test_probabilities["pmf"],
+        test_probabilities["pmf"] if test_probabilities else None,
         bin_probs_test,
-        config.distribution.support_min_f,
+        config.distribution.support_min_f if test_probabilities else None,
     )
 
     hash_paths = [
         config_path,
         mean_model_path,
-        sigma_model_path,
         feature_state_path,
         metrics_path,
         report_path,
         predictions_path,
     ]
+    if sigma_model_path is not None:
+        hash_paths.append(sigma_model_path)
     if calibrator_path is not None:
         hash_paths.append(calibrator_path)
     if global_calibration_path is not None:
@@ -674,11 +686,23 @@ def _baseline_metrics(
         "nbm_tmax_f",
     ]
     results: dict[str, dict[str, dict[str, float]]] = {}
+
+    def ensemble_metrics(df: pd.DataFrame, *, label: str) -> dict[str, float] | None:
+        present_cols = [col for col in model_cols if col in df.columns]
+        if not present_cols:
+            LOGGER.warning(
+                "Skipping ensemble baseline for %s; none of %s present.",
+                label,
+                model_cols,
+            )
+            return None
+        ens_pred = baselines.predict_ensemble_mean(df, present_cols)
+        return metrics.regression_metrics(df["actual_tmax_f"].to_numpy(), ens_pred)
+
     if not val_df.empty:
-        ens_val = baselines.predict_ensemble_mean(val_df, model_cols)
-        results["ensemble_mean_val"] = metrics.regression_metrics(
-            val_df["actual_tmax_f"].to_numpy(), ens_val
-        )
+        ens_val_metrics = ensemble_metrics(val_df, label="validation")
+        if ens_val_metrics is not None:
+            results["ensemble_mean_val"] = ens_val_metrics
         climo_val = baselines.predict_climatology(
             train_df,
             val_df,
@@ -691,10 +715,9 @@ def _baseline_metrics(
             val_df["actual_tmax_f"].to_numpy(), climo_val
         )
     if not test_df.empty:
-        ens_test = baselines.predict_ensemble_mean(test_df, model_cols)
-        results["ensemble_mean_test"] = metrics.regression_metrics(
-            test_df["actual_tmax_f"].to_numpy(), ens_test
-        )
+        ens_test_metrics = ensemble_metrics(test_df, label="test")
+        if ens_test_metrics is not None:
+            results["ensemble_mean_test"] = ens_test_metrics
         climo_test = baselines.predict_climatology(
             train_full_df,
             test_df,
@@ -785,27 +808,38 @@ def _write_predictions(
     path: Path,
     df: pd.DataFrame,
     mu: np.ndarray,
-    sigma: np.ndarray,
-    pmf: np.ndarray,
-    bin_probs: dict[str, np.ndarray],
-    support_min: int,
+    sigma: np.ndarray | None,
+    pmf: np.ndarray | None,
+    bin_probs: dict[str, np.ndarray] | None,
+    support_min: int | None,
 ) -> None:
     records = df[["station_id", "target_date_local", "asof_utc"]].copy()
     records["mu_hat_f"] = mu
-    records["sigma_hat_f"] = sigma
-    records["p_temp_json"] = [
-        json.dumps(row.tolist(), separators=(",", ":"), ensure_ascii=True) for row in pmf
-    ]
-    records["p_bins_json"] = [
-        json.dumps(
-            {name: float(prob[idx]) for name, prob in bin_probs.items()},
-            separators=(",", ":"),
-            ensure_ascii=True,
-        )
-        for idx in range(len(records))
-    ]
-    records["support_min_f"] = support_min
-    records["support_max_f"] = support_min + pmf.shape[1] - 1
+    if sigma is None:
+        records["sigma_hat_f"] = np.full(len(records), np.nan)
+    else:
+        records["sigma_hat_f"] = sigma
+
+    if pmf is None or bin_probs is None or support_min is None:
+        records["p_temp_json"] = [None] * len(records)
+        records["p_bins_json"] = [None] * len(records)
+        records["support_min_f"] = np.nan
+        records["support_max_f"] = np.nan
+    else:
+        records["p_temp_json"] = [
+            json.dumps(row.tolist(), separators=(",", ":"), ensure_ascii=True)
+            for row in pmf
+        ]
+        records["p_bins_json"] = [
+            json.dumps(
+                {name: float(prob[idx]) for name, prob in bin_probs.items()},
+                separators=(",", ":"),
+                ensure_ascii=True,
+            )
+            for idx in range(len(records))
+        ]
+        records["support_min_f"] = support_min
+        records["support_max_f"] = support_min + pmf.shape[1] - 1
     records.to_parquet(path, index=False, engine="pyarrow")
 
 

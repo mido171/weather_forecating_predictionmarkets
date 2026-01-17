@@ -1,0 +1,233 @@
+data:
+  csv_path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\KMIA_mos_training_data.csv
+  dataset_schema_version: 1
+validation:
+  strict_schema: false
+  forecast_min_f: -80.0
+  forecast_max_f: 140.0
+  spread_min_f: 0.0
+  require_asof_not_after_target: true
+split:
+  train_start: 2007-01-01
+  train_end: 2022-12-31
+  test_start: 2024-01-01
+  test_end: 2025-12-31
+  gap_dates: []
+  validation:
+    enabled: true
+    val_start: 2023-01-01
+    val_end: 2023-12-31
+  cv:
+    enabled: true
+    n_splits: 3
+    gap_days: 2
+features:
+  base_features:
+  - gfs_cig_min
+  - gfs_cig_max
+  - gfs_cig_mean
+  - gfs_cig_median
+  - gfs_dpt_min
+  - gfs_dpt_max
+  - gfs_dpt_mean
+  - gfs_dpt_median
+  - gfs_n_x_min
+  - gfs_n_x_max
+  - gfs_n_x_mean
+  - gfs_n_x_median
+  - gfs_p06_min
+  - gfs_p06_max
+  - gfs_p06_mean
+  - gfs_p06_median
+  - gfs_p12_min
+  - gfs_p12_max
+  - gfs_p12_mean
+  - gfs_p12_median
+  - gfs_pos_min
+  - gfs_pos_max
+  - gfs_pos_mean
+  - gfs_pos_median
+  - gfs_poz_min
+  - gfs_poz_max
+  - gfs_poz_mean
+  - gfs_poz_median
+  - gfs_q06_min
+  - gfs_q06_max
+  - gfs_q06_mean
+  - gfs_q06_median
+  - gfs_q12_min
+  - gfs_q12_max
+  - gfs_q12_mean
+  - gfs_q12_median
+  - gfs_t06_min
+  - gfs_t06_max
+  - gfs_t06_mean
+  - gfs_t06_median
+  - gfs_t06_1_min
+  - gfs_t06_1_max
+  - gfs_t06_1_mean
+  - gfs_t06_1_median
+  - gfs_t06_2_min
+  - gfs_t06_2_max
+  - gfs_t06_2_mean
+  - gfs_t06_2_median
+  - gfs_tmp_min
+  - gfs_tmp_max
+  - gfs_tmp_mean
+  - gfs_tmp_median
+  - gfs_vis_min
+  - gfs_vis_max
+  - gfs_vis_mean
+  - gfs_vis_median
+  - gfs_wdr_min
+  - gfs_wdr_max
+  - gfs_wdr_mean
+  - gfs_wdr_median
+  - gfs_wsp_min
+  - gfs_wsp_max
+  - gfs_wsp_mean
+  - gfs_wsp_median
+  - nam_cig_min
+  - nam_cig_max
+  - nam_cig_mean
+  - nam_cig_median
+  - nam_dpt_min
+  - nam_dpt_max
+  - nam_dpt_mean
+  - nam_dpt_median
+  - nam_n_x_min
+  - nam_n_x_max
+  - nam_n_x_mean
+  - nam_n_x_median
+  - nam_p06_min
+  - nam_p06_max
+  - nam_p06_mean
+  - nam_p06_median
+  - nam_p12_min
+  - nam_p12_max
+  - nam_p12_mean
+  - nam_p12_median
+  - nam_pos_min
+  - nam_pos_max
+  - nam_pos_mean
+  - nam_pos_median
+  - nam_poz_min
+  - nam_poz_max
+  - nam_poz_mean
+  - nam_poz_median
+  - nam_q06_min
+  - nam_q06_max
+  - nam_q06_mean
+  - nam_q06_median
+  - nam_q12_min
+  - nam_q12_max
+  - nam_q12_mean
+  - nam_q12_median
+  - nam_t06_min
+  - nam_t06_max
+  - nam_t06_mean
+  - nam_t06_median
+  - nam_t06_1_min
+  - nam_t06_1_max
+  - nam_t06_1_mean
+  - nam_t06_1_median
+  - nam_t06_2_min
+  - nam_t06_2_max
+  - nam_t06_2_mean
+  - nam_t06_2_median
+  - nam_tmp_min
+  - nam_tmp_max
+  - nam_tmp_mean
+  - nam_tmp_median
+  - nam_vis_min
+  - nam_vis_max
+  - nam_vis_mean
+  - nam_vis_median
+  - nam_wdr_min
+  - nam_wdr_max
+  - nam_wdr_mean
+  - nam_wdr_median
+  - nam_wsp_min
+  - nam_wsp_max
+  - nam_wsp_mean
+  - nam_wsp_median
+  ensemble_stats: false
+  pairwise_deltas: false
+  model_vs_ens_deltas: false
+  calendar: true
+  station_onehot: true
+  pairwise_pairs: []
+  climatology:
+    enabled: false
+    label_lag_days: 2
+    rolling_windows_days:
+    - 7
+    - 30
+models:
+  mean:
+    candidates:
+    - lgbm
+    primary: lgbm
+    param_grid:
+      lgbm:
+        num_leaves:
+        - 31
+        - 63
+        min_data_in_leaf:
+        - 20
+        - 50
+        feature_fraction:
+        - 0.8
+        bagging_fraction:
+        - 0.8
+        lambda_l1:
+        - 0.0
+        - 0.1
+        lambda_l2:
+        - 0.0
+        - 0.1
+        learning_rate:
+        - 0.05
+        - 0.1
+        n_estimators:
+        - 300
+  sigma:
+    method: none
+    primary: ridge
+    param_grid: {}
+    sigma_floor: 0.25
+    eps: 1.0e-06
+artifacts:
+  root_dir: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\artifacts
+  run_id: null
+  overwrite: false
+seeds:
+  global_seed: 1337
+  force_single_thread: true
+distribution:
+  support_min_f: -30
+  support_max_f: 130
+calibration:
+  enabled: true
+  method: isotonic
+  bins_to_calibrate:
+  - name: lt_52
+    type: threshold
+    lt: 52
+  - name: ge_90
+    type: threshold
+    ge: 90
+postprocess:
+  global_normal_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+  baseline_median_calibration:
+    enabled: false
+    cal_start: null
+    cal_end: null
+    ddof: 1
+    station_scope: null
+    forecast_columns: []

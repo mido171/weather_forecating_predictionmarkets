@@ -1,0 +1,29 @@
+{
+  "base_cols": [
+    "gfs_tmp_min",
+    "gfs_tmp_max",
+    "gfs_tmp_mean",
+    "gfs_tmp_median",
+    "nam_tmp_min",
+    "nam_tmp_max",
+    "nam_tmp_mean",
+    "nam_tmp_median",
+    "gfs_n_x_min",
+    "gfs_n_x_max",
+    "gfs_n_x_mean",
+    "gfs_n_x_median",
+    "nam_n_x_min",
+    "nam_n_x_max",
+    "nam_n_x_mean",
+    "nam_n_x_median",
+    "month",
+    "sin_doy",
+    "cos_doy",
+    "is_weekend",
+    "asof_sin_hour",
+    "asof_cos_hour"
+  ],
+  "experiment_id": "E15",
+  "model": "lgbm",
+  "name": "Diurnal shape regimes"
+}

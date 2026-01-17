@@ -142,9 +142,11 @@ def _get_col(df: pd.DataFrame, name: str) -> pd.Series:
 
 def _nanmean_two(a: pd.Series, b: pd.Series) -> pd.Series:
     arr = np.vstack([a.to_numpy(dtype=float), b.to_numpy(dtype=float)]).T
-    mean = np.nanmean(arr, axis=1)
-    both_nan = np.isnan(arr).all(axis=1)
-    mean[both_nan] = np.nan
+    valid = np.isfinite(arr)
+    count = valid.sum(axis=1)
+    sum_vals = np.where(valid, arr, 0.0).sum(axis=1)
+    mean = np.full_like(sum_vals, np.nan, dtype=float)
+    np.divide(sum_vals, count, out=mean, where=count > 0)
     return pd.Series(mean, index=a.index, dtype=float)
 
 
@@ -203,10 +205,10 @@ def split_by_date(df: pd.DataFrame) -> dict:
     if not unique_dates:
         raise ValueError("No target_date_local values present.")
 
-    years = sorted({d.astype("datetime64[Y]").astype(int) + 1970 for d in unique_dates})
+    years = sorted({pd.Timestamp(d).year for d in unique_dates})
     full_year = None
     for year in reversed(years):
-        year_dates = [d for d in unique_dates if d.astype("datetime64[Y]").astype(int) + 1970 == year]
+        year_dates = [d for d in unique_dates if pd.Timestamp(d).year == year]
         months = {int(pd.Timestamp(d).month) for d in year_dates}
         if months == set(range(1, 13)):
             full_year = year
@@ -467,6 +469,10 @@ def conditional_rolling_mean(
     group_key: pd.Series,
     min_needed: int,
 ) -> pd.Series:
+    if not isinstance(values, pd.Series):
+        values = pd.Series(values, index=indicator.index)
+    if not isinstance(indicator, pd.Series):
+        indicator = pd.Series(indicator, index=values.index)
     mean = tfl.rolling_conditional_mean(
         values,
         indicator,
@@ -3849,17 +3855,25 @@ def main(argv: list[str] | None = None) -> int:
     ]
     baseline_cols = with_calendar(baseline_cols)
     baseline_def = ExperimentDefinition("BASE", "Baseline MOS means", baseline_cols, lambda c: DerivedFeatureSet(pd.DataFrame(index=c.df.index), [], []))
-    results.append(run_standard_experiment(baseline_def, ctx, output_root / "BASE", args.model))
+    baseline_result = run_standard_experiment(baseline_def, ctx, output_root / "BASE", args.model)
+    results.append(baseline_result)
+    LOGGER.info("Completed %s - %s", baseline_result["experiment_id"], baseline_result["name"])
 
     for exp in experiments:
         run_dir = output_root / exp.experiment_id
         if exp.experiment_id == "E10":
-            results.append(run_e10(ctx, run_dir, args.model))
+            result = run_e10(ctx, run_dir, args.model)
+            results.append(result)
+            LOGGER.info("Completed %s - %s", result["experiment_id"], result["name"])
             continue
         if exp.experiment_id == "E47":
-            results.append(run_e47(ctx, run_dir, args.model))
+            result = run_e47(ctx, run_dir, args.model)
+            results.append(result)
+            LOGGER.info("Completed %s - %s", result["experiment_id"], result["name"])
             continue
-        results.append(run_standard_experiment(exp, ctx, run_dir, args.model))
+        result = run_standard_experiment(exp, ctx, run_dir, args.model)
+        results.append(result)
+        LOGGER.info("Completed %s - %s", result["experiment_id"], result["name"])
 
     baseline_entry = results[0]
     base_mae = baseline_entry["metrics"]["test"]["mae"]

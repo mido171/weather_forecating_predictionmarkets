@@ -43,6 +43,7 @@ SLOW_EXPERIMENT_IDS = {
     "E36",
     "E37",
     "E38",
+    "E50",
 }
 
 
@@ -216,37 +217,21 @@ def split_by_date(df: pd.DataFrame) -> dict:
     if not unique_dates:
         raise ValueError("No target_date_local values present.")
 
-    years = sorted({pd.Timestamp(d).year for d in unique_dates})
-    full_year = None
-    for year in reversed(years):
-        year_dates = [d for d in unique_dates if pd.Timestamp(d).year == year]
-        months = {int(pd.Timestamp(d).month) for d in year_dates}
-        if months == set(range(1, 13)):
-            full_year = year
-            break
+    min_date = pd.Timestamp(unique_dates[0]).normalize()
+    max_date = pd.Timestamp(unique_dates[-1]).normalize()
 
-    if full_year is not None:
-        test_start = pd.Timestamp(year=full_year, month=1, day=1)
-        test_end = pd.Timestamp(year=full_year, month=12, day=31)
-        val_end = test_start - timedelta(days=1)
-        val_start = val_end - timedelta(days=89)
-        train_start = pd.Timestamp(unique_dates[0])
-        train_end = val_start - timedelta(days=1)
-        if train_end < train_start:
-            full_year = None
+    train_start = max(pd.Timestamp("2007-01-01"), min_date)
+    train_end = min(pd.Timestamp("2021-12-31"), max_date)
+    val_start = max(pd.Timestamp("2022-01-01"), min_date)
+    val_end = min(pd.Timestamp("2022-12-31"), max_date)
+    test_start = max(pd.Timestamp("2023-01-01"), min_date)
+    test_end = min(pd.Timestamp("2025-12-31"), max_date)
 
-    if full_year is None:
-        n = len(unique_dates)
-        train_end = unique_dates[int(n * 0.7) - 1]
-        val_end = unique_dates[int(n * 0.85) - 1]
-        train_start = unique_dates[0]
-        val_start = unique_dates[int(n * 0.7)]
-        test_start = unique_dates[int(n * 0.85)]
-        test_end = unique_dates[-1]
-    else:
-        val_start = val_start
-        test_start = test_start
-        test_end = test_end
+    if train_end < train_start or val_end < val_start or test_end < test_start:
+        raise ValueError(
+            "Dataset does not cover required split ranges: "
+            "train=2007-2021, val=2022, test=2023-2025."
+        )
 
     date_series = pd.to_datetime(df["target_date_local"])
     train_mask = (date_series >= train_start) & (date_series <= train_end)

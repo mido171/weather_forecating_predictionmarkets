@@ -1,0 +1,2473 @@
+{
+  "exp": "B6_EXP03_CCI_RECOVERY",
+  "feature_list": [
+    "temp_last",
+    "temp_15m",
+    "temp_30m",
+    "temp_60m",
+    "temp_120m",
+    "max_sofar",
+    "tmin_sofar",
+    "range_sofar",
+    "minutes_since_max",
+    "drop_from_max",
+    "plateau_frac_0p1_last60",
+    "plateau_longest_run_0p1_last60",
+    "plateau_frac_0p1_last120",
+    "plateau_longest_run_0p1_last120",
+    "plateau_frac_0p1_last180",
+    "plateau_longest_run_0p1_last180",
+    "plateau_frac_0p2_last60",
+    "plateau_longest_run_0p2_last60",
+    "plateau_frac_0p2_last120",
+    "plateau_longest_run_0p2_last120",
+    "plateau_frac_0p2_last180",
+    "plateau_longest_run_0p2_last180",
+    "plateau_frac_0p3_last60",
+    "plateau_longest_run_0p3_last60",
+    "plateau_frac_0p3_last120",
+    "plateau_longest_run_0p3_last120",
+    "plateau_frac_0p3_last180",
+    "plateau_longest_run_0p3_last180",
+    "slope_15m",
+    "slope_30m",
+    "slope_60m",
+    "slope_120m",
+    "slope_180m",
+    "curvature_30_180",
+    "curvature_60_180",
+    "std_30m",
+    "std_180",
+    "mad_30m",
+    "mad_60m",
+    "mean_abs_delta_60m",
+    "max_drop_5m_last6h",
+    "drop_cnt_5m_ge0p5_last6h",
+    "drop_cnt_5m_ge1p0_last6h",
+    "drop_cnt_5m_ge2p0_last6h",
+    "time_since_last_drop_ge0p5",
+    "cp_exists",
+    "cp_time_since",
+    "cp_drop_magnitude",
+    "cp_slope_before_v6",
+    "cp_slope_after_v6",
+    "coverage_frac",
+    "last_gap_minutes",
+    "frac_bins_present_total",
+    "max_gap_minutes_total",
+    "tmax_time_local_lag1",
+    "tmax_time_local_lag2",
+    "range_lag1",
+    "range_lag2",
+    "outflow_drop_cnt_lag1",
+    "mos_x_gfs",
+    "mos_x_nam",
+    "mos_n_gfs",
+    "mos_n_nam",
+    "mos_x_mean",
+    "mos_n_mean",
+    "mos_range",
+    "mos_x_disagree",
+    "mos_range_disagree",
+    "mos_tmax_gfs",
+    "mos_tmax_nam",
+    "mos_tmin_gfs",
+    "mos_tmin_nam",
+    "mos_tmax_mean",
+    "mos_tmin_mean",
+    "mos_range_mean",
+    "mos_tmax_disagree",
+    "mos_range_disagree_tmp",
+    "mos_tmp_mean_models",
+    "mos_tmp_mean_disagree",
+    "mos_tmp_gfs_mean",
+    "mos_tmp_nam_mean",
+    "mos_tmp_gfs_max",
+    "mos_tmp_nam_max",
+    "mos_tmp_gfs_min",
+    "mos_tmp_nam_min",
+    "mos_tmp_max_models",
+    "mos_tmp_min_models",
+    "mos_dpt_mean_models",
+    "mos_dpt_mean_disagree",
+    "mos_dpt_gfs_mean",
+    "mos_dpt_nam_mean",
+    "mos_dpt_gfs_max",
+    "mos_dpt_nam_max",
+    "mos_dpt_gfs_min",
+    "mos_dpt_nam_min",
+    "mos_dpt_max_models",
+    "mos_dpt_min_models",
+    "mos_wsp_mean_models",
+    "mos_wsp_mean_disagree",
+    "mos_wsp_gfs_mean",
+    "mos_wsp_nam_mean",
+    "mos_wsp_gfs_max",
+    "mos_wsp_nam_max",
+    "mos_wsp_gfs_min",
+    "mos_wsp_nam_min",
+    "mos_wsp_max_models",
+    "mos_wsp_min_models",
+    "mos_wdr_mean_models",
+    "mos_wdr_mean_disagree",
+    "mos_wdr_gfs_mean",
+    "mos_wdr_nam_mean",
+    "mos_wdr_gfs_max",
+    "mos_wdr_nam_max",
+    "mos_wdr_gfs_min",
+    "mos_wdr_nam_min",
+    "mos_wdr_max_models",
+    "mos_wdr_min_models",
+    "mos_cig_mean_models",
+    "mos_cig_mean_disagree",
+    "mos_cig_gfs_mean",
+    "mos_cig_nam_mean",
+    "mos_cig_gfs_max",
+    "mos_cig_nam_max",
+    "mos_cig_gfs_min",
+    "mos_cig_nam_min",
+    "mos_cig_max_models",
+    "mos_cig_min_models",
+    "mos_vis_mean_models",
+    "mos_vis_mean_disagree",
+    "mos_vis_gfs_mean",
+    "mos_vis_nam_mean",
+    "mos_vis_gfs_max",
+    "mos_vis_nam_max",
+    "mos_vis_gfs_min",
+    "mos_vis_nam_min",
+    "mos_vis_max_models",
+    "mos_vis_min_models",
+    "mos_p06_gfs_mean",
+    "mos_p06_nam_mean",
+    "mos_p06_gfs_max",
+    "mos_p06_nam_max",
+    "mos_p06_gfs_min",
+    "mos_p06_nam_min",
+    "mos_p06_mean_models",
+    "mos_p06_max_models",
+    "mos_p06_min_models",
+    "mos_p06_mean_disagree",
+    "mos_p06_max_disagree",
+    "mos_p12_gfs_mean",
+    "mos_p12_nam_mean",
+    "mos_p12_gfs_max",
+    "mos_p12_nam_max",
+    "mos_p12_gfs_min",
+    "mos_p12_nam_min",
+    "mos_p12_mean_models",
+    "mos_p12_max_models",
+    "mos_p12_min_models",
+    "mos_p12_mean_disagree",
+    "mos_p12_max_disagree",
+    "mos_q06_gfs_mean",
+    "mos_q06_nam_mean",
+    "mos_q06_gfs_max",
+    "mos_q06_nam_max",
+    "mos_q06_gfs_min",
+    "mos_q06_nam_min",
+    "mos_q06_mean_models",
+    "mos_q06_max_models",
+    "mos_q06_min_models",
+    "mos_q06_mean_disagree",
+    "mos_q06_max_disagree",
+    "mos_q12_gfs_mean",
+    "mos_q12_nam_mean",
+    "mos_q12_gfs_max",
+    "mos_q12_nam_max",
+    "mos_q12_gfs_min",
+    "mos_q12_nam_min",
+    "mos_q12_mean_models",
+    "mos_q12_max_models",
+    "mos_q12_min_models",
+    "mos_q12_mean_disagree",
+    "mos_q12_max_disagree",
+    "mos_t06_gfs_mean",
+    "mos_t06_nam_mean",
+    "mos_t06_gfs_max",
+    "mos_t06_nam_max",
+    "mos_t06_gfs_min",
+    "mos_t06_nam_min",
+    "mos_t06_mean_models",
+    "mos_t06_max_models",
+    "mos_t06_min_models",
+    "mos_t06_mean_disagree",
+    "mos_t06_max_disagree",
+    "mos_t06_1_gfs_mean",
+    "mos_t06_1_nam_mean",
+    "mos_t06_1_gfs_max",
+    "mos_t06_1_nam_max",
+    "mos_t06_1_gfs_min",
+    "mos_t06_1_nam_min",
+    "mos_t06_1_mean_models",
+    "mos_t06_1_max_models",
+    "mos_t06_1_min_models",
+    "mos_t06_1_mean_disagree",
+    "mos_t06_1_max_disagree",
+    "mos_t06_2_gfs_mean",
+    "mos_t06_2_nam_mean",
+    "mos_t06_2_gfs_max",
+    "mos_t06_2_nam_max",
+    "mos_t06_2_gfs_min",
+    "mos_t06_2_nam_min",
+    "mos_t06_2_mean_models",
+    "mos_t06_2_max_models",
+    "mos_t06_2_min_models",
+    "mos_t06_2_mean_disagree",
+    "mos_t06_2_max_disagree",
+    "mos_t12_gfs_mean",
+    "mos_t12_gfs_max",
+    "mos_t12_gfs_min",
+    "mos_t12_mean_models",
+    "mos_t12_max_models",
+    "mos_t12_min_models",
+    "mos_t12_1_gfs_mean",
+    "mos_t12_1_gfs_max",
+    "mos_t12_1_gfs_min",
+    "mos_t12_1_mean_models",
+    "mos_t12_1_max_models",
+    "mos_t12_1_min_models",
+    "mos_t12_2_gfs_mean",
+    "mos_t12_2_nam_mean",
+    "mos_t12_2_gfs_max",
+    "mos_t12_2_nam_max",
+    "mos_t12_2_gfs_min",
+    "mos_t12_2_nam_min",
+    "mos_t12_2_mean_models",
+    "mos_t12_2_max_models",
+    "mos_t12_2_min_models",
+    "mos_t12_2_mean_disagree",
+    "mos_t12_2_max_disagree",
+    "mos_pos_gfs_mean",
+    "mos_pos_nam_mean",
+    "mos_pos_gfs_max",
+    "mos_pos_nam_max",
+    "mos_pos_gfs_min",
+    "mos_pos_nam_min",
+    "mos_pos_mean_models",
+    "mos_pos_max_models",
+    "mos_pos_min_models",
+    "mos_pos_mean_disagree",
+    "mos_pos_max_disagree",
+    "mos_poz_gfs_mean",
+    "mos_poz_nam_mean",
+    "mos_poz_gfs_max",
+    "mos_poz_nam_max",
+    "mos_poz_gfs_min",
+    "mos_poz_nam_min",
+    "mos_poz_mean_models",
+    "mos_poz_max_models",
+    "mos_poz_min_models",
+    "mos_poz_mean_disagree",
+    "mos_poz_max_disagree",
+    "mos_u_mean",
+    "mos_v_mean",
+    "mos_age_hours_tmp_gfs",
+    "mos_age_hours_tmp_nam",
+    "mos_x_bc",
+    "mos_p06_max_models_cal",
+    "mos_p12_max_models_cal",
+    "mos_t06_max_models_cal",
+    "mos_t12_max_models_cal",
+    "mos_t06_1_max_models_cal",
+    "mos_t06_2_max_models_cal",
+    "mos_t12_1_max_models_cal",
+    "mos_t12_2_max_models_cal",
+    "mos_tmax_bias_gfs_a0.020",
+    "mos_tmax_bc_gfs_a0.020",
+    "mos_tmax_bias_nam_a0.020",
+    "mos_tmax_bc_nam_a0.020",
+    "mos_tmax_mean_bc_a0.020",
+    "mos_tmax_bias_gfs_a0.050",
+    "mos_tmax_bc_gfs_a0.050",
+    "mos_tmax_bias_nam_a0.050",
+    "mos_tmax_bc_nam_a0.050",
+    "mos_tmax_mean_bc_a0.050",
+    "gap_to_mos_tmax",
+    "gap_norm",
+    "completion_frac",
+    "dd_models",
+    "suppression_index",
+    "p_onshore",
+    "doy_sin",
+    "doy_cos",
+    "month",
+    "heating_fraction_obs",
+    "range_climo_doy",
+    "inc_q10_180",
+    "inc_q50_180",
+    "inc_q90_180",
+    "max_negative_run_5m",
+    "crash_score",
+    "rebound_frac",
+    "conv_risk",
+    "cloud_limit",
+    "recovery_potential"
+  ],
+  "feature_signature": "db88f74505d14137da9a002a54c0182f1b564b83d8510a4872d33ae3c8b81592",
+  "dataset_signature": "f015dadee6ed927bc1c56d7616ad633027a981e824ef037385495e2c0ff8ebdf",
+  "calibration_signature": "ddcbb8bb41143fe6dc7e7579d66930a8187b9b8d322c907ef49a6f207653228f",
+  "always_no_acc_test": 0.6253687315634219,
+  "always_yes_acc_test": 0.3746312684365782,
+  "metrics_raw_val": {
+    "accuracy": 0.7622641509433963,
+    "balanced_accuracy": 0.7241741321388577,
+    "yes_precision": 0.6925465838509317,
+    "yes_recall": 0.5930851063829787,
+    "yes_f1": 0.6389684813753582,
+    "roc_auc": 0.8340293330844843,
+    "brier": 0.1562422370650574,
+    "cm_tn": 585,
+    "cm_fp": 99,
+    "cm_fn": 153,
+    "cm_tp": 223
+  },
+  "metrics_raw_test": {
+    "accuracy": 0.7482792527040315,
+    "balanced_accuracy": 0.7156068934779379,
+    "yes_precision": 0.6947040498442367,
+    "yes_recall": 0.5853018372703412,
+    "yes_f1": 0.6353276353276354,
+    "roc_auc": 0.8245307779923736,
+    "brier": 0.16379265230604442,
+    "cm_tn": 538,
+    "cm_fp": 98,
+    "cm_fn": 158,
+    "cm_tp": 223
+  },
+  "metrics_val": {
+    "accuracy": 0.7632075471698113,
+    "balanced_accuracy": 0.7237075401269131,
+    "yes_precision": 0.6971608832807571,
+    "yes_recall": 0.5877659574468085,
+    "yes_f1": 0.6378066378066378,
+    "roc_auc": 0.8340293330844843,
+    "brier": 0.1562324743891532,
+    "cm_tn": 588,
+    "cm_fp": 96,
+    "cm_fn": 155,
+    "cm_tp": 221
+  },
+  "metrics_test": {
+    "accuracy": 0.7453294001966568,
+    "balanced_accuracy": 0.7116698856039222,
+    "yes_precision": 0.6918238993710691,
+    "yes_recall": 0.5774278215223098,
+    "yes_f1": 0.6294706723891274,
+    "roc_auc": 0.8245307779923736,
+    "brier": 0.16440531898963526,
+    "cm_tn": 538,
+    "cm_fp": 98,
+    "cm_fn": 161,
+    "cm_tp": 220
+  },
+  "reliability_val_raw": [
+    {
+      "bin": 0,
+      "count": 230,
+      "pred": 0.05044024710853878,
+      "obs": 0.030434782608695653
+    },
+    {
+      "bin": 1,
+      "count": 133,
+      "pred": 0.1422199408276408,
+      "obs": 0.12030075187969924
+    },
+    {
+      "bin": 2,
+      "count": 128,
+      "pred": 0.2473202315125984,
+      "obs": 0.265625
+    },
+    {
+      "bin": 3,
+      "count": 129,
+      "pred": 0.3494636582338663,
+      "obs": 0.3488372093023256
+    },
+    {
+      "bin": 4,
+      "count": 118,
+      "pred": 0.44817433376087085,
+      "obs": 0.4322033898305085
+    },
+    {
+      "bin": 5,
+      "count": 105,
+      "pred": 0.5455406594391613,
+      "obs": 0.5238095238095238
+    },
+    {
+      "bin": 6,
+      "count": 70,
+      "pred": 0.6484950902434858,
+      "obs": 0.6571428571428571
+    },
+    {
+      "bin": 7,
+      "count": 61,
+      "pred": 0.7523587805695591,
+      "obs": 0.7540983606557377
+    },
+    {
+      "bin": 8,
+      "count": 56,
+      "pred": 0.8445733565503729,
+      "obs": 0.8392857142857143
+    },
+    {
+      "bin": 9,
+      "count": 30,
+      "pred": 0.9294554445269462,
+      "obs": 0.9666666666666667
+    }
+  ],
+  "reliability_val_cal": [
+    {
+      "bin": 0,
+      "count": 263,
+      "pred": 0.046132889194971057,
+      "obs": 0.053231939163498096
+    },
+    {
+      "bin": 1,
+      "count": 126,
+      "pred": 0.14689765067791088,
+      "obs": 0.11904761904761904
+    },
+    {
+      "bin": 2,
+      "count": 118,
+      "pred": 0.24698216303239356,
+      "obs": 0.288135593220339
+    },
+    {
+      "bin": 3,
+      "count": 129,
+      "pred": 0.34991033412147093,
+      "obs": 0.34108527131782945
+    },
+    {
+      "bin": 4,
+      "count": 107,
+      "pred": 0.45188775179051394,
+      "obs": 0.4485981308411215
+    },
+    {
+      "bin": 5,
+      "count": 97,
+      "pred": 0.546171900471789,
+      "obs": 0.5360824742268041
+    },
+    {
+      "bin": 6,
+      "count": 69,
+      "pred": 0.6484910717417002,
+      "obs": 0.6521739130434783
+    },
+    {
+      "bin": 7,
+      "count": 59,
+      "pred": 0.7521761749510334,
+      "obs": 0.711864406779661
+    },
+    {
+      "bin": 8,
+      "count": 60,
+      "pred": 0.8460229878760299,
+      "obs": 0.85
+    },
+    {
+      "bin": 9,
+      "count": 32,
+      "pred": 0.9329122003821129,
+      "obs": 0.96875
+    }
+  ],
+  "reliability_test_raw": [
+    {
+      "bin": 0,
+      "count": 218,
+      "pred": 0.04949467553847648,
+      "obs": 0.04128440366972477
+    },
+    {
+      "bin": 1,
+      "count": 176,
+      "pred": 0.14720847168662024,
+      "obs": 0.1875
+    },
+    {
+      "bin": 2,
+      "count": 105,
+      "pred": 0.25553702795722716,
+      "obs": 0.2571428571428571
+    },
+    {
+      "bin": 3,
+      "count": 99,
+      "pred": 0.34953232996270844,
+      "obs": 0.41414141414141414
+    },
+    {
+      "bin": 4,
+      "count": 98,
+      "pred": 0.4483993887391687,
+      "obs": 0.4897959183673469
+    },
+    {
+      "bin": 5,
+      "count": 84,
+      "pred": 0.5410029344285172,
+      "obs": 0.5595238095238095
+    },
+    {
+      "bin": 6,
+      "count": 87,
+      "pred": 0.6488319460707084,
+      "obs": 0.6091954022988506
+    },
+    {
+      "bin": 7,
+      "count": 60,
+      "pred": 0.7465807007816297,
+      "obs": 0.75
+    },
+    {
+      "bin": 8,
+      "count": 54,
+      "pred": 0.8579027155536887,
+      "obs": 0.8148148148148148
+    },
+    {
+      "bin": 9,
+      "count": 36,
+      "pred": 0.9296112219031242,
+      "obs": 0.9444444444444444
+    }
+  ],
+  "reliability_test_cal": [
+    {
+      "bin": 0,
+      "count": 253,
+      "pred": 0.045972212974832206,
+      "obs": 0.05928853754940711
+    },
+    {
+      "bin": 1,
+      "count": 150,
+      "pred": 0.14169602397851824,
+      "obs": 0.18666666666666668
+    },
+    {
+      "bin": 2,
+      "count": 111,
+      "pred": 0.2497570678855328,
+      "obs": 0.27927927927927926
+    },
+    {
+      "bin": 3,
+      "count": 95,
+      "pred": 0.3512283997517019,
+      "obs": 0.42105263157894735
+    },
+    {
+      "bin": 4,
+      "count": 90,
+      "pred": 0.4500822895325394,
+      "obs": 0.5222222222222223
+    },
+    {
+      "bin": 5,
+      "count": 81,
+      "pred": 0.5422446622326912,
+      "obs": 0.5432098765432098
+    },
+    {
+      "bin": 6,
+      "count": 79,
+      "pred": 0.6489321249134961,
+      "obs": 0.5949367088607594
+    },
+    {
+      "bin": 7,
+      "count": 65,
+      "pred": 0.7459394749328202,
+      "obs": 0.7384615384615385
+    },
+    {
+      "bin": 8,
+      "count": 49,
+      "pred": 0.8559035116283987,
+      "obs": 0.7959183673469388
+    },
+    {
+      "bin": 9,
+      "count": 44,
+      "pred": 0.9292288250364902,
+      "obs": 0.9545454545454546
+    }
+  ],
+  "ece_val_raw": 0.015311862799732434,
+  "ece_val_cal": 0.015772921193848558,
+  "ece_test_raw": 0.02711204815430905,
+  "ece_test_cal": 0.03480882774542068,
+  "toy_threshold_best": 0.43,
+  "toy_threshold_sweep_val": [
+    {
+      "threshold": 0.3,
+      "tp": 313,
+      "fp": 240,
+      "trade_rate": 0.5216981132075472,
+      "net_units_per_100_days": 6.886792452830188
+    },
+    {
+      "threshold": 0.31,
+      "tp": 309,
+      "fp": 233,
+      "trade_rate": 0.5113207547169811,
+      "net_units_per_100_days": 7.169811320754717
+    },
+    {
+      "threshold": 0.32,
+      "tp": 304,
+      "fp": 226,
+      "trade_rate": 0.5,
+      "net_units_per_100_days": 7.3584905660377355
+    },
+    {
+      "threshold": 0.33,
+      "tp": 300,
+      "fp": 215,
+      "trade_rate": 0.4858490566037736,
+      "net_units_per_100_days": 8.018867924528301
+    },
+    {
+      "threshold": 0.34,
+      "tp": 293,
+      "fp": 205,
+      "trade_rate": 0.469811320754717,
+      "net_units_per_100_days": 8.30188679245283
+    },
+    {
+      "threshold": 0.35,
+      "tp": 287,
+      "fp": 200,
+      "trade_rate": 0.45943396226415095,
+      "net_units_per_100_days": 8.20754716981132
+    },
+    {
+      "threshold": 0.36,
+      "tp": 280,
+      "fp": 192,
+      "trade_rate": 0.44528301886792454,
+      "net_units_per_100_days": 8.30188679245283
+    },
+    {
+      "threshold": 0.37,
+      "tp": 277,
+      "fp": 186,
+      "trade_rate": 0.4367924528301887,
+      "net_units_per_100_days": 8.584905660377357
+    },
+    {
+      "threshold": 0.38,
+      "tp": 275,
+      "fp": 175,
+      "trade_rate": 0.42452830188679247,
+      "net_units_per_100_days": 9.433962264150944
+    },
+    {
+      "threshold": 0.39,
+      "tp": 274,
+      "fp": 166,
+      "trade_rate": 0.41509433962264153,
+      "net_units_per_100_days": 10.18867924528302
+    },
+    {
+      "threshold": 0.4,
+      "tp": 269,
+      "fp": 155,
+      "trade_rate": 0.4,
+      "net_units_per_100_days": 10.754716981132075
+    },
+    {
+      "threshold": 0.41,
+      "tp": 266,
+      "fp": 147,
+      "trade_rate": 0.389622641509434,
+      "net_units_per_100_days": 11.226415094339623
+    },
+    {
+      "threshold": 0.42,
+      "tp": 264,
+      "fp": 141,
+      "trade_rate": 0.38207547169811323,
+      "net_units_per_100_days": 11.60377358490566
+    },
+    {
+      "threshold": 0.43,
+      "tp": 262,
+      "fp": 133,
+      "trade_rate": 0.37264150943396224,
+      "net_units_per_100_days": 12.169811320754716
+    },
+    {
+      "threshold": 0.44,
+      "tp": 252,
+      "fp": 130,
+      "trade_rate": 0.360377358490566,
+      "net_units_per_100_days": 11.50943396226415
+    },
+    {
+      "threshold": 0.45,
+      "tp": 249,
+      "fp": 128,
+      "trade_rate": 0.35566037735849054,
+      "net_units_per_100_days": 11.415094339622641
+    },
+    {
+      "threshold": 0.46,
+      "tp": 247,
+      "fp": 120,
+      "trade_rate": 0.3462264150943396,
+      "net_units_per_100_days": 11.981132075471699
+    },
+    {
+      "threshold": 0.47,
+      "tp": 235,
+      "fp": 111,
+      "trade_rate": 0.3264150943396226,
+      "net_units_per_100_days": 11.69811320754717
+    },
+    {
+      "threshold": 0.48,
+      "tp": 230,
+      "fp": 107,
+      "trade_rate": 0.3179245283018868,
+      "net_units_per_100_days": 11.60377358490566
+    },
+    {
+      "threshold": 0.49,
+      "tp": 225,
+      "fp": 101,
+      "trade_rate": 0.30754716981132074,
+      "net_units_per_100_days": 11.69811320754717
+    },
+    {
+      "threshold": 0.5,
+      "tp": 221,
+      "fp": 96,
+      "trade_rate": 0.2990566037735849,
+      "net_units_per_100_days": 11.79245283018868
+    },
+    {
+      "threshold": 0.51,
+      "tp": 215,
+      "fp": 91,
+      "trade_rate": 0.28867924528301886,
+      "net_units_per_100_days": 11.69811320754717
+    },
+    {
+      "threshold": 0.52,
+      "tp": 209,
+      "fp": 88,
+      "trade_rate": 0.280188679245283,
+      "net_units_per_100_days": 11.415094339622641
+    },
+    {
+      "threshold": 0.53,
+      "tp": 206,
+      "fp": 83,
+      "trade_rate": 0.27264150943396226,
+      "net_units_per_100_days": 11.60377358490566
+    },
+    {
+      "threshold": 0.54,
+      "tp": 200,
+      "fp": 73,
+      "trade_rate": 0.25754716981132075,
+      "net_units_per_100_days": 11.981132075471699
+    },
+    {
+      "threshold": 0.55,
+      "tp": 193,
+      "fp": 69,
+      "trade_rate": 0.24716981132075472,
+      "net_units_per_100_days": 11.69811320754717
+    },
+    {
+      "threshold": 0.56,
+      "tp": 183,
+      "fp": 67,
+      "trade_rate": 0.2358490566037736,
+      "net_units_per_100_days": 10.943396226415095
+    },
+    {
+      "threshold": 0.57,
+      "tp": 181,
+      "fp": 61,
+      "trade_rate": 0.22830188679245284,
+      "net_units_per_100_days": 11.320754716981133
+    },
+    {
+      "threshold": 0.58,
+      "tp": 176,
+      "fp": 59,
+      "trade_rate": 0.22169811320754718,
+      "net_units_per_100_days": 11.037735849056604
+    },
+    {
+      "threshold": 0.59,
+      "tp": 173,
+      "fp": 55,
+      "trade_rate": 0.21509433962264152,
+      "net_units_per_100_days": 11.132075471698114
+    },
+    {
+      "threshold": 0.6,
+      "tp": 169,
+      "fp": 51,
+      "trade_rate": 0.20754716981132076,
+      "net_units_per_100_days": 11.132075471698114
+    },
+    {
+      "threshold": 0.61,
+      "tp": 164,
+      "fp": 49,
+      "trade_rate": 0.2009433962264151,
+      "net_units_per_100_days": 10.849056603773585
+    },
+    {
+      "threshold": 0.62,
+      "tp": 158,
+      "fp": 45,
+      "trade_rate": 0.19150943396226416,
+      "net_units_per_100_days": 10.660377358490566
+    },
+    {
+      "threshold": 0.63,
+      "tp": 156,
+      "fp": 43,
+      "trade_rate": 0.1877358490566038,
+      "net_units_per_100_days": 10.660377358490566
+    },
+    {
+      "threshold": 0.64,
+      "tp": 151,
+      "fp": 38,
+      "trade_rate": 0.17830188679245282,
+      "net_units_per_100_days": 10.660377358490566
+    },
+    {
+      "threshold": 0.65,
+      "tp": 147,
+      "fp": 35,
+      "trade_rate": 0.17169811320754716,
+      "net_units_per_100_days": 10.566037735849058
+    },
+    {
+      "threshold": 0.66,
+      "tp": 144,
+      "fp": 33,
+      "trade_rate": 0.1669811320754717,
+      "net_units_per_100_days": 10.471698113207548
+    },
+    {
+      "threshold": 0.67,
+      "tp": 143,
+      "fp": 32,
+      "trade_rate": 0.1650943396226415,
+      "net_units_per_100_days": 10.471698113207548
+    },
+    {
+      "threshold": 0.68,
+      "tp": 136,
+      "fp": 28,
+      "trade_rate": 0.15471698113207547,
+      "net_units_per_100_days": 10.18867924528302
+    },
+    {
+      "threshold": 0.69,
+      "tp": 130,
+      "fp": 28,
+      "trade_rate": 0.1490566037735849,
+      "net_units_per_100_days": 9.622641509433963
+    },
+    {
+      "threshold": 0.7,
+      "tp": 124,
+      "fp": 27,
+      "trade_rate": 0.14245283018867924,
+      "net_units_per_100_days": 9.150943396226415
+    },
+    {
+      "threshold": 0.71,
+      "tp": 122,
+      "fp": 24,
+      "trade_rate": 0.13773584905660377,
+      "net_units_per_100_days": 9.245283018867925
+    },
+    {
+      "threshold": 0.72,
+      "tp": 118,
+      "fp": 20,
+      "trade_rate": 0.13018867924528302,
+      "net_units_per_100_days": 9.245283018867925
+    },
+    {
+      "threshold": 0.73,
+      "tp": 115,
+      "fp": 20,
+      "trade_rate": 0.12735849056603774,
+      "net_units_per_100_days": 8.962264150943396
+    },
+    {
+      "threshold": 0.74,
+      "tp": 111,
+      "fp": 20,
+      "trade_rate": 0.12358490566037736,
+      "net_units_per_100_days": 8.584905660377357
+    },
+    {
+      "threshold": 0.75,
+      "tp": 107,
+      "fp": 18,
+      "trade_rate": 0.1179245283018868,
+      "net_units_per_100_days": 8.39622641509434
+    },
+    {
+      "threshold": 0.76,
+      "tp": 101,
+      "fp": 17,
+      "trade_rate": 0.11132075471698114,
+      "net_units_per_100_days": 7.9245283018867925
+    },
+    {
+      "threshold": 0.77,
+      "tp": 97,
+      "fp": 14,
+      "trade_rate": 0.10471698113207548,
+      "net_units_per_100_days": 7.830188679245283
+    },
+    {
+      "threshold": 0.78,
+      "tp": 95,
+      "fp": 13,
+      "trade_rate": 0.1018867924528302,
+      "net_units_per_100_days": 7.735849056603773
+    },
+    {
+      "threshold": 0.79,
+      "tp": 87,
+      "fp": 11,
+      "trade_rate": 0.09245283018867924,
+      "net_units_per_100_days": 7.169811320754717
+    },
+    {
+      "threshold": 0.8,
+      "tp": 82,
+      "fp": 10,
+      "trade_rate": 0.08679245283018867,
+      "net_units_per_100_days": 6.7924528301886795
+    },
+    {
+      "threshold": 0.81,
+      "tp": 75,
+      "fp": 10,
+      "trade_rate": 0.08018867924528301,
+      "net_units_per_100_days": 6.132075471698113
+    },
+    {
+      "threshold": 0.82,
+      "tp": 69,
+      "fp": 6,
+      "trade_rate": 0.07075471698113207,
+      "net_units_per_100_days": 5.943396226415095
+    },
+    {
+      "threshold": 0.83,
+      "tp": 63,
+      "fp": 5,
+      "trade_rate": 0.06415094339622641,
+      "net_units_per_100_days": 5.471698113207547
+    },
+    {
+      "threshold": 0.84,
+      "tp": 60,
+      "fp": 5,
+      "trade_rate": 0.06132075471698113,
+      "net_units_per_100_days": 5.188679245283019
+    },
+    {
+      "threshold": 0.85,
+      "tp": 55,
+      "fp": 4,
+      "trade_rate": 0.05566037735849057,
+      "net_units_per_100_days": 4.811320754716982
+    },
+    {
+      "threshold": 0.86,
+      "tp": 53,
+      "fp": 3,
+      "trade_rate": 0.052830188679245285,
+      "net_units_per_100_days": 4.716981132075472
+    },
+    {
+      "threshold": 0.87,
+      "tp": 44,
+      "fp": 1,
+      "trade_rate": 0.04245283018867924,
+      "net_units_per_100_days": 4.056603773584905
+    },
+    {
+      "threshold": 0.88,
+      "tp": 42,
+      "fp": 1,
+      "trade_rate": 0.040566037735849055,
+      "net_units_per_100_days": 3.8679245283018866
+    },
+    {
+      "threshold": 0.89,
+      "tp": 36,
+      "fp": 1,
+      "trade_rate": 0.03490566037735849,
+      "net_units_per_100_days": 3.30188679245283
+    },
+    {
+      "threshold": 0.9,
+      "tp": 31,
+      "fp": 1,
+      "trade_rate": 0.03018867924528302,
+      "net_units_per_100_days": 2.8301886792452833
+    },
+    {
+      "threshold": 0.91,
+      "tp": 27,
+      "fp": 0,
+      "trade_rate": 0.02547169811320755,
+      "net_units_per_100_days": 2.547169811320755
+    },
+    {
+      "threshold": 0.92,
+      "tp": 21,
+      "fp": 0,
+      "trade_rate": 0.01981132075471698,
+      "net_units_per_100_days": 1.9811320754716981
+    },
+    {
+      "threshold": 0.93,
+      "tp": 18,
+      "fp": 0,
+      "trade_rate": 0.016981132075471698,
+      "net_units_per_100_days": 1.6981132075471699
+    },
+    {
+      "threshold": 0.94,
+      "tp": 14,
+      "fp": 0,
+      "trade_rate": 0.013207547169811321,
+      "net_units_per_100_days": 1.3207547169811322
+    },
+    {
+      "threshold": 0.95,
+      "tp": 6,
+      "fp": 0,
+      "trade_rate": 0.005660377358490566,
+      "net_units_per_100_days": 0.5660377358490566
+    }
+  ],
+  "toy_threshold_sweep_test": [
+    {
+      "threshold": 0.3,
+      "tp": 307,
+      "fp": 196,
+      "trade_rate": 0.4945919370698132,
+      "net_units_per_100_days": 10.914454277286136
+    },
+    {
+      "threshold": 0.31,
+      "tp": 301,
+      "fp": 189,
+      "trade_rate": 0.48180924287118976,
+      "net_units_per_100_days": 11.012782694198624
+    },
+    {
+      "threshold": 0.32,
+      "tp": 300,
+      "fp": 182,
+      "trade_rate": 0.47394296951819076,
+      "net_units_per_100_days": 11.60275319567355
+    },
+    {
+      "threshold": 0.33,
+      "tp": 298,
+      "fp": 174,
+      "trade_rate": 0.464110127826942,
+      "net_units_per_100_days": 12.192723697148477
+    },
+    {
+      "threshold": 0.34,
+      "tp": 296,
+      "fp": 169,
+      "trade_rate": 0.45722713864306785,
+      "net_units_per_100_days": 12.48770894788594
+    },
+    {
+      "threshold": 0.35,
+      "tp": 295,
+      "fp": 165,
+      "trade_rate": 0.4523107177974435,
+      "net_units_per_100_days": 12.782694198623402
+    },
+    {
+      "threshold": 0.36,
+      "tp": 292,
+      "fp": 161,
+      "trade_rate": 0.44542772861356933,
+      "net_units_per_100_days": 12.881022615535889
+    },
+    {
+      "threshold": 0.37,
+      "tp": 286,
+      "fp": 156,
+      "trade_rate": 0.43461160275319566,
+      "net_units_per_100_days": 12.782694198623402
+    },
+    {
+      "threshold": 0.38,
+      "tp": 278,
+      "fp": 151,
+      "trade_rate": 0.4218289085545723,
+      "net_units_per_100_days": 12.48770894788594
+    },
+    {
+      "threshold": 0.39,
+      "tp": 271,
+      "fp": 149,
+      "trade_rate": 0.41297935103244837,
+      "net_units_per_100_days": 11.9960668633235
+    },
+    {
+      "threshold": 0.4,
+      "tp": 267,
+      "fp": 141,
+      "trade_rate": 0.40117994100294985,
+      "net_units_per_100_days": 12.389380530973451
+    },
+    {
+      "threshold": 0.41,
+      "tp": 259,
+      "fp": 136,
+      "trade_rate": 0.38839724680432647,
+      "net_units_per_100_days": 12.094395280235988
+    },
+    {
+      "threshold": 0.42,
+      "tp": 256,
+      "fp": 131,
+      "trade_rate": 0.3805309734513274,
+      "net_units_per_100_days": 12.291052114060964
+    },
+    {
+      "threshold": 0.43,
+      "tp": 255,
+      "fp": 127,
+      "trade_rate": 0.37561455260570303,
+      "net_units_per_100_days": 12.586037364798427
+    },
+    {
+      "threshold": 0.44,
+      "tp": 248,
+      "fp": 123,
+      "trade_rate": 0.3647984267453294,
+      "net_units_per_100_days": 12.291052114060964
+    },
+    {
+      "threshold": 0.45,
+      "tp": 246,
+      "fp": 121,
+      "trade_rate": 0.3608652900688299,
+      "net_units_per_100_days": 12.291052114060964
+    },
+    {
+      "threshold": 0.46,
+      "tp": 243,
+      "fp": 114,
+      "trade_rate": 0.35103244837758113,
+      "net_units_per_100_days": 12.684365781710916
+    },
+    {
+      "threshold": 0.47,
+      "tp": 238,
+      "fp": 108,
+      "trade_rate": 0.34021632251720746,
+      "net_units_per_100_days": 12.782694198623402
+    },
+    {
+      "threshold": 0.48,
+      "tp": 232,
+      "fp": 106,
+      "trade_rate": 0.33235004916420846,
+      "net_units_per_100_days": 12.389380530973451
+    },
+    {
+      "threshold": 0.49,
+      "tp": 225,
+      "fp": 100,
+      "trade_rate": 0.319567354965585,
+      "net_units_per_100_days": 12.291052114060964
+    },
+    {
+      "threshold": 0.5,
+      "tp": 220,
+      "fp": 98,
+      "trade_rate": 0.31268436578171094,
+      "net_units_per_100_days": 11.9960668633235
+    },
+    {
+      "threshold": 0.51,
+      "tp": 213,
+      "fp": 95,
+      "trade_rate": 0.3028515240904621,
+      "net_units_per_100_days": 11.60275319567355
+    },
+    {
+      "threshold": 0.52,
+      "tp": 208,
+      "fp": 85,
+      "trade_rate": 0.288102261553589,
+      "net_units_per_100_days": 12.094395280235988
+    },
+    {
+      "threshold": 0.53,
+      "tp": 205,
+      "fp": 80,
+      "trade_rate": 0.28023598820059,
+      "net_units_per_100_days": 12.291052114060964
+    },
+    {
+      "threshold": 0.54,
+      "tp": 200,
+      "fp": 78,
+      "trade_rate": 0.27335299901671584,
+      "net_units_per_100_days": 11.9960668633235
+    },
+    {
+      "threshold": 0.55,
+      "tp": 192,
+      "fp": 74,
+      "trade_rate": 0.2615535889872173,
+      "net_units_per_100_days": 11.60275319567355
+    },
+    {
+      "threshold": 0.56,
+      "tp": 187,
+      "fp": 71,
+      "trade_rate": 0.2536873156342183,
+      "net_units_per_100_days": 11.406096361848574
+    },
+    {
+      "threshold": 0.57,
+      "tp": 184,
+      "fp": 69,
+      "trade_rate": 0.2487708947885939,
+      "net_units_per_100_days": 11.307767944936087
+    },
+    {
+      "threshold": 0.58,
+      "tp": 182,
+      "fp": 69,
+      "trade_rate": 0.24680432645034414,
+      "net_units_per_100_days": 11.11111111111111
+    },
+    {
+      "threshold": 0.59,
+      "tp": 177,
+      "fp": 66,
+      "trade_rate": 0.23893805309734514,
+      "net_units_per_100_days": 10.914454277286136
+    },
+    {
+      "threshold": 0.6,
+      "tp": 176,
+      "fp": 61,
+      "trade_rate": 0.23303834808259588,
+      "net_units_per_100_days": 11.307767944936087
+    },
+    {
+      "threshold": 0.61,
+      "tp": 172,
+      "fp": 60,
+      "trade_rate": 0.22812192723697147,
+      "net_units_per_100_days": 11.012782694198624
+    },
+    {
+      "threshold": 0.62,
+      "tp": 166,
+      "fp": 56,
+      "trade_rate": 0.2182890855457227,
+      "net_units_per_100_days": 10.816125860373647
+    },
+    {
+      "threshold": 0.63,
+      "tp": 159,
+      "fp": 53,
+      "trade_rate": 0.20845624385447395,
+      "net_units_per_100_days": 10.422812192723697
+    },
+    {
+      "threshold": 0.64,
+      "tp": 153,
+      "fp": 50,
+      "trade_rate": 0.19960668633235004,
+      "net_units_per_100_days": 10.127826941986234
+    },
+    {
+      "threshold": 0.65,
+      "tp": 150,
+      "fp": 45,
+      "trade_rate": 0.19174041297935104,
+      "net_units_per_100_days": 10.32448377581121
+    },
+    {
+      "threshold": 0.66,
+      "tp": 147,
+      "fp": 41,
+      "trade_rate": 0.1848574237954769,
+      "net_units_per_100_days": 10.422812192723697
+    },
+    {
+      "threshold": 0.67,
+      "tp": 142,
+      "fp": 37,
+      "trade_rate": 0.176007866273353,
+      "net_units_per_100_days": 10.32448377581121
+    },
+    {
+      "threshold": 0.68,
+      "tp": 140,
+      "fp": 35,
+      "trade_rate": 0.1720747295968535,
+      "net_units_per_100_days": 10.32448377581121
+    },
+    {
+      "threshold": 0.69,
+      "tp": 133,
+      "fp": 32,
+      "trade_rate": 0.16224188790560473,
+      "net_units_per_100_days": 9.931170108161258
+    },
+    {
+      "threshold": 0.7,
+      "tp": 129,
+      "fp": 29,
+      "trade_rate": 0.1553588987217306,
+      "net_units_per_100_days": 9.83284169124877
+    },
+    {
+      "threshold": 0.71,
+      "tp": 121,
+      "fp": 26,
+      "trade_rate": 0.14454277286135694,
+      "net_units_per_100_days": 9.341199606686331
+    },
+    {
+      "threshold": 0.72,
+      "tp": 118,
+      "fp": 21,
+      "trade_rate": 0.13667649950835792,
+      "net_units_per_100_days": 9.537856440511309
+    },
+    {
+      "threshold": 0.73,
+      "tp": 117,
+      "fp": 19,
+      "trade_rate": 0.13372664700098327,
+      "net_units_per_100_days": 9.636184857423794
+    },
+    {
+      "threshold": 0.74,
+      "tp": 112,
+      "fp": 19,
+      "trade_rate": 0.1288102261553589,
+      "net_units_per_100_days": 9.144542772861357
+    },
+    {
+      "threshold": 0.75,
+      "tp": 104,
+      "fp": 17,
+      "trade_rate": 0.11897738446411013,
+      "net_units_per_100_days": 8.55457227138643
+    },
+    {
+      "threshold": 0.76,
+      "tp": 100,
+      "fp": 15,
+      "trade_rate": 0.11307767944936087,
+      "net_units_per_100_days": 8.357915437561456
+    },
+    {
+      "threshold": 0.77,
+      "tp": 94,
+      "fp": 14,
+      "trade_rate": 0.10619469026548672,
+      "net_units_per_100_days": 7.866273352999016
+    },
+    {
+      "threshold": 0.78,
+      "tp": 89,
+      "fp": 14,
+      "trade_rate": 0.10127826941986234,
+      "net_units_per_100_days": 7.374631268436578
+    },
+    {
+      "threshold": 0.79,
+      "tp": 85,
+      "fp": 13,
+      "trade_rate": 0.09636184857423795,
+      "net_units_per_100_days": 7.079646017699115
+    },
+    {
+      "threshold": 0.8,
+      "tp": 81,
+      "fp": 12,
+      "trade_rate": 0.09144542772861357,
+      "net_units_per_100_days": 6.784660766961652
+    },
+    {
+      "threshold": 0.81,
+      "tp": 75,
+      "fp": 12,
+      "trade_rate": 0.0855457227138643,
+      "net_units_per_100_days": 6.1946902654867255
+    },
+    {
+      "threshold": 0.82,
+      "tp": 74,
+      "fp": 12,
+      "trade_rate": 0.08456243854473942,
+      "net_units_per_100_days": 6.096361848574238
+    },
+    {
+      "threshold": 0.83,
+      "tp": 71,
+      "fp": 11,
+      "trade_rate": 0.08062930186823992,
+      "net_units_per_100_days": 5.899705014749262
+    },
+    {
+      "threshold": 0.84,
+      "tp": 69,
+      "fp": 10,
+      "trade_rate": 0.0776794493608653,
+      "net_units_per_100_days": 5.801376597836775
+    },
+    {
+      "threshold": 0.85,
+      "tp": 64,
+      "fp": 8,
+      "trade_rate": 0.07079646017699115,
+      "net_units_per_100_days": 5.506391347099312
+    },
+    {
+      "threshold": 0.86,
+      "tp": 61,
+      "fp": 6,
+      "trade_rate": 0.06588003933136677,
+      "net_units_per_100_days": 5.408062930186824
+    },
+    {
+      "threshold": 0.87,
+      "tp": 61,
+      "fp": 3,
+      "trade_rate": 0.06293018682399214,
+      "net_units_per_100_days": 5.703048180924287
+    },
+    {
+      "threshold": 0.88,
+      "tp": 54,
+      "fp": 2,
+      "trade_rate": 0.05506391347099312,
+      "net_units_per_100_days": 5.11307767944936
+    },
+    {
+      "threshold": 0.89,
+      "tp": 49,
+      "fp": 2,
+      "trade_rate": 0.05014749262536873,
+      "net_units_per_100_days": 4.621435594886923
+    },
+    {
+      "threshold": 0.9,
+      "tp": 42,
+      "fp": 2,
+      "trade_rate": 0.043264503441494594,
+      "net_units_per_100_days": 3.933136676499508
+    },
+    {
+      "threshold": 0.91,
+      "tp": 32,
+      "fp": 1,
+      "trade_rate": 0.032448377581120944,
+      "net_units_per_100_days": 3.048180924287119
+    },
+    {
+      "threshold": 0.92,
+      "tp": 28,
+      "fp": 1,
+      "trade_rate": 0.028515240904621434,
+      "net_units_per_100_days": 2.6548672566371683
+    },
+    {
+      "threshold": 0.93,
+      "tp": 18,
+      "fp": 0,
+      "trade_rate": 0.017699115044247787,
+      "net_units_per_100_days": 1.7699115044247788
+    },
+    {
+      "threshold": 0.94,
+      "tp": 13,
+      "fp": 0,
+      "trade_rate": 0.012782694198623401,
+      "net_units_per_100_days": 1.27826941986234
+    },
+    {
+      "threshold": 0.95,
+      "tp": 8,
+      "fp": 0,
+      "trade_rate": 0.007866273352999017,
+      "net_units_per_100_days": 0.7866273352999017
+    }
+  ],
+  "ev_best_val": {
+    "0.50": {
+      "price": 0.5,
+      "ev_min": 0.04,
+      "tp": 200,
+      "fp": 73,
+      "trades": 273,
+      "trade_rate": 0.25754716981132075,
+      "net_units_per_100_days": 11.981132075471699,
+      "net_per_trade": 0.4652014652014652,
+      "mean_ev": 0.23179476016044356,
+      "pnl_per_contract": 0.2326007326007326,
+      "ev_q10": 0.06406372968065799,
+      "ev_q50": 0.22222731906538895,
+      "ev_q90": 0.4095814885627685
+    },
+    "0.55": {
+      "price": 0.55,
+      "ev_min": 0.0,
+      "tp": 193,
+      "fp": 69,
+      "trades": 262,
+      "trade_rate": 0.24716981132075472,
+      "net_units_per_100_days": 11.69811320754717,
+      "net_per_trade": 0.4732824427480916,
+      "mean_ev": 0.18960986523678106,
+      "pnl_per_contract": 0.18664122137404576,
+      "ev_q10": 0.029976791924855573,
+      "ev_q50": 0.18970641273292033,
+      "ev_q90": 0.36004116823171545
+    },
+    "0.60": {
+      "price": 0.6,
+      "ev_min": 0.0,
+      "tp": 169,
+      "fp": 51,
+      "trades": 220,
+      "trade_rate": 0.20754716981132076,
+      "net_units_per_100_days": 11.132075471698114,
+      "net_per_trade": 0.5363636363636364,
+      "mean_ev": 0.17154021798671673,
+      "pnl_per_contract": 0.16818181818181824,
+      "ev_q10": 0.03224380101062451,
+      "ev_q50": 0.1755896616564694,
+      "ev_q90": 0.31684784446630176
+    }
+  },
+  "ev_best_test": {
+    "0.50": {
+      "price": 0.5,
+      "ev_min": 0.04,
+      "tp": 200,
+      "fp": 78,
+      "trades": 278,
+      "trade_rate": 0.27335299901671584,
+      "net_units_per_100_days": 11.9960668633235,
+      "net_per_trade": 0.43884892086330934,
+      "mean_ev": 0.24030435632016797,
+      "pnl_per_contract": 0.21942446043165467,
+      "ev_q10": 0.083005350003496,
+      "ev_q50": 0.22150354217786616,
+      "ev_q90": 0.4204510992640839
+    },
+    "0.55": {
+      "price": 0.55,
+      "ev_min": 0.0,
+      "tp": 192,
+      "fp": 74,
+      "trades": 266,
+      "trade_rate": 0.2615535889872173,
+      "net_units_per_100_days": 11.60275319567355,
+      "net_per_trade": 0.44360902255639095,
+      "mean_ev": 0.19911016970595447,
+      "pnl_per_contract": 0.17180451127819546,
+      "ev_q10": 0.04713380439871728,
+      "ev_q50": 0.18497151439327747,
+      "ev_q90": 0.3715000673355755
+    },
+    "0.60": {
+      "price": 0.6,
+      "ev_min": 0.0,
+      "tp": 176,
+      "fp": 61,
+      "trades": 237,
+      "trade_rate": 0.23303834808259588,
+      "net_units_per_100_days": 11.307767944936087,
+      "net_per_trade": 0.48523206751054854,
+      "mean_ev": 0.17036727472656796,
+      "pnl_per_contract": 0.1426160337552743,
+      "ev_q10": 0.02946565366772924,
+      "ev_q50": 0.1563868757767788,
+      "ev_q90": 0.3265792772540517
+    }
+  },
+  "ev_sweep_val": {
+    "0.50": {
+      "0.00": {
+        "price": 0.5,
+        "ev_min": 0.0,
+        "tp": 221,
+        "fp": 96,
+        "trades": 317,
+        "trade_rate": 0.2990566037735849,
+        "net_units_per_100_days": 11.79245283018868,
+        "net_per_trade": 0.3943217665615142,
+        "mean_ev": 0.20257893470927824,
+        "pnl_per_contract": 0.1971608832807571,
+        "ev_q10": 0.033688050961129305,
+        "ev_q50": 0.18889415964497291,
+        "ev_q90": 0.39997593415419136
+      },
+      "0.01": {
+        "price": 0.5,
+        "ev_min": 0.01,
+        "tp": 215,
+        "fp": 91,
+        "trades": 306,
+        "trade_rate": 0.28867924528301886,
+        "net_units_per_100_days": 11.69811320754717,
+        "net_per_trade": 0.40522875816993464,
+        "mean_ev": 0.20970881157328206,
+        "pnl_per_contract": 0.20261437908496732,
+        "ev_q10": 0.03925171860805582,
+        "ev_q50": 0.19540656105404614,
+        "ev_q90": 0.40458179412661077
+      },
+      "0.02": {
+        "price": 0.5,
+        "ev_min": 0.02,
+        "tp": 209,
+        "fp": 88,
+        "trades": 297,
+        "trade_rate": 0.280188679245283,
+        "net_units_per_100_days": 11.415094339622641,
+        "net_per_trade": 0.4074074074074074,
+        "mean_ev": 0.21564251248563365,
+        "pnl_per_contract": 0.2037037037037037,
+        "ev_q10": 0.04599838194540096,
+        "ev_q50": 0.20489554152517675,
+        "ev_q90": 0.4066112115200353
+      },
+      "0.03": {
+        "price": 0.5,
+        "ev_min": 0.03,
+        "tp": 206,
+        "fp": 83,
+        "trades": 289,
+        "trade_rate": 0.27264150943396226,
+        "net_units_per_100_days": 11.60377358490566,
+        "net_per_trade": 0.42560553633217996,
+        "mean_ev": 0.2209508083759862,
+        "pnl_per_contract": 0.21280276816608998,
+        "ev_q10": 0.05288890690229884,
+        "ev_q50": 0.21061256181136212,
+        "ev_q90": 0.4072474004363374
+      },
+      "0.04": {
+        "price": 0.5,
+        "ev_min": 0.04,
+        "tp": 200,
+        "fp": 73,
+        "trades": 273,
+        "trade_rate": 0.25754716981132075,
+        "net_units_per_100_days": 11.981132075471699,
+        "net_per_trade": 0.4652014652014652,
+        "mean_ev": 0.23179476016044356,
+        "pnl_per_contract": 0.2326007326007326,
+        "ev_q10": 0.06406372968065799,
+        "ev_q50": 0.22222731906538895,
+        "ev_q90": 0.4095814885627685
+      },
+      "0.05": {
+        "price": 0.5,
+        "ev_min": 0.05,
+        "tp": 193,
+        "fp": 69,
+        "trades": 262,
+        "trade_rate": 0.24716981132075472,
+        "net_units_per_100_days": 11.69811320754717,
+        "net_per_trade": 0.4732824427480916,
+        "mean_ev": 0.2396098652367811,
+        "pnl_per_contract": 0.2366412213740458,
+        "ev_q10": 0.07997679192485561,
+        "ev_q50": 0.23970641273292037,
+        "ev_q90": 0.4100411682317155
+      },
+      "0.06": {
+        "price": 0.5,
+        "ev_min": 0.06,
+        "tp": 183,
+        "fp": 67,
+        "trades": 250,
+        "trade_rate": 0.2358490566037736,
+        "net_units_per_100_days": 10.943396226415095,
+        "net_per_trade": 0.464,
+        "mean_ev": 0.2484520779322433,
+        "pnl_per_contract": 0.232,
+        "ev_q10": 0.09183666479310959,
+        "ev_q50": 0.2508905866616378,
+        "ev_q90": 0.4112814961290204
+      },
+      "0.07": {
+        "price": 0.5,
+        "ev_min": 0.07,
+        "tp": 181,
+        "fp": 61,
+        "trades": 242,
+        "trade_rate": 0.22830188679245284,
+        "net_units_per_100_days": 11.320754716981133,
+        "net_per_trade": 0.49586776859504134,
+        "mean_ev": 0.2545571868882043,
+        "pnl_per_contract": 0.24793388429752067,
+        "ev_q10": 0.10302716830833601,
+        "ev_q50": 0.2559356149826764,
+        "ev_q90": 0.4143807383730182
+      },
+      "0.08": {
+        "price": 0.5,
+        "ev_min": 0.08,
+        "tp": 176,
+        "fp": 59,
+        "trades": 235,
+        "trade_rate": 0.22169811320754718,
+        "net_units_per_100_days": 11.037735849056604,
+        "net_per_trade": 0.4978723404255319,
+        "mean_ev": 0.2599205240871929,
+        "pnl_per_contract": 0.24893617021276596,
+        "ev_q10": 0.11269465197851036,
+        "ev_q50": 0.2618541766230723,
+        "ev_q90": 0.41569391471273076
+      },
+      "0.09": {
+        "price": 0.5,
+        "ev_min": 0.09,
+        "tp": 173,
+        "fp": 55,
+        "trades": 228,
+        "trade_rate": 0.21509433962264152,
+        "net_units_per_100_days": 11.132075471698114,
+        "net_per_trade": 0.5175438596491229,
+        "mean_ev": 0.265271334390029,
+        "pnl_per_contract": 0.25877192982456143,
+        "ev_q10": 0.1179327802491613,
+        "ev_q50": 0.26335180356950544,
+        "ev_q90": 0.4163877470473574
+      },
+      "0.10": {
+        "price": 0.5,
+        "ev_min": 0.1,
+        "tp": 169,
+        "fp": 51,
+        "trades": 220,
+        "trade_rate": 0.20754716981132076,
+        "net_units_per_100_days": 11.132075471698114,
+        "net_per_trade": 0.5363636363636364,
+        "mean_ev": 0.2715402179867167,
+        "pnl_per_contract": 0.2681818181818182,
+        "ev_q10": 0.1322438010106245,
+        "ev_q50": 0.27558966165646936,
+        "ev_q90": 0.41684784446630174
+      }
+    },
+    "0.55": {
+      "0.00": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 193,
+        "fp": 69,
+        "trades": 262,
+        "trade_rate": 0.24716981132075472,
+        "net_units_per_100_days": 11.69811320754717,
+        "net_per_trade": 0.4732824427480916,
+        "mean_ev": 0.18960986523678106,
+        "pnl_per_contract": 0.18664122137404576,
+        "ev_q10": 0.029976791924855573,
+        "ev_q50": 0.18970641273292033,
+        "ev_q90": 0.36004116823171545
+      },
+      "0.01": {
+        "price": 0.55,
+        "ev_min": 0.01,
+        "tp": 183,
+        "fp": 67,
+        "trades": 250,
+        "trade_rate": 0.2358490566037736,
+        "net_units_per_100_days": 10.943396226415095,
+        "net_per_trade": 0.464,
+        "mean_ev": 0.19845207793224323,
+        "pnl_per_contract": 0.18199999999999997,
+        "ev_q10": 0.041836664793109546,
+        "ev_q50": 0.20089058666163778,
+        "ev_q90": 0.36128149612902033
+      },
+      "0.02": {
+        "price": 0.55,
+        "ev_min": 0.02,
+        "tp": 181,
+        "fp": 61,
+        "trades": 242,
+        "trade_rate": 0.22830188679245284,
+        "net_units_per_100_days": 11.320754716981133,
+        "net_per_trade": 0.49586776859504134,
+        "mean_ev": 0.20455718688820423,
+        "pnl_per_contract": 0.1979338842975206,
+        "ev_q10": 0.05302716830833596,
+        "ev_q50": 0.20593561498267637,
+        "ev_q90": 0.36438073837301815
+      },
+      "0.03": {
+        "price": 0.55,
+        "ev_min": 0.03,
+        "tp": 176,
+        "fp": 59,
+        "trades": 235,
+        "trade_rate": 0.22169811320754718,
+        "net_units_per_100_days": 11.037735849056604,
+        "net_per_trade": 0.4978723404255319,
+        "mean_ev": 0.20992052408719283,
+        "pnl_per_contract": 0.19893617021276588,
+        "ev_q10": 0.06269465197851032,
+        "ev_q50": 0.21185417662307227,
+        "ev_q90": 0.3656939147127307
+      },
+      "0.04": {
+        "price": 0.55,
+        "ev_min": 0.04,
+        "tp": 173,
+        "fp": 55,
+        "trades": 228,
+        "trade_rate": 0.21509433962264152,
+        "net_units_per_100_days": 11.132075471698114,
+        "net_per_trade": 0.5175438596491229,
+        "mean_ev": 0.21527133439002893,
+        "pnl_per_contract": 0.2087719298245614,
+        "ev_q10": 0.06793278024916126,
+        "ev_q50": 0.2133518035695054,
+        "ev_q90": 0.3663877470473574
+      },
+      "0.05": {
+        "price": 0.55,
+        "ev_min": 0.05,
+        "tp": 169,
+        "fp": 51,
+        "trades": 220,
+        "trade_rate": 0.20754716981132076,
+        "net_units_per_100_days": 11.132075471698114,
+        "net_per_trade": 0.5363636363636364,
+        "mean_ev": 0.22154021798671666,
+        "pnl_per_contract": 0.21818181818181817,
+        "ev_q10": 0.08224380101062444,
+        "ev_q50": 0.22558966165646932,
+        "ev_q90": 0.3668478444663017
+      },
+      "0.06": {
+        "price": 0.55,
+        "ev_min": 0.06,
+        "tp": 164,
+        "fp": 49,
+        "trades": 213,
+        "trade_rate": 0.2009433962264151,
+        "net_units_per_100_days": 10.849056603773585,
+        "net_per_trade": 0.539906103286385,
+        "mean_ev": 0.22701284551552425,
+        "pnl_per_contract": 0.21995305164319245,
+        "ev_q10": 0.08450174144624041,
+        "ev_q50": 0.23087417104350538,
+        "ev_q90": 0.36881654980032713
+      },
+      "0.07": {
+        "price": 0.55,
+        "ev_min": 0.07,
+        "tp": 158,
+        "fp": 45,
+        "trades": 203,
+        "trade_rate": 0.19150943396226416,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5566502463054187,
+        "mean_ev": 0.2349939868693819,
+        "pnl_per_contract": 0.22832512315270934,
+        "ev_q10": 0.09878872901966124,
+        "ev_q50": 0.2357288534709323,
+        "ev_q90": 0.3725165114288834
+      },
+      "0.08": {
+        "price": 0.55,
+        "ev_min": 0.08,
+        "tp": 156,
+        "fp": 43,
+        "trades": 199,
+        "trade_rate": 0.1877358490566038,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5678391959798995,
+        "mean_ev": 0.23820314379987292,
+        "pnl_per_contract": 0.23391959798994966,
+        "ev_q10": 0.10791269301398913,
+        "ev_q50": 0.2385820445670498,
+        "ev_q90": 0.3733056401677318
+      },
+      "0.09": {
+        "price": 0.55,
+        "ev_min": 0.09,
+        "tp": 151,
+        "fp": 38,
+        "trades": 189,
+        "trade_rate": 0.17830188679245282,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5978835978835979,
+        "mean_ev": 0.24635466138470635,
+        "pnl_per_contract": 0.24894179894179885,
+        "ev_q10": 0.12494480498935297,
+        "ev_q50": 0.2427685441311911,
+        "ev_q90": 0.37417933989549973
+      },
+      "0.10": {
+        "price": 0.55,
+        "ev_min": 0.1,
+        "tp": 147,
+        "fp": 35,
+        "trades": 182,
+        "trade_rate": 0.17169811320754716,
+        "net_units_per_100_days": 10.566037735849058,
+        "net_per_trade": 0.6153846153846154,
+        "mean_ev": 0.2521435404534508,
+        "pnl_per_contract": 0.25769230769230766,
+        "ev_q10": 0.13151849002930088,
+        "ev_q50": 0.251163926459298,
+        "ev_q90": 0.3771706469647311
+      }
+    },
+    "0.60": {
+      "0.00": {
+        "price": 0.6,
+        "ev_min": 0.0,
+        "tp": 169,
+        "fp": 51,
+        "trades": 220,
+        "trade_rate": 0.20754716981132076,
+        "net_units_per_100_days": 11.132075471698114,
+        "net_per_trade": 0.5363636363636364,
+        "mean_ev": 0.17154021798671673,
+        "pnl_per_contract": 0.16818181818181824,
+        "ev_q10": 0.03224380101062451,
+        "ev_q50": 0.1755896616564694,
+        "ev_q90": 0.31684784446630176
+      },
+      "0.01": {
+        "price": 0.6,
+        "ev_min": 0.01,
+        "tp": 164,
+        "fp": 49,
+        "trades": 213,
+        "trade_rate": 0.2009433962264151,
+        "net_units_per_100_days": 10.849056603773585,
+        "net_per_trade": 0.539906103286385,
+        "mean_ev": 0.17701284551552432,
+        "pnl_per_contract": 0.16995305164319255,
+        "ev_q10": 0.03450174144624048,
+        "ev_q50": 0.18087417104350545,
+        "ev_q90": 0.3188165498003272
+      },
+      "0.02": {
+        "price": 0.6,
+        "ev_min": 0.02,
+        "tp": 158,
+        "fp": 45,
+        "trades": 203,
+        "trade_rate": 0.19150943396226416,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5566502463054187,
+        "mean_ev": 0.18499398686938193,
+        "pnl_per_contract": 0.17832512315270937,
+        "ev_q10": 0.048788729019661296,
+        "ev_q50": 0.18572885347093238,
+        "ev_q90": 0.3225165114288835
+      },
+      "0.03": {
+        "price": 0.6,
+        "ev_min": 0.03,
+        "tp": 156,
+        "fp": 43,
+        "trades": 199,
+        "trade_rate": 0.1877358490566038,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5678391959798995,
+        "mean_ev": 0.18820314379987296,
+        "pnl_per_contract": 0.18391959798994978,
+        "ev_q10": 0.0579126930139892,
+        "ev_q50": 0.18858204456704986,
+        "ev_q90": 0.3233056401677319
+      },
+      "0.04": {
+        "price": 0.6,
+        "ev_min": 0.04,
+        "tp": 151,
+        "fp": 38,
+        "trades": 189,
+        "trade_rate": 0.17830188679245282,
+        "net_units_per_100_days": 10.660377358490566,
+        "net_per_trade": 0.5978835978835979,
+        "mean_ev": 0.1963546613847064,
+        "pnl_per_contract": 0.19894179894179898,
+        "ev_q10": 0.07494480498935303,
+        "ev_q50": 0.19276854413119116,
+        "ev_q90": 0.3241793398954998
+      },
+      "0.05": {
+        "price": 0.6,
+        "ev_min": 0.05,
+        "tp": 147,
+        "fp": 35,
+        "trades": 182,
+        "trade_rate": 0.17169811320754716,
+        "net_units_per_100_days": 10.566037735849058,
+        "net_per_trade": 0.6153846153846154,
+        "mean_ev": 0.20214354045345084,
+        "pnl_per_contract": 0.2076923076923077,
+        "ev_q10": 0.08151849002930094,
+        "ev_q50": 0.2011639264592981,
+        "ev_q90": 0.3271706469647312
+      },
+      "0.06": {
+        "price": 0.6,
+        "ev_min": 0.06,
+        "tp": 144,
+        "fp": 33,
+        "trades": 177,
+        "trade_rate": 0.1669811320754717,
+        "net_units_per_100_days": 10.471698113207548,
+        "net_per_trade": 0.6271186440677966,
+        "mean_ev": 0.2062834688629811,
+        "pnl_per_contract": 0.2135593220338983,
+        "ev_q10": 0.08769380424187373,
+        "ev_q50": 0.20456889705836412,
+        "ev_q90": 0.3296626066257655
+      },
+      "0.07": {
+        "price": 0.6,
+        "ev_min": 0.07,
+        "tp": 143,
+        "fp": 32,
+        "trades": 175,
+        "trade_rate": 0.1650943396226415,
+        "net_units_per_100_days": 10.471698113207548,
+        "net_per_trade": 0.6342857142857142,
+        "mean_ev": 0.20793143011666335,
+        "pnl_per_contract": 0.21714285714285714,
+        "ev_q10": 0.09179971882703096,
+        "ev_q50": 0.20476994750969635,
+        "ev_q90": 0.3306949216656232
+      },
+      "0.08": {
+        "price": 0.6,
+        "ev_min": 0.08,
+        "tp": 136,
+        "fp": 28,
+        "trades": 164,
+        "trade_rate": 0.15471698113207547,
+        "net_units_per_100_days": 10.18867924528302,
+        "net_per_trade": 0.6585365853658537,
+        "mean_ev": 0.2168492952309451,
+        "pnl_per_contract": 0.2292682926829269,
+        "ev_q10": 0.10735062012273272,
+        "ev_q50": 0.21508324434665893,
+        "ev_q90": 0.33283352113073444
+      },
+      "0.09": {
+        "price": 0.6,
+        "ev_min": 0.09,
+        "tp": 130,
+        "fp": 28,
+        "trades": 158,
+        "trade_rate": 0.1490566037735849,
+        "net_units_per_100_days": 9.622641509433963,
+        "net_per_trade": 0.6455696202531646,
+        "mean_ev": 0.2218559057585449,
+        "pnl_per_contract": 0.2227848101265823,
+        "ev_q10": 0.11306154713968883,
+        "ev_q50": 0.21866158757127335,
+        "ev_q90": 0.333658673353578
+      },
+      "0.10": {
+        "price": 0.6,
+        "ev_min": 0.1,
+        "tp": 124,
+        "fp": 27,
+        "trades": 151,
+        "trade_rate": 0.14245283018867924,
+        "net_units_per_100_days": 9.150943396226415,
+        "net_per_trade": 0.6423841059602649,
+        "mean_ev": 0.22776797355563164,
+        "pnl_per_contract": 0.22119205298013248,
+        "ev_q10": 0.12732371520997876,
+        "ev_q50": 0.21976484177845956,
+        "ev_q90": 0.33551005915481735
+      }
+    }
+  },
+  "ev_sweep_test": {
+    "0.50": {
+      "0.04": {
+        "price": 0.5,
+        "ev_min": 0.04,
+        "tp": 200,
+        "fp": 78,
+        "trades": 278,
+        "trade_rate": 0.27335299901671584,
+        "net_units_per_100_days": 11.9960668633235,
+        "net_per_trade": 0.43884892086330934,
+        "mean_ev": 0.24030435632016797,
+        "pnl_per_contract": 0.21942446043165467,
+        "ev_q10": 0.083005350003496,
+        "ev_q50": 0.22150354217786616,
+        "ev_q90": 0.4204510992640839
+      }
+    },
+    "0.55": {
+      "0.00": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 192,
+        "fp": 74,
+        "trades": 266,
+        "trade_rate": 0.2615535889872173,
+        "net_units_per_100_days": 11.60275319567355,
+        "net_per_trade": 0.44360902255639095,
+        "mean_ev": 0.19911016970595447,
+        "pnl_per_contract": 0.17180451127819546,
+        "ev_q10": 0.04713380439871728,
+        "ev_q50": 0.18497151439327747,
+        "ev_q90": 0.3715000673355755
+      }
+    },
+    "0.60": {
+      "0.00": {
+        "price": 0.6,
+        "ev_min": 0.0,
+        "tp": 176,
+        "fp": 61,
+        "trades": 237,
+        "trade_rate": 0.23303834808259588,
+        "net_units_per_100_days": 11.307767944936087,
+        "net_per_trade": 0.48523206751054854,
+        "mean_ev": 0.17036727472656796,
+        "pnl_per_contract": 0.1426160337552743,
+        "ev_q10": 0.02946565366772924,
+        "ev_q50": 0.1563868757767788,
+        "ev_q90": 0.3265792772540517
+      }
+    }
+  },
+  "year_breakdown_test": {
+    "2023": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 71,
+        "fp": 28,
+        "trades": 99,
+        "trade_rate": 0.29464285714285715,
+        "net_units_per_100_days": 12.797619047619047,
+        "net_per_trade": 0.43434343434343436,
+        "mean_ev": 0.20476879817800878,
+        "pnl_per_contract": 0.1671717171717171,
+        "ev_q10": 0.04609355277682457,
+        "ev_q50": 0.19308056782774108,
+        "ev_q90": 0.37226617300870374
+      }
+    },
+    "2024": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 72,
+        "fp": 25,
+        "trades": 97,
+        "trade_rate": 0.27873563218390807,
+        "net_units_per_100_days": 13.505747126436782,
+        "net_per_trade": 0.4845360824742268,
+        "mean_ev": 0.2075765632754615,
+        "pnl_per_contract": 0.19226804123711339,
+        "ev_q10": 0.05662149879481689,
+        "ev_q50": 0.19650864306673965,
+        "ev_q90": 0.377211803355043
+      }
+    },
+    "2025": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 49,
+        "fp": 21,
+        "trades": 70,
+        "trade_rate": 0.21021021021021022,
+        "net_units_per_100_days": 8.408408408408409,
+        "net_per_trade": 0.4,
+        "mean_ev": 0.1793752497777321,
+        "pnl_per_contract": 0.14999999999999994,
+        "ev_q10": 0.04138135217417399,
+        "ev_q50": 0.16449676726160994,
+        "ev_q90": 0.3450231950218091
+      }
+    }
+  },
+  "season_breakdown_test": {
+    "DJF": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 63,
+        "fp": 24,
+        "trades": 87,
+        "trade_rate": 0.3333333333333333,
+        "net_units_per_100_days": 14.942528735632186,
+        "net_per_trade": 0.4482758620689655,
+        "mean_ev": 0.21210619934760475,
+        "pnl_per_contract": 0.17413793103448272,
+        "ev_q10": 0.042656939375529626,
+        "ev_q50": 0.2094251186970243,
+        "ev_q90": 0.36778955200763125
+      }
+    },
+    "MAM": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 25,
+        "fp": 19,
+        "trades": 44,
+        "trade_rate": 0.16296296296296298,
+        "net_units_per_100_days": 2.2222222222222223,
+        "net_per_trade": 0.13636363636363635,
+        "mean_ev": 0.1443037031406824,
+        "pnl_per_contract": 0.01818181818181812,
+        "ev_q10": 0.037980700477417195,
+        "ev_q50": 0.11534463582738008,
+        "ev_q90": 0.3104270510465633
+      }
+    },
+    "JJA": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 42,
+        "fp": 9,
+        "trades": 51,
+        "trade_rate": 0.21518987341772153,
+        "net_units_per_100_days": 13.924050632911392,
+        "net_per_trade": 0.6470588235294118,
+        "mean_ev": 0.18817094391519493,
+        "pnl_per_contract": 0.27352941176470585,
+        "ev_q10": 0.04029482291917297,
+        "ev_q50": 0.15959350738069566,
+        "ev_q90": 0.3776300131886109
+      }
+    },
+    "SON": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 62,
+        "fp": 22,
+        "trades": 84,
+        "trade_rate": 0.3373493975903614,
+        "net_units_per_100_days": 16.06425702811245,
+        "net_per_trade": 0.47619047619047616,
+        "mean_ev": 0.2209998181033012,
+        "pnl_per_contract": 0.18809523809523807,
+        "ev_q10": 0.061463995969874466,
+        "ev_q50": 0.2156801515201479,
+        "ev_q90": 0.38696663620420163
+      }
+    }
+  },
+  "regime_breakdown_test": {
+    "onshore_suppressed": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 160,
+        "fp": 63,
+        "trades": 223,
+        "trade_rate": 0.2892347600518807,
+        "net_units_per_100_days": 12.5810635538262,
+        "net_per_trade": 0.4349775784753363,
+        "mean_ev": 0.19894293654903292,
+        "pnl_per_contract": 0.16748878923766813,
+        "ev_q10": 0.050376401523740934,
+        "ev_q50": 0.18578593261434917,
+        "ev_q90": 0.36829554526034564
+      }
+    },
+    "cross_suppressed": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 17,
+        "fp": 4,
+        "trades": 21,
+        "trade_rate": 0.1891891891891892,
+        "net_units_per_100_days": 11.711711711711711,
+        "net_per_trade": 0.6190476190476191,
+        "mean_ev": 0.1841667816958514,
+        "pnl_per_contract": 0.2595238095238095,
+        "ev_q10": 0.04824604861870252,
+        "ev_q50": 0.17361844830052553,
+        "ev_q90": 0.3935046309815635
+      }
+    },
+    "offshore_suppressed": {
+      "price_0.55": {
+        "price": 0.55,
+        "ev_min": 0.0,
+        "tp": 15,
+        "fp": 7,
+        "trades": 22,
+        "trade_rate": 0.16296296296296298,
+        "net_units_per_100_days": 5.9259259259259265,
+        "net_per_trade": 0.36363636363636365,
+        "mean_ev": 0.215069448897121,
+        "pnl_per_contract": 0.13181818181818175,
+        "ev_q10": 0.047841400565079066,
+        "ev_q50": 0.2268251403810973,
+        "ev_q90": 0.3779098545874577
+      }
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "drop_from_max",
+      "gain": 4530.1860736608505,
+      "perm_importance": 0.029830782630334673
+    },
+    {
+      "feature": "gap_norm",
+      "gain": 2852.9158088564873,
+      "perm_importance": 0.009977292522085457
+    },
+    {
+      "feature": "doy_cos",
+      "gain": 1608.9232964515686,
+      "perm_importance": 0.009133538633818716
+    },
+    {
+      "feature": "plateau_frac_0p1_last60",
+      "gain": 1439.6035810709,
+      "perm_importance": 0.018982518352619104
+    },
+    {
+      "feature": "slope_180m",
+      "gain": 1182.69768846035,
+      "perm_importance": 0.005428020405624068
+    },
+    {
+      "feature": "slope_120m",
+      "gain": 1175.9240662381053,
+      "perm_importance": 0.001333675500808762
+    },
+    {
+      "feature": "recovery_potential",
+      "gain": 1155.0080639123917,
+      "perm_importance": 0.0001866368047780398
+    },
+    {
+      "feature": "gap_to_mos_tmax",
+      "gain": 1147.4055211544037,
+      "perm_importance": 0.007947617270125829
+    },
+    {
+      "feature": "std_180",
+      "gain": 984.0233290344477,
+      "perm_importance": 0.0031106134129650354
+    },
+    {
+      "feature": "slope_60m",
+      "gain": 704.5011187493801,
+      "perm_importance": 0.0032117083488865106
+    },
+    {
+      "feature": "heating_fraction_obs",
+      "gain": 664.3865633103997,
+      "perm_importance": 0.0001244245365187302
+    },
+    {
+      "feature": "doy_sin",
+      "gain": 627.0632565021515,
+      "perm_importance": 0.0014542117705613755
+    },
+    {
+      "feature": "mos_tmax_bias_nam_a0.050",
+      "gain": 567.6149769425392,
+      "perm_importance": -0.0001788602712453624
+    },
+    {
+      "feature": "curvature_30_180",
+      "gain": 519.1586716175079,
+      "perm_importance": 0.002632356600721697
+    },
+    {
+      "feature": "minutes_since_max",
+      "gain": 506.6331333871931,
+      "perm_importance": -0.0005910165484632746
+    },
+    {
+      "feature": "mos_wsp_gfs_mean",
+      "gain": 492.05241870880127,
+      "perm_importance": 0.001516424038820574
+    },
+    {
+      "feature": "slope_30m",
+      "gain": 471.32275837659836,
+      "perm_importance": 0.0005365808137365313
+    },
+    {
+      "feature": "curvature_60_180",
+      "gain": 464.99177600443363,
+      "perm_importance": 0.0006571170834890339
+    },
+    {
+      "feature": "mos_tmax_bias_nam_a0.020",
+      "gain": 452.030597448349,
+      "perm_importance": -0.00010498320268736983
+    },
+    {
+      "feature": "plateau_frac_0p1_last120",
+      "gain": 403.1771697998047,
+      "perm_importance": 0.0035694288913773464
+    }
+  ]
+}

@@ -74,6 +74,8 @@ def run_experiment_calibration(
 ) -> CalibrationArtifacts:
     run_dir = run_dir_override or load_experiment_run(sweep_root, experiment_id)
     config = load_config_from_run(run_dir)
+    # Keep base model columns aligned with the sweep config (e.g., MOS n_x fields).
+    tfs._apply_model_cols(config)
 
     if not allow_overlap:
         global_normal_calibration.check_calibration_window(

@@ -17,7 +17,49 @@ RAW_MODEL_ORDER = [
     "gefsatmosmean_tmax_f",
     "gfs_tmax_f",
     "nam_tmax_f",
+    "gfs_n_x_max",
+    "nam_n_x_max",
 ]
+
+
+def rank_with_tie_break(
+    values: np.ndarray,
+    model_cols: list[str],
+    *,
+    tie_breaker: str = "raw_model_order",
+    zero_based: bool = False,
+) -> np.ndarray:
+    """Rank each row's values with deterministic tie-breaking.
+
+    Ranks are assigned per-row with lower values receiving lower ranks.
+
+    tie_breaker:
+      - "raw_model_order": uses RAW_MODEL_ORDER priority (then input order)
+      - "column_name_lexicographic": breaks ties by column name string
+    """
+    if values.ndim != 2:
+        raise ValueError("values must be 2D.")
+    if values.shape[1] != len(model_cols):
+        raise ValueError("values.shape[1] must match len(model_cols).")
+    if tie_breaker not in ("raw_model_order", "column_name_lexicographic"):
+        raise ValueError(f"Unsupported tie_breaker: {tie_breaker}")
+
+    start = 0 if zero_based else 1
+    ranks = np.zeros_like(values, dtype=int)
+    priority = {name: idx for idx, name in enumerate(RAW_MODEL_ORDER)}
+    for row_idx, row_vals in enumerate(values):
+        tuples = []
+        for idx, val in enumerate(row_vals):
+            col = model_cols[idx]
+            if tie_breaker == "column_name_lexicographic":
+                tie_key = col
+            else:
+                tie_key = priority.get(col, idx)
+            tuples.append((val, tie_key, idx))
+        tuples.sort()
+        for rank, item in enumerate(tuples, start=start):
+            ranks[row_idx, item[2]] = rank
+    return ranks
 
 
 def compute_rowwise_features(
@@ -96,7 +138,7 @@ def compute_rowwise_features(
         add(f"{col}_minus_ens_median", delta_median)
         add(f"{col}_minus_ens_median_abs", np.abs(delta_median))
 
-    ranks = _rank_with_tie_break(values, model_cols)
+    ranks = rank_with_tie_break(values, model_cols, tie_breaker="raw_model_order", zero_based=False)
     for idx, col in enumerate(model_cols):
         add(f"rank_{col}_in_ens", ranks[:, idx])
 
@@ -231,14 +273,4 @@ def _closest3_mean(
 
 
 def _rank_with_tie_break(values: np.ndarray, model_cols: list[str]) -> np.ndarray:
-    priority = {name: idx for idx, name in enumerate(RAW_MODEL_ORDER)}
-    ranks = np.zeros_like(values, dtype=int)
-    for row_idx, row_vals in enumerate(values):
-        tuples = []
-        for idx, val in enumerate(row_vals):
-            col = model_cols[idx]
-            tuples.append((val, priority.get(col, idx), idx))
-        tuples.sort()
-        for rank, item in enumerate(tuples, start=1):
-            ranks[row_idx, item[2]] = rank
-    return ranks
+    return rank_with_tie_break(values, model_cols, tie_breaker="raw_model_order", zero_based=False)

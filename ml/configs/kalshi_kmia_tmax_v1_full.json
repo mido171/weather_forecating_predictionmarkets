@@ -1,0 +1,167 @@
+{
+  "station_id": "KMIA",
+  "station_zoneid": "America/New_York",
+  "feature_version": "kmia_kalshi_tmax_v1_full",
+  "build_start_asof": "2007-01-01",
+  "output_start_asof": "2007-01-01",
+  "end_asof": "2025-12-31",
+  "asof_rule": "target_minus_one_day_12z",
+  "asof_hour_utc": 12,
+  "asof_minute_utc": 0,
+  "climate_day_utc_offset_hours": -5,
+  "obs_cutoff_lag_days": 1,
+  "include_retrieved_at_guard": false,
+  "mos_runtime_policy": "exact",
+  "mos_runtime_hour_utc": 12,
+  "mos_runtime_minute_utc": 0,
+  "truth_table": "station_daily_truth_lst",
+  "use_time_step_mos": true,
+  "models": [
+    "GFS",
+    "NAM"
+  ],
+  "variables": [
+    "cig",
+    "dpt",
+    "n_x",
+    "p06",
+    "p12",
+    "pos",
+    "poz",
+    "q06",
+    "q12",
+    "snw",
+    "t06",
+    "t06_1",
+    "t06_2",
+    "tmp",
+    "vis",
+    "wdr",
+    "wsp"
+  ],
+  "baseline_start": "2007-01-01",
+  "baseline_end": "2009-12-31",
+  "distance_calibration_start": "2007-01-01",
+  "distance_calibration_end": "2009-12-31",
+  "distance_features": [
+    "base_tmax_blend",
+    "base_tmax_abs_spread",
+    "mos_gfs_n_x_max",
+    "mos_nam_n_x_max",
+    "mos_xmodel_blend_tmp_mean",
+    "mos_xmodel_blend_tmp_max",
+    "mos_xmodel_blend_dpt_mean",
+    "mos_xmodel_blend_wsp_mean",
+    "mos_xmodel_blend_wdr_mean_sin",
+    "mos_xmodel_blend_wdr_mean_cos",
+    "mos_xmodel_blend_cig_median",
+    "mos_xmodel_blend_vis_mean",
+    "mos_xmodel_blend_p12_max",
+    "mos_xmodel_blend_q12_mean",
+    "mos_xmodel_blend_t06_mean",
+    "cal_d_doy_sin",
+    "cal_d_doy_cos",
+    "obs_tmax_last",
+    "obs_tmax_roll_mean_7",
+    "obs_tmax_roll_mean_30",
+    "obs_tmax_z_30"
+  ],
+  "distance_feature_weights": {
+    "base_tmax_blend": 2.0,
+    "base_tmax_abs_spread": 1.5
+  },
+  "missing_penalty": 1.0,
+  "k": 90,
+  "knn_views": [
+    {
+      "name": "v0",
+      "pool": "full",
+      "distance": "l2"
+    },
+    {
+      "name": "v1",
+      "pool": "season45",
+      "distance": "l2"
+    },
+    {
+      "name": "v2",
+      "pool": "full",
+      "distance": "cosine"
+    },
+    {
+      "name": "v3",
+      "pool": "season45",
+      "distance": "cosine"
+    },
+    {
+      "name": "v4",
+      "pool": "full",
+      "distance": "rank"
+    },
+    {
+      "name": "v5",
+      "pool": "season45",
+      "distance": "rank"
+    }
+  ],
+  "thresholds": [
+    45,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74,
+    76,
+    78,
+    80,
+    82,
+    84,
+    86,
+    88,
+    90,
+    92,
+    94,
+    96,
+    98,
+    100,
+    105
+  ],
+  "tau_fixed": [
+    0.8,
+    1.0,
+    1.6
+  ],
+  "obs_windows_days": [
+    3,
+    7,
+    14,
+    30,
+    45,
+    90,
+    365
+  ],
+  "obs_slope_windows_days": [
+    7,
+    14,
+    30,
+    90
+  ],
+  "bias_windows_days": [
+    7,
+    14,
+    30,
+    60,
+    90,
+    365
+  ],
+  "output_root": "dataset",
+  "output_partition_yearly": false
+}

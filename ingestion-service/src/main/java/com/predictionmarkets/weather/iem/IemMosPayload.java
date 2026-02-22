@@ -8,6 +8,10 @@ import com.predictionmarkets.weather.models.MosModel;
 import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -123,10 +127,38 @@ public record IemMosPayload(
       try {
         return Long.parseLong(text);
       } catch (NumberFormatException ex) {
+        Long parsed = parseIsoMillis(text);
+        if (parsed != null) {
+          return parsed;
+        }
         throw new IllegalArgumentException("Invalid epoch millis for field: " + field, ex);
       }
     }
     throw new IllegalArgumentException("Expected numeric field: " + field);
+  }
+
+  private static Long parseIsoMillis(String text) {
+    String normalized = text.trim();
+    if (normalized.isEmpty()) {
+      return null;
+    }
+    try {
+      return Instant.parse(normalized).toEpochMilli();
+    } catch (DateTimeParseException ex) {
+      // fall through for non-UTC strings without timezone
+    }
+    try {
+      if (normalized.endsWith("Z")) {
+        normalized = normalized.substring(0, normalized.length() - 1);
+      }
+      DateTimeFormatter formatter = normalized.contains(".")
+          ? DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+          : DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+      LocalDateTime local = LocalDateTime.parse(normalized, formatter);
+      return local.toInstant(ZoneOffset.UTC).toEpochMilli();
+    } catch (DateTimeParseException ex) {
+      return null;
+    }
   }
 
   private static Map<String, IemMosValue> parseValues(JsonNode entry) {
@@ -191,6 +223,9 @@ public record IemMosPayload(
     String normalized = normalizeText(value);
     if ("ETA".equals(normalized)) {
       normalized = "NAM";
+    }
+    if ("AVN".equals(normalized)) {
+      normalized = "GFS";
     }
     try {
       return MosModel.valueOf(normalized);

@@ -19,6 +19,11 @@ logging:
     org.springframework.boot.context.config: DEBUG
     com.predictionmarkets.weather.gribstream: DEBUG
 
+evomi:
+  proxy:
+    enabled: false
+    credential: "http://core-residential.evomi.com:1000:ahmedac9712:b5biMPfsSTLPsLOOxOrN"
+
 kalshi:
   base-url: https://api.elections.kalshi.com/trade-api/v2
 
@@ -28,15 +33,18 @@ iem:
 cli-settlement:
   station-ids:
     - KMIA
+    - KPHL
+    - KLAX
+    - KMDW
+    - KNYC
   start-date-local: 2007-01-01
   end-date-local: 2025-12-31
 
 gribstream:
   baseUrl: "https://gribstream.com"
-  apiToken: "a379b700999ff2263bc5816c3ca21d25427ce5f7"
   authScheme: "${GRIBSTREAM_AUTH_SCHEME:Bearer}"
   connectTimeoutMillis: 5000
-  readTimeoutMillis: 30000
+  readTimeoutMillis: 120000
   defaultAccept: "application/ndjson"
   gzip: true
   logHttp: true
@@ -116,6 +124,19 @@ gribstream:
       - nbm
       - gefsatmosmean
       - gefsatmos
+  tmax-forecast:
+    station-id: KMIA
+    start-date-local: 2021-04-23
+    end-date-local: 2025-12-31
+    smoke-test-forecasted-at-utc: 2025-01-15T12:00:00Z
+    min-horizon-hours: 12
+    max-horizon-hours: 48
+    rap-max-horizon-hours: 51
+    hrrr-max-horizon-hours: 48
+    min-points-per-day: 8
+    rap-min-points-per-day: 5
+    gefs-min-points-per-day: 4
+    run-range-days: 7
 
 mos:
   training-data:
@@ -138,7 +159,7 @@ pipeline:
     - KXHIGHMIA
     - KXHIGHCHI
     - KXHIGHLAX
-  station-ids-to-run: "KMIA"
+  station-ids-to-run: "KNYC"
   models:
     - GFS
     - NAM
@@ -156,3 +177,24 @@ backfill:
   concurrency:
     mos-window-threads: 6
     mos-asof-threads: 6
+
+experiments:
+  ingest:
+    enabled: false
+    scan-roots:
+      - artifacts
+      - ml
+    station-filter:
+      - KMIA
+    max-metadata-bytes: 1000000
+  report:
+    enabled: false
+    output-dir: artifacts/experiment_reports
+    station-filter:
+      - KMIA
+    limit: 0
+  describe:
+    enabled: false
+    limit: 0
+    output-dir: artifacts/experiment_descriptions
+    apply-to-database: true

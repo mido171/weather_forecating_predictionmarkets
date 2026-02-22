@@ -82,6 +82,21 @@ def test_rank_tie_break() -> None:
     assert features["rank_rap_tmax_f_in_ens"].iloc[0] == 3
 
 
+def test_rank_lexicographic_zero_based() -> None:
+    values = np.array([[5.0, 5.0, 4.0]], dtype=float)
+    model_cols = ["b_col", "a_col", "c_col"]
+    ranks = derived_features.rank_with_tie_break(
+        values,
+        model_cols,
+        tie_breaker="column_name_lexicographic",
+        zero_based=True,
+    )
+    assert ranks.shape == values.shape
+    assert ranks[0, 2] == 0
+    assert ranks[0, 1] == 1
+    assert ranks[0, 0] == 2
+
+
 def test_bias_correction() -> None:
     df = pd.DataFrame(
         {

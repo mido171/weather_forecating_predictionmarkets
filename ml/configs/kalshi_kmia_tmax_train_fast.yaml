@@ -1,0 +1,30 @@
+train_start: "2015-01-01"
+train_end: "2022-12-31"
+val_start: "2023-01-01"
+val_end: "2023-12-31"
+test_start: "2024-01-01"
+test_end: "2025-12-31"
+n_splits: 3
+gap_days: 2
+recency_lambda: 0.0008
+lgbm_params:
+  num_leaves: 31
+  learning_rate: 0.08
+  n_estimators: 250
+  min_data_in_leaf: 40
+  feature_fraction: 0.7
+  bagging_fraction: 0.7
+  bagging_freq: 1
+quantile_params:
+  num_leaves: 31
+  learning_rate: 0.08
+  n_estimators: 200
+  min_data_in_leaf: 40
+  feature_fraction: 0.7
+  bagging_fraction: 0.7
+  bagging_freq: 1
+quantiles:
+  - 0.1
+  - 0.5
+  - 0.9
+stacking: false

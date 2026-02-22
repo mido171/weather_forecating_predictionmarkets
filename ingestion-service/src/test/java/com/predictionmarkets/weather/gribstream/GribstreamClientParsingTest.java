@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
+import com.predictionmarkets.weather.config.EvomiProxyProperties;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +34,10 @@ class GribstreamClientParsingTest {
     GribstreamProperties properties = new GribstreamProperties();
     properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
+    EvomiProxyProperties proxyProperties = new EvomiProxyProperties();
     GribstreamClient client = new GribstreamClient(
         properties,
+        proxyProperties,
         new ObjectMapper(),
         HttpClientSettings.defaultSettings());
 
@@ -110,8 +113,10 @@ class GribstreamClientParsingTest {
     GribstreamProperties properties = new GribstreamProperties();
     properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
+    EvomiProxyProperties proxyProperties = new EvomiProxyProperties();
     GribstreamClient client = new GribstreamClient(
         properties,
+        proxyProperties,
         new ObjectMapper(),
         HttpClientSettings.defaultSettings());
 
@@ -151,8 +156,10 @@ class GribstreamClientParsingTest {
     GribstreamProperties properties = new GribstreamProperties();
     properties.setBaseUrl(server.url("/").toString());
     properties.setApiToken("test-token");
+    EvomiProxyProperties proxyProperties = new EvomiProxyProperties();
     GribstreamClient client = new GribstreamClient(
         properties,
+        proxyProperties,
         new ObjectMapper(),
         HttpClientSettings.defaultSettings());
 

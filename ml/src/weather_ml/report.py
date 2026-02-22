@@ -20,6 +20,7 @@ def write_report(
     global_calibration: dict | None,
     baseline_calibration: dict | None,
     config: dict,
+    rs_moe_sections: dict | None = None,
 ) -> None:
     lines = []
     lines.append("# Training Report")
@@ -39,6 +40,34 @@ def write_report(
     lines.append(_pretty_json(metrics))
     lines.append("```")
     lines.append("")
+    if rs_moe_sections:
+        lines.append("## RS-MoE")
+        lines.append("")
+        lines.append("### RS-MoE Summary")
+        lines.append("```json")
+        lines.append(_pretty_json(rs_moe_sections.get("summary", {})))
+        lines.append("```")
+        lines.append("")
+        lines.append("### Gate Diagnostics")
+        lines.append("```json")
+        lines.append(_pretty_json(rs_moe_sections.get("gate_diagnostics", {})))
+        lines.append("```")
+        lines.append("")
+        lines.append("### Expert Diagnostics")
+        lines.append("```json")
+        lines.append(_pretty_json(rs_moe_sections.get("expert_diagnostics", {})))
+        lines.append("```")
+        lines.append("")
+        lines.append("### Mixture Metrics Summary")
+        lines.append("```json")
+        lines.append(_pretty_json(rs_moe_sections.get("mixture_metrics_summary", {})))
+        lines.append("```")
+        lines.append("")
+        lines.append("### Regime-stratified MAE")
+        lines.append("```json")
+        lines.append(_pretty_json(rs_moe_sections.get("regime_stratified_mae", {})))
+        lines.append("```")
+        lines.append("")
     lines.append("## Feature Importance")
     lines.append("```json")
     lines.append(_pretty_json(feature_importance or {}))

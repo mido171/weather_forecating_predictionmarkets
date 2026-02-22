@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionmarkets.weather.common.Hashing;
 import com.predictionmarkets.weather.common.http.HttpClientSettings;
 import com.predictionmarkets.weather.common.http.HttpRetryPolicy;
+import com.predictionmarkets.weather.config.EvomiProxyProperties;
 import com.predictionmarkets.weather.gribstream.GribstreamRawResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -24,6 +26,9 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.SpringBootVersion;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,22 +48,31 @@ public class GribstreamClient {
 
   private final OkHttpClient httpClient;
   private final HttpUrl baseUrl;
+  private final String apiToken;
   private final String authHeader;
+  private final int tokenLength;
+  private final String tokenShaPrefix;
   private final String acceptHeader;
   private final boolean gzipEnabled;
   private final boolean logHttp;
   private final int logBodyLimit;
   private final HttpRetryPolicy retryPolicy;
   private final ObjectMapper objectMapper;
+  private final boolean evomiProxyEnabled;
+  private final String userAgent;
 
   public GribstreamClient(GribstreamProperties properties,
+                          EvomiProxyProperties evomiProxyProperties,
                           ObjectMapper objectMapper,
                           HttpClientSettings httpClientSettings) {
     Objects.requireNonNull(properties, "properties is required");
     this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper is required");
-    String apiToken = normalizeToken(properties.getApiToken());
+    this.apiToken = normalizeToken(resolveApiToken(properties));
     String authScheme = normalizeAuthScheme(properties.getAuthScheme());
-    this.authHeader = buildAuthorizationHeader(apiToken, authScheme);
+    this.authHeader = buildAuthorizationHeader(this.apiToken, authScheme);
+    this.tokenLength = this.apiToken.length();
+    String tokenFingerprint = Hashing.sha256Hex(this.apiToken);
+    this.tokenShaPrefix = tokenFingerprint.substring(0, 12);
     this.acceptHeader = properties.getDefaultAccept();
     this.gzipEnabled = properties.isGzip();
     this.logHttp = properties.isLogHttp();
@@ -66,21 +80,24 @@ public class GribstreamClient {
     this.retryPolicy = Objects.requireNonNull(httpClientSettings, "httpClientSettings is required")
         .retryPolicy();
     this.baseUrl = parseBaseUrl(properties.getBaseUrl());
-    this.httpClient = new OkHttpClient.Builder()
+    this.evomiProxyEnabled = evomiProxyProperties != null && evomiProxyProperties.isEnabled();
+    this.userAgent = buildUserAgent("gribstream-history", gzipEnabled, evomiProxyEnabled);
+    OkHttpClient.Builder builder = new OkHttpClient.Builder()
         .connectTimeout(properties.getConnectTimeoutMillis(), java.util.concurrent.TimeUnit.MILLISECONDS)
         .readTimeout(properties.getReadTimeoutMillis(), java.util.concurrent.TimeUnit.MILLISECONDS)
         .callTimeout(Duration.ofMillis(properties.getReadTimeoutMillis()))
         .writeTimeout(properties.getReadTimeoutMillis(), java.util.concurrent.TimeUnit.MILLISECONDS)
         .retryOnConnectionFailure(true)
-        .build();
-    String tokenFingerprint = Hashing.sha256Hex(apiToken);
+        ;
+    EvomiProxySupport.applyIfEnabled(builder, evomiProxyProperties, logger);
+    this.httpClient = builder.build();
     logger.info("[GRIBSTREAM] Auth token loaded OK. tokenLen={} tokenSha256Prefix={}",
-        apiToken.length(),
-        tokenFingerprint.substring(0, 12));
+        tokenLength,
+        tokenShaPrefix);
     logger.debug("Gribstream client configured baseUrl={} tokenSha256Prefix={} tokenLength={}",
         properties.getBaseUrl(),
-        Hashing.sha256Hex(apiToken).substring(0, 12),
-        apiToken.length());
+        tokenShaPrefix,
+        tokenLength);
   }
 
   public GribstreamClientResponse fetchHistory(String modelCode, GribstreamHistoryRequest request) {
@@ -163,11 +180,17 @@ public class GribstreamClient {
           }
           return response.bodyBytes;
         }
+        if (response.statusCode == 401) {
+          logUnauthorized(modelCode, requestSha256);
+        }
         if (retryPolicy.isRetryableStatus(response.statusCode) && attempt < maxAttempts) {
           long backoffMillis = retryPolicy.computeDelayMillis(attempt);
           logRetry(modelCode, attempt, maxAttempts, response.statusCode, backoffMillis, null);
           sleepBackoff(backoffMillis);
           continue;
+        }
+        if (response.statusCode != 401) {
+          logFailure(modelCode, requestSha256, response.statusCode);
         }
         throw new GribstreamResponseException("Gribstream HTTP status " + response.statusCode
             + " model=" + modelCode
@@ -201,6 +224,7 @@ public class GribstreamClient {
         .url(url)
         .post(body)
         .header("Authorization", authHeader)
+        .header("User-Agent", userAgent)
         .header("Accept", acceptHeader)
         .header("Content-Type", "application/json");
     if (gzipEnabled) {
@@ -240,6 +264,37 @@ public class GribstreamClient {
     return trimmed;
   }
 
+  private static String resolveApiToken(GribstreamProperties properties) {
+    String configured = properties == null ? null : properties.getApiToken();
+    String classpathToken = loadClasspathToken("application.yml");
+    if (classpathToken != null && !classpathToken.isBlank()) {
+      if (configured != null && !configured.isBlank() && !configured.equals(classpathToken)) {
+        logger.warn("Overriding gribstream.apiToken with classpath application.yml value.");
+      }
+      return classpathToken.trim();
+    }
+    return configured;
+  }
+
+  private static String loadClasspathToken(String resourceName) {
+    ClassPathResource resource = new ClassPathResource(resourceName);
+    if (!resource.exists()) {
+      return null;
+    }
+    YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+    factory.setResources(resource);
+    Properties props = factory.getObject();
+    if (props == null || props.isEmpty()) {
+      return null;
+    }
+    String token = props.getProperty("gribstream.apiToken");
+    if (token == null) {
+      return null;
+    }
+    String trimmed = token.trim();
+    return trimmed.isEmpty() ? null : trimmed;
+  }
+
   private static String buildAuthorizationHeader(String apiToken, String authScheme) {
     String token = apiToken.trim();
     if (token.isEmpty()) {
@@ -262,6 +317,107 @@ public class GribstreamClient {
   private static boolean hasAuthScheme(String headerValue) {
     int spaceIndex = headerValue.indexOf(' ');
     return spaceIndex > 0 && spaceIndex < headerValue.length() - 1;
+  }
+
+  private void logUnauthorized(String modelCode, String requestSha256) {
+    logger.error(
+        "[GRIBSTREAM] Unauthorized response model={} requestSha256={} tokenLen={} tokenSha256Prefix={} "
+            + "apiToken={} authHeader={} evomiProxyEnabled={}",
+        modelCode,
+        requestSha256,
+        tokenLength,
+        tokenShaPrefix,
+        apiToken,
+        maskAuthHeader(authHeader),
+        evomiProxyEnabled);
+  }
+
+  private void logFailure(String modelCode, String requestSha256, int statusCode) {
+    logger.error(
+        "[GRIBSTREAM] History request failed model={} status={} requestSha256={} apiToken={} "
+            + "evomiProxyEnabled={}",
+        modelCode,
+        statusCode,
+        requestSha256,
+        apiToken,
+        evomiProxyEnabled);
+  }
+
+  private static String buildUserAgent(String clientName,
+                                       boolean gzipEnabled,
+                                       boolean evomiProxyEnabled) {
+    String appName = "weather-forecasting-predictionmarkets";
+    String appVersion = resolveImplementationVersion(GribstreamClient.class, "dev");
+    String profiles = normalizeProperty(System.getProperty("spring.profiles.active"), "default");
+    String javaVersion = normalizeProperty(System.getProperty("java.version"), "unknown");
+    String javaRuntime = normalizeProperty(System.getProperty("java.runtime.name"), "unknown");
+    String javaRuntimeVersion = normalizeProperty(System.getProperty("java.runtime.version"), "");
+    String javaVendor = normalizeProperty(System.getProperty("java.vendor"), "unknown");
+    String vmName = normalizeProperty(System.getProperty("java.vm.name"), "unknown");
+    String vmVersion = normalizeProperty(System.getProperty("java.vm.version"), "unknown");
+    String vmVendor = normalizeProperty(System.getProperty("java.vm.vendor"), "unknown");
+    String osName = normalizeProperty(System.getProperty("os.name"), "unknown");
+    String osVersion = normalizeProperty(System.getProperty("os.version"), "unknown");
+    String osArch = normalizeProperty(System.getProperty("os.arch"), "unknown");
+    String timezone = normalizeProperty(System.getProperty("user.timezone"), "unknown");
+    String language = normalizeProperty(System.getProperty("user.language"), "unknown");
+    String country = normalizeProperty(System.getProperty("user.country"), "");
+    String springBoot = normalizeProperty(SpringBootVersion.getVersion(), "unknown");
+    String okhttpVersion = resolveImplementationVersion(OkHttpClient.class, "unknown");
+
+    StringBuilder ua = new StringBuilder(256);
+    ua.append(appName).append('/').append(appVersion)
+        .append(" (module=ingestion-service; client=").append(clientName)
+        .append("; profiles=").append(profiles)
+        .append("; gzip=").append(gzipEnabled ? "on" : "off")
+        .append("; proxy=evomi:").append(evomiProxyEnabled ? "on" : "off")
+        .append(") ");
+
+    ua.append("Java/").append(javaVersion)
+        .append(" (").append(javaRuntime);
+    if (!javaRuntimeVersion.isBlank()) {
+      ua.append(' ').append(javaRuntimeVersion);
+    }
+    ua.append("; ").append(javaVendor).append(") ");
+
+    ua.append("VM/").append(vmName).append(' ').append(vmVersion)
+        .append(" (").append(vmVendor).append(") ");
+
+    ua.append("OS/").append(osName).append(' ').append(osVersion)
+        .append(" (").append(osArch).append(") ");
+
+    ua.append("TZ/").append(timezone)
+        .append(" Locale/").append(language);
+    if (!country.isBlank()) {
+      ua.append('-').append(country);
+    }
+
+    ua.append(" SpringBoot/").append(springBoot)
+        .append(" OkHttp/").append(okhttpVersion);
+    return ua.toString();
+  }
+
+  private static String resolveImplementationVersion(Class<?> type, String fallback) {
+    if (type == null) {
+      return fallback;
+    }
+    Package pkg = type.getPackage();
+    String version = pkg == null ? null : pkg.getImplementationVersion();
+    if (version == null || version.isBlank()) {
+      return fallback;
+    }
+    return version;
+  }
+
+  private static String normalizeProperty(String value, String fallback) {
+    if (value == null) {
+      return fallback;
+    }
+    String trimmed = value.trim();
+    if (trimmed.isEmpty()) {
+      return fallback;
+    }
+    return trimmed.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ');
   }
 
   private static HttpUrl parseBaseUrl(String baseUrl) {

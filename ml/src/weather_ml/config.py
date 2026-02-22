@@ -93,6 +93,104 @@ class ModelConfig:
 
 
 @dataclass(frozen=True)
+class MeanModelStrategyConfig:
+    type: str = "standard"
+
+
+@dataclass(frozen=True)
+class RsMoeRegimeLabelerConfig:
+    type: str = "ex108_compat"
+    residual_threshold_f: float | None = None
+    baseline_pred_source: str | None = None
+
+
+@dataclass(frozen=True)
+class RsMoeOofGatingConfig:
+    enabled: bool = True
+    method: str = "expanding_time_blocks"
+    n_folds: int = 5
+    burnin_fraction: float = 0.20
+    min_rows_per_fold: int = 100
+    weight_floor: float = 0.02
+    random_seed: int = 12345
+
+
+@dataclass(frozen=True)
+class RsMoeGateModelConfig:
+    library: str = "catboost"
+    params: dict[str, Any] = field(
+        default_factory=lambda: {
+            "loss_function": "MultiClass",
+            "classes_count": 3,
+            "iterations": 800,
+            "depth": 6,
+            "learning_rate": 0.05,
+            "l2_leaf_reg": 6.0,
+            "random_seed": 12345,
+            "allow_writing_files": False,
+            "verbose": False,
+        }
+    )
+
+
+@dataclass(frozen=True)
+class RsMoeGateCalibrationConfig:
+    method: str = "temperature_scaling"
+    temperature_init: float = 1.0
+    temperature_bounds: list[float] = field(default_factory=lambda: [0.5, 10.0])
+    optimizer: str = "lbfgs"
+    max_iter: int = 200
+    tol: float = 1e-7
+
+
+@dataclass(frozen=True)
+class RsMoeExpertsConfig:
+    library: str = "xgboost"
+    objective_variant: str = "absoluteerror"
+    absoluteerror_params: dict[str, Any] = field(
+        default_factory=lambda: {
+            "objective": "reg:absoluteerror",
+            "n_estimators": 300,
+            "learning_rate": 0.05,
+            "max_depth": 4,
+            "subsample": 0.9,
+            "colsample_bytree": 0.9,
+            "min_child_weight": 5.0,
+            "reg_lambda": 1.0,
+            "reg_alpha": 0.0,
+            "tree_method": "hist",
+            "random_state": 12345,
+        }
+    )
+    quantile_median_params: dict[str, Any] = field(
+        default_factory=lambda: {
+            "objective": "reg:quantileerror",
+            "quantile_alpha": 0.5,
+            "n_estimators": 300,
+            "learning_rate": 0.05,
+            "max_depth": 4,
+            "subsample": 0.9,
+            "colsample_bytree": 0.9,
+            "min_child_weight": 5.0,
+            "reg_lambda": 1.0,
+            "reg_alpha": 0.0,
+            "tree_method": "hist",
+            "random_state": 12345,
+        }
+    )
+
+
+@dataclass(frozen=True)
+class RsMoeConfig:
+    regimes: list[str] = field(default_factory=lambda: ["cool", "normal", "warm"])
+    regime_labeler: RsMoeRegimeLabelerConfig = field(default_factory=RsMoeRegimeLabelerConfig)
+    oof_gating: RsMoeOofGatingConfig = field(default_factory=RsMoeOofGatingConfig)
+    gate_model: RsMoeGateModelConfig = field(default_factory=RsMoeGateModelConfig)
+    gate_calibration: RsMoeGateCalibrationConfig = field(default_factory=RsMoeGateCalibrationConfig)
+    experts: RsMoeExpertsConfig = field(default_factory=RsMoeExpertsConfig)
+
+
+@dataclass(frozen=True)
 class ArtifactConfig:
     root_dir: str = "artifacts"
     run_id: str | None = None
@@ -159,6 +257,8 @@ class TrainingConfig:
     distribution: DistributionConfig
     calibration: CalibrationConfig
     postprocess: PostprocessConfig
+    mean_model: MeanModelStrategyConfig = field(default_factory=MeanModelStrategyConfig)
+    rs_moe: RsMoeConfig = field(default_factory=RsMoeConfig)
 
 
 def load_config(path: str | Path) -> TrainingConfig:
@@ -256,6 +356,81 @@ def load_config(path: str | Path) -> TrainingConfig:
     )
     models = ModelConfig(mean=mean, sigma=sigma)
 
+    mean_model_raw = raw.get("mean_model", {}) or {}
+    mean_model_type = str(mean_model_raw.get("type", "standard"))
+    if mean_model_type not in {"standard", "rs_moe"}:
+        raise ValueError(f"Unsupported mean_model.type: {mean_model_type}")
+    mean_model = MeanModelStrategyConfig(type=mean_model_type)
+
+    rs_moe_raw = raw.get("rs_moe", {}) or {}
+    regimes = [str(value) for value in rs_moe_raw.get("regimes", ["cool", "normal", "warm"])]
+
+    regime_labeler_raw = rs_moe_raw.get("regime_labeler", {}) or {}
+    regime_labeler = RsMoeRegimeLabelerConfig(
+        type=str(regime_labeler_raw.get("type", "ex108_compat")),
+        residual_threshold_f=(
+            float(regime_labeler_raw["residual_threshold_f"])
+            if regime_labeler_raw.get("residual_threshold_f") is not None
+            else None
+        ),
+        baseline_pred_source=(
+            str(regime_labeler_raw["baseline_pred_source"])
+            if regime_labeler_raw.get("baseline_pred_source") is not None
+            else None
+        ),
+    )
+
+    oof_gating_raw = rs_moe_raw.get("oof_gating", {}) or {}
+    oof_gating = RsMoeOofGatingConfig(
+        enabled=bool(oof_gating_raw.get("enabled", True)),
+        method=str(oof_gating_raw.get("method", "expanding_time_blocks")),
+        n_folds=int(oof_gating_raw.get("n_folds", 5)),
+        burnin_fraction=float(oof_gating_raw.get("burnin_fraction", 0.20)),
+        min_rows_per_fold=int(oof_gating_raw.get("min_rows_per_fold", 100)),
+        weight_floor=float(oof_gating_raw.get("weight_floor", 0.02)),
+        random_seed=int(oof_gating_raw.get("random_seed", 12345)),
+    )
+
+    gate_model_raw = rs_moe_raw.get("gate_model", {}) or {}
+    gate_model_params = dict(RsMoeGateModelConfig().params)
+    gate_model_params.update(dict(gate_model_raw.get("params", {}) or {}))
+    gate_model = RsMoeGateModelConfig(
+        library=str(gate_model_raw.get("library", "catboost")),
+        params=gate_model_params,
+    )
+
+    gate_calibration_raw = rs_moe_raw.get("gate_calibration", {}) or {}
+    temperature_bounds = gate_calibration_raw.get("temperature_bounds", [0.5, 10.0])
+    gate_calibration = RsMoeGateCalibrationConfig(
+        method=str(gate_calibration_raw.get("method", "temperature_scaling")),
+        temperature_init=float(gate_calibration_raw.get("temperature_init", 1.0)),
+        temperature_bounds=[float(value) for value in temperature_bounds],
+        optimizer=str(gate_calibration_raw.get("optimizer", "lbfgs")),
+        max_iter=int(gate_calibration_raw.get("max_iter", 200)),
+        tol=float(gate_calibration_raw.get("tol", 1e-7)),
+    )
+
+    experts_raw = rs_moe_raw.get("experts", {}) or {}
+    absolute_params = dict(RsMoeExpertsConfig().absoluteerror_params)
+    absolute_params.update(dict(experts_raw.get("absoluteerror_params", {}) or {}))
+    quantile_params = dict(RsMoeExpertsConfig().quantile_median_params)
+    quantile_params.update(dict(experts_raw.get("quantile_median_params", {}) or {}))
+    experts = RsMoeExpertsConfig(
+        library=str(experts_raw.get("library", "xgboost")),
+        objective_variant=str(experts_raw.get("objective_variant", "absoluteerror")),
+        absoluteerror_params=absolute_params,
+        quantile_median_params=quantile_params,
+    )
+
+    rs_moe = RsMoeConfig(
+        regimes=regimes,
+        regime_labeler=regime_labeler,
+        oof_gating=oof_gating,
+        gate_model=gate_model,
+        gate_calibration=gate_calibration,
+        experts=experts,
+    )
+
     artifacts_raw = raw.get("artifacts", {}) or {}
     artifacts = ArtifactConfig(
         root_dir=str(artifacts_raw.get("root_dir", "artifacts")),
@@ -313,6 +488,8 @@ def load_config(path: str | Path) -> TrainingConfig:
         split=split,
         features=features,
         models=models,
+        mean_model=mean_model,
+        rs_moe=rs_moe,
         artifacts=artifacts,
         seeds=seeds,
         distribution=distribution,
@@ -337,6 +514,8 @@ def resolve_paths(config: TrainingConfig, *, repo_root: Path) -> TrainingConfig:
         split=config.split,
         features=config.features,
         models=config.models,
+        mean_model=config.mean_model,
+        rs_moe=config.rs_moe,
         artifacts=ArtifactConfig(
             root_dir=str(artifacts_root),
             run_id=config.artifacts.run_id,

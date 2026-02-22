@@ -1,0 +1,20 @@
+{
+  "blend_method": "mean_of_gfs_n_x_max_and_nam_n_x_max",
+  "created_utc": "2026-01-18T08:47:27Z",
+  "csv_path": "ml\\data\\gribstream\\KMIA_gribstream_cli_training_data.csv",
+  "daily_aggregation": "mean_over_asof",
+  "daily_rows": 1705,
+  "end_date": "2025-12-31",
+  "filter_end": "2025-12-31",
+  "filter_start": "2021-03-01",
+  "metrics": {
+    "bias": -0.4818181818181818,
+    "mae": 1.3627565982404692,
+    "p50_abs_error": 1.0,
+    "p90_abs_error": 3.0,
+    "p95_abs_error": 3.5,
+    "rmse": 1.8146115973581955
+  },
+  "start_date": "2021-04-23",
+  "target_col": "target_tmax_f"
+}

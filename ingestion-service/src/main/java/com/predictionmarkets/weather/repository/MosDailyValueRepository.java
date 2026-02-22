@@ -1,7 +1,10 @@
 package com.predictionmarkets.weather.repository;
 
 import com.predictionmarkets.weather.models.MosDailyValue;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +16,14 @@ public interface MosDailyValueRepository extends JpaRepository<MosDailyValue, Lo
 
   List<MosDailyValue> findByStationIdAndModelOrderByRuntimeUtcAscTargetDateLocalAscVariableCodeAsc(
       String stationId, String model);
+
+  Optional<MosDailyValue>
+      findFirstByStationIdAndModelAndTargetDateLocalAndVariableCodeAndRuntimeUtcLessThanEqualOrderByRuntimeUtcDesc(
+          String stationId,
+          String model,
+          LocalDate targetDateLocal,
+          String variableCode,
+          Instant runtimeUtcMax);
 
   Page<MosDailyValue> findByStationIdAndModelIn(String stationId, List<String> models,
                                                 Pageable pageable);

@@ -1,0 +1,53 @@
+station_id: KMIA
+gribstream:
+  base_url: "https://gribstream.com"
+  models:
+    - gfs
+    - nbm
+    - hrrr
+    - rap
+    - gefsatmosmean
+    - gefsatmos
+  gefs_members:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+iem:
+  base_url: "https://mesonet.agron.iastate.edu"
+mos_models:
+  - GFS
+  - NAM
+mysql:
+  host: "localhost"
+  port: 3306
+  database: "weather_predictionmarkets"
+  user: "root"
+  password: ""

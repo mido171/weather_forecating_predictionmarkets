@@ -1,0 +1,55 @@
+{
+  "train": {
+    "accuracy": 0.8365487674169346,
+    "balanced_accuracy": 0.7760614960632515,
+    "yes_precision": 0.8811410459587956,
+    "yes_recall": 0.5924347362813,
+    "yes_f1": 0.7085058935966868,
+    "roc_auc": 0.9388308119462505,
+    "brier": 0.12506796873719045,
+    "cm_tn": 3571,
+    "cm_fp": 150,
+    "cm_fn": 765,
+    "cm_tp": 1112
+  },
+  "val": {
+    "accuracy": 0.7445175438596491,
+    "balanced_accuracy": 0.6742632086593077,
+    "yes_precision": 0.6878048780487804,
+    "yes_recall": 0.45483870967741935,
+    "yes_f1": 0.5475728155339806,
+    "roc_auc": 0.762849640981674,
+    "brier": 0.19603065048933335,
+    "cm_tn": 538,
+    "cm_fp": 64,
+    "cm_fn": 169,
+    "cm_tp": 141
+  },
+  "test": {
+    "accuracy": 0.7347670250896058,
+    "balanced_accuracy": 0.6696205443174895,
+    "yes_precision": 0.7058823529411765,
+    "yes_recall": 0.4414715719063545,
+    "yes_f1": 0.5432098765432098,
+    "roc_auc": 0.754982531610946,
+    "brier": 0.19731724339801265,
+    "cm_tn": 483,
+    "cm_fp": 55,
+    "cm_fn": 167,
+    "cm_tp": 132
+  },
+  "threshold": 0.6599999999999999,
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "verbose": -1,
+    "scale_pos_weight": 1.9824187533297815,
+    "num_leaves": 31,
+    "min_data_in_leaf": 50,
+    "learning_rate": 0.05,
+    "feature_fraction": 0.6,
+    "bagging_fraction": 0.7,
+    "reg_lambda": 1
+  },
+  "best_iteration": 90
+}

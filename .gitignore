@@ -6,3 +6,59 @@
 *.war
 *.ear
 *.nar
+
+# Local secrets
+.env
+/config/live_env.yaml
+/config/live_secrets.yaml
+
+# IDE / editor
+**/.idea/
+**/.vscode/
+*.iml
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Local caches / run outputs
+cache/
+asof_model_cache/
+tmax_cache/
+catboost_info/
+ingestion-service/artifacts/
+ml/artifacts/
+
+# Large generated datasets (do not commit)
+ml/dataset/
+dataset/
+ml/data/gribstream/
+weather_predictionmarkets_experiments/
+
+# Local datasets (do not commit)
+data/**
+!data/iem_minute_data/
+!data/iem_minute_data/*.ps1
+
+# Generated model artifacts living next to Java module code
+models/kmia/
+models/knyc/
+models/kphl/
+
+# Generated reports / scratch
+reports/
+noaa_sanity/
+backtests/
+backtesting/out/
+rap/
+rap_*.csv
+tmp_*.py
+
+# Artifacts: ignore everything by default; allow only curated experiment outputs
+artifacts/**
+!artifacts/experiments/
+!artifacts/experiments/classic/
+!artifacts/experiments/classic/winners/
+!artifacts/experiments/classic/winners/**
+!artifacts/experiments/early_maxout_strategy/
+!artifacts/experiments/early_maxout_strategy/**

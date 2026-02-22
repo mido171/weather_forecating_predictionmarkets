@@ -1,0 +1,63 @@
+{
+  "val": {
+    "accuracy": 0.6867924528301886,
+    "balanced_accuracy": 0.5920430508896355,
+    "yes_precision": 0.6410256410256411,
+    "yes_recall": 0.26595744680851063,
+    "yes_f1": 0.37593984962406013,
+    "roc_auc": 0.6173303938036581,
+    "brier": 0.20957500300357576,
+    "cm_tn": 628,
+    "cm_fp": 56,
+    "cm_fn": 276,
+    "cm_tp": 100
+  },
+  "test": {
+    "accuracy": 0.6696165191740413,
+    "balanced_accuracy": 0.5858899123458624,
+    "yes_precision": 0.6530612244897959,
+    "yes_recall": 0.25196850393700787,
+    "yes_f1": 0.36363636363636365,
+    "roc_auc": 0.6123924957493521,
+    "brier": 0.21760235187874558,
+    "cm_tn": 585,
+    "cm_fp": 51,
+    "cm_fn": 285,
+    "cm_tp": 96
+  },
+  "threshold_acc": 0.43999999999999995,
+  "threshold_bal": 0.3,
+  "threshold_profit": 0.43999999999999995,
+  "net_units_per_100_val_profit": 4.150943396226415,
+  "net_units_per_100_test_profit": 4.424778761061947,
+  "trade_rate_val_profit": 0.1471698113207547,
+  "trade_rate_test_profit": 0.14454277286135694,
+  "metrics_raw_val": {
+    "accuracy": 0.6556603773584906,
+    "balanced_accuracy": 0.5146276595744681,
+    "yes_precision": 1.0,
+    "yes_recall": 0.02925531914893617,
+    "yes_f1": 0.056847545219638244,
+    "roc_auc": 0.6149779924101033,
+    "brier": 0.28191231179789017,
+    "cm_tn": 684,
+    "cm_fp": 0,
+    "cm_fn": 365,
+    "cm_tp": 11
+  },
+  "metrics_raw_test": {
+    "accuracy": 0.6381514257620452,
+    "balanced_accuracy": 0.5175865398900609,
+    "yes_precision": 0.9333333333333333,
+    "yes_recall": 0.03674540682414698,
+    "yes_f1": 0.0707070707070707,
+    "roc_auc": 0.6133788111391736,
+    "brier": 0.29782145281239264,
+    "cm_tn": 635,
+    "cm_fp": 1,
+    "cm_fn": 367,
+    "cm_tp": 14
+  },
+  "always_no_acc": 0.6253687315634219,
+  "always_yes_acc": 0.3746312684365782
+}

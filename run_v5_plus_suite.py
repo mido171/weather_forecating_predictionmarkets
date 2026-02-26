@@ -371,22 +371,24 @@ def main() -> int:
         p_gate = train_gate()
 
         def fit(mask: np.ndarray):
-            if not mask.any():
+            train_idx = train_mask & mask
+            val_idx = val_mask & mask
+            if not train_idx.any():
                 return None
             if objective == "quantile":
                 return base.train_lgbm_quantile(
-                    X[mask],
-                    y[mask] - base_vals[mask],
-                    X[val_mask & mask],
-                    y[val_mask & mask] - base_vals[val_mask & mask],
+                    X[train_idx],
+                    y[train_idx] - base_vals[train_idx],
+                    X[val_idx],
+                    y[val_idx] - base_vals[val_idx],
                     seed=args.seed,
                     alpha=alpha,
                 )
             return base.train_lgbm_regressor(
-                X[mask],
-                y[mask] - base_vals[mask],
-                X[val_mask & mask],
-                y[val_mask & mask] - base_vals[val_mask & mask],
+                X[train_idx],
+                y[train_idx] - base_vals[train_idx],
+                X[val_idx],
+                y[val_idx] - base_vals[val_idx],
                 seed=args.seed,
             )
 

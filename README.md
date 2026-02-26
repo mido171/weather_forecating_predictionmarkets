@@ -35,3 +35,14 @@ Gribstream executors:
 GRIBSTREAM_API_TOKEN=your-token
 GRIBSTREAM_AUTH_SCHEME=Bearer
 ```
+
+## Weather.com historical observations
+The Weather.com ingestion endpoints require an API key. Configure it through environment
+variables; never commit the key.
+
+```text
+WEATHERCOM_API_KEY=your-weathercom-key
+```
+
+Relevant Spring config keys live under `weathercom.*` in
+`ingestion-service/src/main/resources/application.yml`.

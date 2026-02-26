@@ -198,3 +198,25 @@ experiments:
     limit: 0
     output-dir: artifacts/experiment_descriptions
     apply-to-database: true
+
+weathercom:
+  api:
+    base-url: https://api.weather.com
+    api-key: ${WEATHERCOM_API_KEY:}
+    connect-timeout-ms: 5000
+    read-timeout-ms: 20000
+    user-agent: weather-forecasting-predictionmarkets/1.0
+  ingestion:
+    enabled: false
+    thread-pool-size: 15
+    queue-capacity: 200
+    chunk-days: 1
+    max-retries: 4
+    retry-backoff-ms: 500
+    max-backoff-ms: 10000
+    retry-jitter-ms: 250
+    upsert-batch-size: 500
+    store-response-body: true
+    max-response-body-chars: 50000
+    rate-limit:
+      permits-per-second: 2.0

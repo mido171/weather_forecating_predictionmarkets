@@ -199,19 +199,63 @@ public class BackfillOrchestrator {
     LocalDate start = requireStartDate(request.dateStartLocal(), BackfillJobType.MOS_INGEST_WINDOW);
     LocalDate end = requireEndDate(request.dateEndLocal(), BackfillJobType.MOS_INGEST_WINDOW);
     validateDateRange(start, end);
-    StationRegistry station = resolveStation(singleSeriesTicker(request.seriesTickers(),
-        BackfillJobType.MOS_INGEST_WINDOW));
+    List<String> seriesTickers = requireSeriesTickers(request.seriesTickers(),
+        BackfillJobType.MOS_INGEST_WINDOW);
+    List<StationRegistry> stations = resolveStations(seriesTickers);
     List<MosModel> models = requireModels(request.models(), BackfillJobType.MOS_INGEST_WINDOW);
     int windowDays = request.mosWindowDays();
     if (windowDays < 1) {
       throw new IllegalArgumentException("mosWindowDays must be >= 1");
     }
+    if (stations.size() == 1) {
+      runMosIngestWindowForStation(stations.get(0), models, start, end, windowDays);
+      return;
+    }
+
+    int stationThreadCount = Math.max(1, stations.size());
+    ExecutorService executor = Executors.newFixedThreadPool(
+        stationThreadCount, namedThreadFactory("mos-window-station"));
+    AtomicInteger failures = new AtomicInteger();
+    try {
+      List<Future<?>> futures = new ArrayList<>(stations.size());
+      for (StationRegistry station : stations) {
+        futures.add(executor.submit(() -> {
+          String stationId = station.getStationId();
+          snapshot("job=mos_ingest_window station=" + stationId + " status=start");
+          try {
+            runMosIngestWindowForStation(station, models, start, end, windowDays);
+            snapshot("job=mos_ingest_window station=" + stationId + " status=complete");
+          } catch (RuntimeException ex) {
+            failures.incrementAndGet();
+            snapshot("job=mos_ingest_window station=" + stationId + " status=failed");
+            logger.error("[BACKFILL] mos_ingest_window failed station={}", stationId, ex);
+          }
+          return null;
+        }));
+      }
+      waitAllOrFail(futures);
+    } finally {
+      shutdownExecutor(executor);
+    }
+    if (failures.get() > 0) {
+      snapshot("job=mos_ingest_window complete failures=" + failures.get()
+          + " stations=" + stations.size());
+    } else {
+      snapshot("job=mos_ingest_window complete stations=" + stations.size());
+    }
+  }
+
+  private void runMosIngestWindowForStation(StationRegistry station,
+                                            List<MosModel> models,
+                                            LocalDate start,
+                                            LocalDate end,
+                                            int windowDays) {
+    String jobName = BackfillJobType.MOS_INGEST_WINDOW.jobName();
+    String stationId = station.getStationId();
     Instant rangeStartUtc = start.atStartOfDay(ZoneOffset.UTC).toInstant();
     Instant rangeEndUtc = end.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
     Duration windowSize = Duration.ofDays(windowDays);
-    String jobName = BackfillJobType.MOS_INGEST_WINDOW.jobName();
-    String stationId = station.getStationId();
-
+    int windowThreadCount = Math.max(1, concurrencyProperties.getMosWindowThreads());
     for (MosModel model : models) {
       IngestCheckpoint existing = checkpointService.findCheckpoint(jobName, stationId, model)
           .orElse(null);
@@ -236,8 +280,7 @@ public class BackfillOrchestrator {
           checkpointService.markRunning(jobName, stationId, model, null, cursorRef.get()));
       try {
         checkpointService.markRunning(jobName, stationId, model, null, cursorRef.get());
-        int threadCount = Math.max(1, concurrencyProperties.getMosWindowThreads());
-        if (threadCount == 1 || windows.size() <= 1) {
+        if (windowThreadCount == 1 || windows.size() <= 1) {
           for (WindowRange window : windows) {
             mosRunIngestService.ingestWindow(stationId, model, window.start(), window.end());
             processedWindows += 1;
@@ -252,11 +295,11 @@ public class BackfillOrchestrator {
           }
         } else {
           ExecutorService executor = Executors.newFixedThreadPool(
-              threadCount, namedThreadFactory("mos-window"));
+              windowThreadCount, namedThreadFactory("mos-window"));
           try {
             int index = 0;
             while (index < windows.size()) {
-              int endIndex = Math.min(index + threadCount, windows.size());
+              int endIndex = Math.min(index + windowThreadCount, windows.size());
               List<WindowRange> batch = windows.subList(index, endIndex);
               List<Future<?>> futures = new ArrayList<>(batch.size());
               for (WindowRange window : batch) {
@@ -273,7 +316,7 @@ public class BackfillOrchestrator {
                   + " window=" + batch.get(0).start() + ".." + last.end()
                   + " progress=" + processedWindows + "/" + totalWindows
                   + " remaining=" + (totalWindows - processedWindows)
-                  + " threads=" + threadCount);
+                  + " threads=" + windowThreadCount);
               cursorRuntime = last.end();
               cursorRef.set(cursorRuntime);
               checkpointService.markRunning(jobName, stationId, model, null, cursorRuntime);
@@ -416,6 +459,14 @@ public class BackfillOrchestrator {
         .orElseGet(() -> kalshiSeriesResolver.resolveAndUpsert(normalized));
   }
 
+  private List<StationRegistry> resolveStations(List<String> seriesTickers) {
+    List<StationRegistry> stations = new ArrayList<>(seriesTickers.size());
+    for (String seriesTicker : seriesTickers) {
+      stations.add(resolveStation(seriesTicker));
+    }
+    return stations;
+  }
+
   private String singleSeriesTicker(List<String> seriesTickers, BackfillJobType jobType) {
     if (seriesTickers == null || seriesTickers.isEmpty()) {
       throw new IllegalArgumentException("seriesTicker is required for " + jobType.jobName());
@@ -425,6 +476,13 @@ public class BackfillOrchestrator {
           "Only one seriesTicker is supported for " + jobType.jobName());
     }
     return seriesTickers.get(0);
+  }
+
+  private List<String> requireSeriesTickers(List<String> seriesTickers, BackfillJobType jobType) {
+    if (seriesTickers == null || seriesTickers.isEmpty()) {
+      throw new IllegalArgumentException("seriesTicker is required for " + jobType.jobName());
+    }
+    return seriesTickers;
   }
 
   private List<MosModel> requireModels(List<MosModel> models, BackfillJobType jobType) {

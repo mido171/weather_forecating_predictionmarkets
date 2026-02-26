@@ -2,6 +2,22 @@
 
 This repository is a weather forecasting + prediction markets playground with a strict backbone: data ingestion must be reproducible, auditable, restartable, and safe against leakage. This file is the single handoff doc for how code is organized, how to run ingestion/reporting tasks, and which invariants must never be violated.
 
+## Additional Documentation (MUST READ)
+
+This repo also contains extended documentation under `documentation/`.
+
+Agents/Codex MUST read **all** markdown documents under `documentation/` before doing anything! and:
+
+- Editing or running the Kalshi downloader
+- Editing or running any bridge/backtest/trading scripts
+- Making claims about leakage safety or execution-time correctness
+
+Start with:
+
+- `documentation/README.md`
+- `documentation/klga_same_day_tmax_distribution/README.md`
+- then all markdown files under `documentation/klga_same_day_tmax_distribution/` in numeric order
+
 The repo currently contains two kinds of systems:
 1) Java/Spring ingestion + MySQL persistence + simple CLI runners (Epic #1)
 2) Python training/evaluation/backtesting artifacts (Epic #2/#3 work-in-progress), which are treated as sources to ingest and catalog rather than as the canonical system of record.

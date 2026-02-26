@@ -513,23 +513,40 @@ def run_training_pipeline(
     medians = _fit_imputer(df, feature_cols=feature_cols, train_mask=split_masks["train"])
     x_all = _apply_imputer(df, feature_cols=feature_cols, medians=medians)
 
-    y_peak_all = pd.to_numeric(df["peak"], errors="coerce").fillna(0).astype(int).to_numpy()
-    y_delta_all = pd.to_numeric(df["delta"], errors="coerce").fillna(0).astype(int).to_numpy()
+    peak_series = pd.to_numeric(df["peak"], errors="coerce")
+    delta_series = pd.to_numeric(df["delta"], errors="coerce")
+    peak_label_mask = np.isfinite(peak_series.to_numpy(dtype=float))
+    delta_label_mask = np.isfinite(delta_series.to_numpy(dtype=float))
 
-    train_idx = np.where(split_masks["train"])[0]
-    val_idx = np.where(split_masks["val"])[0]
-    test_idx = np.where(split_masks["test"])[0]
-    if len(val_idx) == 0 or len(test_idx) == 0:
-        raise ValueError("Validation/test splits are empty.")
+    y_peak_all = np.full(len(df), -1, dtype=int)
+    y_delta_all = np.full(len(df), -1, dtype=int)
+    if np.any(peak_label_mask):
+        y_peak_all[peak_label_mask] = (
+            peak_series.loc[peak_label_mask].round().astype(int).to_numpy()
+        )
+    if np.any(delta_label_mask):
+        y_delta_all[delta_label_mask] = (
+            delta_series.loc[delta_label_mask].round().astype(int).to_numpy()
+        )
 
-    train_weights = _recency_weights(df, split_masks["train"])
+    peak_train_mask = split_masks["train"] & peak_label_mask
+    peak_val_mask = split_masks["val"] & peak_label_mask
+    peak_test_mask = split_masks["test"] & peak_label_mask
+    train_idx = np.where(peak_train_mask)[0]
+    val_idx = np.where(peak_val_mask)[0]
+    test_idx = np.where(peak_test_mask)[0]
+    if len(train_idx) == 0 or len(val_idx) == 0 or len(test_idx) == 0:
+        raise ValueError("Peak train/validation/test splits are empty after label filtering.")
+
+    train_weights = _recency_weights(df, peak_train_mask)
     stage_end(
         sidx,
         "prepare_splits_and_features",
         st0,
         details=(
             f"feature_count={len(feature_cols)} "
-            f"train_rows={len(train_idx)} val_rows={len(val_idx)} test_rows={len(test_idx)}"
+            f"train_rows={len(train_idx)} val_rows={len(val_idx)} test_rows={len(test_idx)} "
+            f"peak_labels={int(np.sum(peak_label_mask))} delta_labels={int(np.sum(delta_label_mask))}"
         ),
     )
 
@@ -577,8 +594,20 @@ def run_training_pipeline(
 
     # Delta model trains only on non-peak rows.
     k_delta = cfg.delta_class_max
-    delta_train_mask = split_masks["train"] & (y_peak_all == 0) & (y_delta_all >= 1)
-    delta_val_mask = split_masks["val"] & (y_peak_all == 0) & (y_delta_all >= 1)
+    delta_train_mask = (
+        split_masks["train"]
+        & peak_label_mask
+        & delta_label_mask
+        & (y_peak_all == 0)
+        & (y_delta_all >= 1)
+    )
+    delta_val_mask = (
+        split_masks["val"]
+        & peak_label_mask
+        & delta_label_mask
+        & (y_peak_all == 0)
+        & (y_delta_all >= 1)
+    )
     if not np.any(delta_train_mask):
         raise ValueError("No train rows available for delta model.")
     if not np.any(delta_val_mask):

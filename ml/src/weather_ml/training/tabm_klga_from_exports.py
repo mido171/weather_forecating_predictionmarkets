@@ -16,7 +16,12 @@ import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import brier_score_loss, log_loss
 
-from weather_ml.klga_daily_tmax_dist.config import OBS_ALLOWED_COLUMNS, PipelineConfig, SplitConfig
+from weather_ml.klga_daily_tmax_dist.config import (
+    OBS_ALLOWED_COLUMNS,
+    OBS_OPTIONAL_COLUMNS,
+    PipelineConfig,
+    SplitConfig,
+)
 from weather_ml.klga_daily_tmax_dist.features import (
     build_daily_prior_frame,
     build_feature_rows,
@@ -151,12 +156,16 @@ def _load_daily_csv(path: Path) -> pd.DataFrame:
 
 def _load_obs_csv(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, low_memory=False)
-    missing = set(OBS_ALLOWED_COLUMNS).difference(df.columns)
+    required = set(OBS_ALLOWED_COLUMNS).difference(set(OBS_OPTIONAL_COLUMNS))
+    missing = required.difference(df.columns)
     if missing:
         raise ValueError(f"observations_30m_required_columns.csv missing columns: {sorted(missing)}")
+    for optional in OBS_OPTIONAL_COLUMNS:
+        if optional not in df.columns:
+            df[optional] = np.nan
     df["valid_time_utc"] = pd.to_datetime(df["valid_time_utc"], utc=True, errors="coerce")
     df = df.dropna(subset=["valid_time_utc"]).copy()
-    for c in ["temp", "dew_pt", "rh", "pressure", "vis", "wspd", "wdir", "gust", "precip_hrly"]:
+    for c in ["temp", "dew_pt", "rh", "pressure", "vis", "wspd", "wdir", "gust", "precip_hrly", "uv_index", "feels_like"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
     return df
 
@@ -468,7 +477,11 @@ def run_tabm_training_from_exports(
     obs_df = obs_df[(obs_df["valid_time_utc"] >= start_obs_utc) & (obs_df["valid_time_utc"] <= end_obs_utc)].copy()
     if obs_df.empty:
         raise ValueError("No observation rows after horizon filtering.")
-    station_series = prepare_station_series(obs_df, station_ids=p_cfg.all_station_ids)
+    station_series = prepare_station_series(
+        obs_df,
+        station_ids=p_cfg.all_station_ids,
+        include_feels_like=p_cfg.include_feels_like,
+    )
     daily_prior_df = build_daily_prior_frame(daily_df)
     feat_df, audit = build_feature_rows(
         calendar_df=calendar_df,
@@ -485,7 +498,7 @@ def run_tabm_training_from_exports(
     sidx, st0 = stage_start("prepare_training_matrices")
     masks = _split_masks(feat_df, cfg.split)
     feat_df, climo_meta = _add_climo_features(feat_df, masks["train"])
-    feat_cols = _model_feature_columns(feat_df)
+    feat_cols = _model_feature_columns(feat_df, p_cfg)
     medians = _fit_imputer(feat_df, feature_cols=feat_cols, train_mask=masks["train"])
     x_all = _apply_imputer(feat_df, feature_cols=feat_cols, medians=medians).astype(np.float32)
 

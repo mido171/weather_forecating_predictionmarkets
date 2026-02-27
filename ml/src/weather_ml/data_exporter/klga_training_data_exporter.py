@@ -13,9 +13,9 @@ from sqlalchemy import text
 from weather_ml.klga_daily_tmax_dist.config import (
     ALL_STATION_IDS,
     NEIGHBOR_STATION_IDS,
-    OBS_ALLOWED_COLUMNS,
     TARGET_STATION_ID,
     find_repo_root,
+    observation_columns,
 )
 from weather_ml.klga_daily_tmax_dist.db import create_engine_from_url
 
@@ -106,7 +106,7 @@ def _export_observations_csv(
 ) -> tuple[Path, int]:
     engine = create_engine_from_url(mysql_url)
     station_ids = tuple(ALL_STATION_IDS)
-    colset = tuple(OBS_ALLOWED_COLUMNS)
+    colset = observation_columns(include_feels_like=False)
     cols_sql = ", ".join(colset)
     placeholders = ", ".join(f":loc_{i}" for i in range(len(station_ids)))
     start_utc, end_utc_exclusive = _obs_window_utc(start_date_local, end_date_local)
@@ -216,4 +216,3 @@ def export_klga_training_eval_csvs(
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
     active_logger.info("EXPORT_DONE manifest=%s", manifest_path)
     return manifest
-

@@ -98,7 +98,13 @@ def _split_masks(df: pd.DataFrame, cfg: PipelineConfig) -> dict[str, np.ndarray]
     return {"train": train.to_numpy(), "val": val.to_numpy(), "test": test.to_numpy()}
 
 
-def _add_climo_features(df: pd.DataFrame, train_mask: np.ndarray) -> tuple[pd.DataFrame, dict[str, Any]]:
+def _add_climo_features(
+    df: pd.DataFrame,
+    train_mask: np.ndarray,
+    *,
+    cfg: PipelineConfig | None = None,
+    state_lookup_path: Path | None = None,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
     out = df.copy()
     train_df = out.loc[train_mask].copy()
     if train_df.empty:
@@ -108,23 +114,16 @@ def _add_climo_features(df: pd.DataFrame, train_mask: np.ndarray) -> tuple[pd.Da
 
     key_cols = ["doy", "cutoff_minutes"]
     lookup = (
-        train_df.groupby(key_cols, as_index=False)["delta"]
-        .agg(["mean", "std"])
+        train_df.groupby(key_cols)["delta"]
+        .agg(climo_rem_delta_mean="mean", climo_rem_delta_std="std")
         .reset_index()
-        .rename(columns={"mean": "climo_rem_delta_mean", "std": "climo_rem_delta_std"})
     )
     lookup["climo_rem_delta_std"] = lookup["climo_rem_delta_std"].fillna(0.0)
 
     cutoff_fallback = (
-        train_df.groupby("cutoff_minutes", as_index=False)["delta"]
-        .agg(["mean", "std"])
+        train_df.groupby("cutoff_minutes")["delta"]
+        .agg(climo_cutoff_fallback_mean="mean", climo_cutoff_fallback_std="std")
         .reset_index()
-        .rename(
-            columns={
-                "mean": "climo_cutoff_fallback_mean",
-                "std": "climo_cutoff_fallback_std",
-            }
-        )
     )
     cutoff_fallback["climo_cutoff_fallback_std"] = cutoff_fallback["climo_cutoff_fallback_std"].fillna(0.0)
 
@@ -134,14 +133,107 @@ def _add_climo_features(df: pd.DataFrame, train_mask: np.ndarray) -> tuple[pd.Da
     out["climo_rem_delta_std"] = out["climo_rem_delta_std"].fillna(out["climo_cutoff_fallback_std"])
     out = out.drop(columns=["climo_cutoff_fallback_mean", "climo_cutoff_fallback_std"])
 
+    state_meta: dict[str, Any] = {}
+    cfg_obj = cfg or PipelineConfig()
+    if cfg_obj.enable_state_anomaly_lookups:
+        state_features = [
+            "temp_now",
+            "dewpoint_depression_now",
+            "vis_now",
+            "pressure_now",
+            "wspd_now",
+            "clds_oktas_now",
+            "uv_index_now",
+            "coastal_minus_inland_temp",
+            "clds_oktas_coastal_minus_inland",
+            "uv_coastal_minus_inland",
+            "vis_coastal_minus_inland",
+            "temp_slope_180",
+            "pressure_slope_180",
+            "vis_slope_180",
+            "clds_oktas_delta_180",
+            "uv_delta_180",
+        ]
+        existing_state_features = [f for f in state_features if f in out.columns]
+        if existing_state_features:
+            out["doy_bin"] = (
+                ((pd.to_numeric(out["doy"], errors="coerce") - 1.0) // 7.0)
+                .clip(lower=0)
+                .fillna(0.0)
+                .astype(int)
+            )
+
+            state_lookup_df: pd.DataFrame
+            lookup_source = "built_from_train"
+            if state_lookup_path is not None and state_lookup_path.exists():
+                state_lookup_df = pd.read_json(state_lookup_path, orient="records")
+                lookup_source = "loaded_from_artifact"
+            else:
+                state_rows: list[pd.DataFrame] = []
+                train_state = out.loc[train_mask].copy()
+                if train_state.empty:
+                    raise AssertionError("State lookup builder received no train rows.")
+                for feat in existing_state_features:
+                    grp = (
+                        train_state.groupby(["cutoff_minutes", "doy_bin"])[feat]
+                        .agg(state_mean="mean", state_std="std")
+                        .reset_index()
+                    )
+                    grp["feature_name"] = feat
+                    state_rows.append(grp)
+                state_lookup_df = pd.concat(state_rows, ignore_index=True)
+                state_lookup_df["state_std"] = pd.to_numeric(
+                    state_lookup_df["state_std"], errors="coerce"
+                ).fillna(0.0)
+                if state_lookup_path is not None:
+                    state_lookup_path.parent.mkdir(parents=True, exist_ok=True)
+                    state_lookup_df.to_json(
+                        state_lookup_path,
+                        orient="records",
+                        indent=2,
+                    )
+
+            missing_any = np.zeros(len(out), dtype=bool)
+            for feat in existing_state_features:
+                fl = state_lookup_df[state_lookup_df["feature_name"] == feat].copy()
+                fl = fl.set_index(["cutoff_minutes", "doy_bin"])
+                means: list[float] = []
+                stds: list[float] = []
+                for cm, db in zip(
+                    pd.to_numeric(out["cutoff_minutes"], errors="coerce").tolist(),
+                    pd.to_numeric(out["doy_bin"], errors="coerce").fillna(0).astype(int).tolist(),
+                ):
+                    key = (float(cm), int(db))
+                    if key in fl.index:
+                        means.append(float(fl.at[key, "state_mean"]))
+                        stds.append(float(fl.at[key, "state_std"]))
+                    else:
+                        means.append(np.nan)
+                        stds.append(np.nan)
+                means_arr = np.asarray(means, dtype=float)
+                stds_arr = np.asarray(stds, dtype=float)
+                cur = pd.to_numeric(out[feat], errors="coerce").to_numpy(dtype=float)
+                out[f"{feat}_anom"] = cur - means_arr
+                out[f"{feat}_z"] = (cur - means_arr) / np.maximum(stds_arr, 1e-6)
+                missing_any |= ~np.isfinite(means_arr) | ~np.isfinite(stds_arr)
+            out["is_state_climo_missing"] = missing_any.astype(float)
+            state_meta = {
+                "enabled": True,
+                "feature_count": int(len(existing_state_features)),
+                "lookup_rows": int(len(state_lookup_df)),
+                "lookup_source": lookup_source,
+                "lookup_path": str(state_lookup_path) if state_lookup_path is not None else None,
+            }
+
     meta = {
         "lookup_rows": int(len(lookup)),
         "train_rows_used": int(len(train_df)),
+        "state_lookup": state_meta,
     }
     return out, meta
 
 
-def _model_feature_columns(df: pd.DataFrame) -> list[str]:
+def _model_feature_columns(df: pd.DataFrame, cfg: PipelineConfig) -> list[str]:
     exclude = {
         "target_date_local",
         "cutoff_local",
@@ -155,6 +247,10 @@ def _model_feature_columns(df: pd.DataFrame) -> list[str]:
     cols = []
     for c in df.columns:
         if c in exclude:
+            continue
+        if (not cfg.keep_merge_index_features) and c in {"index", "index_x", "index_y"}:
+            continue
+        if (not cfg.include_feels_like) and c.startswith("feels_like"):
             continue
         if pd.api.types.is_numeric_dtype(df[c]):
             cols.append(c)
@@ -372,6 +468,56 @@ def _temperature_bucket_calibration(
     return pd.DataFrame(rows).sort_values("temp_bucket").reset_index(drop=True)
 
 
+def _delta_logloss_by_group(
+    *,
+    y_true: np.ndarray,
+    probs: np.ndarray,
+    group_values: pd.Series,
+    split_name: str,
+    group_name: str,
+) -> pd.DataFrame:
+    if len(y_true) == 0:
+        return pd.DataFrame(columns=["split", "group_name", "group_value", "n_rows", "multi_logloss_temp"])
+    out_rows: list[dict[str, Any]] = []
+    g = group_values.fillna("MISSING").astype(str)
+    for gv in sorted(g.unique().tolist()):
+        m = g == gv
+        if not np.any(m.to_numpy()):
+            continue
+        y_g = y_true[m.to_numpy()]
+        p_g = probs[m.to_numpy()]
+        if len(y_g) == 0:
+            continue
+        out_rows.append(
+            {
+                "split": split_name,
+                "group_name": group_name,
+                "group_value": gv,
+                "n_rows": int(len(y_g)),
+                "multi_logloss_temp": float(_multi_logloss(y_g, p_g)),
+            }
+        )
+    return pd.DataFrame(out_rows)
+
+
+def _uv_quantile_labels(values: pd.Series, q: int = 5) -> pd.Series:
+    s = pd.to_numeric(values, errors="coerce")
+    labels = pd.Series(["MISSING"] * len(s), index=s.index, dtype=object)
+    finite_mask = np.isfinite(s.to_numpy(dtype=float))
+    if finite_mask.sum() == 0:
+        return labels
+    finite_values = s[finite_mask]
+    try:
+        bins = pd.qcut(finite_values, q=q, labels=False, duplicates="drop")
+    except ValueError:
+        labels.loc[finite_mask] = "Q1"
+        return labels
+    n_bins = int(pd.Series(bins).nunique())
+    for i in range(n_bins):
+        labels.loc[finite_values.index[bins == i]] = f"Q{i + 1}"
+    return labels
+
+
 def _build_full_delta_arrays(
     *,
     full_len: int,
@@ -458,7 +604,8 @@ def run_training_pipeline(
         (
             "PIPELINE_START run_dir=%s run_log=%s force_rebuild_dataset=%s "
             "progress_rows=%d progress_seconds=%.1f peak_log_period=%d delta_log_period=%d "
-            "train_log_seconds=%.1f train_heartbeat_seconds=%.1f enable_analog=%s"
+            "train_log_seconds=%.1f train_heartbeat_seconds=%.1f enable_analog=%s "
+            "feature_contract=%s delta_objective=%s"
         ),
         run_dir,
         run_log_path,
@@ -470,9 +617,11 @@ def run_training_pipeline(
         float(train_log_every_seconds),
         float(train_heartbeat_seconds),
         bool(enable_analog),
+        cfg.feature_contract_version,
+        cfg.delta_objective,
     )
 
-    feature_store_path = cfg.output_root / "feature_store" / "klga_feature_store.parquet"
+    feature_store_path = cfg.output_root / "feature_store" / f"{cfg.feature_store_stem}.parquet"
     sidx, st0 = stage_start("build_feature_store", details=f"path={feature_store_path}")
     if force_rebuild_dataset or (not feature_store_path.exists()):
         ds = build_feature_store(
@@ -507,8 +656,16 @@ def run_training_pipeline(
 
     sidx, st0 = stage_start("prepare_splits_and_features")
     split_masks = _split_masks(df, cfg)
-    df, climo_meta = _add_climo_features(df, split_masks["train"])
-    feature_cols = _model_feature_columns(df)
+    state_lookup_path = (
+        cfg.output_root / "feature_store" / f"state_climo_lookup_{cfg.feature_contract_version}.json"
+    )
+    df, climo_meta = _add_climo_features(
+        df,
+        split_masks["train"],
+        cfg=cfg,
+        state_lookup_path=state_lookup_path,
+    )
+    feature_cols = _model_feature_columns(df, cfg)
 
     medians = _fit_imputer(df, feature_cols=feature_cols, train_mask=split_masks["train"])
     x_all = _apply_imputer(df, feature_cols=feature_cols, medians=medians)
@@ -608,6 +765,13 @@ def run_training_pipeline(
         & (y_peak_all == 0)
         & (y_delta_all >= 1)
     )
+    delta_test_mask = (
+        split_masks["test"]
+        & peak_label_mask
+        & delta_label_mask
+        & (y_peak_all == 0)
+        & (y_delta_all >= 1)
+    )
     if not np.any(delta_train_mask):
         raise ValueError("No train rows available for delta model.")
     if not np.any(delta_val_mask):
@@ -615,11 +779,22 @@ def run_training_pipeline(
 
     delta_train_idx = np.where(delta_train_mask)[0]
     delta_val_idx = np.where(delta_val_mask)[0]
+    delta_test_idx = np.where(delta_test_mask)[0]
     y_delta_class_train = np.clip(y_delta_all[delta_train_idx], 1, k_delta) - 1
     y_delta_class_val = np.clip(y_delta_all[delta_val_idx], 1, k_delta) - 1
+    y_delta_class_test = np.clip(y_delta_all[delta_test_idx], 1, k_delta) - 1
     train_weight_full = np.zeros(len(df), dtype=float)
     train_weight_full[train_idx] = train_weights
     delta_train_weights = train_weight_full[delta_train_idx]
+    if cfg.delta_use_cutoff_weights and len(delta_train_idx) > 0:
+        cutoff_vals = pd.to_numeric(
+            df.iloc[delta_train_idx]["cutoff_minutes"],
+            errors="coerce",
+        ).to_numpy(dtype=float)
+        norm = (cutoff_vals - 240.0) / (1080.0 - 240.0)
+        norm = np.clip(norm, 0.0, 1.0)
+        cutoff_weight = 1.0 + float(cfg.delta_cutoff_weight_alpha) * norm
+        delta_train_weights = delta_train_weights * cutoff_weight
 
     sidx, st0 = stage_start(
         "train_delta_model",
@@ -632,6 +807,8 @@ def run_training_pipeline(
         y_val=y_delta_class_val,
         num_classes=k_delta,
         sample_weight_train=delta_train_weights,
+        objective=cfg.delta_objective,
+        use_class_weights=cfg.delta_use_class_weights,
         logger=logger,
         log_period=delta_train_log_period,
         log_every_seconds=train_log_every_seconds,
@@ -833,10 +1010,16 @@ def run_training_pipeline(
     val_logits = logits_all[delta_val_idx]
     val_probs_raw = p_delta_raw_all[delta_val_idx]
     val_probs_temp = p_delta_temp_all[delta_val_idx]
+    test_probs_raw = p_delta_raw_all[delta_test_idx]
+    test_probs_temp = p_delta_temp_all[delta_test_idx]
     delta_metrics = {
         "val": {
             "multi_logloss_raw": _multi_logloss(y_delta_class_val, val_probs_raw),
             "multi_logloss_temp": _multi_logloss(y_delta_class_val, val_probs_temp),
+        },
+        "test": {
+            "multi_logloss_raw": _multi_logloss(y_delta_class_test, test_probs_raw) if len(delta_test_idx) else np.nan,
+            "multi_logloss_temp": _multi_logloss(y_delta_class_test, test_probs_temp) if len(delta_test_idx) else np.nan,
         },
         "temperature": float(delta_result.temperature),
     }
@@ -886,6 +1069,79 @@ def run_training_pipeline(
     )
     calib_val.to_csv(run_dir / "reports" / "bucket_calibration_val.csv", index=False)
     calib_test.to_csv(run_dir / "reports" / "bucket_calibration_test.csv", index=False)
+
+    # V2 delta-by-regime diagnostics.
+    cloud_parts: list[pd.DataFrame] = []
+    uv_parts: list[pd.DataFrame] = []
+    precip_parts: list[pd.DataFrame] = []
+    for split_name, idx_arr, y_arr in [
+        ("val", delta_val_idx, y_delta_class_val),
+        ("test", delta_test_idx, y_delta_class_test),
+    ]:
+        if len(idx_arr) == 0:
+            continue
+        probs_arr = p_delta_temp_all[idx_arr]
+        cloud_vals = (
+            df.iloc[idx_arr]["clds_norm_now"]
+            if "clds_norm_now" in df.columns
+            else pd.Series(["UNK"] * len(idx_arr))
+        )
+        cloud_parts.append(
+            _delta_logloss_by_group(
+                y_true=y_arr,
+                probs=probs_arr,
+                group_values=cloud_vals,
+                split_name=split_name,
+                group_name="clds_norm_now",
+            )
+        )
+
+        uv_vals = (
+            _uv_quantile_labels(df.iloc[idx_arr]["uv_index_now"], q=5)
+            if "uv_index_now" in df.columns
+            else pd.Series(["MISSING"] * len(idx_arr))
+        )
+        uv_parts.append(
+            _delta_logloss_by_group(
+                y_true=y_arr,
+                probs=probs_arr,
+                group_values=uv_vals,
+                split_name=split_name,
+                group_name="uv_quantile",
+            )
+        )
+
+        for precip_feature in ["any_precip_sofar", "precip_any_180", "wx_precip_any_180"]:
+            if precip_feature not in df.columns:
+                continue
+            precip_parts.append(
+                _delta_logloss_by_group(
+                    y_true=y_arr,
+                    probs=probs_arr,
+                    group_values=df.iloc[idx_arr][precip_feature].astype(str),
+                    split_name=split_name,
+                    group_name=precip_feature,
+                )
+            )
+
+    cloud_report = (
+        pd.concat(cloud_parts, ignore_index=True)
+        if cloud_parts
+        else pd.DataFrame(columns=["split", "group_name", "group_value", "n_rows", "multi_logloss_temp"])
+    )
+    uv_report = (
+        pd.concat(uv_parts, ignore_index=True)
+        if uv_parts
+        else pd.DataFrame(columns=["split", "group_name", "group_value", "n_rows", "multi_logloss_temp"])
+    )
+    precip_report = (
+        pd.concat(precip_parts, ignore_index=True)
+        if precip_parts
+        else pd.DataFrame(columns=["split", "group_name", "group_value", "n_rows", "multi_logloss_temp"])
+    )
+    cloud_report.to_csv(run_dir / "reports" / "delta_logloss_by_cloud_regime.csv", index=False)
+    uv_report.to_csv(run_dir / "reports" / "delta_logloss_by_uv_regime.csv", index=False)
+    precip_report.to_csv(run_dir / "reports" / "delta_logloss_by_precip_regime.csv", index=False)
     stage_end(
         sidx,
         "evaluate_metrics",
@@ -933,6 +1189,9 @@ def run_training_pipeline(
         json.dumps({"temperature": float(delta_result.temperature)}, indent=2, sort_keys=True),
         encoding="utf-8",
     )
+    if state_lookup_path.exists():
+        state_copy_path = models_dir / f"state_climo_lookup_{cfg.feature_contract_version}.json"
+        state_copy_path.write_text(state_lookup_path.read_text(encoding="utf-8"), encoding="utf-8")
 
     (run_dir / "feature_list.json").write_text(json.dumps(feature_cols, indent=2), encoding="utf-8")
     (run_dir / "imputer_values.json").write_text(
@@ -976,6 +1235,7 @@ def run_training_pipeline(
 
     metrics: dict[str, Any] = {
         "run_id": run_dir.name,
+        "feature_contract_version": cfg.feature_contract_version,
         "feature_store_path": str(feature_store_path),
         "rows_total": int(len(df)),
         "split_rows": {
@@ -1024,6 +1284,7 @@ def run_training_pipeline(
         "# KLGA Same-Day Tmax Distribution Run",
         "",
         f"- run_id: {run_dir.name}",
+        f"- feature_contract_version: {cfg.feature_contract_version}",
         f"- feature_store_path: {feature_store_path}",
         f"- rows_total: {len(df)}",
         f"- split_rows: train={len(train_idx)} val={len(val_idx)} test={len(test_idx)}",
@@ -1061,14 +1322,28 @@ def run_training_pipeline(
 
     # Save config snapshot.
     cfg_payload = {
+        "feature_contract_version": cfg.feature_contract_version,
         "target_station_id": cfg.target_station_id,
         "neighbor_station_ids": list(cfg.neighbor_station_ids),
         "enable_analog": bool(enable_analog),
+        "enable_v2_regime_features": bool(cfg.enable_v2_regime_features),
+        "enable_neighbor_regime_features": bool(cfg.enable_neighbor_regime_features),
+        "enable_v2_vis_precip_wdir_dynamics": bool(cfg.enable_v2_vis_precip_wdir_dynamics),
+        "enable_state_anomaly_lookups": bool(cfg.enable_state_anomaly_lookups),
+        "keep_merge_index_features": bool(cfg.keep_merge_index_features),
+        "include_feels_like": bool(cfg.include_feels_like),
         "cutoff_start": f"{cfg.cutoff_start_hour:02d}:{cfg.cutoff_start_minute:02d}",
         "cutoff_end": f"{cfg.cutoff_end_hour:02d}:{cfg.cutoff_end_minute:02d}",
         "cutoff_step_minutes": int(cfg.cutoff_step_minutes),
         "windows_minutes": list(cfg.windows_minutes),
+        "regime_windows_minutes": list(cfg.regime_windows_minutes),
+        "wx_windows_minutes": list(cfg.wx_windows_minutes),
+        "neighbor_gradient_windows_minutes": list(cfg.neighbor_gradient_windows_minutes),
         "delta_class_max": int(cfg.delta_class_max),
+        "delta_objective": str(cfg.delta_objective),
+        "delta_use_class_weights": bool(cfg.delta_use_class_weights),
+        "delta_use_cutoff_weights": bool(cfg.delta_use_cutoff_weights),
+        "delta_cutoff_weight_alpha": float(cfg.delta_cutoff_weight_alpha),
         "split": {
             "train_start": str(cfg.split.train_start),
             "train_end": str(cfg.split.train_end),

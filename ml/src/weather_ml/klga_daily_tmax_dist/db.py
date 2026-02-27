@@ -179,9 +179,10 @@ def fetch_observations(
         "wdir",
         "gust",
         "precip_hrly",
+        "uv_index",
+        "feels_like",
     ]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
-

@@ -80,6 +80,33 @@ def parse_args() -> argparse.Namespace:
         default=10.0,
         help="Heartbeat interval while LightGBM is fitting (alive/ETA logs).",
     )
+    p.add_argument(
+        "--delta-objective",
+        choices=["multiclass", "multiclassova"],
+        default=None,
+        help="Override delta objective.",
+    )
+    p.add_argument(
+        "--disable-delta-class-weights",
+        action="store_true",
+        help="Disable delta class-weighting.",
+    )
+    p.add_argument(
+        "--enable-delta-cutoff-weights",
+        action="store_true",
+        help="Enable optional late-cutoff weighting for delta training.",
+    )
+    p.add_argument(
+        "--delta-cutoff-weight-alpha",
+        type=float,
+        default=None,
+        help="Alpha for optional delta cutoff weighting.",
+    )
+    p.add_argument(
+        "--include-feels-like",
+        action="store_true",
+        help="Include cleaned feels_like features if available.",
+    )
     return p.parse_args()
 
 
@@ -91,7 +118,17 @@ def main() -> None:
         format="%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    cfg = PipelineConfig(output_root=Path(args.output_root).resolve())
+    cfg_kwargs = {
+        "output_root": Path(args.output_root).resolve(),
+        "include_feels_like": bool(args.include_feels_like),
+        "delta_use_class_weights": (not bool(args.disable_delta_class_weights)),
+        "delta_use_cutoff_weights": bool(args.enable_delta_cutoff_weights),
+    }
+    if args.delta_objective is not None:
+        cfg_kwargs["delta_objective"] = str(args.delta_objective)
+    if args.delta_cutoff_weight_alpha is not None:
+        cfg_kwargs["delta_cutoff_weight_alpha"] = float(args.delta_cutoff_weight_alpha)
+    cfg = PipelineConfig(**cfg_kwargs)
     result = run_training_pipeline(
         cfg=cfg,
         mysql_url=args.mysql_url,

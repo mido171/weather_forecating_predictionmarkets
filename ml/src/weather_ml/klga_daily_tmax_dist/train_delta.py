@@ -166,6 +166,9 @@ def train_delta_model(
     y_val: np.ndarray,
     num_classes: int,
     sample_weight_train: np.ndarray | None = None,
+    objective: str = "multiclass",
+    use_class_weights: bool = True,
+    class_weight_clip: tuple[float, float] = (0.5, 5.0),
     params_override: dict[str, Any] | None = None,
     logger: logging.Logger | None = None,
     log_period: int = 25,
@@ -181,19 +184,32 @@ def train_delta_model(
     active_logger = logger or logging.getLogger(__name__)
     y_train = np.asarray(y_train, dtype=int)
     y_val = np.asarray(y_val, dtype=int)
+    if objective not in {"multiclass", "multiclassova"}:
+        raise ValueError(f"Unsupported delta objective: {objective}")
 
     counts = np.bincount(y_train, minlength=num_classes).astype(float)
-    class_weight = np.where(counts > 0, counts.sum() / np.maximum(counts, 1.0), 1.0)
-    class_weight = class_weight / np.nanmean(class_weight)
+    class_weight = np.ones(num_classes, dtype=float)
+    if use_class_weights:
+        nonzero = counts[counts > 0]
+        if nonzero.size > 0:
+            median_freq = float(np.median(nonzero))
+            lo, hi = class_weight_clip
+            for k in range(num_classes):
+                if counts[k] <= 0:
+                    class_weight[k] = 1.0
+                else:
+                    w = (median_freq / counts[k]) ** 0.5
+                    class_weight[k] = float(np.clip(w, lo, hi))
     per_row_class_weight = class_weight[y_train]
     if sample_weight_train is None:
-        combined_weight = per_row_class_weight
+        combined_weight = per_row_class_weight if use_class_weights else np.ones_like(per_row_class_weight)
     else:
-        combined_weight = np.asarray(sample_weight_train, dtype=float) * per_row_class_weight
+        base = np.asarray(sample_weight_train, dtype=float)
+        combined_weight = base * (per_row_class_weight if use_class_weights else 1.0)
 
     params = {
         "boosting_type": "gbdt",
-        "objective": "multiclass",
+        "objective": objective,
         "num_class": int(num_classes),
         "metric": "multi_logloss",
         "num_leaves": 128,
@@ -278,6 +294,7 @@ def train_delta_model(
         "temperature": float(temperature),
     }
     class_counts = {f"class_{k}": float(v) for k, v in enumerate(counts)}
+    class_counts.update({f"class_weight_{k}": float(w) for k, w in enumerate(class_weight)})
     return DeltaTrainResult(
         model=model,
         temperature=float(temperature),

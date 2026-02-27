@@ -7,6 +7,7 @@ import logging
 import time
 
 import json
+import numpy as np
 import pandas as pd
 
 from .config import BANNED_OBS_COLUMNS, PipelineConfig
@@ -90,6 +91,7 @@ def build_feature_store(
         request_location_ids=cfg.all_station_ids,
         start_utc=start_obs_utc.to_pydatetime(),
         end_utc=end_obs_utc.to_pydatetime(),
+        columns=cfg.observation_columns,
     )
     if obs_df.empty:
         raise ValueError("No observation rows returned for configured stations/date range.")
@@ -100,7 +102,11 @@ def build_feature_store(
         obs_df["valid_time_utc"].max(),
     )
 
-    station_series = prepare_station_series(obs_df, station_ids=cfg.all_station_ids)
+    station_series = prepare_station_series(
+        obs_df,
+        station_ids=cfg.all_station_ids,
+        include_feels_like=cfg.include_feels_like,
+    )
     daily_prior_df = build_daily_prior_frame(daily_df)
     feature_df, audit = build_feature_rows(
         calendar_df=calendar_df,
@@ -120,15 +126,54 @@ def build_feature_store(
     out_root = output_root or cfg.output_root
     feature_dir = out_root / "feature_store"
     feature_dir.mkdir(parents=True, exist_ok=True)
-    feature_store_path = feature_dir / "klga_feature_store.parquet"
+    feature_store_path = feature_dir / f"{cfg.feature_store_stem}.parquet"
     feature_df.to_parquet(feature_store_path, index=False)
     active_logger.info("DATASET_FEATURE_STORE_WRITTEN path=%s rows=%d", feature_store_path, len(feature_df))
 
+    date_series = pd.to_datetime(feature_df["target_date_local"], errors="coerce").dt.date
+    split_rows = {
+        "train": int(((date_series >= cfg.split.train_start) & (date_series <= cfg.split.train_end)).sum()),
+        "val": int(((date_series >= cfg.split.val_start) & (date_series <= cfg.split.val_end)).sum()),
+        "test": int(((date_series >= cfg.split.test_start) & (date_series <= cfg.split.test_end)).sum()),
+    }
+    key_missing = {}
+    for c in [
+        "temp_now",
+        "vis_now",
+        "precip_hrly_now",
+        "clds_oktas_now",
+        "uv_index_now",
+        "wx_coarse_code",
+    ]:
+        if c in feature_df.columns:
+            key_missing[c] = float(pd.to_numeric(feature_df[c], errors="coerce").isna().mean())
+
+    max_used_minus_cutoff_minutes = np.nan
+    if "max_valid_time_used_utc" in feature_df.columns and "cutoff_utc" in feature_df.columns:
+        max_used = pd.to_datetime(feature_df["max_valid_time_used_utc"], utc=True, errors="coerce")
+        cutoff = pd.to_datetime(feature_df["cutoff_utc"], utc=True, errors="coerce")
+        delta_minutes = (max_used - cutoff).dt.total_seconds() / 60.0
+        if np.isfinite(delta_minutes.to_numpy(dtype=float)).any():
+            max_used_minus_cutoff_minutes = float(np.nanmax(delta_minutes.to_numpy(dtype=float)))
+
+    station_coverage: dict[str, Any] = {}
+    if "request_location_id" in obs_df.columns:
+        for sid, sdf in obs_df.groupby("request_location_id"):
+            station_coverage[str(sid)] = {
+                "rows": int(len(sdf)),
+                "time_min_utc": str(sdf["valid_time_utc"].min()),
+                "time_max_utc": str(sdf["valid_time_utc"].max()),
+            }
+
+    banned_found = sorted([b for b in BANNED_OBS_COLUMNS if b in feature_df.columns])
+
     integrity_payload: dict[str, Any] = {
+        "feature_contract_version": cfg.feature_contract_version,
         "rows": int(len(feature_df)),
         "dates": int(feature_df["target_date_local"].nunique()),
         "date_min": str(feature_df["target_date_local"].min()),
         "date_max": str(feature_df["target_date_local"].max()),
+        "split_rows": split_rows,
         "created_indexes": created_indexes,
         "calendar_rows": int(len(calendar_df)),
         "calendar_unique_dates": int(calendar_df["target_date_local"].nunique()),
@@ -136,10 +181,18 @@ def build_feature_store(
         "obs_time_min_utc": str(obs_df["valid_time_utc"].min()),
         "obs_time_max_utc": str(obs_df["valid_time_utc"].max()),
         "daily_rows_loaded": int(len(daily_df)),
+        "key_missing_rate": key_missing,
+        "station_coverage_summary": station_coverage,
+        "max_obs_timestamp_used_minus_cutoff_minutes_max": (
+            None if not np.isfinite(max_used_minus_cutoff_minutes) else max_used_minus_cutoff_minutes
+        ),
+        "banned_columns_detection": (
+            "none found" if not banned_found else {"found": banned_found}
+        ),
         "audit": audit,
         "missing_rate_numeric": _compute_missing_rates(feature_df),
     }
-    integrity_path = feature_dir / "klga_feature_store_integrity.json"
+    integrity_path = feature_dir / f"{cfg.feature_store_stem}_integrity.json"
     integrity_path.write_text(json.dumps(integrity_payload, indent=2, sort_keys=True), encoding="utf-8")
     active_logger.info("DATASET_INTEGRITY_WRITTEN path=%s", integrity_path)
     active_logger.info(

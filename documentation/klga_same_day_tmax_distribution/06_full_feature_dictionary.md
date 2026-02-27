@@ -18,6 +18,11 @@ Reference feature list artifact:
 
 - `artifacts/same_day_res_poly/<RUN_ID>/feature_list.json`
 
+Important:
+
+- this file describes the feature contract, not "the best set"
+- if you change feature definitions, you must treat it as a new model contract and re-export artifacts
+
 ## 1) Feature naming conventions
 
 General conventions:
@@ -275,6 +280,25 @@ Important:
 - lookup computed only on training slice,
 - then frozen and applied to val/test/live.
 
+### 11.1 What climo_rem_delta_mean/std represent (intuitively)
+
+These are "empirical priors" learned from your own training data:
+
+- for each `(day_of_year, cutoff_minutes)` the system computes the historical distribution of remaining warming
+- then it stores:
+  - average remaining warming (`climo_rem_delta_mean`)
+  - variability of remaining warming (`climo_rem_delta_std`)
+
+Interpretation:
+
+- high `climo_rem_delta_mean` early in the day means: historically there is still a lot of warming left
+- low `climo_rem_delta_mean` late in the day means: historically there is not much left
+- high `climo_rem_delta_std` means: remaining warming is historically more variable/uncertain for that time-of-year and time-of-day
+
+Leakage safety:
+
+- these values are computed only on the training slice and then frozen
+
 ## 12) Technical merge-index fields
 
 Fields observed in current feature list:
@@ -336,6 +360,46 @@ Feature builder enforces:
 - no duplicate-source contamination from `KNYC`.
 
 If these guards fail, pipeline should fail hard.
+
+## 18) Feature importance (how to see what mattered)
+
+The LightGBM models can report feature importance.
+
+Important caveats:
+
+- feature importance is not causality
+- correlated features can split importance across them
+- importance depends on the model family and training window
+
+### 18.1 How to extract feature importance (example snippet)
+
+For a completed run folder containing `models/peak_model.txt` and `models/delta_model.txt`, you can load the model and inspect importance by "gain".
+
+Pseudo-example (conceptual):
+
+1. Load the LightGBM booster.
+2. Get importance array for your `feature_list.json`.
+3. Sort and print top N.
+
+If you want this automated, add a small utility script that:
+
+- reads `feature_list.json`
+- loads the model files
+- writes `reports/feature_importance_peak.csv` and `reports/feature_importance_delta.csv`
+
+### 18.2 What features are typically high-signal (non-exhaustive)
+
+Historically, the highest-value families tend to include:
+
+- climo remaining delta mean/std (strong priors by season + time-of-day)
+- current state and proximity to so-far max:
+  - `temp_now_minus_tmax`, `mins_since_tmax`, `temp_drop_from_peak`
+- short-window trajectory:
+  - `temp_slope_60`, `temp_slope_180`, `temp_is_falling_60`
+- coastal/inland neighbor composites:
+  - `coastal_minus_inland_temp`
+
+The exact ordering should be checked in your run artifacts for the specific model you intend to use.
 
 ## 17) Fast audit commands
 

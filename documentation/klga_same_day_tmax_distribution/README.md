@@ -26,7 +26,7 @@ Default artifact root:
 - Beginner or decision-maker: `00` then `02`.
 - Engineer implementing changes: `01`, `03`, and `06`.
 - Operator monitoring/recovering runs: `03` and `04`.
-- Anyone confused by metrics or model interaction: `02` and `05`.
+- Anyone confused by metrics or model interaction: `02` (includes merged FAQ section).
 
 ## Mandatory Read Order
 
@@ -35,8 +35,9 @@ Default artifact root:
 3. `02_metrics_and_interpretation_for_beginners.md`
 4. `03_runbook_training_inference_and_artifacts.md`
 5. `04_run_history_and_current_status_2026-02-26.md`
-6. `05_faq_ultra_clear.md`
-7. `06_full_feature_dictionary.md`
+6. `06_full_feature_dictionary.md`
+7. `07_exporter_and_remote_training_tabm.md`
+8. `09_results_metrics_and_feature_importance.md`
 
 ## System Invariants
 
@@ -46,3 +47,19 @@ Default artifact root:
 - KLGA canonical source semantics are mandatory.
 
 Treat any violation as a blocker, not a warning.
+
+## What Was Added After The Initial LGBM System
+
+Two operational extensions were added later:
+
+1. A portable CSV exporter so training/evaluation can happen off-DB on another machine.
+2. A Tabular Neural Network (TabM) runner that trains peak+delta from exports and writes a full artifact set.
+
+Those are documented in:
+
+- `07_exporter_and_remote_training_tabm.md`
+- (troubleshooting is merged into `07_exporter_and_remote_training_tabm.md`)
+
+Results and full feature importance tables live in:
+
+- `09_results_metrics_and_feature_importance.md`

@@ -14,15 +14,18 @@ Primary documentation folder:
 4. `documentation/klga_same_day_tmax_distribution/02_metrics_and_interpretation_for_beginners.md`
 5. `documentation/klga_same_day_tmax_distribution/03_runbook_training_inference_and_artifacts.md`
 6. `documentation/klga_same_day_tmax_distribution/04_run_history_and_current_status_2026-02-26.md`
-7. `documentation/klga_same_day_tmax_distribution/05_faq_ultra_clear.md`
-8. `documentation/klga_same_day_tmax_distribution/06_full_feature_dictionary.md`
+7. `documentation/klga_same_day_tmax_distribution/06_full_feature_dictionary.md`
+8. `documentation/klga_same_day_tmax_distribution/07_exporter_and_remote_training_tabm.md`
+9. `documentation/klga_same_day_tmax_distribution/09_results_metrics_and_feature_importance.md`
 
 ## Fast Path by Use Case
 
 - Want executive understanding first: read `00` then `02`.
 - Implementing or modifying code: read `01`, `03`, and `06` in full.
 - Debugging run quality or artifact completeness: read `03` then `04`.
-- Resolving user confusion about peak/delta/NLL semantics: read `02` and `05`.
+- Resolving user confusion about peak/delta/NLL semantics: read `02` (includes merged FAQ section).
+- Exporting data or training on another machine: read `07` (includes troubleshooting section).
+- Reviewing final results and full feature importance: read `09`.
 
 ## Non-Negotiable Policy
 

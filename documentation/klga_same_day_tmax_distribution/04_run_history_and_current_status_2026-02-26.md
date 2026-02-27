@@ -22,6 +22,7 @@ This file prevents that confusion.
 | `20260225T144103Z` | `artifacts/same_day_res_poly_smoke4/` | smoke | completed | same as smoke3; sanity check repeat |
 | `20260225T155726Z` | `artifacts/same_day_res_poly/` | full + analog | interrupted | reached stage 10/12; did not write final artifacts |
 | `20260226T081223Z` | `artifacts/same_day_res_poly/` | full no-analog (`--skip-analog-blend`) | completed | full export package present (peak + delta models and reports) |
+| `20260226T224250Z` | external data folder | TabM from exports | completed | TabM underperformed LGBM baseline on NLL/logloss; exporter workflow validated |
 
 ## 3) Smoke runs (for mechanics, not performance)
 
@@ -194,6 +195,83 @@ Reason:
 - reproducible run path.
 
 Treat `20260225T155726Z` as a diagnostic run only.
+
+## 11) TabM From Exports Run (Completed)
+
+This is a separate experimental track:
+
+- Export raw input CSVs from MySQL (portable bundle).
+- Train peak+delta with a tabular neural network (TabM) on the same feature contract.
+
+Why it matters:
+
+- validates that the feature contract is portable and can be trained off-DB
+- tests the "tabular NN might outperform GBDT" hypothesis on this dataset
+
+### 11.1 Run identity
+
+Run id:
+
+- `20260226T224250Z`
+
+Data source:
+
+- exported CSV bundle (moved to a local folder on the training machine)
+
+Export horizon:
+
+- 1973-01-01 .. 2025-12-31 (daily truth dates: 19,325 days)
+
+Feature rows:
+
+- `19,325 days * 29 cutoffs/day = 560,425 rows`
+
+Splits (same date boundaries as system spec, with earlier train start):
+
+- train: 1973-01-01 .. 2021-12-31
+- val: 2022-01-01 .. 2023-12-31
+- test: 2024-01-01 .. 2025-12-31
+
+### 11.2 Metrics (from metrics.md)
+
+Peak (TabM):
+
+- val logloss cal: `0.2455`
+- test logloss cal: `0.2448`
+- val brier cal: `0.0783`
+- test brier cal: `0.0781`
+
+Delta (TabM):
+
+- val multi logloss temp: `2.5231`
+- test multi logloss temp: `2.5897`
+- temperature scaler T: `0.7871`
+
+Combined distribution (TabM):
+
+- val NLL: `2.4199`
+- test NLL: `2.5109`
+- val top1: `0.2361`
+- test top1: `0.2316`
+
+### 11.3 Comparison vs reference LGBM run
+
+Reference run:
+
+- `20260226T081223Z` (LGBM peak+delta, analog disabled, completed exports)
+
+Headline:
+
+- TabM is worse on probability quality (logloss/Brier/NLL) even if top1 is similar.
+
+Interpretation:
+
+- For this engineered tabular feature set, LightGBM remains the stronger and more trading-relevant baseline.
+- This is not surprising: GBDTs often win on tabular tasks with messy missingness and strong threshold interactions.
+
+Next:
+
+- if we pursue tabular NNs further, it should be as a deliberate tuning effort, not an assumed upgrade.
 
 ## 9) What changed to improve reliability
 

@@ -2,6 +2,15 @@
 
 This is the implementation-grade reference for the KLGA same-day Tmax distribution system.
 
+It is intentionally detailed and is the authoritative reference for:
+
+- data contracts (what columns/tables are allowed)
+- as-of semantics (what timestamps are legal)
+- label definitions (what peak/delta mean)
+- feature engineering contract (what is computed and how)
+- model training/calibration contract
+- artifact contract (what outputs must exist after a successful run)
+
 ## 1) Objective and non-negotiable constraints
 
 ### Objective
@@ -23,6 +32,34 @@ Then derive bucket probabilities for market labels.
    - date `D` daily max cannot be used as feature
 4. Duplicate-source guard:
    - `KNYC:9:US` excluded
+
+## 1.1 Code map (where things live)
+
+Primary implementation package:
+
+- `ml/src/weather_ml/klga_daily_tmax_dist/`
+
+Key modules:
+
+- `config.py`: station ids, cutoffs, split boundaries, constants, and guardrail configuration
+- `db.py`: MySQL fetch helpers with allowed-column enforcement
+- `timegrid.py`: NY-local cutoff grid generation with DST-safe UTC conversion
+- `features.py`: feature engineering contract (snapshot, so-far, windows, neighbors, priors)
+- `make_dataset.py`: builds and writes the parquet feature store
+- `train_peak.py`: trains the LightGBM binary peak model + isotonic calibrator
+- `train_delta.py`: trains the LightGBM multiclass delta model + temperature scaling
+- `analog_knn.py`: optional analog posterior module and blending (disabled in baseline export mode)
+- `infer.py`: PMF composition and bucket parsing utilities
+- `pipeline.py`: orchestrates stages, writes artifacts, and produces reports/metrics
+
+Operational extensions:
+
+- exporter:
+  - runner: `ml/run_klga_data_exporter.py`
+  - module: `ml/src/weather_ml/data_exporter/`
+- TabM experiment:
+  - runner: `ml/run_training_tabm_klga_from_exports.py`
+  - module: `ml/src/weather_ml/training/tabm_klga_from_exports.py`
 
 ## 2) Canonical data contracts
 
@@ -57,6 +94,20 @@ Enforced in:
 - `ml/src/weather_ml/klga_daily_tmax_dist/db.py`
 - `ml/src/weather_ml/klga_daily_tmax_dist/config.py`
 
+### 2.1.1 Why "allowed vs banned" is strict
+
+The observation table often contains a mixture of:
+
+- instantaneous fields (safe for as-of usage)
+- summary fields that may represent full-day extrema/totals (unsafe for as-of usage)
+
+Even if a summary field is sparsely populated, it can create catastrophic leakage on the rows where it is present.
+
+Therefore:
+
+- the safe default is "ban unless proven instantaneous"
+- this system hard-fails if banned columns are detected in the selected feature set
+
 ## 2.2 Daily truth table
 
 Table:
@@ -72,6 +123,19 @@ Used fields:
 Target station:
 
 - `KLGA:9:US`
+
+### 2.2.1 What "truth" means operationally
+
+This table is treated as the market-aligned "truth":
+
+- it is what the system trains to match
+- it is what we evaluate against
+- it is only used for priors on dates `< D` and for labels on date `D`
+
+If truth rows are revised later in Wunderground:
+
+- your live trading system must decide whether you use the revised value or the "finalized" value used by the market
+- the model as implemented is aligned to "truth as stored at training time" and uses the same source semantics as your stored table
 
 ## 2.3 Station universe
 
@@ -92,6 +156,37 @@ Neighbors:
 Hard exclusion:
 
 - `KNYC:9:US`
+
+### 2.3.1 Why neighbors are in the same feature vector (not separate rows)
+
+We are modeling one target station (KLGA).
+
+Neighbors are used as contextual signals, not as separate training targets:
+
+- each training row corresponds to one `(target_date_local, cutoff_minutes)` for KLGA
+- neighbor observations are appended as additional features in the same row
+
+This is important for leakage safety and interpretability:
+
+- the label is always KLGA's daily max
+- we never accidentally "train on neighbor truth and transfer"
+
+## 2.4 Recommended indexes (speed + determinism)
+
+Large historical windows make feature building expensive unless the DB access pattern is index-friendly.
+
+Recommended indexes:
+
+Observation table:
+
+- `(request_location_id, valid_time_utc)`
+- optionally `(request_location_id, valid_time_utc, temp)` for faster "latest temp <= cutoff" scans
+
+Daily max table:
+
+- `(request_location_id, target_date_local)`
+
+If these indexes do not exist, runs can be orders of magnitude slower.
 
 ## 3) Time and cutoff semantics
 
@@ -114,6 +209,35 @@ As-of window for same-day features:
 - from local midnight of date `D` to cutoff `t_c`
 - converted to UTC with timezone-aware conversion
 
+### 3.1 DST correctness and why you must not hardcode UTC offsets
+
+NY local time changes offset due to DST.
+
+So "04:00 local" is:
+
+- 09:00 UTC during standard time (UTC-5)
+- 08:00 UTC during daylight time (UTC-4)
+
+If you hardcode offsets, you will:
+
+- build incorrect observation windows
+- silently introduce leakage or missingness artifacts near DST transitions
+
+Correct approach:
+
+- represent cutoffs as timezone-aware local datetimes in `America/New_York`
+- convert to UTC for querying
+
+### 3.2 Expected bins and coverage features
+
+Coverage features depend on how many 30-minute slots should exist since midnight.
+
+Because DST can make a local day have 23 or 25 hours, the expected number of bins must be computed using timezone-aware arithmetic on local datetimes.
+
+Implementation note:
+
+- the pipeline computes expected bins from `(cutoff_local - midnight_local)` in the local timezone and divides by 30 minutes
+
 ## 4) Label definitions
 
 For each `(D, t_c)`:
@@ -128,6 +252,25 @@ Meaning:
 
 - `peak=1` means max already reached by cutoff
 - `peak=0` means still room to rise
+
+### 4.1 Why delta is clamped at 0
+
+In a perfect world:
+
+- `tmax_truth >= tmax_sofar`
+
+But in reality, mismatches can occur due to:
+
+- rounding and whole-degree truth semantics
+- observation gaps
+- slight source timing differences
+
+So if a negative delta occurs, it is clamped:
+
+- `delta = 0`
+- `peak = 1`
+
+This prevents impossible "negative remaining warming" labels.
 
 ## 5) Feature engineering contracts
 
@@ -229,6 +372,24 @@ Train-only lookup by `(doy, cutoff_minutes)`:
 
 Applied to val/test/live with no future leakage.
 
+### 5.9 Missing values and imputation contract
+
+The system uses a two-layer approach:
+
+1. explicit missingness flags (feature-level indicators)
+2. numeric imputation for the model matrix
+
+Imputation policy:
+
+- compute per-feature median on the train split only
+- fill any non-finite value (NaN/inf) with that train median
+- persist the fill map to `imputer_values.json`
+
+This is critical for:
+
+- reproducibility
+- standalone inference using exported models
+
 ## 6) Dataset build and persistence
 
 Primary builder:
@@ -251,6 +412,16 @@ Feature store:
 Integrity report:
 
 - `artifacts/same_day_res_poly/feature_store/klga_feature_store_integrity.json`
+
+### 6.1 Feature store caching and what gets recomputed
+
+The feature store is expensive to build. So runs are designed to reuse it:
+
+- if the feature store exists and `--force-rebuild-dataset` is not set:
+  - dataset build is skipped/reused
+  - models are retrained and evaluated on the cached feature store
+
+This makes repeated experiments much faster while preserving leakage safety.
 
 ## 7) Train/validation/test split contract
 
@@ -284,6 +455,11 @@ Core API:
 
 - `ml/src/weather_ml/klga_daily_tmax_dist/train_peak.py`
 
+Training notes:
+
+- peak outputs raw probabilities that are then mapped by isotonic regression
+- calibration quality is assessed by both logloss and Brier score
+
 ## 8.2 Delta model
 
 Type:
@@ -307,6 +483,11 @@ Core API:
 
 - `ml/src/weather_ml/klga_daily_tmax_dist/train_delta.py`
 
+Training notes:
+
+- delta is trained only where truth indicates `delta>=1` (equivalently `peak=0`)
+- delta metrics are computed only on that filtered subset
+
 ## 9) Optional analog kNN module
 
 Implementation:
@@ -322,6 +503,18 @@ Current run-mode control:
 
 - enabled by default
 - disable with `--skip-analog-blend`
+
+### 9.1 Why analog is treated as optional
+
+Analog is valuable conceptually, but operationally:
+
+- it is computationally expensive
+- it increases complexity and failure surface area
+
+So the system supports:
+
+- a fast, reliable no-analog mode for exporting peak+delta
+- a heavier analog-enabled mode for research runs
 
 ## 10) Posterior composition
 
@@ -340,6 +533,33 @@ With analog enabled:
 PMF utilities:
 
 - `ml/src/weather_ml/klga_daily_tmax_dist/infer.py`
+
+### 10.1 Concrete composition example
+
+Suppose at cutoff:
+
+- `round(tmax_sofar)=74`
+- peak model says `p_peak=0.80`
+- delta model (conditional) says:
+  - `P(delta=1|>0)=0.50`
+  - `P(delta=2|>0)=0.30`
+  - `P(delta=3|>0)=0.20`
+
+Then full delta PMF is:
+
+- `P(delta=0)=0.80`
+- `P(delta=1)=(1-0.80)*0.50=0.10`
+- `P(delta=2)=(1-0.80)*0.30=0.06`
+- `P(delta=3)=(1-0.80)*0.20=0.04`
+
+And Tmax PMF is:
+
+- `P(T=74)=0.80`
+- `P(T=75)=0.10`
+- `P(T=76)=0.06`
+- `P(T=77)=0.04`
+
+Bucket probabilities are then sums of these integer outcomes.
 
 ## 11) Metrics semantics
 
@@ -374,6 +594,13 @@ Implemented guards:
    - `KNYC` not allowed in station set
 5. feature exclusion guard:
    - labels not included in model matrix
+
+### 12.1 Guardrail philosophy
+
+Guards are asserts/hard failures because:
+
+- a silent leakage bug is worse than a crash
+- metrics without correctness are actively harmful for trading decisions
 
 ## 13) Pipeline stage flow
 
@@ -425,6 +652,22 @@ Important robustness improvement:
 
 - peak and delta model files are checkpoint-saved immediately after training stage completion, so artifacts exist even if a later stage fails.
 
+### 14.1 Full artifact contract (what a "complete run" must contain)
+
+A complete run (LGBM pipeline) should contain:
+
+- `run.log` ending in `PIPELINE_DONE`
+- `metrics.json` and `metrics.md`
+- `models/` with peak+delta + calibration artifacts
+- `predictions/` parquet files
+- `reports/` cutoff metrics and bucket calibration CSVs
+- config snapshots (`config.json`, feature list, imputer values)
+
+This contract allows:
+
+- reproducible offline evaluation
+- portable inference with exported models
+
 ## 15) Current authoritative no-analog export run
 
 Run id:
@@ -442,6 +685,20 @@ Mode:
 Result:
 
 - full artifact package present including exported peak and delta models.
+
+## 16) Export bundle + TabM training (portable workflow)
+
+After the initial system, two additional operational modules were implemented:
+
+1. Exporter:
+   - materializes the raw inputs into a portable CSV bundle under `exports/`
+2. TabM training runner:
+   - trains the same peak+delta decomposition from the exported bundle
+   - writes a full evaluation artifact set into the same folder tree
+
+Details:
+
+- `07_exporter_and_remote_training_tabm.md`
 
 ## 16) Design tradeoffs and known limits
 

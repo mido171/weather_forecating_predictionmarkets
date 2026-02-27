@@ -2,6 +2,12 @@
 
 This runbook is for running, monitoring, validating, and recovering KLGA pipeline jobs.
 
+It covers:
+
+- the primary LGBM pipeline (`ml/run_klga_daily_tmax_dist.py`)
+- the portable CSV exporter (`ml/run_klga_data_exporter.py`)
+- the experimental TabM-from-exports trainer (`ml/run_training_tabm_klga_from_exports.py`)
+
 ## 1) Prerequisites
 
 From repo root:
@@ -57,6 +63,51 @@ python ml/run_klga_daily_tmax_dist.py `
   --train-log-every-seconds 5 `
   --train-heartbeat-seconds 5
 ```
+
+## 2.5 Export raw inputs to a portable CSV bundle (DB -> files)
+
+Use this when you want to train/evaluate on another machine without DB access.
+
+```powershell
+python ml/run_klga_data_exporter.py --log-level INFO
+```
+
+Outputs a folder containing:
+
+- `daily_max_truth_klga.csv`
+- `observations_30m_required_columns.csv`
+- `station_universe.csv`
+- `export_manifest.json`
+
+Important:
+
+- these exports can be large (hundreds of MB)
+- do not commit them to Git
+
+Details:
+
+- `07_exporter_and_remote_training_tabm.md`
+
+## 2.6 Train TabM (tabular neural net) from exported CSVs
+
+Use this when you want to compare a tabular NN against the LGBM baseline using the same features/splits.
+
+```powershell
+python ml/run_training_tabm_klga_from_exports.py `
+  --data-dir "D:\\path\\to\\export_bundle_folder" `
+  --log-level INFO
+```
+
+Behavior:
+
+- checks and installs missing Python dependencies via pip (including torch/tabm)
+- writes a full run folder under:
+  - `<data-dir>/training_results_tabm/<RUN_ID>/`
+
+Details + known Windows issues:
+
+- `07_exporter_and_remote_training_tabm.md`
+- (troubleshooting is merged into `07_exporter_and_remote_training_tabm.md`)
 
 ## 3) What gets reused vs recomputed
 
@@ -117,6 +168,18 @@ Check latest run dirs:
 Get-ChildItem artifacts/same_day_res_poly -Directory | Sort-Object Name
 ```
 
+### 5.1 Monitoring a TabM-from-exports run
+
+Tail the TabM run log:
+
+```powershell
+Get-Content "<data-dir>\\training_results_tabm\\<RUN_ID>\\run.log" -Wait
+```
+
+TabM emits stage-level progress, for example:
+
+- `STAGE_START [3/10 20.0%] build_feature_rows`
+
 ## 6) Expected slow stages
 
 Primary runtime sinks:
@@ -171,6 +234,17 @@ Reports:
 - `reports/cutoff_metrics_test.csv`
 - `reports/bucket_calibration_val.csv`
 - `reports/bucket_calibration_test.csv`
+
+### 8.1 TabM artifact checklist (from exports trainer)
+
+TabM run folders contain a similar artifact set, but with different model filenames:
+
+- `models/tabm_peak_model.pt`
+- `models/tabm_delta_model.pt`
+- `models/peak_isotonic.pkl`
+- `models/delta_temperature_T.json`
+
+TabM predictions are written as both CSV and parquet for portability.
 
 ## 9) Fast validation script pattern
 
@@ -254,3 +328,16 @@ Before sharing results:
 2. quote mode (analog enabled or skipped)
 3. quote split used
 4. quote exact metric name, not just a number
+
+## 16) When something breaks
+
+Start with:
+
+- `07_exporter_and_remote_training_tabm.md` (see section "Troubleshooting and Known Issues")
+
+That checklist covers:
+
+- "looks stuck" vs actually dead
+- missing final artifacts
+- Windows venv activation policy errors
+- PyTorch DLL initialization failures (WinError 1114)

@@ -2,21 +2,27 @@
 
 This repository is a weather forecasting + prediction markets playground with a strict backbone: data ingestion must be reproducible, auditable, restartable, and safe against leakage. This file is the single handoff doc for how code is organized, how to run ingestion/reporting tasks, and which invariants must never be violated.
 
-## Additional Documentation (MUST READ)
+## Startup: Read Documentation First (MANDATORY)
 
-This repo also contains extended documentation under `documentation/`.
+Before doing anything in this repo (running commands, editing code/docs, or making claims), Agents/Codex MUST start by reading the documentation in this order:
 
-Agents/Codex MUST read **all** markdown documents under `documentation/` before doing anything! and:
+1) `documentation/README.md`
+2) `documentation/klga_same_day_tmax_distribution/README.md`
+3) `documentation/klga_same_day_tmax_distribution/00_high_level_overview.md`
+4) `documentation/klga_same_day_tmax_distribution/01_system_spec_and_implementation.md`
+5) `documentation/klga_same_day_tmax_distribution/02_metrics_and_interpretation_for_beginners.md` (includes FAQ)
+6) `documentation/klga_same_day_tmax_distribution/03_runbook_training_inference_and_artifacts.md`
+7) `documentation/klga_same_day_tmax_distribution/04_run_history_and_current_status_2026-02-26.md`
+8) `documentation/klga_same_day_tmax_distribution/06_full_feature_dictionary.md`
+9) `documentation/klga_same_day_tmax_distribution/07_exporter_and_remote_training_tabm.md` (includes troubleshooting)
+10) `documentation/klga_same_day_tmax_distribution/09_results_metrics_and_feature_importance.md`
 
+In addition, before any of the following:
 - Editing or running the Kalshi downloader
 - Editing or running any bridge/backtest/trading scripts
 - Making claims about leakage safety or execution-time correctness
 
-Start with:
-
-- `documentation/README.md`
-- `documentation/klga_same_day_tmax_distribution/README.md`
-- then all markdown files under `documentation/klga_same_day_tmax_distribution/` in numeric order
+Agents/Codex MUST read **all** markdown documents under `documentation/` (repo-wide), not just the KLGA folder.
 
 The repo currently contains two kinds of systems:
 1) Java/Spring ingestion + MySQL persistence + simple CLI runners (Epic #1)

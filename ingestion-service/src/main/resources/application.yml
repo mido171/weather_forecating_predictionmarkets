@@ -31,6 +31,8 @@ iem:
   base-url: https://mesonet.agron.iastate.edu
 
 cli-settlement:
+  ingest-enabled: true
+  source-fetch-threads: 8
   station-ids:
     - KMIA
     - KPHL
@@ -39,6 +41,10 @@ cli-settlement:
     - KNYC
   start-date-local: 2007-01-01
   end-date-local: 2025-12-31
+  export:
+    enabled: false
+    output-dir: artifacts/cli_settlement_exports
+    include-header: true
 
 gribstream:
   baseUrl: "https://gribstream.com"

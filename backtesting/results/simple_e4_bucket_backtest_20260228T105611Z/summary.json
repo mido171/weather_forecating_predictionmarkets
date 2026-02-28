@@ -1,0 +1,20 @@
+{
+  "files_considered": 31,
+  "entries": 28,
+  "wins": 8,
+  "losses": 20,
+  "win_rate": 0.2857142857142857,
+  "mean_ev": 0.6777872500000001,
+  "median_ev": 0.7170185,
+  "assumptions": {
+    "ev_threshold": 0.15,
+    "min_win_prob": 0.65,
+    "entry_time_stockholm_gte": "19:00",
+    "trade_date_mapping_offset_days": -1,
+    "entry_row_rule": "first row with timestamp >= cutoff",
+    "exit_price": "end-of-day row in same CSV",
+    "result_rule": "W if eod_price > entry_price else L",
+    "one_trade_per_day": true,
+    "selection_rule": "max EV, then max model_win_pct, then min entry_price"
+  }
+}

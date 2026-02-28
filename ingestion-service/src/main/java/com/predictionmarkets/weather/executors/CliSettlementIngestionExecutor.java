@@ -1,8 +1,12 @@
 package com.predictionmarkets.weather.executors;
 
 import com.predictionmarkets.weather.IngestionServiceApplication;
+import com.predictionmarkets.weather.cli.CliDailyCsvExportService;
 import com.predictionmarkets.weather.cli.CliDailyIngestService;
 import com.predictionmarkets.weather.config.CliSettlementIngestionProperties;
+import com.predictionmarkets.weather.iem.IemCliDaily;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -29,21 +33,79 @@ public final class CliSettlementIngestionExecutor {
         .run(args)) {
       CliDailyIngestService cliDailyIngestService =
           context.getBean(CliDailyIngestService.class);
+      CliDailyCsvExportService csvExportService =
+          context.getBean(CliDailyCsvExportService.class);
       CliSettlementIngestionProperties properties =
           context.getBean(CliSettlementIngestionProperties.class);
       List<String> stationIds = normalizeStationIds(properties.getStationIds());
       LocalDate start = requireStartDate(properties.getStartDateLocal());
       LocalDate end = requireEndDate(properties.getEndDateLocal());
       validateDateRange(start, end);
+      validateExecutionMode(properties);
+      int sourceFetchThreads = requireSourceFetchThreads(properties.getSourceFetchThreads());
       snapshot("CLI settlement ingest starting stations=" + stationIds
-          + " range=" + start + ".." + end);
+          + " range=" + start + ".." + end
+          + " ingestEnabled=" + properties.isIngestEnabled()
+          + " exportEnabled=" + (properties.getExport() != null && properties.getExport().isEnabled())
+          + " sourceFetchThreads=" + sourceFetchThreads);
       for (String stationId : stationIds) {
-        int upserted = cliDailyIngestService.ingestRange(stationId, start, end);
-        snapshot("CLI settlement ingest complete station=" + stationId
-            + " upserted=" + upserted);
+        if (properties.isIngestEnabled()) {
+          int upserted = cliDailyIngestService.ingestRange(stationId, start, end);
+          snapshot("CLI settlement ingest complete station=" + stationId
+              + " upserted=" + upserted);
+        }
+        if (properties.getExport() != null && properties.getExport().isEnabled()) {
+          List<IemCliDaily> days = cliDailyIngestService.fetchRangeFromSource(
+              stationId,
+              start,
+              end,
+              sourceFetchThreads);
+          Path outputPath = resolveExportPath(properties, stationId, start, end);
+          long exported = csvExportService.exportFetchedDays(
+              stationId,
+              start,
+              end,
+              days,
+              outputPath,
+              properties.getExport().isIncludeHeader());
+          snapshot("CLI settlement CSV export complete station=" + stationId
+              + " rows=" + exported
+              + " outputPath=" + outputPath.toAbsolutePath());
+        }
       }
       snapshot("CLI settlement ingest finished.");
     }
+  }
+
+  private static int requireSourceFetchThreads(int sourceFetchThreads) {
+    if (sourceFetchThreads < 1) {
+      throw new IllegalArgumentException("cli-settlement.source-fetch-threads must be >= 1");
+    }
+    return sourceFetchThreads;
+  }
+
+  private static void validateExecutionMode(CliSettlementIngestionProperties properties) {
+    boolean ingestEnabled = properties.isIngestEnabled();
+    boolean exportEnabled = properties.getExport() != null && properties.getExport().isEnabled();
+    if (!ingestEnabled && !exportEnabled) {
+      throw new IllegalArgumentException(
+          "cli-settlement requires ingest-enabled=true or export.enabled=true");
+    }
+    if (exportEnabled) {
+      String outputDir = properties.getExport().getOutputDir();
+      if (outputDir == null || outputDir.isBlank()) {
+        throw new IllegalArgumentException("cli-settlement.export.output-dir is required");
+      }
+    }
+  }
+
+  private static Path resolveExportPath(CliSettlementIngestionProperties properties,
+                                        String stationId,
+                                        LocalDate start,
+                                        LocalDate end) {
+    String fileName = stationId.toUpperCase(Locale.ROOT) + "_cli_settlement_"
+        + start + "_" + end + ".csv";
+    return Paths.get(properties.getExport().getOutputDir()).resolve(fileName);
   }
 
   private static List<String> normalizeStationIds(List<String> stationIds) {

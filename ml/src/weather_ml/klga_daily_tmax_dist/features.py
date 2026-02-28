@@ -9,6 +9,16 @@ import re
 
 import numpy as np
 import pandas as pd
+try:
+    from numba import njit
+    NUMBA_AVAILABLE = True
+except Exception:  # pragma: no cover - fallback for environments without numba
+    NUMBA_AVAILABLE = False
+
+    def njit(*args, **kwargs):  # type: ignore[misc]
+        def _decorator(fn):
+            return fn
+        return _decorator
 
 from .config import (
     COASTAL_STATIONS,
@@ -24,12 +34,20 @@ from .logging_utils import ProgressTracker
 CLDS_CODE_ORDER = ("CLR", "FEW", "SCT", "BKN", "OVC")
 CLDS_OKTAS_MIDPOINT = {
     "CLR": 0.0,
-    "FEW": 1.5,
-    "SCT": 3.5,
+    "FEW": 2.0,
+    "SCT": 4.0,
     "BKN": 6.0,
     "OVC": 8.0,
 }
 ALLOWED_CLDS_NORM = set(CLDS_CODE_ORDER) | {"UNK"}
+CLDS_ID_MAP = {
+    "UNK": 0,
+    "CLR": 1,
+    "FEW": 2,
+    "SCT": 3,
+    "BKN": 4,
+    "OVC": 5,
+}
 
 CARDINAL_DEGREES = {
     "N": 0.0,
@@ -50,6 +68,34 @@ CARDINAL_DEGREES = {
     "NNW": 337.5,
 }
 ALLOWED_CARDINALS = set(CARDINAL_DEGREES.keys()) | {"CALM", "VAR"}
+WDIR_CARDINAL_ID_MAP = {
+    "UNK": 0,
+    "CALM": 1,
+    "VAR": 2,
+    "N": 3,
+    "NNE": 4,
+    "NE": 5,
+    "ENE": 6,
+    "E": 7,
+    "ESE": 8,
+    "SE": 9,
+    "SSE": 10,
+    "S": 11,
+    "SSW": 12,
+    "SW": 13,
+    "WSW": 14,
+    "W": 15,
+    "WNW": 16,
+    "NW": 17,
+    "NNW": 18,
+}
+UV_DESC_ID_MAP = {
+    "UNK": 0,
+    "Low": 1,
+    "Moderate": 2,
+    "High": 3,
+    "Very High": 4,
+}
 
 WX_FLAG_ORDER = (
     "wx_has_light",
@@ -82,6 +128,21 @@ WX_PRECIP_FLAGS = (
     "wx_has_hail",
     "wx_has_wintry_mix",
 )
+WX_OBSTRUCTION_FLAGS = (
+    "wx_has_fog",
+    "wx_has_mist",
+    "wx_has_haze",
+    "wx_has_smoke",
+    "wx_has_dust",
+)
+WX_FROZEN_FLAGS = (
+    "wx_has_snow",
+    "wx_has_sleet",
+    "wx_has_freezing",
+    "wx_has_wintry_mix",
+    "wx_has_hail",
+)
+WX_CONVECTIVE_FLAGS = ("wx_has_tstorm", "wx_has_thunder")
 
 
 @dataclass(frozen=True)
@@ -106,14 +167,20 @@ def _sanitize_text(raw: Any) -> str:
     return str(raw).strip()
 
 
-def _build_last_valid_index(valid_mask: np.ndarray) -> np.ndarray:
+@njit(cache=True)
+def _build_last_valid_index_numba(valid_mask: np.ndarray) -> np.ndarray:
     out = np.full(valid_mask.shape[0], -1, dtype=np.int32)
     last = -1
-    for i, ok in enumerate(valid_mask.tolist()):
-        if ok:
+    for i in range(valid_mask.shape[0]):
+        if valid_mask[i]:
             last = i
         out[i] = last
     return out
+
+
+def _build_last_valid_index(valid_mask: np.ndarray) -> np.ndarray:
+    # Compiled scan avoids Python-loop overhead when building station lookup indices.
+    return _build_last_valid_index_numba(valid_mask.astype(np.bool_, copy=False))
 
 
 def _normalize_clds(raw: Any) -> tuple[str, float, float, float]:
@@ -133,11 +200,12 @@ def _parse_wx_phrase(raw: Any) -> dict[str, Any]:
         out = {k: 0.0 for k in WX_FLAG_ORDER}
         out["wx_missing"] = 1.0
         out["wx_coarse_code"] = 0.0
-        out["wx_phrase_norm"] = ""
+        out["wx_phrase_norm"] = "unk"
         out["is_unseen"] = False
         return out
 
     phrase = re.sub(r"\s+", " ", txt_raw.strip().lower())
+    phrase = re.sub(r"\s+and\s+", " / ", phrase)
     tokens = [t.strip() for t in re.split(r"\s*/\s*", phrase) if t.strip()]
     joined = " | ".join(tokens) if tokens else phrase
 
@@ -147,14 +215,14 @@ def _parse_wx_phrase(raw: Any) -> dict[str, Any]:
     flags: dict[str, float] = {
         "wx_has_light": float(has_any(("light",))),
         "wx_has_heavy": float(has_any(("heavy",))),
-        "wx_has_rain": float(has_any(("rain", "showers", "showers in the vicinity"))),
+        "wx_has_rain": float(has_any(("rain", "showers", "showers in the vicinity", "shower"))),
         "wx_has_drizzle": float(has_any(("drizzle",))),
         "wx_has_snow": float(has_any(("snow",))),
         "wx_has_sleet": float(has_any(("sleet",))),
         "wx_has_freezing": float(has_any(("freezing", "ice pellets", "freezing rain"))),
         "wx_has_hail": float(has_any(("hail",))),
         "wx_has_wintry_mix": float(has_any(("wintry mix", "wintry", "mix"))),
-        "wx_has_tstorm": float(has_any(("tstorm", "thunderstorm", "storms"))),
+        "wx_has_tstorm": float(has_any(("tstorm", "t-storm", "t storm", "thunderstorm", "storms"))),
         "wx_has_thunder": float(has_any(("thunder",))),
         "wx_has_funnel": float(has_any(("funnel",))),
         "wx_has_tornado": float(has_any(("tornado",))),
@@ -171,6 +239,7 @@ def _parse_wx_phrase(raw: Any) -> dict[str, Any]:
         flags[k] > 0
         for k in ("wx_has_fog", "wx_has_mist", "wx_has_haze", "wx_has_smoke", "wx_has_dust")
     )
+    has_precip = any(flags[k] > 0 for k in WX_PRECIP_FLAGS)
     has_rain = any(flags[k] > 0 for k in ("wx_has_rain", "wx_has_drizzle"))
     has_frozen = any(
         flags[k] > 0
@@ -192,6 +261,8 @@ def _parse_wx_phrase(raw: Any) -> dict[str, Any]:
         coarse = 2.0
     elif has_cloud:
         coarse = 1.0
+    elif has_precip:
+        coarse = 7.0
     else:
         coarse = 0.0
 
@@ -211,7 +282,7 @@ def _clean_uv_index(raw: Any) -> tuple[float, float, float]:
     if not np.isfinite(val):
         return np.nan, 1.0, 1.0
     val_f = float(val)
-    if 0.0 <= val_f <= 20.0:
+    if val_f >= 0.0:
         return val_f, 0.0, 0.0
     return np.nan, 1.0, 1.0
 
@@ -219,7 +290,7 @@ def _clean_uv_index(raw: Any) -> tuple[float, float, float]:
 def _encode_uv_desc(raw: Any) -> tuple[str, dict[str, float]]:
     txt = _sanitize_text(raw)
     if txt == "":
-        return "", {
+        return "UNK", {
             "uv_desc_low": 0.0,
             "uv_desc_moderate": 0.0,
             "uv_desc_high": 0.0,
@@ -232,13 +303,13 @@ def _encode_uv_desc(raw: Any) -> tuple[str, dict[str, float]]:
         "moderate": "Moderate",
         "high": "High",
         "very high": "Very High",
-    }.get(norm, "")
+    }.get(norm, "UNK")
     out = {
         "uv_desc_low": 1.0 if mapped == "Low" else 0.0,
         "uv_desc_moderate": 1.0 if mapped == "Moderate" else 0.0,
         "uv_desc_high": 1.0 if mapped == "High" else 0.0,
         "uv_desc_very_high": 1.0 if mapped == "Very High" else 0.0,
-        "uv_desc_missing": 0.0 if mapped else 1.0,
+        "uv_desc_missing": 0.0 if mapped != "UNK" else 1.0,
     }
     return mapped, out
 
@@ -246,11 +317,23 @@ def _encode_uv_desc(raw: Any) -> tuple[str, dict[str, float]]:
 def _normalize_wdir_cardinal(raw: Any) -> tuple[str, float, float, float]:
     txt = _sanitize_text(raw)
     if txt == "":
-        return "", 0.0, 0.0, 1.0
+        return "UNK", 0.0, 0.0, 1.0
     norm = txt.upper().replace("-", "").replace(" ", "")
     if norm not in ALLOWED_CARDINALS:
-        return "", 0.0, 0.0, 1.0
+        return "UNK", 0.0, 0.0, 1.0
     return norm, float(1.0 if norm == "CALM" else 0.0), float(1.0 if norm == "VAR" else 0.0), 0.0
+
+
+def _clds_id_from_norm(clds_norm: str) -> int:
+    return int(CLDS_ID_MAP.get(clds_norm, 0))
+
+
+def _uv_desc_id_from_norm(uv_desc_norm: str) -> int:
+    return int(UV_DESC_ID_MAP.get(uv_desc_norm, 0))
+
+
+def _wdir_cardinal_id_from_norm(cardinal_norm: str) -> int:
+    return int(WDIR_CARDINAL_ID_MAP.get(cardinal_norm, 0))
 
 
 def _clean_feels_like(raw: Any) -> tuple[float, float, float]:
@@ -316,6 +399,7 @@ def prepare_station_series(
 
         clds_norm: list[str] = []
         clds_oktas: list[float] = []
+        clds_id: list[float] = []
         clds_missing: list[float] = []
         clds_unk: list[float] = []
         wx_payloads: dict[str, list[float]] = {k: [] for k in WX_FLAG_ORDER}
@@ -328,6 +412,7 @@ def prepare_station_series(
         uv_invalid: list[float] = []
         uv_missing: list[float] = []
         uv_desc_norm: list[str] = []
+        uv_desc_id: list[float] = []
         uv_desc_cols = {
             "uv_desc_low": [],
             "uv_desc_moderate": [],
@@ -337,6 +422,7 @@ def prepare_station_series(
         }
 
         wdir_cardinal_norm: list[str] = []
+        wdir_cardinal_id: list[float] = []
         wdir_is_calm: list[float] = []
         wdir_is_var: list[float] = []
         wdir_cardinal_missing: list[float] = []
@@ -361,6 +447,7 @@ def prepare_station_series(
                 raise AssertionError(f"CLDS vocabulary guard failed at parse time: {clds_n}")
             clds_norm.append(clds_n)
             clds_oktas.append(clds_o)
+            clds_id.append(float(_clds_id_from_norm(clds_n)))
             clds_missing.append(clds_m)
             clds_unk.append(clds_u)
 
@@ -380,11 +467,13 @@ def prepare_station_series(
 
             uv_desc_v, uv_desc_flags = _encode_uv_desc(raw_uv_desc[i])
             uv_desc_norm.append(uv_desc_v)
+            uv_desc_id.append(float(_uv_desc_id_from_norm(uv_desc_v)))
             for key, val in uv_desc_flags.items():
                 uv_desc_cols[key].append(float(val))
 
             cardinal, is_calm, is_var, card_miss = _normalize_wdir_cardinal(raw_card[i])
             wdir_cardinal_norm.append(cardinal)
+            wdir_cardinal_id.append(float(_wdir_cardinal_id_from_norm(cardinal)))
             wdir_is_calm.append(is_calm)
             wdir_is_var.append(is_var)
             wdir_cardinal_missing.append(card_miss)
@@ -406,6 +495,7 @@ def prepare_station_series(
             feels_like_missing.append(fl_miss)
 
         values["clds_oktas"] = np.asarray(clds_oktas, dtype=float)
+        values["clds_id"] = np.asarray(clds_id, dtype=float)
         values["clds_missing"] = np.asarray(clds_missing, dtype=float)
         values["clds_unk"] = np.asarray(clds_unk, dtype=float)
         for code in CLDS_CODE_ORDER:
@@ -417,10 +507,12 @@ def prepare_station_series(
         values["uv_index_clean"] = np.asarray(uv_clean, dtype=float)
         values["uv_invalid"] = np.asarray(uv_invalid, dtype=float)
         values["uv_missing"] = np.asarray(uv_missing, dtype=float)
+        values["uv_desc_id"] = np.asarray(uv_desc_id, dtype=float)
         for key, vals in uv_desc_cols.items():
             values[key] = np.asarray(vals, dtype=float)
 
         values["wdir_filled"] = np.asarray(wdir_filled, dtype=float)
+        values["wdir_cardinal_id"] = np.asarray(wdir_cardinal_id, dtype=float)
         values["wdir_is_calm"] = np.asarray(wdir_is_calm, dtype=float)
         values["wdir_is_var"] = np.asarray(wdir_is_var, dtype=float)
         values["wdir_cardinal_missing"] = np.asarray(wdir_cardinal_missing, dtype=float)
@@ -565,6 +657,59 @@ def _window_text_values(
     return station.texts[column][i0:i1], station.times_ns[i0:i1]
 
 
+@njit(cache=True)
+def _window_stats_numba(vals: np.ndarray) -> tuple[float, float, float, float, float]:
+    count = 0
+    sum_v = 0.0
+    sum_sq = 0.0
+    min_v = np.inf
+    max_v = -np.inf
+    has_prev = False
+    prev = 0.0
+    diff_count = 0
+    diff_sum = 0.0
+    diff_sum_sq = 0.0
+
+    for i in range(vals.shape[0]):
+        v = vals[i]
+        if not np.isfinite(v):
+            continue
+        count += 1
+        sum_v += v
+        sum_sq += v * v
+        if v < min_v:
+            min_v = v
+        if v > max_v:
+            max_v = v
+        if has_prev:
+            d = v - prev
+            diff_count += 1
+            diff_sum += d
+            diff_sum_sq += d * d
+        prev = v
+        has_prev = True
+
+    if count == 0:
+        return np.nan, np.nan, np.nan, np.nan, np.nan
+
+    mean_v = sum_v / count
+    var_v = (sum_sq / count) - (mean_v * mean_v)
+    if var_v < 0.0:
+        var_v = 0.0
+    std = float(np.sqrt(var_v))
+    rng = float(max_v - min_v)
+
+    if diff_count == 0:
+        std_diff = np.nan
+    else:
+        diff_mean = diff_sum / diff_count
+        diff_var = (diff_sum_sq / diff_count) - (diff_mean * diff_mean)
+        if diff_var < 0.0:
+            diff_var = 0.0
+        std_diff = float(np.sqrt(diff_var))
+    return std, float(min_v), float(max_v), rng, std_diff
+
+
 def _window_stats(
     station: StationSeries,
     *,
@@ -575,17 +720,7 @@ def _window_stats(
     vals, times = _window_numeric_values(station, column=column, start_ns=start_ns, end_ns=end_ns)
     if vals.size == 0:
         return np.nan, np.nan, np.nan, np.nan, np.nan, None
-    finite = vals[np.isfinite(vals)]
-    if finite.size == 0:
-        return np.nan, np.nan, np.nan, np.nan, np.nan, int(times[-1])
-    std = float(np.std(finite, ddof=0))
-    min_v = float(np.min(finite))
-    max_v = float(np.max(finite))
-    rng = float(max_v - min_v)
-    if finite.size >= 2:
-        std_diff = float(np.std(np.diff(finite), ddof=0))
-    else:
-        std_diff = np.nan
+    std, min_v, max_v, rng, std_diff = _window_stats_numba(np.asarray(vals, dtype=np.float64))
     return std, min_v, max_v, rng, std_diff, int(times[-1])
 
 
@@ -656,12 +791,14 @@ def _compute_station_snapshot(
         # Regime sensors.
         clds_norm, clds_ts_ns, _ = _text_at_or_before(station, column="clds_norm", target_ns=cutoff_ns)
         clds_oktas, clds_oktas_ts_ns, _ = _value_at_or_before(station, column="clds_oktas", target_ns=cutoff_ns)
+        clds_id_now, clds_id_ts_ns, _ = _value_at_or_before(station, column="clds_id", target_ns=cutoff_ns)
         clds_missing_now, clds_missing_ts_ns, _ = _value_at_or_before(
             station, column="clds_missing", target_ns=cutoff_ns
         )
         clds_unk_now, clds_unk_ts_ns, _ = _value_at_or_before(station, column="clds_unk", target_ns=cutoff_ns)
         max_used_ns = _update_max_used(max_used_ns, clds_ts_ns)
         max_used_ns = _update_max_used(max_used_ns, clds_oktas_ts_ns)
+        max_used_ns = _update_max_used(max_used_ns, clds_id_ts_ns)
         max_used_ns = _update_max_used(max_used_ns, clds_missing_ts_ns)
         max_used_ns = _update_max_used(max_used_ns, clds_unk_ts_ns)
 
@@ -670,11 +807,19 @@ def _compute_station_snapshot(
             raise AssertionError(f"CLDS vocabulary guard failed: {clds_norm}")
         features["clds_norm_now"] = clds_norm
         features["clds_oktas_now"] = clds_oktas
+        features["clds_id"] = (
+            float(clds_id_now) if np.isfinite(clds_id_now) else float(_clds_id_from_norm(clds_norm))
+        )
         features["clds_missing_now"] = float(clds_missing_now) if np.isfinite(clds_missing_now) else 1.0
         features["clds_unk_now"] = float(clds_unk_now) if np.isfinite(clds_unk_now) else 0.0
+        features["is_clds_missing_now"] = float(features["clds_missing_now"])
         for code in CLDS_CODE_ORDER:
             features[f"clds_is_{code}"] = 1.0 if clds_norm == code else 0.0
 
+        wx_phrase_norm_now, wx_phrase_ts_ns, _ = _text_at_or_before(
+            station, column="wx_phrase_norm", target_ns=cutoff_ns
+        )
+        max_used_ns = _update_max_used(max_used_ns, wx_phrase_ts_ns)
         for key in WX_FLAG_ORDER:
             v, ts_ns, _ = _value_at_or_before(station, column=key, target_ns=cutoff_ns)
             features[key] = float(v) if np.isfinite(v) else 0.0
@@ -684,28 +829,78 @@ def _compute_station_snapshot(
         max_used_ns = _update_max_used(max_used_ns, ts_ns)
         wx_coarse_now, ts_ns, _ = _value_at_or_before(station, column="wx_coarse_code", target_ns=cutoff_ns)
         features["wx_coarse_code"] = float(wx_coarse_now) if np.isfinite(wx_coarse_now) else 0.0
+        features["wx_coarse_id"] = float(int(round(features["wx_coarse_code"])))
+        features["wx_is_precip_now"] = float(
+            1.0 if any(float(features.get(flag, 0.0)) > 0.0 for flag in WX_PRECIP_FLAGS) else 0.0
+        )
+        features["wx_is_obstruction_now"] = float(
+            1.0 if any(float(features.get(flag, 0.0)) > 0.0 for flag in WX_OBSTRUCTION_FLAGS) else 0.0
+        )
+        features["wx_is_convective_now"] = float(
+            1.0 if any(float(features.get(flag, 0.0)) > 0.0 for flag in WX_CONVECTIVE_FLAGS) else 0.0
+        )
+        features["wx_is_frozen_now"] = float(
+            1.0 if any(float(features.get(flag, 0.0)) > 0.0 for flag in WX_FROZEN_FLAGS) else 0.0
+        )
+        features["wx_is_windy_now"] = float(1.0 if float(features.get("wx_has_windy", 0.0)) > 0.0 else 0.0)
+        features["wx_is_missing_now"] = float(features["wx_missing_now"])
+        features["wx_phrase_norm_now"] = (
+            _sanitize_text(wx_phrase_norm_now).lower() if _sanitize_text(wx_phrase_norm_now) else "unk"
+        )
         max_used_ns = _update_max_used(max_used_ns, ts_ns)
 
         uv_now, uv_ts_ns, _ = _value_at_or_before(station, column="uv_index_clean", target_ns=cutoff_ns)
         uv_invalid_now, uv_invalid_ts_ns, _ = _value_at_or_before(station, column="uv_invalid", target_ns=cutoff_ns)
         uv_missing_now, uv_missing_ts_ns, _ = _value_at_or_before(station, column="uv_missing", target_ns=cutoff_ns)
+        uv_desc_id_now, uv_desc_id_ts_ns, _ = _value_at_or_before(station, column="uv_desc_id", target_ns=cutoff_ns)
+        uv_desc_norm_now, uv_desc_norm_ts_ns, _ = _text_at_or_before(
+            station, column="uv_desc_norm", target_ns=cutoff_ns
+        )
         max_used_ns = _update_max_used(max_used_ns, uv_ts_ns)
         max_used_ns = _update_max_used(max_used_ns, uv_invalid_ts_ns)
         max_used_ns = _update_max_used(max_used_ns, uv_missing_ts_ns)
+        max_used_ns = _update_max_used(max_used_ns, uv_desc_id_ts_ns)
+        max_used_ns = _update_max_used(max_used_ns, uv_desc_norm_ts_ns)
         features["uv_index_now"] = uv_now
         features["uv_invalid_flag"] = float(uv_invalid_now) if np.isfinite(uv_invalid_now) else 0.0
         features["uv_missing_now"] = float(uv_missing_now) if np.isfinite(uv_missing_now) else 1.0
-        if features["uv_missing_now"] < 0.5 and (not np.isfinite(uv_now) or uv_now < 0.0 or uv_now > 20.0):
+        features["uv_desc_norm_now"] = _sanitize_text(uv_desc_norm_now) if _sanitize_text(uv_desc_norm_now) else "UNK"
+        features["uv_desc_id"] = (
+            float(uv_desc_id_now)
+            if np.isfinite(uv_desc_id_now)
+            else float(_uv_desc_id_from_norm(features["uv_desc_norm_now"]))
+        )
+        if features["uv_missing_now"] < 0.5 and (not np.isfinite(uv_now) or uv_now < 0.0):
             raise AssertionError(f"UV sanity guard failed: uv_index_now={uv_now}")
         for key in ["uv_desc_low", "uv_desc_moderate", "uv_desc_high", "uv_desc_very_high", "uv_desc_missing"]:
             v, ts_ns, _ = _value_at_or_before(station, column=key, target_ns=cutoff_ns)
             features[key] = float(v) if np.isfinite(v) else 0.0
             max_used_ns = _update_max_used(max_used_ns, ts_ns)
 
+        wdir_cardinal_norm_now, wdir_card_ts_ns, _ = _text_at_or_before(
+            station, column="wdir_cardinal_norm", target_ns=cutoff_ns
+        )
+        wdir_card_id_now, wdir_card_id_ts_ns, _ = _value_at_or_before(
+            station, column="wdir_cardinal_id", target_ns=cutoff_ns
+        )
+        max_used_ns = _update_max_used(max_used_ns, wdir_card_ts_ns)
+        max_used_ns = _update_max_used(max_used_ns, wdir_card_id_ts_ns)
+        features["wdir_cardinal_norm_now"] = (
+            _sanitize_text(wdir_cardinal_norm_now).upper()
+            if _sanitize_text(wdir_cardinal_norm_now)
+            else "UNK"
+        )
+        features["wdir_cardinal_id"] = (
+            float(wdir_card_id_now)
+            if np.isfinite(wdir_card_id_now)
+            else float(_wdir_cardinal_id_from_norm(features["wdir_cardinal_norm_now"]))
+        )
         for key in ["wdir_is_calm", "wdir_is_var", "wdir_filled_from_cardinal", "wdir_cardinal_missing"]:
             v, ts_ns, _ = _value_at_or_before(station, column=key, target_ns=cutoff_ns)
             features[key] = float(v) if np.isfinite(v) else 0.0
             max_used_ns = _update_max_used(max_used_ns, ts_ns)
+        features["wind_is_calm"] = float(features.get("wdir_is_calm", 0.0))
+        features["wind_is_var"] = float(features.get("wdir_is_var", 0.0))
 
         if station.values["feels_like_missing"].size:
             fl_now, fl_ts_ns, _ = _value_at_or_before(station, column="feels_like_clean", target_ns=cutoff_ns)
@@ -895,6 +1090,8 @@ def _compute_station_full_features(
             features[f"vis_range_{w}"] = _safe_diff(features[f"vis_max_{w}"], features[f"vis_min_{w}"])
             features[f"vis_std_{w}"] = float(np.std(vis_fin, ddof=0)) if vis_fin.size else np.nan
             features[f"vis_missing_frac_{w}"] = _frac_missing(vis_win)
+            if w == 180 and np.isfinite(vis_now) and np.isfinite(features[f"vis_max_{w}"]):
+                features["vis_drop_flag_180"] = float(1.0 if vis_now <= (features[f"vis_max_{w}"] - 2.0) else 0.0)
             if vis_times.size:
                 max_used_ns = _update_max_used(max_used_ns, int(vis_times[-1]))
 
@@ -937,15 +1134,38 @@ def _compute_station_full_features(
             features[f"clds_oktas_min_{w}"] = float(np.min(clds_fin)) if clds_fin.size else np.nan
             features[f"clds_oktas_max_{w}"] = float(np.max(clds_fin)) if clds_fin.size else np.nan
             features[f"clds_oktas_std_{w}"] = float(np.std(clds_fin, ddof=0)) if clds_fin.size else np.nan
-            clds_norm_clean = [_sanitize_text(v) for v in clds_norm_win.tolist()]
-            known = [c for c in clds_norm_clean if c in CLDS_CODE_ORDER]
-            denom = max(len(known), 1)
+            clds_norm_clean = np.asarray([_sanitize_text(v) for v in clds_norm_win.tolist()], dtype=object)
+            known_mask = np.isin(clds_norm_clean, CLDS_CODE_ORDER)
+            known = clds_norm_clean[known_mask]
+            denom = max(int(known.size), 1)
             for code in CLDS_CODE_ORDER:
-                features[f"clds_frac_{code}_{w}"] = float(sum(1 for c in known if c == code) / denom) if known else 0.0
-            trans_seq = [c for c in clds_norm_clean if c != ""]
-            features[f"clds_transitions_{w}"] = float(
-                sum(1 for j in range(1, len(trans_seq)) if trans_seq[j] != trans_seq[j - 1])
+                features[f"clds_frac_{code}_{w}"] = float(np.sum(known == code) / denom) if known.size else 0.0
+            trans_seq = clds_norm_clean[clds_norm_clean != ""]
+            features[f"clds_transitions_{w}"] = (
+                float(np.sum(trans_seq[1:] != trans_seq[:-1])) if trans_seq.size > 1 else 0.0
             )
+            if w == 180:
+                clear_frac = float(features.get("clds_frac_CLR_180", 0.0)) + float(features.get("clds_frac_FEW_180", 0.0))
+                features["clds_frac_clear_180"] = clear_frac
+                features["clds_frac_overcast_180"] = float(features.get("clds_frac_OVC_180", 0.0))
+                features["clds_frac_bkn_180"] = float(features.get("clds_frac_BKN_180", 0.0))
+                ovc_mask = np.asarray(trans_seq == "OVC", dtype=np.int8)
+                if ovc_mask.size:
+                    # Vectorized run-length computation for overcast persistence.
+                    boundary_idx = np.flatnonzero(np.concatenate(([True], ovc_mask[1:] != ovc_mask[:-1], [True])))
+                    run_lengths = np.diff(boundary_idx)
+                    run_values = ovc_mask[boundary_idx[:-1]]
+                    max_run = int(np.max(run_lengths[run_values == 1])) if np.any(run_values == 1) else 0
+                else:
+                    max_run = 0
+                # 30m cadence: 3 consecutive OVC points means at least 60 minutes.
+                features["clds_has_overcast_run_180"] = float(1.0 if max_run >= 3 else 0.0)
+                has_clearish = bool(np.any(np.isin(trans_seq, ["CLR", "FEW"])))
+                has_bkn_ovc = bool(np.any(np.isin(trans_seq, ["BKN", "OVC"])))
+                features["clds_clear_break_180"] = float(1.0 if (has_clearish and has_bkn_ovc) else 0.0)
+            if w == 360:
+                features["clds_frac_overcast_360"] = float(features.get("clds_frac_OVC_360", 0.0))
+                features["clds_transitions_360"] = float(features.get("clds_transitions_360", 0.0))
             clds_missing_win, _ = _window_numeric_values(
                 station,
                 column="clds_missing",
@@ -1038,6 +1258,7 @@ def _compute_station_full_features(
             values=sofar_clds,
             cutoff_ns=cutoff_ns,
         )
+        features["clds_runlen_min"] = float(features["clds_last_change_min"]) if np.isfinite(features["clds_last_change_min"]) else np.nan
         features["is_persistently_OVC_180"] = (
             1.0 if np.isfinite(features.get("clds_frac_OVC_180", np.nan)) and features.get("clds_frac_OVC_180", 0.0) >= 0.8 else 0.0
         )
@@ -1063,6 +1284,12 @@ def _compute_station_full_features(
             else 0.0
         )
         features["clear_break_180"] = float(1.0 if has_clear and prev_bkn_ovc >= 0.5 else 0.0)
+        if "clds_clear_break_180" in features:
+            features["clds_clear_break_180"] = float(
+                1.0 if (features.get("clds_clear_break_180", 0.0) > 0.0 or features["clear_break_180"] > 0.0) else 0.0
+            )
+        else:
+            features["clds_clear_break_180"] = float(features["clear_break_180"])
 
     if regime_dynamics:
         for w in wx_windows:
@@ -1076,9 +1303,31 @@ def _compute_station_full_features(
             precip_any_row = np.max(stacked, axis=0) if stacked.size else np.asarray([], dtype=float)
             fog_arr, _ = _window_numeric_values(station, column="wx_has_fog", start_ns=start_ns, end_ns=cutoff_ns)
             haze_arr, _ = _window_numeric_values(station, column="wx_has_haze", start_ns=start_ns, end_ns=cutoff_ns)
+            mist_arr, _ = _window_numeric_values(station, column="wx_has_mist", start_ns=start_ns, end_ns=cutoff_ns)
+            smoke_arr, _ = _window_numeric_values(station, column="wx_has_smoke", start_ns=start_ns, end_ns=cutoff_ns)
+            dust_arr, _ = _window_numeric_values(station, column="wx_has_dust", start_ns=start_ns, end_ns=cutoff_ns)
             thunder_arr, _ = _window_numeric_values(station, column="wx_has_thunder", start_ns=start_ns, end_ns=cutoff_ns)
             tstorm_arr, _ = _window_numeric_values(station, column="wx_has_tstorm", start_ns=start_ns, end_ns=cutoff_ns)
             thunder_any_row = np.maximum(np.nan_to_num(thunder_arr, nan=0.0), np.nan_to_num(tstorm_arr, nan=0.0))
+            obstruction_any_row = np.maximum.reduce(
+                [
+                    np.nan_to_num(fog_arr, nan=0.0),
+                    np.nan_to_num(mist_arr, nan=0.0),
+                    np.nan_to_num(haze_arr, nan=0.0),
+                    np.nan_to_num(smoke_arr, nan=0.0),
+                    np.nan_to_num(dust_arr, nan=0.0),
+                ]
+            ) if fog_arr.size else np.asarray([], dtype=float)
+            frozen_parts = []
+            for flag in WX_FROZEN_FLAGS:
+                arr, _ = _window_numeric_values(station, column=flag, start_ns=start_ns, end_ns=cutoff_ns)
+                frozen_parts.append(arr)
+            frozen_stacked = (
+                np.vstack([np.nan_to_num(a, nan=0.0) for a in frozen_parts])
+                if frozen_parts and frozen_parts[0].size
+                else np.zeros((len(frozen_parts), 0))
+            )
+            frozen_any_row = np.max(frozen_stacked, axis=0) if frozen_stacked.size else np.asarray([], dtype=float)
 
             features[f"wx_precip_any_{w}"] = float(1.0 if precip_any_row.size and np.any(precip_any_row > 0.0) else 0.0)
             features[f"wx_precip_frac_{w}"] = float(np.mean(precip_any_row > 0.0)) if precip_any_row.size else 0.0
@@ -1086,13 +1335,40 @@ def _compute_station_full_features(
             features[f"wx_fog_frac_{w}"] = float(np.mean(fog_arr > 0.0)) if fog_arr.size else 0.0
             features[f"wx_haze_any_{w}"] = float(1.0 if haze_arr.size and np.any(haze_arr > 0.0) else 0.0)
             features[f"wx_haze_frac_{w}"] = float(np.mean(haze_arr > 0.0)) if haze_arr.size else 0.0
+            features[f"wx_obstruction_any_{w}"] = float(
+                1.0 if obstruction_any_row.size and np.any(obstruction_any_row > 0.0) else 0.0
+            )
+            features[f"wx_obstruction_frac_{w}"] = (
+                float(np.mean(obstruction_any_row > 0.0)) if obstruction_any_row.size else 0.0
+            )
             features[f"wx_thunder_any_{w}"] = float(1.0 if thunder_any_row.size and np.any(thunder_any_row > 0.0) else 0.0)
             features[f"wx_thunder_frac_{w}"] = float(np.mean(thunder_any_row > 0.0)) if thunder_any_row.size else 0.0
+            features[f"wx_convective_any_{w}"] = float(
+                1.0 if thunder_any_row.size and np.any(thunder_any_row > 0.0) else 0.0
+            )
+            features[f"wx_frozen_any_{w}"] = float(
+                1.0 if frozen_any_row.size and np.any(frozen_any_row > 0.0) else 0.0
+            )
+            wx_coarse_win, _ = _window_numeric_values(
+                station,
+                column="wx_coarse_code",
+                start_ns=start_ns,
+                end_ns=cutoff_ns,
+            )
+            wx_coarse_fin = wx_coarse_win[np.isfinite(wx_coarse_win)]
+            wx_coarse_clean = np.rint(wx_coarse_fin).astype(np.int16, copy=False)
+            features[f"wx_transitions_{w}"] = (
+                float(np.sum(wx_coarse_clean[1:] != wx_coarse_clean[:-1])) if wx_coarse_clean.size > 1 else 0.0
+            )
+            if w == 180:
+                features["wx_obstruction_frac_180"] = float(features.get("wx_obstruction_frac_180", 0.0))
+            if w == 360:
+                features["wx_convective_any_360"] = float(features.get("wx_convective_any_360", 0.0))
+                features["wx_frozen_any_360"] = float(features.get("wx_frozen_any_360", 0.0))
 
     if regime_dynamics:
-        sofar_times = station.times_ns[
-            _window_slice_indices(station, start_ns=midnight_ns, end_ns=cutoff_ns)[0] : _window_slice_indices(station, start_ns=midnight_ns, end_ns=cutoff_ns)[1]
-        ]
+        sofar_i0, sofar_i1 = _window_slice_indices(station, start_ns=midnight_ns, end_ns=cutoff_ns)
+        sofar_times = station.times_ns[sofar_i0:sofar_i1]
         precip_today = np.zeros_like(sofar_times, dtype=bool)
         for flag in WX_PRECIP_FLAGS:
             arr, _ = _window_numeric_values(station, column=flag, start_ns=midnight_ns, end_ns=cutoff_ns)
@@ -1120,6 +1396,17 @@ def _compute_station_full_features(
         features["wx_thunder_onset_min_today"] = _onset_minutes_today(
             times_ns=sofar_times,
             event_mask=np.maximum(np.nan_to_num(thunder_today, nan=0.0), np.nan_to_num(tstorm_today, nan=0.0)) > 0.0,
+            cutoff_ns=cutoff_ns,
+        )
+        sofar_wx_coarse, sofar_wx_times = _window_numeric_values(
+            station,
+            column="wx_coarse_code",
+            start_ns=midnight_ns,
+            end_ns=cutoff_ns,
+        )
+        features["wx_runlen_min"] = _minutes_since_last_change_numeric(
+            times_ns=sofar_wx_times,
+            values=sofar_wx_coarse,
             cutoff_ns=cutoff_ns,
         )
 
@@ -1177,6 +1464,38 @@ def _frac_missing(vals: np.ndarray) -> float:
     return float(np.mean(~np.isfinite(vals)))
 
 
+@njit(cache=True)
+def _minutes_since_last_change_numeric_numba(
+    times_ns: np.ndarray,
+    values: np.ndarray,
+    cutoff_ns: int,
+    cap_minutes: float,
+) -> float:
+    found = False
+    prev = 0.0
+    last_change_ts = 0
+    for i in range(values.shape[0]):
+        cur = values[i]
+        if not np.isfinite(cur):
+            continue
+        if not found:
+            found = True
+            prev = cur
+            last_change_ts = int(times_ns[i])
+            continue
+        if abs(cur - prev) > 1e-9:
+            prev = cur
+            last_change_ts = int(times_ns[i])
+    if not found:
+        return np.nan
+    mins = float((cutoff_ns - last_change_ts) / 60_000_000_000.0)
+    if mins < 0.0:
+        mins = 0.0
+    if mins > cap_minutes:
+        mins = cap_minutes
+    return mins
+
+
 def _minutes_since_last_change_numeric(
     *,
     times_ns: np.ndarray,
@@ -1184,20 +1503,14 @@ def _minutes_since_last_change_numeric(
     cutoff_ns: int,
     cap_minutes: float = 360.0,
 ) -> float:
-    finite = np.isfinite(values)
-    if not finite.any():
-        return np.nan
-    vals = values[finite]
-    ts = times_ns[finite]
-    last_change_ts = int(ts[0])
-    prev = float(vals[0])
-    for i in range(1, len(vals)):
-        cur = float(vals[i])
-        if not np.isclose(cur, prev, rtol=0.0, atol=1e-9):
-            last_change_ts = int(ts[i])
-            prev = cur
-    mins = float((cutoff_ns - last_change_ts) / 60_000_000_000.0)
-    return float(min(max(mins, 0.0), cap_minutes))
+    return float(
+        _minutes_since_last_change_numeric_numba(
+            np.asarray(times_ns, dtype=np.int64),
+            np.asarray(values, dtype=np.float64),
+            int(cutoff_ns),
+            float(cap_minutes),
+        )
+    )
 
 
 def _minutes_since_last_change_text(
@@ -1212,16 +1525,33 @@ def _minutes_since_last_change_text(
     if not valid.any():
         return np.nan
     vals = cleaned[valid]
-    ts = times_ns[valid]
-    last_change_ts = int(ts[0])
-    prev = str(vals[0])
-    for i in range(1, len(vals)):
-        cur = str(vals[i])
-        if cur != prev:
-            last_change_ts = int(ts[i])
-            prev = cur
-    mins = float((cutoff_ns - last_change_ts) / 60_000_000_000.0)
+    ts = np.asarray(times_ns[valid], dtype=np.int64)
+    if vals.size == 0:
+        return np.nan
+    if vals.size == 1:
+        mins = float((int(cutoff_ns) - int(ts[0])) / 60_000_000_000.0)
+        return float(min(max(mins, 0.0), cap_minutes))
+    change_pos = np.where(vals[1:] != vals[:-1])[0]
+    last_change_idx = int(change_pos[-1] + 1) if change_pos.size else 0
+    mins = float((int(cutoff_ns) - int(ts[last_change_idx])) / 60_000_000_000.0)
     return float(min(max(mins, 0.0), cap_minutes))
+
+
+@njit(cache=True)
+def _onset_minutes_today_numba(
+    times_ns: np.ndarray,
+    event_mask: np.ndarray,
+    cutoff_ns: int,
+    sentinel: float,
+) -> float:
+    for i in range(event_mask.shape[0]):
+        if event_mask[i]:
+            first_ts = int(times_ns[i])
+            mins = float((cutoff_ns - first_ts) / 60_000_000_000.0)
+            if mins < 0.0:
+                return 0.0
+            return mins
+    return sentinel
 
 
 def _onset_minutes_today(
@@ -1231,11 +1561,14 @@ def _onset_minutes_today(
     cutoff_ns: int,
     sentinel: float = 9999.0,
 ) -> float:
-    idx = np.where(event_mask)[0]
-    if idx.size == 0:
-        return float(sentinel)
-    first_ts = int(times_ns[int(idx[0])])
-    return float(max((cutoff_ns - first_ts) / 60_000_000_000.0, 0.0))
+    return float(
+        _onset_minutes_today_numba(
+            np.asarray(times_ns, dtype=np.int64),
+            np.asarray(event_mask, dtype=np.bool_),
+            int(cutoff_ns),
+            float(sentinel),
+        )
+    )
 
 
 def _signed_angle_diff_deg(now_deg: float, prev_deg: float) -> float:
@@ -1365,6 +1698,27 @@ def _add_neighbor_composites(row: dict[str, Any], cfg: PipelineConfig) -> None:
             )
         row["wx_precip_any_coastal"] = float(1.0 if any(v > 0.0 for v in coastal_any_vals) else 0.0)
         row["wx_precip_any_inland"] = float(1.0 if any(v > 0.0 for v in inland_any_vals) else 0.0)
+        obstruction_features = [
+            "wx_has_fog",
+            "wx_has_mist",
+            "wx_has_haze",
+            "wx_has_smoke",
+            "wx_has_dust",
+        ]
+        coastal_obs_vals: list[float] = []
+        inland_obs_vals: list[float] = []
+        for sid in COASTAL_STATIONS:
+            short = _station_short(sid)
+            coastal_obs_vals.append(
+                float(any(float(row.get(f"{short}_{p}", 0.0)) > 0.0 for p in obstruction_features))
+            )
+        for sid in INLAND_STATIONS:
+            short = _station_short(sid)
+            inland_obs_vals.append(
+                float(any(float(row.get(f"{short}_{p}", 0.0)) > 0.0 for p in obstruction_features))
+            )
+        row["wx_obstruction_any_coastal"] = float(1.0 if any(v > 0.0 for v in coastal_obs_vals) else 0.0)
+        row["wx_obstruction_any_inland"] = float(1.0 if any(v > 0.0 for v in inland_obs_vals) else 0.0)
         row["precip_any_coastal"] = _compute_group_or(
             row, feature_name="precip_hrly_now", stations=COASTAL_STATIONS
         )
@@ -1383,6 +1737,7 @@ def build_feature_rows(
     logger: logging.Logger | None = None,
     log_every_rows: int = 2000,
     log_every_seconds: float = 20.0,
+    materialize_chunk_rows: int = 2000,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     if TARGET_STATION_ID != cfg.target_station_id:
         raise ValueError("Target station mismatch; KLGA must be canonical.")
@@ -1405,7 +1760,9 @@ def build_feature_rows(
         else {}
     )
 
-    rows: list[dict[str, Any]] = []
+    chunk_size = int(materialize_chunk_rows) if int(materialize_chunk_rows) > 0 else 2000
+    row_buffer: list[dict[str, Any]] = []
+    row_chunks: list[pd.DataFrame] = []
     guard_failures = 0
     max_used_overall: pd.Timestamp | None = None
     active_logger = logger or logging.getLogger(__name__)
@@ -1416,6 +1773,12 @@ def build_feature_rows(
         log_every_rows=log_every_rows,
         log_every_seconds=log_every_seconds,
     )
+
+    def _flush_row_buffer() -> None:
+        if not row_buffer:
+            return
+        row_chunks.append(pd.DataFrame.from_records(row_buffer))
+        row_buffer.clear()
 
     for sid in cfg.all_station_ids:
         unseen = station_series[sid].wx_unseen_counts
@@ -1629,12 +1992,14 @@ def build_feature_rows(
             uv_now = float(row.get(f"{prefix}uv_index_now", np.nan))
             uv_missing = float(row.get(f"{prefix}uv_missing_now", 1.0))
             if np.isfinite(uv_missing) and uv_missing < 0.5:
-                if (not np.isfinite(uv_now)) or uv_now < 0.0 or uv_now > 20.0:
+                if (not np.isfinite(uv_now)) or uv_now < 0.0:
                     raise AssertionError(
                         f"UV sanity guard failed station={sid} date={target_date} cutoff={cutoff_minutes} value={uv_now}"
                     )
 
-        rows.append(row)
+        row_buffer.append(row)
+        if len(row_buffer) >= chunk_size:
+            _flush_row_buffer()
         tracker.maybe_log(
             i,
             extra=(
@@ -1646,7 +2011,13 @@ def build_feature_rows(
     if guard_failures > 0:
         raise AssertionError(f"As-of guard failed for {guard_failures} rows.")
 
-    feature_df = pd.DataFrame(rows)
+    _flush_row_buffer()
+    if not row_chunks:
+        feature_df = pd.DataFrame()
+    elif len(row_chunks) == 1:
+        feature_df = row_chunks[0]
+    else:
+        feature_df = pd.concat(row_chunks, ignore_index=True, copy=False)
     feature_df = feature_df.sort_values(["target_date_local", "cutoff_minutes"]).reset_index(drop=True)
     audit = {
         "rows": int(len(feature_df)),

@@ -160,6 +160,7 @@ def train_peak_model(
     X_val: np.ndarray,
     y_val: np.ndarray,
     sample_weight_train: np.ndarray | None = None,
+    categorical_feature: list[int] | tuple[int, ...] | None = None,
     params_override: dict[str, Any] | None = None,
     logger: logging.Logger | None = None,
     log_period: int = 50,
@@ -243,6 +244,7 @@ def train_peak_model(
             sample_weight=sample_weight_train,
             eval_set=[(X_val, y_val)],
             eval_metric="binary_logloss",
+            categorical_feature=list(categorical_feature) if categorical_feature is not None else "auto",
             callbacks=callbacks,
         )
     finally:

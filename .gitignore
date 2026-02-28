@@ -21,6 +21,10 @@
 __pycache__/
 *.py[cod]
 
+# Local Python environments
+.venv/
+venv/
+
 # Local caches / run outputs
 cache/
 asof_model_cache/
@@ -66,3 +70,8 @@ artifacts/**
 # Local export bundles
 exports/**
 _tmp_*.py
+
+# Accidental root-level JS bundle artifacts
+chunk-*.js
+main-*.js
+scripts-*.js

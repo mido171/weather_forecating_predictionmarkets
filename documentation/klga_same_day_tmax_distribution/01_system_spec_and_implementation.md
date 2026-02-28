@@ -602,6 +602,24 @@ Guards are asserts/hard failures because:
 - a silent leakage bug is worse than a crash
 - metrics without correctness are actively harmful for trading decisions
 
+### 12.2 Feature-generation performance policy (vectorization + numba)
+
+Feature generation must remain leakage-safe while being optimized aggressively for runtime.
+
+Required policy:
+
+- preserve as-of semantics exactly (`valid_time_utc <= cutoff_utc`),
+- preserve split isolation exactly (train/val/test by date),
+- preserve truth usage exactly (date `D` daily max is label-only, never feature input),
+- prefer vectorized NumPy operations over Python loops when mathematically equivalent,
+- use Numba (`@njit`) in hot numeric loops (window stats, onset/change/run-length scans),
+- keep safe fallback behavior if Numba is unavailable,
+- treat any optimization that changes feature values vs the feature contract as a regression unless explicitly versioned.
+
+Operational note:
+
+- optimization is accepted only if leakage guards still pass and feature outputs remain numerically consistent within expected floating-point tolerance.
+
 ## 13) Pipeline stage flow
 
 Entry point:

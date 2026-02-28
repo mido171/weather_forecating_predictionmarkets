@@ -166,6 +166,7 @@ def train_delta_model(
     y_val: np.ndarray,
     num_classes: int,
     sample_weight_train: np.ndarray | None = None,
+    categorical_feature: list[int] | tuple[int, ...] | None = None,
     objective: str = "multiclass",
     use_class_weights: bool = True,
     class_weight_clip: tuple[float, float] = (0.5, 5.0),
@@ -272,6 +273,7 @@ def train_delta_model(
             sample_weight=combined_weight,
             eval_set=[(X_val, y_val)],
             eval_metric="multi_logloss",
+            categorical_feature=list(categorical_feature) if categorical_feature is not None else "auto",
             callbacks=callbacks,
         )
     finally:

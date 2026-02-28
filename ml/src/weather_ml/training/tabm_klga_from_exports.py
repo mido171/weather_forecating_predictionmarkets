@@ -5,6 +5,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 import copy
+import gc
 import json
 import logging
 import math
@@ -15,6 +16,7 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import brier_score_loss, log_loss
+from sklearn.preprocessing import RobustScaler, StandardScaler
 
 from weather_ml.klga_daily_tmax_dist.config import (
     OBS_ALLOWED_COLUMNS,
@@ -51,6 +53,13 @@ from weather_ml.klga_daily_tmax_dist.train_delta import (
     train_delta_model,
 )
 from weather_ml.klga_daily_tmax_dist.train_peak import predict_peak_probability, train_peak_model
+from weather_ml.training.oom_matrix import (
+    apply_scaler_inplace_memmap,
+    build_imputed_memmap,
+    fit_imputer_medians_columnwise,
+    fit_scaler_state_from_memmap,
+    write_scaler_artifacts,
+)
 
 
 REQUIRED_EXPORT_FILES = (
@@ -58,6 +67,8 @@ REQUIRED_EXPORT_FILES = (
     "observations_30m_required_columns.csv",
     "station_universe.csv",
 )
+
+TABM_V3_CONTRACT_ID = "klga_same_day_tmax_dist_v3_tabular_nn"
 
 
 @dataclass(frozen=True)
@@ -82,6 +93,10 @@ class TabMTrainingConfig:
     log_every_batches: int = 50
     log_every_rows: int = 2000
     log_every_seconds: float = 20.0
+    feature_scaler: str = "none"
+    v3_feature_mode: bool = False
+    feature_materialize_chunk_rows: int = 2000
+    matrix_chunk_rows: int = 2048
 
 
 @dataclass(frozen=True)
@@ -218,6 +233,70 @@ def _iter_batches(n: int, batch_size: int, rng: np.random.Generator):
         yield idx[i : i + batch_size]
 
 
+def _build_feature_scaler(name: str) -> StandardScaler | RobustScaler | None:
+    key = str(name).strip().lower()
+    if key in {"none", "off", "disabled"}:
+        return None
+    if key == "standard":
+        return StandardScaler(copy=True, with_mean=True, with_std=True)
+    if key == "robust":
+        return RobustScaler(
+            with_centering=True,
+            with_scaling=True,
+            quantile_range=(25.0, 75.0),
+            unit_variance=False,
+            copy=True,
+        )
+    raise ValueError(f"Unsupported feature scaler '{name}'. Expected one of: none, standard, robust.")
+
+
+def _fit_transform_feature_scaler(
+    *,
+    x_all: np.ndarray,
+    train_idx: np.ndarray,
+    scaler_name: str,
+    logger: logging.Logger,
+) -> tuple[np.ndarray, StandardScaler | RobustScaler | None, dict[str, Any]]:
+    x_arr = np.asarray(x_all, dtype=np.float64)
+    if len(train_idx) == 0:
+        raise ValueError("Cannot fit feature scaler with zero train rows.")
+    scaler = _build_feature_scaler(scaler_name)
+    if scaler is None:
+        meta = {
+            "enabled": False,
+            "scaler_name": "none",
+            "train_rows_used": int(len(train_idx)),
+            "n_features": int(x_arr.shape[1]),
+        }
+        logger.info("FEATURE_SCALER disabled")
+        return x_arr.astype(np.float32, copy=False), None, meta
+
+    scaler.fit(x_arr[train_idx])
+    x_scaled = scaler.transform(x_arr)
+    if not np.isfinite(x_scaled).all():
+        raise AssertionError("Feature scaler produced non-finite values.")
+    meta = {
+        "enabled": True,
+        "scaler_name": str(scaler_name).strip().lower(),
+        "train_rows_used": int(len(train_idx)),
+        "n_features": int(x_arr.shape[1]),
+        "fitted_on_train_only": True,
+    }
+    logger.info(
+        "FEATURE_SCALER fitted scaler=%s train_rows=%d n_features=%d",
+        meta["scaler_name"],
+        meta["train_rows_used"],
+        meta["n_features"],
+    )
+    return x_scaled.astype(np.float32, copy=False), scaler, meta
+
+
+def _binary_logloss(y_true: np.ndarray, y_prob: np.ndarray) -> float:
+    y = np.asarray(y_true, dtype=int)
+    p = np.clip(np.asarray(y_prob, dtype=float), 1e-6, 1 - 1e-6)
+    return float(log_loss(y, p, labels=[0, 1]))
+
+
 def _predict_peak_probs(model: Any, x: np.ndarray, device: torch.device, batch_size: int) -> np.ndarray:
     import torch
 
@@ -250,6 +329,263 @@ def _predict_delta_logits_probs(
     if not all_logits:
         return np.empty((0, 0), dtype=np.float64), np.empty((0, 0), dtype=np.float64)
     return np.concatenate(all_logits, axis=0), np.concatenate(all_probs, axis=0)
+
+
+def _predict_peak_probs_indexed(
+    model: Any,
+    x_all: np.ndarray,
+    row_indices: np.ndarray,
+    device: torch.device,
+    batch_size: int,
+) -> np.ndarray:
+    import torch
+
+    ridx = np.asarray(row_indices, dtype=np.int64)
+    if ridx.size == 0:
+        return np.array([], dtype=np.float64)
+    model.eval()
+    out: list[np.ndarray] = []
+    with torch.no_grad():
+        for i0 in range(0, ridx.size, max(int(batch_size), 1)):
+            idx = ridx[i0 : i0 + max(int(batch_size), 1)]
+            xb = torch.from_numpy(np.asarray(x_all[idx, :], dtype=np.float32)).to(device=device, dtype=torch.float32)
+            logits = model(x_num=xb).squeeze(-1)
+            p = torch.sigmoid(logits).mean(dim=1)
+            out.append(p.detach().cpu().numpy())
+    return np.concatenate(out, axis=0) if out else np.array([], dtype=np.float64)
+
+
+def _predict_delta_logits_probs_indexed(
+    model: Any,
+    x_all: np.ndarray,
+    row_indices: np.ndarray,
+    device: torch.device,
+    batch_size: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    import torch
+
+    ridx = np.asarray(row_indices, dtype=np.int64)
+    if ridx.size == 0:
+        return np.empty((0, 0), dtype=np.float64), np.empty((0, 0), dtype=np.float64)
+    model.eval()
+    logits_out: list[np.ndarray] = []
+    probs_out: list[np.ndarray] = []
+    with torch.no_grad():
+        for i0 in range(0, ridx.size, max(int(batch_size), 1)):
+            idx = ridx[i0 : i0 + max(int(batch_size), 1)]
+            xb = torch.from_numpy(np.asarray(x_all[idx, :], dtype=np.float32)).to(device=device, dtype=torch.float32)
+            logits = model(x_num=xb).mean(dim=1)
+            probs = torch.softmax(logits, dim=-1)
+            logits_out.append(logits.detach().cpu().numpy())
+            probs_out.append(probs.detach().cpu().numpy())
+    if not logits_out:
+        return np.empty((0, 0), dtype=np.float64), np.empty((0, 0), dtype=np.float64)
+    return np.concatenate(logits_out, axis=0), np.concatenate(probs_out, axis=0)
+
+
+def _fit_peak_indexed(
+    *,
+    x_all: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    y_all: np.ndarray,
+    cfg: TabMTrainingConfig,
+    device: torch.device,
+    logger: logging.Logger,
+) -> tuple[Any, IsotonicRegression, dict[str, Any]]:
+    import tabm
+    import torch
+    import torch.nn.functional as F
+
+    train_idx = np.asarray(train_idx, dtype=np.int64)
+    val_idx = np.asarray(val_idx, dtype=np.int64)
+    y_all = np.asarray(y_all, dtype=np.int64)
+    if train_idx.size == 0 or val_idx.size == 0:
+        raise ValueError("Peak train/val rows cannot be empty.")
+
+    model = tabm.TabM.make(
+        n_num_features=int(x_all.shape[1]),
+        cat_cardinalities=None,
+        d_out=1,
+        k=cfg.tabm_k,
+        arch_type=cfg.tabm_arch_type,
+        n_blocks=cfg.tabm_n_blocks,
+        d_block=cfg.tabm_d_block,
+        dropout=cfg.tabm_dropout,
+        start_scaling_init=cfg.tabm_start_scaling_init,
+    ).to(device)
+    optim = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+    rng = np.random.default_rng(cfg.seed)
+
+    best_epoch = 0
+    best_val = math.inf
+    best_state = copy.deepcopy(model.state_dict())
+    patience_left = cfg.patience
+
+    for epoch in range(1, cfg.max_epochs_peak + 1):
+        epoch_start = time.perf_counter()
+        model.train()
+        n_batches = max(int(math.ceil(train_idx.size / max(cfg.batch_size, 1))), 1)
+        active_logger_every = max(cfg.log_every_batches, 1)
+        for bi, bidx in enumerate(_iter_batches(train_idx.size, cfg.batch_size, rng), start=1):
+            row_ids = train_idx[bidx]
+            xb_np = np.asarray(x_all[row_ids, :], dtype=np.float32)
+            yb_np = y_all[row_ids].astype(np.float32, copy=False)
+            xb = torch.from_numpy(xb_np).to(device=device, dtype=torch.float32)
+            yb = torch.from_numpy(yb_np).to(device=device, dtype=torch.float32)
+            logits = model(x_num=xb).squeeze(-1)
+            target = yb[:, None].expand_as(logits)
+            loss = F.binary_cross_entropy_with_logits(logits, target)
+            optim.zero_grad(set_to_none=True)
+            loss.backward()
+            optim.step()
+            if bi % active_logger_every == 0 or bi == n_batches:
+                pct = 100.0 * float(bi) / float(n_batches)
+                logger.info(
+                    "TABM_PEAK_BATCH epoch=%d/%d batch=%d/%d (%.1f%%) loss=%.6f",
+                    epoch,
+                    cfg.max_epochs_peak,
+                    bi,
+                    n_batches,
+                    pct,
+                    float(loss.item()),
+                )
+
+        p_val_raw = _predict_peak_probs_indexed(model, x_all, val_idx, device, cfg.batch_size)
+        y_val = y_all[val_idx]
+        val_ll = _binary_logloss(y_val, p_val_raw)
+        logger.info(
+            "TABM_PEAK_EPOCH epoch=%d/%d val_logloss=%.6f elapsed=%s",
+            epoch,
+            cfg.max_epochs_peak,
+            val_ll,
+            format_duration(time.perf_counter() - epoch_start),
+        )
+        if val_ll < best_val - 1e-6:
+            best_val = val_ll
+            best_epoch = epoch
+            best_state = copy.deepcopy(model.state_dict())
+            patience_left = cfg.patience
+        else:
+            patience_left -= 1
+            if patience_left <= 0:
+                break
+
+    model.load_state_dict(best_state)
+    p_val_raw = _predict_peak_probs_indexed(model, x_all, val_idx, device, cfg.batch_size)
+    y_val = y_all[val_idx]
+    iso = IsotonicRegression(out_of_bounds="clip")
+    iso.fit(p_val_raw, y_val)
+    p_val_cal = np.clip(iso.predict(p_val_raw), 1e-6, 1 - 1e-6)
+    return model, iso, {
+        "best_epoch": int(best_epoch),
+        "val_logloss_raw": _binary_logloss(y_val, p_val_raw),
+        "val_logloss_cal": _binary_logloss(y_val, p_val_cal),
+        "val_brier_raw": float(brier_score_loss(y_val, p_val_raw)),
+        "val_brier_cal": float(brier_score_loss(y_val, p_val_cal)),
+    }
+
+
+def _fit_delta_indexed(
+    *,
+    x_all: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    y_train: np.ndarray,
+    y_val: np.ndarray,
+    num_classes: int,
+    cfg: TabMTrainingConfig,
+    device: torch.device,
+    logger: logging.Logger,
+) -> tuple[Any, float, dict[str, Any]]:
+    import tabm
+    import torch
+    import torch.nn.functional as F
+
+    train_idx = np.asarray(train_idx, dtype=np.int64)
+    val_idx = np.asarray(val_idx, dtype=np.int64)
+    y_train = np.asarray(y_train, dtype=np.int64)
+    y_val = np.asarray(y_val, dtype=np.int64)
+    if train_idx.size == 0 or val_idx.size == 0:
+        raise ValueError("Delta train/val rows cannot be empty.")
+
+    model = tabm.TabM.make(
+        n_num_features=int(x_all.shape[1]),
+        cat_cardinalities=None,
+        d_out=int(num_classes),
+        k=cfg.tabm_k,
+        arch_type=cfg.tabm_arch_type,
+        n_blocks=cfg.tabm_n_blocks,
+        d_block=cfg.tabm_d_block,
+        dropout=cfg.tabm_dropout,
+        start_scaling_init=cfg.tabm_start_scaling_init,
+    ).to(device)
+    optim = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+    rng = np.random.default_rng(cfg.seed + 1)
+
+    best_epoch = 0
+    best_val = math.inf
+    best_state = copy.deepcopy(model.state_dict())
+    patience_left = cfg.patience
+
+    for epoch in range(1, cfg.max_epochs_delta + 1):
+        epoch_start = time.perf_counter()
+        model.train()
+        n_batches = max(int(math.ceil(train_idx.size / max(cfg.batch_size, 1))), 1)
+        active_logger_every = max(cfg.log_every_batches, 1)
+        for bi, bidx in enumerate(_iter_batches(train_idx.size, cfg.batch_size, rng), start=1):
+            row_ids = train_idx[bidx]
+            xb_np = np.asarray(x_all[row_ids, :], dtype=np.float32)
+            yb_np = y_train[bidx].astype(np.int64, copy=False)
+            xb = torch.from_numpy(xb_np).to(device=device, dtype=torch.float32)
+            yb = torch.from_numpy(yb_np).to(device=device, dtype=torch.long)
+            logits_ens = model(x_num=xb)  # (B, K, C)
+            k = logits_ens.shape[1]
+            loss = F.cross_entropy(logits_ens.reshape(-1, num_classes), yb.repeat_interleave(k))
+            optim.zero_grad(set_to_none=True)
+            loss.backward()
+            optim.step()
+            if bi % active_logger_every == 0 or bi == n_batches:
+                pct = 100.0 * float(bi) / float(n_batches)
+                logger.info(
+                    "TABM_DELTA_BATCH epoch=%d/%d batch=%d/%d (%.1f%%) loss=%.6f",
+                    epoch,
+                    cfg.max_epochs_delta,
+                    bi,
+                    n_batches,
+                    pct,
+                    float(loss.item()),
+                )
+
+        v_logits, v_probs = _predict_delta_logits_probs_indexed(model, x_all, val_idx, device, cfg.batch_size)
+        v_ll = float(_multi_logloss(y_val, v_probs))
+        logger.info(
+            "TABM_DELTA_EPOCH epoch=%d/%d val_multi_logloss=%.6f elapsed=%s",
+            epoch,
+            cfg.max_epochs_delta,
+            v_ll,
+            format_duration(time.perf_counter() - epoch_start),
+        )
+        if v_ll < best_val - 1e-6:
+            best_val = v_ll
+            best_epoch = epoch
+            best_state = copy.deepcopy(model.state_dict())
+            patience_left = cfg.patience
+        else:
+            patience_left -= 1
+            if patience_left <= 0:
+                break
+
+    model.load_state_dict(best_state)
+    val_logits, val_probs_raw = _predict_delta_logits_probs_indexed(model, x_all, val_idx, device, cfg.batch_size)
+    temperature = float(_multiclass_temperature_scale(val_logits, y_val))
+    val_probs_temp = _softmax(val_logits / max(temperature, 1e-6))
+    return model, temperature, {
+        "best_epoch": int(best_epoch),
+        "temperature": float(temperature),
+        "val_multi_logloss_raw": float(_multi_logloss(y_val, val_probs_raw)),
+        "val_multi_logloss_temp": float(_multi_logloss(y_val, val_probs_temp)),
+    }
 
 
 def _fit_peak(
@@ -312,7 +648,7 @@ def _fit_peak(
                 )
 
         p_val_raw = _predict_peak_probs(model, x_val, device, cfg.batch_size)
-        val_ll = float(log_loss(y_val, np.clip(p_val_raw, 1e-6, 1 - 1e-6)))
+        val_ll = _binary_logloss(y_val, p_val_raw)
         logger.info(
             "TABM_PEAK_EPOCH epoch=%d/%d val_logloss=%.6f elapsed=%s",
             epoch,
@@ -337,8 +673,8 @@ def _fit_peak(
     p_val_cal = np.clip(iso.predict(p_val_raw), 1e-6, 1 - 1e-6)
     return model, iso, {
         "best_epoch": int(best_epoch),
-        "val_logloss_raw": float(log_loss(y_val, np.clip(p_val_raw, 1e-6, 1 - 1e-6))),
-        "val_logloss_cal": float(log_loss(y_val, p_val_cal)),
+        "val_logloss_raw": _binary_logloss(y_val, p_val_raw),
+        "val_logloss_cal": _binary_logloss(y_val, p_val_cal),
         "val_brier_raw": float(brier_score_loss(y_val, p_val_raw)),
         "val_brier_cal": float(brier_score_loss(y_val, p_val_cal)),
     }
@@ -452,7 +788,7 @@ def run_tabm_training_from_exports(
     pipeline_start = time.perf_counter()
     active_logger.info("TABM_EXPORT_RUN_START run_dir=%s data_dir=%s", run_dir, cfg.data_dir)
 
-    stage_total = 9
+    stage_total = 10
     stage_idx = 0
 
     def stage_start(name: str, details: str = "") -> tuple[int, float]:
@@ -502,7 +838,15 @@ def run_tabm_training_from_exports(
     )
 
     sidx, st0 = stage_start("build_feature_rows")
-    p_cfg = PipelineConfig(split=cfg.split, output_root=cfg.output_root)
+    p_cfg = (
+        PipelineConfig(
+            split=cfg.split,
+            output_root=cfg.output_root,
+            feature_contract_version=TABM_V3_CONTRACT_ID,
+        )
+        if cfg.v3_feature_mode
+        else PipelineConfig(split=cfg.split, output_root=cfg.output_root)
+    )
     calendar_df = make_calendar_grid(sorted(set(daily_df["target_date_local"])), tz=p_cfg.local_zone)
     start_obs_utc = pd.Timestamp(calendar_df["midnight_utc"].min()).tz_convert("UTC") - pd.Timedelta(hours=6)
     end_obs_utc = pd.Timestamp(calendar_df["cutoff_utc"].max()).tz_convert("UTC")
@@ -524,15 +868,21 @@ def run_tabm_training_from_exports(
         logger=active_logger,
         log_every_rows=cfg.log_every_rows,
         log_every_seconds=cfg.log_every_seconds,
+        materialize_chunk_rows=cfg.feature_materialize_chunk_rows,
     )
+    if int(audit.get("asof_guard_failures", 0)) != 0:
+        raise AssertionError(f"As-of leakage guard failed: {audit.get('asof_guard_failures')}")
     stage_end(sidx, "build_feature_rows", st0, details=f"feature_rows={len(feat_df)}")
 
     sidx, st0 = stage_start("prepare_training_matrices")
     masks = _split_masks(feat_df, cfg.split)
     feat_df, climo_meta = _add_climo_features(feat_df, masks["train"])
     feat_cols = _model_feature_columns(feat_df, p_cfg)
-    medians = _fit_imputer(feat_df, feature_cols=feat_cols, train_mask=masks["train"])
-    x_all = _apply_imputer(feat_df, feature_cols=feat_cols, medians=medians).astype(np.float32)
+    medians = fit_imputer_medians_columnwise(
+        df=feat_df,
+        feature_cols=feat_cols,
+        train_mask=masks["train"],
+    )
 
     peak_series = pd.to_numeric(feat_df["peak"], errors="coerce")
     delta_series = pd.to_numeric(feat_df["delta"], errors="coerce")
@@ -548,6 +898,46 @@ def run_tabm_training_from_exports(
     peak_test_idx = np.where(masks["test"] & peak_mask)[0]
     if len(peak_train_idx) == 0 or len(peak_val_idx) == 0 or len(peak_test_idx) == 0:
         raise ValueError("Peak split rows are empty.")
+
+    matrix_tmp_dir = _ensure_dir(run_dir / "tmp")
+    matrix_path = matrix_tmp_dir / "x_all_imputed_scaled.f32.memmap"
+    x_all = build_imputed_memmap(
+        df=feat_df,
+        feature_cols=feat_cols,
+        medians=medians,
+        out_path=matrix_path,
+        chunk_rows=cfg.matrix_chunk_rows,
+        dtype=np.float32,
+        logger=active_logger,
+    )
+    scaler_state = fit_scaler_state_from_memmap(
+        x_all=x_all,
+        train_idx=peak_train_idx,
+        scaler_name=cfg.feature_scaler,
+        chunk_rows=cfg.matrix_chunk_rows,
+        logger=active_logger,
+    )
+    apply_scaler_inplace_memmap(
+        x_all=x_all,
+        scaler_state=scaler_state,
+        chunk_rows=cfg.matrix_chunk_rows,
+    )
+    feature_scaler_meta = scaler_state.as_meta()
+
+    eval_cols_needed = [
+        "target_date_local",
+        "cutoff_minutes",
+        "tmax_truth",
+        "tmax_sofar",
+        "clds_norm_now",
+        "uv_index_now",
+        "any_precip_sofar",
+        "precip_any_180",
+        "wx_precip_any_180",
+    ]
+    eval_df = feat_df.loc[:, [c for c in eval_cols_needed if c in feat_df.columns]].copy()
+    del feat_df
+    gc.collect()
 
     delta_class_max = PipelineConfig().delta_class_max
     delta_train_idx = np.where(masks["train"] & peak_mask & delta_mask & (y_peak_all == 0) & (y_delta_all >= 1))[0]
@@ -568,16 +958,17 @@ def run_tabm_training_from_exports(
         details=(
             f"features={len(feat_cols)} peak_train={len(peak_train_idx)} "
             f"peak_val={len(peak_val_idx)} peak_test={len(peak_test_idx)} "
-            f"delta_train={len(delta_train_idx)} delta_val={len(delta_val_idx)} delta_test={len(delta_test_idx)}"
+            f"delta_train={len(delta_train_idx)} delta_val={len(delta_val_idx)} delta_test={len(delta_test_idx)} "
+            f"scaler={feature_scaler_meta.get('scaler_name')}"
         ),
     )
 
     sidx, st0 = stage_start("train_peak_model")
-    peak_model, peak_iso, peak_train = _fit_peak(
-        x_train=x_all[peak_train_idx],
-        y_train=y_peak_all[peak_train_idx].astype(np.int64),
-        x_val=x_all[peak_val_idx],
-        y_val=y_peak_all[peak_val_idx].astype(np.int64),
+    peak_model, peak_iso, peak_train = _fit_peak_indexed(
+        x_all=x_all,
+        train_idx=peak_train_idx,
+        val_idx=peak_val_idx,
+        y_all=y_peak_all,
         cfg=cfg,
         device=device,
         logger=active_logger,
@@ -585,10 +976,11 @@ def run_tabm_training_from_exports(
     stage_end(sidx, "train_peak_model", st0, details=f"best_epoch={peak_train.get('best_epoch')}")
 
     sidx, st0 = stage_start("train_delta_model")
-    delta_model, delta_temp, delta_train = _fit_delta(
-        x_train=x_all[delta_train_idx],
+    delta_model, delta_temp, delta_train = _fit_delta_indexed(
+        x_all=x_all,
+        train_idx=delta_train_idx,
+        val_idx=delta_val_idx,
         y_train=y_delta_train.astype(np.int64),
-        x_val=x_all[delta_val_idx],
         y_val=y_delta_val.astype(np.int64),
         num_classes=delta_class_max,
         cfg=cfg,
@@ -603,14 +995,16 @@ def run_tabm_training_from_exports(
     )
 
     sidx, st0 = stage_start("predict_probabilities")
-    p_peak_val_raw = _predict_peak_probs(peak_model, x_all[peak_val_idx], device, cfg.batch_size)
-    p_peak_test_raw = _predict_peak_probs(peak_model, x_all[peak_test_idx], device, cfg.batch_size)
+    p_peak_val_raw = _predict_peak_probs_indexed(peak_model, x_all, peak_val_idx, device, cfg.batch_size)
+    p_peak_test_raw = _predict_peak_probs_indexed(peak_model, x_all, peak_test_idx, device, cfg.batch_size)
     p_peak_val_cal = np.clip(peak_iso.predict(p_peak_val_raw), 1e-6, 1 - 1e-6)
     p_peak_test_cal = np.clip(peak_iso.predict(p_peak_test_raw), 1e-6, 1 - 1e-6)
 
-    d_val_logits, d_val_probs_raw = _predict_delta_logits_probs(delta_model, x_all[delta_val_idx], device, cfg.batch_size)
-    d_test_logits, d_test_probs_raw = _predict_delta_logits_probs(
-        delta_model, x_all[delta_test_idx], device, cfg.batch_size
+    d_val_logits, d_val_probs_raw = _predict_delta_logits_probs_indexed(
+        delta_model, x_all, delta_val_idx, device, cfg.batch_size
+    )
+    d_test_logits, d_test_probs_raw = _predict_delta_logits_probs_indexed(
+        delta_model, x_all, delta_test_idx, device, cfg.batch_size
     )
     d_val_probs_temp = _softmax(d_val_logits / max(delta_temp, 1e-6))
     d_test_probs_temp = _softmax(d_test_logits / max(delta_temp, 1e-6))
@@ -631,13 +1025,13 @@ def run_tabm_training_from_exports(
 
     sidx, st0 = stage_start("evaluate_metrics")
     combined_val, combined_val_detail = _evaluate_distribution_rows(
-        df=feat_df,
+        df=eval_df,
         row_indices=peak_val_idx,
         p_peak=p_peak_val_cal,
         p_delta_cond=p_delta_val_cond,
     )
     combined_test, combined_test_detail = _evaluate_distribution_rows(
-        df=feat_df,
+        df=eval_df,
         row_indices=peak_test_idx,
         p_peak=p_peak_test_cal,
         p_delta_cond=p_delta_test_cond,
@@ -651,14 +1045,14 @@ def run_tabm_training_from_exports(
 
     sidx, st0 = stage_start("write_prediction_and_report_files")
     pred_val = _build_full_delta_arrays(
-        full_len=len(feat_df),
+        full_len=len(eval_df),
         class_count=delta_class_max,
         row_indices=peak_val_idx,
         p_peak=p_peak_val_cal,
         p_delta=p_delta_val_cond,
     )
     pred_test = _build_full_delta_arrays(
-        full_len=len(feat_df),
+        full_len=len(eval_df),
         class_count=delta_class_max,
         row_indices=peak_test_idx,
         p_peak=p_peak_test_cal,
@@ -675,13 +1069,13 @@ def run_tabm_training_from_exports(
     cutoff_test.to_csv(reports_dir / "cutoff_metrics_test.csv", index=False)
 
     calib_val = _temperature_bucket_calibration(
-        df=feat_df,
+        df=eval_df,
         row_indices=peak_val_idx,
         p_peak=p_peak_val_cal,
         p_delta_cond=p_delta_val_cond,
     )
     calib_test = _temperature_bucket_calibration(
-        df=feat_df,
+        df=eval_df,
         row_indices=peak_test_idx,
         p_peak=p_peak_test_cal,
         p_delta_cond=p_delta_test_cond,
@@ -698,6 +1092,11 @@ def run_tabm_training_from_exports(
         json.dumps({"temperature": float(delta_temp)}, indent=2),
         encoding="utf-8",
     )
+    write_scaler_artifacts(
+        scaler_state=scaler_state,
+        model_joblib_path=models_dir / "feature_scaler.joblib",
+        meta_json_path=run_dir / "feature_scaler_meta.json",
+    )
     (run_dir / "feature_list.json").write_text(json.dumps(feat_cols, indent=2), encoding="utf-8")
     (run_dir / "imputer_values.json").write_text(json.dumps(medians, indent=2, sort_keys=True), encoding="utf-8")
     (run_dir / "train_date_range.txt").write_text(
@@ -713,10 +1112,15 @@ def run_tabm_training_from_exports(
         encoding="utf-8",
     )
 
+    contract_id = TABM_V3_CONTRACT_ID if cfg.v3_feature_mode else p_cfg.feature_contract_version
+    backend_name = "tabm_v3" if cfg.v3_feature_mode else "tabm"
+
     metrics = {
         "run_id": run_dir.name,
+        "backend": backend_name,
+        "feature_contract_version": contract_id,
         "data_dir": str(cfg.data_dir),
-        "rows_total": int(len(feat_df)),
+        "rows_total": int(len(eval_df)),
         "split_rows_peak": {
             "train": int(len(peak_train_idx)),
             "val": int(len(peak_val_idx)),
@@ -729,16 +1133,23 @@ def run_tabm_training_from_exports(
         },
         "audit": audit,
         "climo_lookup_meta": climo_meta,
+        "feature_scaler": feature_scaler_meta,
+        "leakage_guards": {
+            "asof_guard_failures": int(audit.get("asof_guard_failures", 0)),
+            "scaler_train_only_guard": bool(feature_scaler_meta.get("fitted_on_train_only", True)),
+            "scaler_train_rows_used": int(feature_scaler_meta.get("train_rows_used", 0)),
+            "scaler_name": str(feature_scaler_meta.get("scaler_name", "none")),
+        },
         "peak": {
             "val": {
-                "logloss_raw": float(log_loss(y_peak_all[peak_val_idx], np.clip(p_peak_val_raw, 1e-6, 1 - 1e-6))),
-                "logloss_cal": float(log_loss(y_peak_all[peak_val_idx], p_peak_val_cal)),
+                "logloss_raw": _binary_logloss(y_peak_all[peak_val_idx], p_peak_val_raw),
+                "logloss_cal": _binary_logloss(y_peak_all[peak_val_idx], p_peak_val_cal),
                 "brier_raw": float(brier_score_loss(y_peak_all[peak_val_idx], p_peak_val_raw)),
                 "brier_cal": float(brier_score_loss(y_peak_all[peak_val_idx], p_peak_val_cal)),
             },
             "test": {
-                "logloss_raw": float(log_loss(y_peak_all[peak_test_idx], np.clip(p_peak_test_raw, 1e-6, 1 - 1e-6))),
-                "logloss_cal": float(log_loss(y_peak_all[peak_test_idx], p_peak_test_cal)),
+                "logloss_raw": _binary_logloss(y_peak_all[peak_test_idx], p_peak_test_raw),
+                "logloss_cal": _binary_logloss(y_peak_all[peak_test_idx], p_peak_test_cal),
                 "brier_raw": float(brier_score_loss(y_peak_all[peak_test_idx], p_peak_test_raw)),
                 "brier_cal": float(brier_score_loss(y_peak_all[peak_test_idx], p_peak_test_cal)),
             },
@@ -762,8 +1173,10 @@ def run_tabm_training_from_exports(
     metrics_path.write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
 
     cfg_payload = {
+        "backend": backend_name,
         "data_dir": str(cfg.data_dir),
         "output_root": str(cfg.output_root),
+        "feature_contract_version": contract_id,
         "split": {
             "train_start": str(cfg.split.train_start),
             "train_end": str(cfg.split.train_end),
@@ -787,6 +1200,8 @@ def run_tabm_training_from_exports(
             "patience": cfg.patience,
             "device": str(device),
             "seed": cfg.seed,
+            "feature_scaler": str(feature_scaler_meta.get("scaler_name", "none")),
+            "v3_feature_mode": bool(cfg.v3_feature_mode),
         },
     }
     (run_dir / "config.json").write_text(json.dumps(cfg_payload, indent=2, sort_keys=True), encoding="utf-8")
@@ -796,7 +1211,9 @@ def run_tabm_training_from_exports(
         "",
         f"- run_id: {run_dir.name}",
         f"- data_dir: {cfg.data_dir}",
-        f"- rows_total: {len(feat_df)}",
+        f"- feature_contract_version: {contract_id}",
+        f"- feature_scaler: {feature_scaler_meta.get('scaler_name')}",
+        f"- rows_total: {len(eval_df)}",
         f"- split_rows_peak: train={len(peak_train_idx)} val={len(peak_val_idx)} test={len(peak_test_idx)}",
         f"- split_rows_delta: train={len(delta_train_idx)} val={len(delta_val_idx)} test={len(delta_test_idx)}",
         "",
@@ -1189,14 +1606,14 @@ def run_lgbm_training_from_exports(
 
     peak_metrics = {
         "val": {
-            "logloss_raw": float(log_loss(y_peak_all[peak_val_idx], np.clip(p_peak_val_raw, 1e-6, 1 - 1e-6))),
-            "logloss_cal": float(log_loss(y_peak_all[peak_val_idx], np.clip(p_peak_val_cal, 1e-6, 1 - 1e-6))),
+            "logloss_raw": _binary_logloss(y_peak_all[peak_val_idx], p_peak_val_raw),
+            "logloss_cal": _binary_logloss(y_peak_all[peak_val_idx], p_peak_val_cal),
             "brier_raw": float(brier_score_loss(y_peak_all[peak_val_idx], p_peak_val_raw)),
             "brier_cal": float(brier_score_loss(y_peak_all[peak_val_idx], p_peak_val_cal)),
         },
         "test": {
-            "logloss_raw": float(log_loss(y_peak_all[peak_test_idx], np.clip(p_peak_test_raw, 1e-6, 1 - 1e-6))),
-            "logloss_cal": float(log_loss(y_peak_all[peak_test_idx], np.clip(p_peak_test_cal, 1e-6, 1 - 1e-6))),
+            "logloss_raw": _binary_logloss(y_peak_all[peak_test_idx], p_peak_test_raw),
+            "logloss_cal": _binary_logloss(y_peak_all[peak_test_idx], p_peak_test_cal),
             "brier_raw": float(brier_score_loss(y_peak_all[peak_test_idx], p_peak_test_raw)),
             "brier_cal": float(brier_score_loss(y_peak_all[peak_test_idx], p_peak_test_cal)),
         },

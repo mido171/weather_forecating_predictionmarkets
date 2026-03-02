@@ -1,0 +1,135 @@
+# MOS Backtesting Documentation
+
+This folder is the canonical documentation set for MOS-first Kalshi backtesting in this repo.
+
+It is explicitly designed for:
+
+- reproducibility (same inputs -> same outputs),
+- auditability (JSON sanity checks + deterministic tie-breaks),
+- execution-time correctness (no entry before gate/effective cutoff),
+- leakage paranoia (runtime-aligned model use, no future quote use).
+
+## Scope
+
+This track covers two execution families:
+
+1. Single-station MOS runs (historical `blend_00`, runtime matrix `blend_12`/`blend_00`).
+2. Co-joined two-station MOS runs (`KNYC` + `KMIA`, one trade/day globally).
+
+It also documents:
+
+- data contracts and date/file mapping,
+- entry-gate vs market-open delay semantics,
+- fixed-risk and fractional-Kelly sizing,
+- outlier-filtered recalc protocol,
+- sanity/audit acceptance criteria.
+
+## Current Canonical Reference
+
+Current strict reference used for latest reporting/UI:
+
+- run record:
+  - `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+- core side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc_with_balance.csv`
+
+## Mandatory Read Order
+
+1. `documentation/mos/00_scope_and_objective.md`
+2. `documentation/mos/01_data_contracts_and_file_mapping.md`
+3. `documentation/mos/02_backtest_logic_and_formulas.md`
+4. `documentation/mos/03_sanity_audit_framework.md`
+5. `documentation/mos/04_run_record_2026-03-01_entry1530z_cap400.md`
+6. `documentation/mos/06_run_record_2026-03-01_leakage_free_runtime_matrix.md`
+7. `documentation/mos/07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
+8. `documentation/mos/08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
+9. `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+10. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
+
+## Document Map
+
+- `00_scope_and_objective.md`
+  - scope boundaries, supported strategy families, and hard invariants.
+- `01_data_contracts_and_file_mapping.md`
+  - input/output schemas, naming contracts, date mapping, and price normalization.
+- `02_backtest_logic_and_formulas.md`
+  - full execution algorithm, sizing formulas, EV logic, and post-processing semantics.
+- `03_sanity_audit_framework.md`
+  - required sanity counters and pass criteria for single-station and co-joined runs.
+- `04_run_record_2026-03-01_entry1530z_cap400.md`
+  - audited single-station baseline run record.
+- `05_troubleshooting_and_common_failure_modes.md`
+  - operational debugging guide for timing, parsing, selection, and arithmetic issues.
+- `06_run_record_2026-03-01_leakage_free_runtime_matrix.md`
+  - blend_00 vs blend_12 runtime matrix benchmark and leakage timing checks.
+- `07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
+  - first co-joined baseline run record (fixed-risk, no open-delay).
+- `08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
+  - historical strict run (fractional-Kelly + outlier recalc, no open-delay).
+- `09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+  - current strict reference (open+30m + strict filters + post-processed recalc).
+
+## Canonical Scripts
+
+- `backtesting/mos_blend00_entry1530z_cap400_audit.py`
+- `backtesting/mos_blend12_knyc_kmia_cojoined_audit.py`
+
+Note:
+
+- `mos_blend12_knyc_kmia_cojoined_audit.py` natively supports fixed-risk sizing.
+- fractional-Kelly + outlier-filtered recalc is currently a deterministic post-processing layer on top of co-joined trade stream outputs.
+
+## Key Output Families
+
+### Single-Station (blend_00 entry1530z baseline)
+
+- trades:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\trades_all_available_blend00_ev0p1_win60_risk5p5pct_entry1530z_cap400.csv`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_all_available_blend00_ev0p1_win60_risk5p5pct_entry1530z_cap400.json`
+- sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_all_available_blend00_ev0p1_win60_risk5p5pct_entry1530z_cap400.json`
+- deep sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\deep_sanity_all_available_blend00_ev0p1_win60_risk5p5pct_entry1530z_cap400.json`
+
+### Runtime Matrix (blend_00 vs blend_12)
+
+- matrix comparison:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\matrix_blend00_blend12_ev0p20_win65_risk5p5_cap400_comparison.csv`
+- freshness/performance:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\matrix_blend00_blend12_freshness_vs_performance.csv`
+- outlier-capped recalc matrix:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\matrix_blend00_blend12_ev0p20_win65_risk5p5_cap400_pnlcap3000removed_recalc_comparison.csv`
+
+### Co-Joined Baseline (KNYC+KMIA, fixed risk)
+
+- run record:
+  - `documentation/mos/07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_ev0p15_win65_risk6p5_cap400.json`
+
+### Co-Joined Strict (historical no-open-delay variant)
+
+- run record:
+  - `documentation/mos/08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
+
+### Co-Joined Strict (latest open+30m variant)
+
+- run record:
+  - `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+- fixed-risk base summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_risk6p5_cap500_base.json`
+- strict post-processed summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc.json`
+- strict side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc_with_balance.csv`
+
+## Claim Hygiene Rule
+
+A MOS performance claim is non-authoritative unless it includes all five:
+
+1. exact entry rule (gate and any open-delay),
+2. exact filters (`EV`, `model_win_prob`),
+3. exact sizing policy (fixed risk or Kelly, cap),
+4. exact summary JSON path,
+5. exact sanity JSON path.

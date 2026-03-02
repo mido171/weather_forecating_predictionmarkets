@@ -6,23 +6,30 @@ This repository is a weather forecasting + prediction markets playground with a 
 
 Before doing anything in this repo (running commands, editing code/docs, or making claims), Agents/Codex MUST start by reading the documentation in this order:
 
-1) `documentation/README.md`
-2) `documentation/klga_same_day_tmax_distribution/README.md`
-3) `documentation/klga_same_day_tmax_distribution/00_high_level_overview.md`
-4) `documentation/klga_same_day_tmax_distribution/01_system_spec_and_implementation.md`
-5) `documentation/klga_same_day_tmax_distribution/02_metrics_and_interpretation_for_beginners.md` (includes FAQ)
-6) `documentation/klga_same_day_tmax_distribution/03_runbook_training_inference_and_artifacts.md`
-7) `documentation/klga_same_day_tmax_distribution/04_run_history_and_current_status_2026-02-26.md`
-8) `documentation/klga_same_day_tmax_distribution/06_full_feature_dictionary.md`
-9) `documentation/klga_same_day_tmax_distribution/07_exporter_and_remote_training_tabm.md` (includes troubleshooting)
-10) `documentation/klga_same_day_tmax_distribution/09_results_metrics_and_feature_importance.md`
+1) `documentation/mos/README.md`
+2) `documentation/mos/00_scope_and_objective.md`
+3) `documentation/mos/01_data_contracts_and_file_mapping.md`
+4) `documentation/mos/02_backtest_logic_and_formulas.md`
+5) `documentation/mos/03_sanity_audit_framework.md`
+6) `documentation/mos/04_run_record_2026-03-01_entry1530z_cap400.md`
+7) `documentation/mos/06_run_record_2026-03-01_leakage_free_runtime_matrix.md`
+8) `documentation/mos/07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
+9) `documentation/mos/08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
+10) `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+11) `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
 
 In addition, before any of the following:
 - Editing or running the Kalshi downloader
 - Editing or running any bridge/backtest/trading scripts
 - Making claims about leakage safety or execution-time correctness
 
-Agents/Codex MUST read **all** markdown documents under `documentation/` (repo-wide), not just the KLGA folder.
+Agents/Codex MUST limit mandatory startup documentation reads to `documentation/mos/` only.
+
+For any MOS/Kalshi backtest claim, Agents/Codex MUST explicitly reference:
+- the exact entry gate rule (timestamp and side-price selection semantics),
+- the exact stake sizing rule (including cap),
+- the summary JSON path,
+- the sanity JSON path.
 
 The repo currently contains two kinds of systems:
 1) Java/Spring ingestion + MySQL persistence + simple CLI runners (Epic #1)

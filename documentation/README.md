@@ -2,9 +2,15 @@
 
 This repository has a dedicated documentation track for the KLGA same-day Tmax distribution system used for Polymarket-style bucket probabilities.
 
+It also includes a KNYC point-forecast/quantile track for the quantile+KNN+gate+rolling-conformal pipeline.
+
+It also includes a KNYC MOS-first backtesting and audit track for Kalshi execution simulation.
+
 Primary documentation folder:
 
 - `documentation/klga_same_day_tmax_distribution/`
+- `documentation/knyc_quantile_knn_conformal/`
+- `documentation/mos/`
 
 ## Required Read Order
 
@@ -26,6 +32,27 @@ Primary documentation folder:
 - Resolving user confusion about peak/delta/NLL semantics: read `02` (includes merged FAQ section).
 - Exporting data or training on another machine: read `07` (includes troubleshooting section).
 - Reviewing final results and full feature importance: read `09`.
+
+## KNYC Track
+
+- Entry: `documentation/knyc_quantile_knn_conformal/README.md`
+- Latest run record: `documentation/knyc_quantile_knn_conformal/00_run_record_2026-02-28.md`
+- MOS-first run record: `documentation/knyc_quantile_knn_conformal/01_run_record_2026-03-01_mos_first_plan.md`
+
+## MOS Backtesting Track
+
+- Entry: `documentation/mos/README.md`
+- Scope and objective: `documentation/mos/00_scope_and_objective.md`
+- Data contracts and mapping: `documentation/mos/01_data_contracts_and_file_mapping.md`
+- Backtest formulas: `documentation/mos/02_backtest_logic_and_formulas.md`
+- Sanity audit framework: `documentation/mos/03_sanity_audit_framework.md`
+- Current audited run: `documentation/mos/04_run_record_2026-03-01_entry1530z_cap400.md`
+- Leakage-free runtime matrix: `documentation/mos/06_run_record_2026-03-01_leakage_free_runtime_matrix.md`
+- Co-joined baseline run (`KNYC` + `KMIA`): `documentation/mos/07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
+- Latest strict co-joined run (fractional Kelly + outlier-filtered recalc): `documentation/mos/08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
+- Troubleshooting: `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
+
+When editing any bridge/backtest/trading code, the MOS track is mandatory reading in addition to the KLGA/KNYC docs.
 
 ## Non-Negotiable Policy
 

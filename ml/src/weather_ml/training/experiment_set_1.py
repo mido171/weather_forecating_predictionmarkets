@@ -57,6 +57,7 @@ from weather_ml.training.tabm_klga_from_exports import (
     _attach_run_file_handler,
     _load_daily_csv,
     _load_obs_csv,
+    _load_station_universe_csv,
     _require_export_files,
     _split_masks,
     _write_df_with_csv_parquet,
@@ -140,6 +141,7 @@ class DatasetContext:
     climo_meta: dict[str, Any]
     anomaly_meta: dict[str, Any]
     hmm_meta: dict[str, Any]
+    station_universe: dict[str, Any]
     daily_rows: int
     obs_rows: int
     forbidden_present: list[str]
@@ -270,6 +272,8 @@ def _label_alignment_gate(
     out_dir: Path,
     logger: logging.Logger,
 ) -> dict[str, Any]:
+    station_universe = _load_station_universe_csv(cfg.data_dir / "station_universe.csv")
+    target_short = station_universe.target_station_id.split(":", 1)[0]
     csv_path = cfg.data_dir / "daily_max_truth_klga.csv"
     raw = pd.read_csv(csv_path, low_memory=False)
     required = {"request_location_id", "target_date_local", "max_temp_f", "station_zoneid"}
@@ -288,7 +292,7 @@ def _label_alignment_gate(
     zone_series = df["station_zoneid"].astype(str).str.strip()
     zone_ok = zone_series.eq("America/New_York")
     request_ids = df["request_location_id"].astype(str).str.strip()
-    request_klga = request_ids.str.startswith("KLGA")
+    request_target = request_ids.str.startswith(target_short)
 
     dup_count = int(
         df.dropna(subset=["target_date_local"])
@@ -307,7 +311,8 @@ def _label_alignment_gate(
         "rows_in_split_window": int(
             ((df["target_date_local"] >= cfg.split.train_start) & (df["target_date_local"] <= cfg.split.test_end)).sum()
         ),
-        "station_id_klga_like_rows": int(request_klga.sum()),
+        "target_station_id": station_universe.target_station_id,
+        "station_id_target_like_rows": int(request_target.sum()),
         "station_zoneid_expected": "America/New_York",
         "station_zoneid_bad_rows": int((~zone_ok).sum()),
         "station_zoneid_distinct": sorted(zone_series.dropna().unique().tolist())[:50],
@@ -370,6 +375,12 @@ def _build_dataset_context(
     logger: logging.Logger,
 ) -> DatasetContext:
     _require_export_files(cfg.data_dir)
+    station_universe = _load_station_universe_csv(cfg.data_dir / "station_universe.csv")
+    logger.info(
+        "STATION_UNIVERSE target=%s neighbors=%s",
+        station_universe.target_station_id,
+        ",".join(station_universe.neighbor_station_ids),
+    )
     daily_df = _load_daily_csv(cfg.data_dir / "daily_max_truth_klga.csv")
     daily_df = daily_df[
         (daily_df["target_date_local"] >= cfg.split.train_start)
@@ -387,6 +398,8 @@ def _build_dataset_context(
         split=cfg.split,
         output_root=cfg.output_root,
         feature_contract_version=CONTRACT_ID_V3,
+        target_station_id=station_universe.target_station_id,
+        neighbor_station_ids=station_universe.neighbor_station_ids,
         include_feels_like=False,
         delta_objective="multiclass",
         delta_use_class_weights=True,
@@ -451,6 +464,8 @@ def _build_dataset_context(
     categorical_indices = [base_cols.index(c) for c in categorical_names]
     leakage_guards = {
         "asof_guard_failures": int(audit.get("asof_guard_failures", 0)),
+        "target_station_id": p_cfg.target_station_id,
+        "neighbor_station_ids": list(p_cfg.neighbor_station_ids),
         "feature_budget_base": int(len(base_cols)),
         "feature_budget_max": int(cfg.feature_budget_max),
         "categorical_map_guard": cat_guard,
@@ -474,6 +489,11 @@ def _build_dataset_context(
         climo_meta=climo_meta,
         anomaly_meta=anomaly_meta,
         hmm_meta=hmm_meta,
+        station_universe={
+            "target_station_id": station_universe.target_station_id,
+            "neighbor_station_ids": list(station_universe.neighbor_station_ids),
+            "all_station_ids": list(station_universe.all_station_ids),
+        },
         daily_rows=int(len(daily_df)),
         obs_rows=int(len(obs_df)),
         forbidden_present=forbidden_present,
@@ -1923,7 +1943,11 @@ def run_experiment_set_1(*, cfg: ExperimentSet1Config, logger: logging.Logger | 
     )
     label_gate = _label_alignment_gate(cfg=cfg, out_dir=gate_dir, logger=active_logger)
     ctx = _build_dataset_context(cfg=cfg, logger=active_logger)
-    p_cfg = PipelineConfig(split=cfg.split)
+    p_cfg = PipelineConfig(
+        split=cfg.split,
+        target_station_id=str(ctx.station_universe["target_station_id"]),
+        neighbor_station_ids=tuple(ctx.station_universe["neighbor_station_ids"]),
+    )
     slices = _prepare_split_slices(ctx=ctx, delta_class_max=int(p_cfg.delta_class_max))
 
     results: dict[str, ExperimentArtifacts] = {}

@@ -9,6 +9,7 @@ import gc
 import json
 import logging
 import math
+import sys
 import time
 
 import joblib
@@ -72,6 +73,15 @@ TABM_V3_CONTRACT_ID = "klga_same_day_tmax_dist_v3_tabular_nn"
 
 
 @dataclass(frozen=True)
+class ExportFileBundle:
+    bundle_root: Path
+    daily_path: Path
+    observations_path: Path
+    station_universe_path: Path
+    resolution_mode: str
+
+
+@dataclass(frozen=True)
 class TabMTrainingConfig:
     data_dir: Path
     output_root: Path
@@ -131,6 +141,16 @@ class LGBMExportsTrainingResult:
     metrics: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class StationUniverseSpec:
+    target_station_id: str
+    neighbor_station_ids: tuple[str, ...]
+
+    @property
+    def all_station_ids(self) -> tuple[str, ...]:
+        return (self.target_station_id,) + tuple(self.neighbor_station_ids)
+
+
 def _timestamp_id() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
@@ -184,10 +204,172 @@ def _set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def _require_export_files(data_dir: Path) -> None:
-    missing = [x for x in REQUIRED_EXPORT_FILES if not (data_dir / x).exists()]
+def _resolve_export_bundle_from_root(root: Path) -> ExportFileBundle | None:
+    root = root.resolve()
+
+    # Flat layout:
+    #   <root>/daily_max_truth_klga.csv
+    #   <root>/observations_30m_required_columns.csv
+    #   <root>/station_universe.csv
+    daily_flat = root / "daily_max_truth_klga.csv"
+    obs_flat = root / "observations_30m_required_columns.csv"
+    station_flat = root / "station_universe.csv"
+    if daily_flat.exists() and obs_flat.exists() and station_flat.exists():
+        return ExportFileBundle(
+            bundle_root=root,
+            daily_path=daily_flat,
+            observations_path=obs_flat,
+            station_universe_path=station_flat,
+            resolution_mode="flat",
+        )
+
+    # Split layout:
+    #   <root>/02_truth/daily_max_truth_klga.csv
+    #   <root>/03_observations/observations_30m_required_columns.csv
+    #   <root>/01_reference/station_universe.csv
+    daily_split = root / "02_truth" / "daily_max_truth_klga.csv"
+    obs_split = root / "03_observations" / "observations_30m_required_columns.csv"
+    station_split = root / "01_reference" / "station_universe.csv"
+    if daily_split.exists() and obs_split.exists() and station_split.exists():
+        return ExportFileBundle(
+            bundle_root=root,
+            daily_path=daily_split,
+            observations_path=obs_split,
+            station_universe_path=station_split,
+            resolution_mode="split_01_02_03",
+        )
+    return None
+
+
+def _bundle_similarity_score(bundle_root: Path, requested_data_dir: Path) -> int:
+    req_parts = [p.lower() for p in requested_data_dir.resolve().parts]
+    cand_parts = [p.lower() for p in bundle_root.resolve().parts]
+
+    common_prefix = 0
+    for a, b in zip(req_parts, cand_parts):
+        if a != b:
+            break
+        common_prefix += 1
+    overlap = len(set(req_parts).intersection(set(cand_parts)))
+    # Higher prefix/overlap is better; shorter paths are slightly preferred on ties.
+    return common_prefix * 100 + overlap * 10 - len(cand_parts)
+
+
+def _iter_files_named(root: Path, filename: str, max_depth: int = 6) -> list[Path]:
+    out: list[Path] = []
+    if not root.exists() or not root.is_dir():
+        return out
+
+    root = root.resolve()
+    root_depth = len(root.parts)
+    stack: list[Path] = [root]
+    needle = filename.lower()
+
+    while stack:
+        cur = stack.pop()
+        cur_depth = len(cur.parts) - root_depth
+        try:
+            entries = list(cur.iterdir())
+        except Exception:
+            continue
+        for entry in entries:
+            if entry.is_file():
+                if entry.name.lower() == needle:
+                    out.append(entry.resolve())
+                continue
+            if entry.is_dir() and cur_depth < max_depth:
+                stack.append(entry)
+    return out
+
+
+def _resolve_export_files(data_dir: Path, logger: logging.Logger | None = None) -> ExportFileBundle:
+    data_dir = data_dir.resolve()
+
+    direct = _resolve_export_bundle_from_root(data_dir)
+    if direct is not None:
+        if logger is not None:
+            logger.info(
+                "EXPORT_INPUT_RESOLUTION mode=%s bundle_root=%s daily=%s obs=%s station=%s",
+                direct.resolution_mode,
+                str(direct.bundle_root),
+                str(direct.daily_path),
+                str(direct.observations_path),
+                str(direct.station_universe_path),
+            )
+        return direct
+
+    candidate_bundles: dict[Path, ExportFileBundle] = {}
+    search_roots: list[Path] = [data_dir]
+    if data_dir.parent != data_dir:
+        search_roots.append(data_dir.parent.resolve())
+
+    visited_search_roots: set[Path] = set()
+    for search_root in search_roots:
+        search_root = search_root.resolve()
+        if search_root in visited_search_roots:
+            continue
+        visited_search_roots.add(search_root)
+        for station_file in _iter_files_named(search_root, "station_universe.csv", max_depth=6):
+            parent = station_file.parent
+            possible_roots = [parent, parent.parent]
+            for root in possible_roots:
+                bundle = _resolve_export_bundle_from_root(root)
+                if bundle is not None:
+                    candidate_bundles[bundle.bundle_root] = bundle
+
+    if not candidate_bundles:
+        raise FileNotFoundError(
+            f"Missing required export files in {data_dir}: {list(REQUIRED_EXPORT_FILES)}. "
+            f"Also failed to auto-discover a valid bundle under {data_dir} or its parent {data_dir.parent}."
+        )
+
+    ranked = sorted(
+        candidate_bundles.values(),
+        key=lambda b: _bundle_similarity_score(b.bundle_root, data_dir),
+        reverse=True,
+    )
+    chosen = ranked[0]
+
+    if logger is not None:
+        logger.warning(
+            "EXPORT_INPUT_AUTO_DISCOVERED requested_data_dir=%s chosen_bundle_root=%s mode=%s candidates=%d",
+            str(data_dir),
+            str(chosen.bundle_root),
+            chosen.resolution_mode,
+            len(ranked),
+        )
+        for i, c in enumerate(ranked[:5], start=1):
+            logger.warning(
+                "EXPORT_INPUT_CANDIDATE rank=%d score=%d bundle_root=%s mode=%s",
+                i,
+                _bundle_similarity_score(c.bundle_root, data_dir),
+                str(c.bundle_root),
+                c.resolution_mode,
+            )
+        logger.info(
+            "EXPORT_INPUT_RESOLUTION mode=%s bundle_root=%s daily=%s obs=%s station=%s",
+            chosen.resolution_mode,
+            str(chosen.bundle_root),
+            str(chosen.daily_path),
+            str(chosen.observations_path),
+            str(chosen.station_universe_path),
+        )
+    return chosen
+
+
+def _require_export_files(data_dir: Path, logger: logging.Logger | None = None) -> ExportFileBundle:
+    bundle = _resolve_export_files(data_dir, logger=logger)
+    required_paths = [
+        bundle.daily_path,
+        bundle.observations_path,
+        bundle.station_universe_path,
+    ]
+    missing = [str(p) for p in required_paths if not p.exists()]
     if missing:
-        raise FileNotFoundError(f"Missing required export files in {data_dir}: {missing}")
+        raise FileNotFoundError(
+            f"Resolved export bundle has missing files for requested data_dir={data_dir}: {missing}"
+        )
+    return bundle
 
 
 def _load_daily_csv(path: Path) -> pd.DataFrame:
@@ -214,7 +396,70 @@ def _load_obs_csv(path: Path) -> pd.DataFrame:
     df = df.dropna(subset=["valid_time_utc"]).copy()
     for c in ["temp", "dew_pt", "rh", "pressure", "vis", "wspd", "wdir", "gust", "precip_hrly", "uv_index", "feels_like"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    return df
+    repo_root = Path(__file__).resolve().parents[4]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    try:
+        from tools.data_sanitizer.data_sanitizer import (
+            load_rules,
+            read_station_universe,
+            sanitize_observations_dataframe,
+        )
+    except Exception:
+        return df
+
+    rules_path = repo_root / "tools" / "data_sanitizer" / "default_rules.yaml"
+    rules = load_rules(rules_path if rules_path.exists() else None)
+    station_universe_path = path.parent / "station_universe.csv"
+    station_universe = read_station_universe(station_universe_path if station_universe_path.exists() else None)
+    sanitized, _meta = sanitize_observations_dataframe(
+        df,
+        rules=rules,
+        station_universe=station_universe,
+        emit_flags=False,
+        drop_invalid_timestamps=True,
+        fill_wdir_from_cardinal=False,
+        enforce_30m_grid=False,
+        collect_triggered_rules=False,
+    )
+    sanitized["valid_time_utc"] = pd.to_datetime(sanitized["valid_time_utc"], utc=True, errors="coerce")
+    sanitized = sanitized.dropna(subset=["valid_time_utc"]).copy()
+    return sanitized
+
+
+def _load_station_universe_csv(path: Path) -> StationUniverseSpec:
+    df = pd.read_csv(path, low_memory=False)
+    required = {"request_location_id", "role"}
+    missing = sorted(required.difference(df.columns))
+    if missing:
+        raise ValueError(f"station_universe.csv missing columns: {missing}")
+
+    out = df.copy()
+    out["request_location_id"] = out["request_location_id"].astype(str).str.strip().str.upper()
+    out["role"] = out["role"].astype(str).str.strip().str.lower()
+    out = out[out["request_location_id"] != ""].copy()
+    out = out[out["role"].isin({"target", "neighbor"})].copy()
+    if out.empty:
+        raise ValueError("station_universe.csv has no usable rows after normalization.")
+
+    if out["request_location_id"].duplicated().any():
+        dups = sorted(out.loc[out["request_location_id"].duplicated(), "request_location_id"].unique().tolist())
+        raise ValueError(f"station_universe.csv has duplicate station ids: {dups}")
+
+    targets = out.loc[out["role"] == "target", "request_location_id"].tolist()
+    if len(targets) != 1:
+        raise ValueError(f"station_universe.csv must have exactly one target row, found {len(targets)}")
+    target = targets[0]
+
+    neighbors = sorted(out.loc[out["role"] == "neighbor", "request_location_id"].tolist())
+    neighbors = [sid for sid in neighbors if sid != target]
+    if not neighbors:
+        raise ValueError("station_universe.csv must include at least one neighbor station.")
+
+    return StationUniverseSpec(
+        target_station_id=target,
+        neighbor_station_ids=tuple(neighbors),
+    )
 
 
 def _split_masks(df: pd.DataFrame, split: SplitConfig) -> dict[str, np.ndarray]:
@@ -818,18 +1063,24 @@ def run_tabm_training_from_exports(
         )
 
     sidx, st0 = stage_start("validate_input_files")
-    _require_export_files(cfg.data_dir)
+    export_bundle = _require_export_files(cfg.data_dir, logger=active_logger)
     stage_end(sidx, "validate_input_files", st0)
 
     sidx, st0 = stage_start("load_raw_csvs")
-    daily_df = _load_daily_csv(cfg.data_dir / "daily_max_truth_klga.csv")
+    daily_df = _load_daily_csv(export_bundle.daily_path)
     daily_df = daily_df[
         (daily_df["target_date_local"] >= cfg.split.train_start)
         & (daily_df["target_date_local"] <= cfg.split.test_end)
     ].copy()
     if daily_df.empty:
         raise ValueError("No daily rows in split horizon.")
-    obs_df = _load_obs_csv(cfg.data_dir / "observations_30m_required_columns.csv")
+    obs_df = _load_obs_csv(export_bundle.observations_path)
+    station_universe = _load_station_universe_csv(export_bundle.station_universe_path)
+    active_logger.info(
+        "STATION_UNIVERSE target=%s neighbors=%s",
+        station_universe.target_station_id,
+        ",".join(station_universe.neighbor_station_ids),
+    )
     stage_end(
         sidx,
         "load_raw_csvs",
@@ -843,9 +1094,16 @@ def run_tabm_training_from_exports(
             split=cfg.split,
             output_root=cfg.output_root,
             feature_contract_version=TABM_V3_CONTRACT_ID,
+            target_station_id=station_universe.target_station_id,
+            neighbor_station_ids=station_universe.neighbor_station_ids,
         )
         if cfg.v3_feature_mode
-        else PipelineConfig(split=cfg.split, output_root=cfg.output_root)
+        else PipelineConfig(
+            split=cfg.split,
+            output_root=cfg.output_root,
+            target_station_id=station_universe.target_station_id,
+            neighbor_station_ids=station_universe.neighbor_station_ids,
+        )
     )
     calendar_df = make_calendar_grid(sorted(set(daily_df["target_date_local"])), tz=p_cfg.local_zone)
     start_obs_utc = pd.Timestamp(calendar_df["midnight_utc"].min()).tz_convert("UTC") - pd.Timedelta(hours=6)
@@ -1289,18 +1547,24 @@ def run_lgbm_training_from_exports(
         )
 
     sidx, st0 = stage_start("validate_input_files")
-    _require_export_files(cfg.data_dir)
+    export_bundle = _require_export_files(cfg.data_dir, logger=active_logger)
     stage_end(sidx, "validate_input_files", st0)
 
     sidx, st0 = stage_start("load_raw_csvs")
-    daily_df = _load_daily_csv(cfg.data_dir / "daily_max_truth_klga.csv")
+    daily_df = _load_daily_csv(export_bundle.daily_path)
     daily_df = daily_df[
         (daily_df["target_date_local"] >= cfg.split.train_start)
         & (daily_df["target_date_local"] <= cfg.split.test_end)
     ].copy()
     if daily_df.empty:
         raise ValueError("No daily rows in split horizon.")
-    obs_df = _load_obs_csv(cfg.data_dir / "observations_30m_required_columns.csv")
+    obs_df = _load_obs_csv(export_bundle.observations_path)
+    station_universe = _load_station_universe_csv(export_bundle.station_universe_path)
+    active_logger.info(
+        "STATION_UNIVERSE target=%s neighbors=%s",
+        station_universe.target_station_id,
+        ",".join(station_universe.neighbor_station_ids),
+    )
     stage_end(
         sidx,
         "load_raw_csvs",
@@ -1312,6 +1576,8 @@ def run_lgbm_training_from_exports(
     p_cfg = PipelineConfig(
         split=cfg.split,
         output_root=cfg.output_root,
+        target_station_id=station_universe.target_station_id,
+        neighbor_station_ids=station_universe.neighbor_station_ids,
         include_feels_like=cfg.include_feels_like,
         delta_objective=cfg.delta_objective,
         delta_use_class_weights=cfg.delta_use_class_weights,

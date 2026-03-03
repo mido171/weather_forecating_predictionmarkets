@@ -25,7 +25,6 @@ from .config import (
     INLAND_STATIONS,
     NORTH_INTERIOR_STATIONS,
     PipelineConfig,
-    TARGET_STATION_ID,
     URBAN_FRINGE_STATIONS,
 )
 from .logging_utils import ProgressTracker
@@ -1739,11 +1738,14 @@ def build_feature_rows(
     log_every_seconds: float = 20.0,
     materialize_chunk_rows: int = 2000,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
-    if TARGET_STATION_ID != cfg.target_station_id:
-        raise ValueError("Target station mismatch; KLGA must be canonical.")
-    station_set = set(cfg.all_station_ids)
-    if "KNYC:9:US" in station_set:
-        raise ValueError("Duplicate-source guard failed: KNYC must be excluded.")
+    station_ids = list(cfg.all_station_ids)
+    station_set = set(station_ids)
+    if len(station_set) != len(station_ids):
+        raise ValueError(f"Duplicate station ids in config.all_station_ids: {station_ids}")
+    if cfg.target_station_id not in station_set:
+        raise ValueError(f"Target station {cfg.target_station_id} missing from station universe.")
+    if cfg.target_station_id in set(cfg.neighbor_station_ids):
+        raise ValueError("Target station cannot also be listed as a neighbor.")
 
     missing_station_series = station_set.difference(station_series.keys())
     if missing_station_series:

@@ -1,0 +1,25 @@
+obs_csv: D:\Ahmed\data\kalshi\training_data\observations_30m_required_columns.csv
+truth_csv: D:\Ahmed\data\kalshi\training_data\KNYC_settled_tmax.csv
+station_universe: D:\Ahmed\data\kalshi\training_data\station_universe.csv
+schema_profile: null
+bucket_config: null
+market_odds_file: null
+decision_stockholm_time: "19:00"
+output_dir: D:\Ahmed\data\kalshi\Experiments\point_foreacast\E1
+skip_sanitization: false
+force_rebuild_features: true
+emit_global_diagnostics: true
+allow_debug_failure: false
+split:
+  train_start: "1973-01-01"
+  train_end: "2021-12-31"
+  dev_start: "2022-01-01"
+  dev_end: "2023-12-31"
+  test_start: "2024-01-01"
+  test_end: "2025-12-31"
+model:
+  quantiles: [0.01, 0.025, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.975, 0.99]
+  k_neighbors: 64
+  random_seed: 42
+  conformal_window: 365
+  conformal_min_warmup: 120

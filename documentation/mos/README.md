@@ -26,12 +26,23 @@ It also documents:
 
 ## Current Canonical Reference
 
-Current strict reference used for latest reporting/UI:
+Current strict methodology reference:
 
 - run record:
   - `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
 - core side-aware table:
   - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc_with_balance.csv`
+
+Current live-script replay/UI dataset:
+
+- run record:
+  - `documentation/mos/11_run_record_2026-03-02_cojoined_blend12_live_script_replay.md`
+- side-aware table (window `2024-2025`):
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_with_balance.csv`
+- windowed UI + 2026 extension run record:
+  - `documentation/mos/12_run_record_2026-03-02_ui_toggle_and_2026_live_script_replay.md`
+- side-aware table (window `2026`):
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026_with_balance.csv`
 
 ## Mandatory Read Order
 
@@ -68,6 +79,12 @@ Current strict reference used for latest reporting/UI:
   - historical strict run (fractional-Kelly + outlier recalc, no open-delay).
 - `09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
   - current strict reference (open+30m + strict filters + post-processed recalc).
+- `10_run_record_2026-03-02_model_export_and_live_inference.md`
+  - explicit model lineage for `ev0p30_win75_risk6_cap500_minprice10c`, retrain/export record, and live inference leakage-proof implementation details.
+- `11_run_record_2026-03-02_cojoined_blend12_live_script_replay.md`
+  - co-joined backtest replay where per-day forecasts are generated from the live inference script instead of parquet prediction files.
+- `12_run_record_2026-03-02_ui_toggle_and_2026_live_script_replay.md`
+  - 2026 co-joined replay extension and UI dataset toggle (`2024-2025` vs `2026`).
 
 ## Canonical Scripts
 
@@ -123,6 +140,35 @@ Note:
   - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc.json`
 - strict side-aware table:
   - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc_with_balance.csv`
+
+### Model Export + Live Inference (KNYC + KMIA blend_12)
+
+- run record:
+  - `documentation/mos/10_run_record_2026-03-02_model_export_and_live_inference.md`
+- lineage/export manifest:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS_RETRAIN_20260302\model_lineage_and_exports_for_cojoined_ev0p30_win75_risk6.json`
+
+### Co-Joined Live-Script Replay (KNYC+KMIA, open+30m, fixed risk)
+
+- run record:
+  - `documentation/mos/11_run_record_2026-03-02_cojoined_blend12_live_script_replay.md`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script.json`
+- sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script.json`
+- side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_with_balance.csv`
+
+### UI Windowed Datasets (2024-2025 + 2026)
+
+- run record:
+  - `documentation/mos/12_run_record_2026-03-02_ui_toggle_and_2026_live_script_replay.md`
+- 2026 summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026.json`
+- 2026 sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026.json`
+- 2026 side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026_with_balance.csv`
 
 ## Claim Hygiene Rule
 

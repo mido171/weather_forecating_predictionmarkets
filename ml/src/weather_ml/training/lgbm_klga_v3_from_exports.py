@@ -43,6 +43,7 @@ from weather_ml.training.tabm_klga_from_exports import (
     _attach_run_file_handler,
     _load_daily_csv,
     _load_obs_csv,
+    _load_station_universe_csv,
     _require_export_files,
     _split_masks,
     _write_df_with_csv_parquet,
@@ -436,6 +437,12 @@ def run_lgbm_v3_training_from_exports(*, cfg: LGBMV3TrainingConfig, logger: logg
     if daily_df.empty:
         raise ValueError("No daily rows in split horizon.")
     obs_df = _load_obs_csv(cfg.data_dir / "observations_30m_required_columns.csv")
+    station_universe = _load_station_universe_csv(cfg.data_dir / "station_universe.csv")
+    active_logger.info(
+        "STATION_UNIVERSE target=%s neighbors=%s",
+        station_universe.target_station_id,
+        ",".join(station_universe.neighbor_station_ids),
+    )
     forbidden_present = sorted(BANNED_OBS_COLUMNS.intersection(set(obs_df.columns)))
     if forbidden_present:
         raise AssertionError(f"Forbidden observation columns present: {forbidden_present}")
@@ -446,6 +453,8 @@ def run_lgbm_v3_training_from_exports(*, cfg: LGBMV3TrainingConfig, logger: logg
         split=cfg.split,
         output_root=cfg.output_root,
         feature_contract_version=CONTRACT_ID_V3,
+        target_station_id=station_universe.target_station_id,
+        neighbor_station_ids=station_universe.neighbor_station_ids,
         include_feels_like=cfg.include_feels_like,
         delta_objective=cfg.delta_objective,
         delta_use_class_weights=cfg.delta_use_class_weights,

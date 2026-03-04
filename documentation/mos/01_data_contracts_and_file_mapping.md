@@ -2,6 +2,11 @@
 
 This document is the schema and mapping contract for MOS backtesting inputs/outputs.
 
+Canonical-source note:
+
+1. For station-onboarding and canonical MOS/NWS history, `D:\Ahmed\data\sqlite` is the primary read source.
+2. CSV inputs referenced below are compatibility artifacts derived from SQLite for current downstream script interfaces.
+
 ## 1) Prediction Input Contracts
 
 ### 1.1 Required Prediction Columns
@@ -33,6 +38,23 @@ Co-joined blend_12:
 - KMIA:
   - `D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\dev_predictions.parquet`
   - `D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\test_predictions.parquet`
+- KMDW:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\dev_predictions.parquet`
+  - `D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\test_predictions.parquet`
+
+### 1.4 Generic Station Mapping Inputs (Co-Joined Script)
+
+`backtesting/mos_blend12_knyc_kmia_cojoined_audit.py` now supports station-agnostic maps via:
+
+- `--pred-dev-by-station-json`
+- `--pred-test-by-station-json`
+- `--truth-csv-by-station-json`
+- `--kalshi-root-by-station-json`
+- `--file-prefix-by-station-json`
+
+Values may be:
+1. inline JSON object text, or
+2. path to a JSON file containing `{ "STATION": "path" }`.
 
 ## 2) Market Input Contracts
 
@@ -40,6 +62,7 @@ Co-joined blend_12:
 
 - KNYC: `KNYC_YYYYMMDD.csv`
 - KMIA: `KMIA_YYYYMMDD.csv`
+- KMDW: `KMDW_YYYYMMDD.csv`
 
 ### 2.2 Required Market Columns
 
@@ -58,6 +81,8 @@ Co-joined dedicated roots:
   - `D:\Ahmed\data\kalshi\kalshi_history\kxhighny_2024_10_01_to_2025_12_31`
 - KMIA:
   - `D:\Ahmed\data\kalshi\kalshi_history\kxhighmia_2024_10_01_to_2025_12_31`
+- KMDW:
+  - `D:\Ahmed\data\kalshi\kalshi_history\kxhighchi_2024_10_01_to_2026_03_03`
 
 ## 3) Date Mapping Rules
 

@@ -19,7 +19,6 @@ from sklearn.metrics import log_loss
 
 LOGGER = logging.getLogger("knyc_mos")
 EPS = 1e-9
-NY_TZ = "America/New_York"
 QUANTILES = [0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95]
 W_GRID = [0.0, 0.25, 0.5, 0.75, 1.0]
 K_GRID = [16, 32, 64]
@@ -70,17 +69,17 @@ def load_truth(path: Path) -> pd.DataFrame:
     return t
 
 
-def load_mos(path: Path) -> pd.DataFrame:
+def load_mos(path: Path, station_zoneid: str) -> pd.DataFrame:
     m = pd.read_csv(path)
     m["runtime_utc"] = pd.to_datetime(m["runtime_utc"], errors="coerce", utc=True)
     m["forecast_time_utc"] = pd.to_datetime(m["forecast_time_utc"], errors="coerce", utc=True)
     m = m.dropna(subset=["runtime_utc", "forecast_time_utc", "model"])
-    m["runtime_ny"] = m["runtime_utc"].dt.tz_convert(NY_TZ)
-    m["forecast_ny"] = m["forecast_time_utc"].dt.tz_convert(NY_TZ)
+    m["runtime_local"] = m["runtime_utc"].dt.tz_convert(station_zoneid)
+    m["forecast_local"] = m["forecast_time_utc"].dt.tz_convert(station_zoneid)
     m["runtime_hour_utc"] = m["runtime_utc"].dt.hour.astype(int)
-    m["target_date_local"] = m["forecast_ny"].dt.tz_localize(None).dt.normalize()
-    m["runtime_date_local"] = m["runtime_ny"].dt.tz_localize(None).dt.normalize()
-    m["forecast_hour_local"] = m["forecast_ny"].dt.hour + m["forecast_ny"].dt.minute / 60.0
+    m["target_date_local"] = m["forecast_local"].dt.tz_localize(None).dt.normalize()
+    m["runtime_date_local"] = m["runtime_local"].dt.tz_localize(None).dt.normalize()
+    m["forecast_hour_local"] = m["forecast_local"].dt.hour + m["forecast_local"].dt.minute / 60.0
     for c in ["tmp", "dpt", "sky", "wdr", "wsp", "gst", "p06", "p12", "t06", "t12", "n_x", "n_n"]:
         if c not in m.columns:
             m[c] = np.nan
@@ -109,7 +108,7 @@ def interp(h: np.ndarray, v: np.ndarray, target: float) -> float:
     return float(np.interp(target, h2, v2))
 
 
-def build_slice(mos: pd.DataFrame, truth: pd.DataFrame, s: SliceDef) -> pd.DataFrame:
+def build_slice(mos: pd.DataFrame, truth: pd.DataFrame, s: SliceDef, station_zoneid: str) -> pd.DataFrame:
     d = mos[(mos["model"] == s.model) & (mos["runtime_hour_utc"] == s.runtime_hour)].copy()
     if d.empty:
         return d
@@ -136,7 +135,7 @@ def build_slice(mos: pd.DataFrame, truth: pd.DataFrame, s: SliceDef) -> pd.DataF
             wcos = float(np.mean(np.cos(rad)))
         else:
             wsin, wcos = float("nan"), float("nan")
-        noon = pd.Timestamp(tdate).tz_localize(NY_TZ) + pd.Timedelta(hours=12)
+        noon = pd.Timestamp(tdate).tz_localize(station_zoneid) + pd.Timedelta(hours=12)
         lead = (noon.tz_convert("UTC") - runtime_utc).total_seconds() / 3600.0
         doy = pd.Timestamp(tdate).dayofyear
         rad = 2 * math.pi * doy / 365.25
@@ -441,7 +440,9 @@ def tune_w(y: np.ndarray, a: np.ndarray, b: np.ndarray) -> float:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="KNYC MOS-first full run")
+    parser = argparse.ArgumentParser(description="Station MOS-first full run")
+    parser.add_argument("--station-id", default="KNYC")
+    parser.add_argument("--station-zoneid", default="America/New_York")
     parser.add_argument("--mos-csv", default=r"D:\Ahmed\data\kalshi\training_data\KNYC_mos_archive_2000_2025.csv.gz")
     parser.add_argument("--truth-csv", default=r"D:\Ahmed\data\kalshi\training_data\KNYC_settled_tmax.csv")
     parser.add_argument("--out-root", default=r"D:\Ahmed\data\kalshi\Experiments\MOS")
@@ -462,7 +463,7 @@ def main() -> None:
     d9 = ensure_dir(out / "09_reports")
 
     truth = load_truth(Path(args.truth_csv))
-    mos = load_mos(Path(args.mos_csv))
+    mos = load_mos(Path(args.mos_csv), str(args.station_zoneid))
     features = [
         "mos_tmax_raw", "mos_tmin_raw", "mos_dtr_raw", "mos_tmax_hour_local", "tmp_09", "tmp_12", "tmp_15", "tmp_18", "tmp_21",
         "heat_09_15", "heat_12_18", "cool_18_21", "nx_high", "nx_low", "dpt_09", "dpt_15", "dpt_21", "dep_15", "dep_21", "dpt_change_09_15",
@@ -477,7 +478,7 @@ def main() -> None:
 
     for s in SLICE_DEFS:
         LOGGER.info("Building %s", s.sid)
-        sdf = build_slice(mos, truth, s)
+        sdf = build_slice(mos, truth, s, str(args.station_zoneid))
         slices[s.sid] = sdf
         ensure_dir(d0 / "slices")
         sdf.to_parquet(d0 / "slices" / f"{s.sid}.parquet", index=False)

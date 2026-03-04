@@ -35,6 +35,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from ml_live.python.fetch.iem_mos import fetch_mos_payload, mos_window_utc
+from tools.live import mos_blend12_bundle as blend12_bundle
 
 
 DEFAULT_LIVE_ROOT = Path(r"D:\Ahmed\data\live\mos_quantile_live_inference")
@@ -42,57 +43,22 @@ DEFAULT_IEM_BASE_URL = "https://mesonet.agron.iastate.edu"
 
 DEFAULT_MODEL_BUNDLE_KNYC = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS\03_blends\blend_12\live_model_bundle_v2_20260302")
 DEFAULT_MODEL_BUNDLE_KMIA = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\live_model_bundle_v2_20260302")
+DEFAULT_MODEL_BUNDLE_KMDW = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\live_model_bundle_v2_20260304")
 
 DEFAULT_MOS_ARCHIVE_KNYC = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KNYC_mos_archive_2000_2025.csv.gz")
 DEFAULT_MOS_ARCHIVE_KMIA = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KMIA_mos_archive_2000_2025.csv.gz")
+DEFAULT_MOS_ARCHIVE_KMDW = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KMDW_mos_archive_2002_2026.csv.gz")
 DEFAULT_TRUTH_KNYC = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KNYC_settled_tmax.csv")
 DEFAULT_TRUTH_KMIA = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KMIA_settled_tmax.csv")
+DEFAULT_TRUTH_KMDW = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KMDW_settled_tmax_2002_2026.csv")
 
-DEFAULT_SERIES_BY_STATION = {"KNYC": "KXHIGHNY", "KMIA": "KXHIGHMIA"}
-DEFAULT_FILE_PREFIX_BY_STATION = {"KNYC": "KNYC", "KMIA": "KMIA"}
-DEFAULT_ZONE_BY_STATION = {"KNYC": "America/New_York", "KMIA": "America/New_York"}
+DEFAULT_SERIES_BY_STATION = {"KNYC": "KXHIGHNY", "KMIA": "KXHIGHMIA", "KMDW": "KXHIGHCHI"}
+DEFAULT_FILE_PREFIX_BY_STATION = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW"}
+DEFAULT_ZONE_BY_STATION = {"KNYC": "America/New_York", "KMIA": "America/New_York", "KMDW": "America/Chicago"}
 
-QUANTILES = [0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95]
-QUANTILE_COLUMNS = [f"q_{q:.2f}" for q in QUANTILES]
-
-FEATURE_COLUMNS = [
-    "mos_tmax_raw",
-    "mos_tmin_raw",
-    "mos_dtr_raw",
-    "mos_tmax_hour_local",
-    "tmp_09",
-    "tmp_12",
-    "tmp_15",
-    "tmp_18",
-    "tmp_21",
-    "heat_09_15",
-    "heat_12_18",
-    "cool_18_21",
-    "nx_high",
-    "nx_low",
-    "dpt_09",
-    "dpt_15",
-    "dpt_21",
-    "dep_15",
-    "dep_21",
-    "dpt_change_09_15",
-    "cloud_mean_12_21",
-    "cloud_max_12_21",
-    "cloud_change_12_18",
-    "p06_max_day",
-    "p12_max_day",
-    "t06_max_day",
-    "t12_max_day",
-    "wsp_mean_12_21",
-    "wsp_max_day",
-    "wdr_sin_mean_12_21",
-    "wdr_cos_mean_12_21",
-    "gst_max_day",
-    "doy_sin",
-    "doy_cos",
-    "runtime_hour_utc",
-    "lead_hours_to_local_noon",
-]
+QUANTILES = list(blend12_bundle.QUANTILES)
+QUANTILE_COLUMNS = list(blend12_bundle.QUANTILE_COLUMNS)
+FEATURE_COLUMNS = list(blend12_bundle.FEATURE_COLUMNS)
 
 RAW_FIELD_NAMES = [
     "tmp",
@@ -126,8 +92,7 @@ class SliceDef:
 
 
 SLICE_DEFS = [
-    SliceDef("gfs_12", "GFS", 12, "2009-01-01"),
-    SliceDef("nam_12", "NAM", 12, "2009-01-01"),
+    SliceDef(s.sid, s.model, s.runtime_hour, s.train_start) for s in blend12_bundle.SLICE_DEFS
 ]
 
 
@@ -642,94 +607,14 @@ def train_slice_bundle(df: pd.DataFrame, sdef: SliceDef, logger: logging.Logger)
 
 
 def train_and_write_bundle(cfg: StationConfig, logger: logging.Logger) -> None:
-    if not cfg.mos_archive_path.exists():
-        raise FileNotFoundError(f"Missing MOS archive CSV for bundle training: {cfg.mos_archive_path}")
-    if not cfg.truth_csv_path.exists():
-        raise FileNotFoundError(f"Missing truth CSV for bundle training: {cfg.truth_csv_path}")
-
-    logger.info("TRAIN_BUNDLE_START station=%s out=%s", cfg.station_id, str(cfg.bundle_dir))
-
-    truth = load_truth(cfg.truth_csv_path)
-    mos = load_mos(cfg.mos_archive_path)
-
-    per_slice: Dict[str, Dict[str, Any]] = {}
-    for sdef in SLICE_DEFS:
-        sdf = build_slice(mos, truth, sdef)
-        if sdf.empty:
-            raise ValueError(f"No rows after slice build for station={cfg.station_id} slice={sdef.sid}")
-        per_slice[sdef.sid] = train_slice_bundle(sdf, sdef, logger)
-
-    gd = per_slice["gfs_12"]["dev"]
-    nd = per_slice["nam_12"]["dev"]
-    dev = gd.merge(nd, on=["target_date_local", "y_tmax"], suffixes=("_g", "_n"))
-    if dev.empty:
-        raise ValueError(f"Empty merged dev set for station={cfg.station_id} while tuning blend weights")
-
-    yv = dev["y_tmax"].to_numpy(dtype=float)
-    blend_point_weight = tune_w(yv, dev["pred_point_g"].to_numpy(dtype=float), dev["pred_point_n"].to_numpy(dtype=float))
-
-    blend_quantile_weights: Dict[float, float] = {}
-    for q in QUANTILES:
-        c0, c1 = f"q_{q:.2f}_g", f"q_{q:.2f}_n"
-        best_w, best_pin = blend_point_weight, 1e18
-        for wv in [0.0, 0.25, 0.5, 0.75, 1.0]:
-            blended = wv * dev[c0].to_numpy(dtype=float) + (1 - wv) * dev[c1].to_numpy(dtype=float)
-            pb = pinball(yv, blended, q)
-            if pb < best_pin:
-                best_w, best_pin = wv, pb
-        blend_quantile_weights[q] = float(best_w)
-
-    cfg.bundle_dir.mkdir(parents=True, exist_ok=True)
-
-    artifact_hashes: Dict[str, str] = {}
-    for sid in ["gfs_12", "nam_12"]:
-        sdir = cfg.bundle_dir / sid
-        sdir.mkdir(parents=True, exist_ok=True)
-
-        point_path = sdir / "point_model.joblib"
-        joblib.dump(per_slice[sid]["point_model"], point_path)
-        artifact_hashes[str(point_path)] = sha256_file(point_path)
-
-        med_path = sdir / "feature_medians.json"
-        med_path.write_text(json.dumps(per_slice[sid]["medians"], indent=2, sort_keys=True), encoding="utf-8")
-        artifact_hashes[str(med_path)] = sha256_file(med_path)
-
-        for q in QUANTILES:
-            q_path = sdir / f"q_{q:.2f}.joblib"
-            joblib.dump(per_slice[sid]["quantile_models"][q], q_path)
-            artifact_hashes[str(q_path)] = sha256_file(q_path)
-
-    blend_weights_path = cfg.bundle_dir / "blend_weights.json"
-    blend_weights_path.write_text(
-        json.dumps(
-            {
-                "point": blend_point_weight,
-                "quantiles": {f"{q:.2f}": blend_quantile_weights[q] for q in QUANTILES},
-            },
-            indent=2,
-            sort_keys=True,
-        ),
-        encoding="utf-8",
+    blend12_bundle.train_and_write_bundle(
+        station_id=cfg.station_id,
+        station_zoneid=cfg.zoneid,
+        mos_archive_path=cfg.mos_archive_path,
+        truth_csv_path=cfg.truth_csv_path,
+        bundle_dir=cfg.bundle_dir,
+        logger=logger,
     )
-    artifact_hashes[str(blend_weights_path)] = sha256_file(blend_weights_path)
-
-    manifest = {
-        "schema": "mos_blend12_live_bundle_v1",
-        "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "station_id": cfg.station_id,
-        "inputs": {
-            "mos_archive_path": str(cfg.mos_archive_path),
-            "mos_archive_sha256": sha256_file(cfg.mos_archive_path),
-            "truth_csv_path": str(cfg.truth_csv_path),
-            "truth_csv_sha256": sha256_file(cfg.truth_csv_path),
-        },
-        "blend_weights": {
-            "point": blend_point_weight,
-            "quantiles": {f"{q:.2f}": blend_quantile_weights[q] for q in QUANTILES},
-        },
-        "artifacts_sha256": artifact_hashes,
-    }
-    (cfg.bundle_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
 
 
 def load_bundle(cfg: StationConfig, auto_train_if_missing: bool, logger: logging.Logger) -> StationBundle:
@@ -738,44 +623,15 @@ def load_bundle(cfg: StationConfig, auto_train_if_missing: bool, logger: logging
         if not auto_train_if_missing:
             raise FileNotFoundError(f"Missing model bundle manifest: {manifest_path}")
         train_and_write_bundle(cfg, logger)
-
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-
-    point_models: Dict[str, Any] = {}
-    quantile_models: Dict[str, Dict[float, Any]] = {}
-    medians: Dict[str, Dict[str, float]] = {}
-    artifact_hashes: Dict[str, str] = {}
-
-    for sid in ["gfs_12", "nam_12"]:
-        sdir = cfg.bundle_dir / sid
-        point_path = sdir / "point_model.joblib"
-        point_models[sid] = joblib.load(point_path)
-        artifact_hashes[str(point_path)] = sha256_file(point_path)
-
-        med_path = sdir / "feature_medians.json"
-        medians[sid] = {k: float(v) for k, v in json.loads(med_path.read_text(encoding="utf-8")).items()}
-        artifact_hashes[str(med_path)] = sha256_file(med_path)
-
-        qmods: Dict[float, Any] = {}
-        for q in QUANTILES:
-            q_path = sdir / f"q_{q:.2f}.joblib"
-            qmods[q] = joblib.load(q_path)
-            artifact_hashes[str(q_path)] = sha256_file(q_path)
-        quantile_models[sid] = qmods
-
-    bw = json.loads((cfg.bundle_dir / "blend_weights.json").read_text(encoding="utf-8"))
-    blend_point = float(bw.get("point", 0.5))
-    bq_raw = bw.get("quantiles", {}) or {}
-    blend_quantiles = {q: float(bq_raw.get(f"{q:.2f}", blend_point)) for q in QUANTILES}
-
+    b = blend12_bundle.load_bundle(cfg.bundle_dir)
     return StationBundle(
-        point_models=point_models,
-        quantile_models=quantile_models,
-        medians=medians,
-        blend_point_weight=blend_point,
-        blend_quantile_weights=blend_quantiles,
-        manifest=manifest,
-        artifact_hashes=artifact_hashes,
+        point_models=b.point_models,
+        quantile_models=b.quantile_models,
+        medians=b.medians,
+        blend_point_weight=b.blend_point_weight,
+        blend_quantile_weights=b.blend_quantile_weights,
+        manifest=b.manifest,
+        artifact_hashes=b.artifact_hashes,
     )
 
 
@@ -1229,8 +1085,136 @@ def build_feature_evidence(
     return out
 
 
+def _require_arg(name: str, value: Optional[str]) -> str:
+    out = str(value or "").strip()
+    if not out:
+        raise ValueError(f"--{name} is required for single-station mode")
+    return out
+
+
+def _station_config_from_obj(payload: Dict[str, Any], live_root: Path) -> StationConfig:
+    station_id = str(payload.get("station_id") or "").strip().upper()
+    zoneid = str(payload.get("zoneid") or "").strip()
+    series = str(payload.get("series") or "").strip().upper()
+    file_prefix = str(payload.get("file_prefix") or station_id).strip().upper()
+    if not station_id or not zoneid or not series:
+        raise ValueError("station config requires station_id, zoneid, and series")
+    bundle_raw = str(payload.get("bundle_dir") or "").strip()
+    mos_raw = str(payload.get("mos_archive_path") or payload.get("mos_archive") or "").strip()
+    truth_raw = str(payload.get("truth_csv_path") or payload.get("truth_csv") or "").strip()
+    market_root_raw = str(payload.get("market_root") or "").strip()
+    market_root = Path(market_root_raw).expanduser() if market_root_raw else (live_root / "kalshi" / station_id.lower())
+    if not bundle_raw:
+        raise ValueError(f"station config missing bundle_dir for station={station_id}")
+    if not mos_raw:
+        raise ValueError(f"station config missing mos_archive_path for station={station_id}")
+    if not truth_raw:
+        raise ValueError(f"station config missing truth_csv_path for station={station_id}")
+    bundle_dir = Path(bundle_raw).expanduser()
+    mos_archive_path = Path(mos_raw).expanduser()
+    truth_csv_path = Path(truth_raw).expanduser()
+    return StationConfig(
+        station_id=station_id,
+        zoneid=zoneid,
+        series=series,
+        file_prefix=file_prefix,
+        market_root=market_root,
+        bundle_dir=bundle_dir,
+        mos_archive_path=mos_archive_path,
+        truth_csv_path=truth_csv_path,
+    )
+
+
+def resolve_station_configs(args: argparse.Namespace, live_root: Path) -> List[StationConfig]:
+    if args.station_configs_json:
+        path = Path(args.station_configs_json)
+        if not path.exists():
+            raise FileNotFoundError(f"--station-configs-json not found: {path}")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        rows: List[Dict[str, Any]] = []
+        if isinstance(payload, dict):
+            for sid, cfg in payload.items():
+                if isinstance(cfg, dict):
+                    row = dict(cfg)
+                    row.setdefault("station_id", sid)
+                    rows.append(row)
+        elif isinstance(payload, list):
+            rows = [x for x in payload if isinstance(x, dict)]
+        else:
+            raise ValueError("--station-configs-json must contain a JSON object or array")
+        if not rows:
+            raise ValueError("--station-configs-json did not contain any station configs")
+        configs = [_station_config_from_obj(x, live_root) for x in rows]
+    elif args.station_id:
+        station_id = str(args.station_id).strip().upper()
+        zoneid = _require_arg("station-zoneid", args.station_zoneid)
+        series = _require_arg("series", args.series).upper()
+        file_prefix = _require_arg("file-prefix", args.file_prefix).upper()
+        bundle_dir = Path(_require_arg("bundle-dir", args.bundle_dir))
+        mos_archive_path = Path(_require_arg("mos-archive", args.mos_archive))
+        truth_csv_path = Path(_require_arg("truth-csv", args.truth_csv))
+        market_root = Path(str(args.market_root).strip()) if args.market_root else (live_root / "kalshi" / station_id.lower())
+        configs = [
+            StationConfig(
+                station_id=station_id,
+                zoneid=zoneid,
+                series=series,
+                file_prefix=file_prefix,
+                market_root=market_root,
+                bundle_dir=bundle_dir,
+                mos_archive_path=mos_archive_path,
+                truth_csv_path=truth_csv_path,
+            )
+        ]
+    else:
+        market_root_knyc = Path(args.market_root_knyc) if args.market_root_knyc else (live_root / "kalshi" / "knyc")
+        market_root_kmia = Path(args.market_root_kmia) if args.market_root_kmia else (live_root / "kalshi" / "kmia")
+        market_root_kmdw = Path(args.market_root_kmdw) if args.market_root_kmdw else (live_root / "kalshi" / "kmdw")
+        configs = [
+            StationConfig(
+                station_id="KMIA",
+                zoneid=DEFAULT_ZONE_BY_STATION["KMIA"],
+                series=DEFAULT_SERIES_BY_STATION["KMIA"],
+                file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KMIA"],
+                market_root=market_root_kmia,
+                bundle_dir=Path(args.bundle_dir_kmia),
+                mos_archive_path=Path(args.mos_archive_kmia),
+                truth_csv_path=Path(args.truth_csv_kmia),
+            ),
+            StationConfig(
+                station_id="KMDW",
+                zoneid=DEFAULT_ZONE_BY_STATION["KMDW"],
+                series=DEFAULT_SERIES_BY_STATION["KMDW"],
+                file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KMDW"],
+                market_root=market_root_kmdw,
+                bundle_dir=Path(args.bundle_dir_kmdw),
+                mos_archive_path=Path(args.mos_archive_kmdw),
+                truth_csv_path=Path(args.truth_csv_kmdw),
+            ),
+            StationConfig(
+                station_id="KNYC",
+                zoneid=DEFAULT_ZONE_BY_STATION["KNYC"],
+                series=DEFAULT_SERIES_BY_STATION["KNYC"],
+                file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KNYC"],
+                market_root=market_root_knyc,
+                bundle_dir=Path(args.bundle_dir_knyc),
+                mos_archive_path=Path(args.mos_archive_knyc),
+                truth_csv_path=Path(args.truth_csv_knyc),
+            ),
+        ]
+
+    seen: set[str] = set()
+    deduped: List[StationConfig] = []
+    for cfg in configs:
+        if cfg.station_id in seen:
+            raise ValueError(f"Duplicate station_id in config set: {cfg.station_id}")
+        seen.add(cfg.station_id)
+        deduped.append(cfg)
+    return deduped
+
+
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Live leakage-safe MOS blend12 inference (KNYC + KMIA).")
+    p = argparse.ArgumentParser(description="Live leakage-safe MOS blend12 inference (station-generic).")
     p.add_argument("--target-date", required=True)
     p.add_argument("--runtime-policy", choices=["blend12_tminus1_1200z"], default="blend12_tminus1_1200z")
     p.add_argument("--entry-hour-z", type=int, default=12)
@@ -1243,10 +1227,13 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("--bundle-dir-knyc", default=str(DEFAULT_MODEL_BUNDLE_KNYC))
     p.add_argument("--bundle-dir-kmia", default=str(DEFAULT_MODEL_BUNDLE_KMIA))
+    p.add_argument("--bundle-dir-kmdw", default=str(DEFAULT_MODEL_BUNDLE_KMDW))
     p.add_argument("--mos-archive-knyc", default=str(DEFAULT_MOS_ARCHIVE_KNYC))
     p.add_argument("--mos-archive-kmia", default=str(DEFAULT_MOS_ARCHIVE_KMIA))
+    p.add_argument("--mos-archive-kmdw", default=str(DEFAULT_MOS_ARCHIVE_KMDW))
     p.add_argument("--truth-csv-knyc", default=str(DEFAULT_TRUTH_KNYC))
     p.add_argument("--truth-csv-kmia", default=str(DEFAULT_TRUTH_KMIA))
+    p.add_argument("--truth-csv-kmdw", default=str(DEFAULT_TRUTH_KMDW))
 
     p.add_argument("--auto-train-bundle", dest="auto_train_bundle", action="store_true")
     p.add_argument("--no-auto-train-bundle", dest="auto_train_bundle", action="store_false")
@@ -1254,6 +1241,16 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("--market-root-knyc", default=None)
     p.add_argument("--market-root-kmia", default=None)
+    p.add_argument("--market-root-kmdw", default=None)
+    p.add_argument("--station-configs-json", default=None)
+    p.add_argument("--station-id", default=None, help="Single-station mode station id (e.g. KATL)")
+    p.add_argument("--station-zoneid", default=None, help="Single-station mode timezone (e.g. America/New_York)")
+    p.add_argument("--series", default=None, help="Single-station mode Kalshi series ticker")
+    p.add_argument("--file-prefix", default=None, help="Single-station mode market file prefix (e.g. KATL)")
+    p.add_argument("--bundle-dir", default=None, help="Single-station mode bundle directory")
+    p.add_argument("--mos-archive", default=None, help="Single-station mode MOS archive CSV path")
+    p.add_argument("--truth-csv", default=None, help="Single-station mode truth CSV path")
+    p.add_argument("--market-root", default=None, help="Single-station mode Kalshi minute root")
     p.add_argument("--auto-download-market", dest="auto_download_market", action="store_true")
     p.add_argument("--no-auto-download-market", dest="auto_download_market", action="store_false")
     p.set_defaults(auto_download_market=True)
@@ -1293,31 +1290,7 @@ def main() -> int:
     if args.auto_train_bundle:
         logger.warning("AUTO_TRAIN_BUNDLE is enabled; missing bundles will be trained.")
 
-    market_root_knyc = Path(args.market_root_knyc) if args.market_root_knyc else (live_root / "kalshi" / "knyc")
-    market_root_kmia = Path(args.market_root_kmia) if args.market_root_kmia else (live_root / "kalshi" / "kmia")
-
-    station_cfgs = [
-        StationConfig(
-            station_id="KMIA",
-            zoneid=DEFAULT_ZONE_BY_STATION["KMIA"],
-            series=DEFAULT_SERIES_BY_STATION["KMIA"],
-            file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KMIA"],
-            market_root=market_root_kmia,
-            bundle_dir=Path(args.bundle_dir_kmia),
-            mos_archive_path=Path(args.mos_archive_kmia),
-            truth_csv_path=Path(args.truth_csv_kmia),
-        ),
-        StationConfig(
-            station_id="KNYC",
-            zoneid=DEFAULT_ZONE_BY_STATION["KNYC"],
-            series=DEFAULT_SERIES_BY_STATION["KNYC"],
-            file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KNYC"],
-            market_root=market_root_knyc,
-            bundle_dir=Path(args.bundle_dir_knyc),
-            mos_archive_path=Path(args.mos_archive_knyc),
-            truth_csv_path=Path(args.truth_csv_knyc),
-        ),
-    ]
+    station_cfgs = resolve_station_configs(args, live_root)
 
     expected_runtime_utc = pd.Timestamp(runtime_utc)
     inference_blocks: Dict[str, Any] = {}
@@ -1512,7 +1485,9 @@ def main() -> int:
     guardrail_counters = {
         "runtime_after_quote_asof": int(sum(1 for v in leakage_station_evidence.values() if not v["runtime_lte_quote_asof"])),
         "runtime_policy_mismatch": int(sum(1 for v in leakage_station_evidence.values() if not v["runtime_equals_expected_policy_runtime"])),
-        "prediction_quantiles_monotonic_violation": int(sum(1 for sid in ["KMIA", "KNYC"] if not leakage_station_evidence[sid]["inference_quantiles_monotonic"])),
+        "prediction_quantiles_monotonic_violation": int(
+            sum(1 for v in leakage_station_evidence.values() if not v["inference_quantiles_monotonic"])
+        ),
         "non_leakage_free_feature_rows": total_non_leakage_free,
         "truth_columns_used_for_inference": 0,
     }
@@ -1540,8 +1515,7 @@ def main() -> int:
         "run_id": run_id,
         "target_date_local": target_date.isoformat(),
         "quote_asof_utc": safe_iso_utc(quote_asof_utc),
-        "inference_kmia": inference_blocks["KMIA"],
-        "inference_knyc": inference_blocks["KNYC"],
+        "inference_by_station": {sid: inference_blocks[sid] for sid in sorted(inference_blocks)},
         "leakage_proof": leakage_proof,
         "artifacts": {
             "feature_evidence_csv_by_station": feature_csv_paths,
@@ -1549,6 +1523,8 @@ def main() -> int:
             "log_file": str(log_file),
         },
     }
+    for sid in sorted(inference_blocks):
+        report[f"inference_{sid.lower()}"] = inference_blocks[sid]
 
     report_path = out_dir / "inference_report.json"
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -1558,8 +1534,7 @@ def main() -> int:
         json.dumps(
             {
                 "target_date_local": target_date.isoformat(),
-                "inference_kmia": report["inference_kmia"],
-                "inference_knyc": report["inference_knyc"],
+                "inference_by_station": report["inference_by_station"],
                 "leakage_proof_summary": {
                     "passes_all_guardrails": report["leakage_proof"]["passes_all_guardrails"],
                     "global_guardrail_counters": report["leakage_proof"]["global_guardrail_counters"],

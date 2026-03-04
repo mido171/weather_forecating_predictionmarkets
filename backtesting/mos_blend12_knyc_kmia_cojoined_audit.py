@@ -113,6 +113,39 @@ def compute_entry_cutoff_utc(target_date_local: pd.Timestamp, entry_hour_z: int,
     )
 
 
+def parse_station_ids(value: str) -> List[str]:
+    out: List[str] = []
+    seen: set[str] = set()
+    for raw in str(value or "").split(","):
+        sid = raw.strip().upper()
+        if not sid or sid in seen:
+            continue
+        seen.add(sid)
+        out.append(sid)
+    return out
+
+
+def parse_json_mapping(value: Optional[str]) -> Dict[str, str]:
+    if value is None:
+        return {}
+    txt = str(value).strip()
+    if not txt:
+        return {}
+    path = Path(txt)
+    if path.exists():
+        txt = path.read_text(encoding="utf-8")
+    payload = json.loads(txt)
+    if not isinstance(payload, dict):
+        raise ValueError("JSON mapping must be an object")
+    out: Dict[str, str] = {}
+    for k, v in payload.items():
+        key = str(k).strip().upper()
+        val = str(v).strip()
+        if key and val:
+            out[key] = val
+    return out
+
+
 def load_predictions(dev_path: Path, test_path: Path) -> Dict[str, pd.Series]:
     dev = pd.read_parquet(dev_path)
     test = pd.read_parquet(test_path)
@@ -200,15 +233,16 @@ def load_predictions_from_live_script(
     python_bin: str,
     script_log_level: str,
     truth_maps: Dict[str, Dict[str, float]],
+    station_ids: List[str],
 ) -> Tuple[Dict[str, Dict[str, Dict]], Dict]:
     days = pd.date_range(pd.Timestamp(start_date), pd.Timestamp(end_date), freq="D")
-    pred_maps: Dict[str, Dict[str, Dict]] = {"KNYC": {}, "KMIA": {}}
+    pred_maps: Dict[str, Dict[str, Dict]] = {sid: {} for sid in station_ids}
     stats = {
         "days_requested": int(len(days)),
         "days_with_live_report": 0,
         "days_live_inference_failed": 0,
         "days_missing_truth_any_station": 0,
-        "station_prediction_rows": {"KNYC": 0, "KMIA": 0},
+        "station_prediction_rows": {sid: 0 for sid in station_ids},
         "failed_live_inference_days": [],
         "live_script_path": str(live_script_path),
         "live_root": str(live_root),
@@ -234,9 +268,12 @@ def load_predictions_from_live_script(
             continue
         stats["days_with_live_report"] += 1
 
-        for station_id in ["KNYC", "KMIA"]:
-            key = f"inference_{station_id.lower()}"
-            block = report.get(key, {})
+        report_blocks = report.get("inference_by_station", {}) if isinstance(report.get("inference_by_station"), dict) else {}
+        for station_id in station_ids:
+            block = report_blocks.get(station_id, {})
+            if not block:
+                key = f"inference_{station_id.lower()}"
+                block = report.get(key, {})
             q = block.get("quantiles", {})
             if not q:
                 continue
@@ -311,6 +348,7 @@ def candidate_sort_key(c: Dict) -> Tuple:
 
 def build_day_contexts(
     day: pd.Timestamp,
+    station_ids: List[str],
     pred_maps: Dict[str, Dict[str, pd.Series]],
     market_indices: Dict[str, Dict[str, Path]],
     entry_hour_z: int,
@@ -323,7 +361,7 @@ def build_day_contexts(
     contexts: List[Dict] = []
     status = {"day": day_key, "gate_cutoff_utc": safe_iso_utc(gate), "station_status": {}}
 
-    for station_id in ["KNYC", "KMIA"]:
+    for station_id in station_ids:
         st = {
             "has_prediction": False,
             "has_market_file": False,
@@ -463,6 +501,7 @@ def candidates_at_timestamp(
 
 def select_trade_for_day(
     day: pd.Timestamp,
+    station_ids: List[str],
     pred_maps: Dict[str, Dict[str, pd.Series]],
     market_indices: Dict[str, Dict[str, Path]],
     ev_min: float,
@@ -474,6 +513,7 @@ def select_trade_for_day(
 ) -> Tuple[Optional[Dict], Dict]:
     contexts, status = build_day_contexts(
         day,
+        station_ids,
         pred_maps,
         market_indices,
         entry_hour_z,
@@ -515,6 +555,7 @@ def select_trade_for_day(
 
 
 def run_backtest(
+    station_ids: List[str],
     pred_maps: Dict[str, Dict[str, pd.Series]],
     market_indices: Dict[str, Dict[str, Path]],
     start_date: str,
@@ -534,11 +575,9 @@ def run_backtest(
     days = pd.date_range(pd.Timestamp(start_date), pd.Timestamp(end_date), freq="D")
     counts = {
         "total_days": int(len(days)),
-        "days_with_knyc_prediction": 0,
-        "days_with_kmia_prediction": 0,
+        "days_with_prediction_by_station": {sid: 0 for sid in station_ids},
         "days_with_any_prediction": 0,
-        "days_with_knyc_market_file": 0,
-        "days_with_kmia_market_file": 0,
+        "days_with_market_file_by_station": {sid: 0 for sid in station_ids},
         "days_with_any_market_file": 0,
         "days_with_any_station_context": 0,
         "days_without_trade_candidate": 0,
@@ -547,19 +586,21 @@ def run_backtest(
     for day in days:
         day_key = day.strftime("%Y-%m-%d")
         ymd = day.strftime("%Y%m%d")
-        has_pred_knyc = day_key in pred_maps["KNYC"]
-        has_pred_kmia = day_key in pred_maps["KMIA"]
-        has_file_knyc = ymd in market_indices["KNYC"]
-        has_file_kmia = ymd in market_indices["KMIA"]
-        counts["days_with_knyc_prediction"] += int(has_pred_knyc)
-        counts["days_with_kmia_prediction"] += int(has_pred_kmia)
-        counts["days_with_any_prediction"] += int(has_pred_knyc or has_pred_kmia)
-        counts["days_with_knyc_market_file"] += int(has_file_knyc)
-        counts["days_with_kmia_market_file"] += int(has_file_kmia)
-        counts["days_with_any_market_file"] += int(has_file_knyc or has_file_kmia)
+        has_any_pred = False
+        has_any_file = False
+        for sid in station_ids:
+            has_pred = day_key in pred_maps.get(sid, {})
+            has_file = ymd in market_indices.get(sid, {})
+            counts["days_with_prediction_by_station"][sid] += int(has_pred)
+            counts["days_with_market_file_by_station"][sid] += int(has_file)
+            has_any_pred = has_any_pred or has_pred
+            has_any_file = has_any_file or has_file
+        counts["days_with_any_prediction"] += int(has_any_pred)
+        counts["days_with_any_market_file"] += int(has_any_file)
 
         chosen, dbg = select_trade_for_day(
             day=day,
+            station_ids=station_ids,
             pred_maps=pred_maps,
             market_indices=market_indices,
             ev_min=ev_min,
@@ -647,6 +688,7 @@ def _eq(a: float, b: float, tol: float = 1e-9) -> bool:
 
 
 def run_sanity_audit(
+    station_ids: List[str],
     trades_df: pd.DataFrame,
     pred_maps: Dict[str, Dict[str, pd.Series]],
     market_indices: Dict[str, Dict[str, Path]],
@@ -702,6 +744,7 @@ def run_sanity_audit(
 
         chosen, _ = select_trade_for_day(
             day=day,
+            station_ids=station_ids,
             pred_maps=pred_maps,
             market_indices=market_indices,
             ev_min=ev_min,
@@ -852,12 +895,21 @@ def build_stockholm_display_table(trades_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Audited co-joined KNYC/KMIA MOS blend_12 backtest.")
+    p = argparse.ArgumentParser(description="Audited MOS blend_12 backtest (single-station or cojoined).")
+    p.add_argument("--mode", choices=["single", "cojoined"], default="single")
+    p.add_argument("--stations", default="KNYC", help="Comma-separated station ids.")
     p.add_argument("--prediction-source", choices=["parquet", "live-script"], default="parquet")
+    p.add_argument("--pred-dev-by-station-json", default=None, help="JSON map station->dev parquet path (or path to JSON file).")
+    p.add_argument("--pred-test-by-station-json", default=None, help="JSON map station->test parquet path (or path to JSON file).")
+    p.add_argument("--truth-csv-by-station-json", default=None, help="JSON map station->truth csv path (or path to JSON file).")
+    p.add_argument("--kalshi-root-by-station-json", default=None, help="JSON map station->kalshi root path (or path to JSON file).")
+    p.add_argument("--file-prefix-by-station-json", default=None, help="JSON map station->market file prefix (or path to JSON file).")
     p.add_argument("--pred-dev-knyc", default=r"D:\Ahmed\data\kalshi\Experiments\MOS\03_blends\blend_12\dev_predictions.parquet")
     p.add_argument("--pred-test-knyc", default=r"D:\Ahmed\data\kalshi\Experiments\MOS\03_blends\blend_12\test_predictions.parquet")
     p.add_argument("--pred-dev-kmia", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\dev_predictions.parquet")
     p.add_argument("--pred-test-kmia", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\test_predictions.parquet")
+    p.add_argument("--pred-dev-kmdw", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\dev_predictions.parquet")
+    p.add_argument("--pred-test-kmdw", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\test_predictions.parquet")
     p.add_argument(
         "--live-script-path",
         default=str((Path(__file__).resolve().parents[1] / "tools" / "live" / "mos_quantile_live_inference.py")),
@@ -867,8 +919,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--live-script-log-level", default="ERROR")
     p.add_argument("--truth-csv-knyc", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KNYC_settled_tmax.csv")
     p.add_argument("--truth-csv-kmia", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KMIA_settled_tmax.csv")
+    p.add_argument("--truth-csv-kmdw", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KMDW_settled_tmax_2002_2026.csv")
     p.add_argument("--kalshi-root-knyc", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighny_2024_10_01_to_2025_12_31")
     p.add_argument("--kalshi-root-kmia", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighmia_2024_10_01_to_2025_12_31")
+    p.add_argument("--kalshi-root-kmdw", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighchi_2024_10_01_to_2026_03_03")
     p.add_argument("--start-date", default="2024-10-01")
     p.add_argument("--end-date", default="2025-12-31")
     p.add_argument("--entry-hour-z", type=int, default=12)
@@ -890,26 +944,53 @@ def main() -> None:
     args = parse_args()
     if float(args.min_market_price) < 0.0 or float(args.min_market_price) > 1.0:
         raise ValueError("--min-market-price must be in [0, 1]")
+    station_ids = parse_station_ids(args.stations)
+    if not station_ids:
+        raise ValueError("--stations must contain at least one station id")
+    if args.mode == "single" and len(station_ids) != 1:
+        raise ValueError("--mode single requires exactly one station id in --stations")
+
+    pred_dev_map = parse_json_mapping(args.pred_dev_by_station_json)
+    pred_test_map = parse_json_mapping(args.pred_test_by_station_json)
+    truth_csv_map = parse_json_mapping(args.truth_csv_by_station_json)
+    kalshi_root_map = parse_json_mapping(args.kalshi_root_by_station_json)
+    file_prefix_map = parse_json_mapping(args.file_prefix_by_station_json)
+
+    legacy_pred_dev = {"KNYC": str(args.pred_dev_knyc), "KMIA": str(args.pred_dev_kmia), "KMDW": str(args.pred_dev_kmdw)}
+    legacy_pred_test = {"KNYC": str(args.pred_test_knyc), "KMIA": str(args.pred_test_kmia), "KMDW": str(args.pred_test_kmdw)}
+    legacy_truth = {"KNYC": str(args.truth_csv_knyc), "KMIA": str(args.truth_csv_kmia), "KMDW": str(args.truth_csv_kmdw)}
+    legacy_kalshi_root = {"KNYC": str(args.kalshi_root_knyc), "KMIA": str(args.kalshi_root_kmia), "KMDW": str(args.kalshi_root_kmdw)}
+    legacy_file_prefix = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW"}
+
     if str(args.prediction_source) == "parquet":
-        pred_maps = {
-            "KNYC": load_predictions(Path(args.pred_dev_knyc), Path(args.pred_test_knyc)),
-            "KMIA": load_predictions(Path(args.pred_dev_kmia), Path(args.pred_test_kmia)),
-        }
+        pred_maps: Dict[str, Dict[str, pd.Series]] = {}
+        used_pred_dev: Dict[str, str] = {}
+        used_pred_test: Dict[str, str] = {}
+        for sid in station_ids:
+            dev_path = pred_dev_map.get(sid) or legacy_pred_dev.get(sid)
+            test_path = pred_test_map.get(sid) or legacy_pred_test.get(sid)
+            if not dev_path or not test_path:
+                raise ValueError(f"Missing parquet prediction paths for station={sid}")
+            used_pred_dev[sid] = str(dev_path)
+            used_pred_test[sid] = str(test_path)
+            pred_maps[sid] = load_predictions(Path(dev_path), Path(test_path))
         source_meta: Dict = {
             "prediction_source": "parquet",
-            "pred_dev_knyc": str(args.pred_dev_knyc),
-            "pred_test_knyc": str(args.pred_test_knyc),
-            "pred_dev_kmia": str(args.pred_dev_kmia),
-            "pred_test_kmia": str(args.pred_test_kmia),
+            "pred_dev_by_station": used_pred_dev,
+            "pred_test_by_station": used_pred_test,
         }
     else:
         live_script_path = Path(args.live_script_path)
         if not live_script_path.exists():
             raise FileNotFoundError(f"Live script not found: {live_script_path}")
-        truth_maps = {
-            "KNYC": load_truth_map(Path(args.truth_csv_knyc)),
-            "KMIA": load_truth_map(Path(args.truth_csv_kmia)),
-        }
+        truth_maps: Dict[str, Dict[str, float]] = {}
+        used_truth_csv: Dict[str, str] = {}
+        for sid in station_ids:
+            truth_path = truth_csv_map.get(sid) or legacy_truth.get(sid)
+            if not truth_path:
+                raise ValueError(f"Missing truth CSV path for station={sid}")
+            used_truth_csv[sid] = str(truth_path)
+            truth_maps[sid] = load_truth_map(Path(truth_path))
         pred_maps, live_stats = load_predictions_from_live_script(
             start_date=str(args.start_date),
             end_date=str(args.end_date),
@@ -918,6 +999,7 @@ def main() -> None:
             python_bin=str(args.live_script_python),
             script_log_level=str(args.live_script_log_level),
             truth_maps=truth_maps,
+            station_ids=station_ids,
         )
         source_meta = {
             "prediction_source": "live-script",
@@ -925,16 +1007,24 @@ def main() -> None:
             "live_inference_root": str(args.live_inference_root),
             "live_script_python": str(args.live_script_python),
             "live_script_log_level": str(args.live_script_log_level),
-            "truth_csv_knyc": str(args.truth_csv_knyc),
-            "truth_csv_kmia": str(args.truth_csv_kmia),
+            "truth_csv_by_station": used_truth_csv,
             "live_loader_stats": live_stats,
         }
 
-    market_indices = {
-        "KNYC": build_market_index(Path(args.kalshi_root_knyc), "KNYC"),
-        "KMIA": build_market_index(Path(args.kalshi_root_kmia), "KMIA"),
-    }
+    market_indices: Dict[str, Dict[str, Path]] = {}
+    used_kalshi_roots: Dict[str, str] = {}
+    used_file_prefixes: Dict[str, str] = {}
+    for sid in station_ids:
+        root = kalshi_root_map.get(sid) or legacy_kalshi_root.get(sid)
+        prefix = file_prefix_map.get(sid) or legacy_file_prefix.get(sid) or sid
+        if not root:
+            raise ValueError(f"Missing Kalshi root for station={sid}")
+        used_kalshi_roots[sid] = str(root)
+        used_file_prefixes[sid] = str(prefix).upper()
+        market_indices[sid] = build_market_index(Path(root), str(prefix).upper())
+
     trades_df, summary, day_debug = run_backtest(
+        station_ids=station_ids,
         pred_maps=pred_maps,
         market_indices=market_indices,
         start_date=str(args.start_date),
@@ -950,6 +1040,7 @@ def main() -> None:
         min_entry_minutes_after_open=int(args.min_entry_minutes_after_open),
     )
     sanity = run_sanity_audit(
+        station_ids=station_ids,
         trades_df=trades_df,
         pred_maps=pred_maps,
         market_indices=market_indices,
@@ -963,6 +1054,10 @@ def main() -> None:
         stake_cap_usd=float(args.stake_cap_usd),
     )
     summary["prediction_source_meta"] = source_meta
+    summary["mode"] = str(args.mode)
+    summary["stations"] = station_ids
+    summary["kalshi_roots_by_station"] = used_kalshi_roots
+    summary["file_prefix_by_station"] = used_file_prefixes
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

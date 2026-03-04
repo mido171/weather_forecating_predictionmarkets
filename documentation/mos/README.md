@@ -14,7 +14,7 @@ It is explicitly designed for:
 This track covers two execution families:
 
 1. Single-station MOS runs (historical `blend_00`, runtime matrix `blend_12`/`blend_00`).
-2. Co-joined two-station MOS runs (`KNYC` + `KMIA`, one trade/day globally).
+2. Co-joined multi-station MOS runs (`KNYC` + `KMIA` + optional additional stations such as `KMDW`, one trade/day globally).
 
 It also documents:
 
@@ -23,6 +23,19 @@ It also documents:
 - fixed-risk and fractional-Kelly sizing,
 - outlier-filtered recalc protocol,
 - sanity/audit acceptance criteria.
+
+## Canonical Data Source Policy (Mandatory)
+
+For MOS/NWS data in this workflow, the primary read path is:
+
+1. `D:\Ahmed\data\sqlite\NWS\<STATION>\...`
+2. `D:\Ahmed\data\sqlite\MOS\<STATION>\...`
+
+Policy:
+
+1. SQLite under `D:\Ahmed\data\sqlite` is the canonical source-of-truth for MOS/NWS.
+2. Compatibility CSV exports are derived from SQLite and are not canonical.
+3. Any run claiming station onboarding or canonical data quality must reference SQLite artifacts first, then export artifacts.
 
 ## Current Canonical Reference
 
@@ -44,6 +57,15 @@ Current live-script replay/UI dataset:
 - side-aware table (window `2026`):
   - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026_with_balance.csv`
 
+Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
+
+- run record:
+  - `documentation/mos/16_run_record_2026-03-04_cojoined_blend12_knyc_kmia_kmdw_openplus30m_risk7p5_cap700_2024_2025.md`
+- side-aware table (window `2024-2025`):
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025_with_balance.csv`
+- UI engineering record (virtualized table + station scoring):
+  - `documentation/mos/17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
+
 ## Mandatory Read Order
 
 1. `documentation/mos/00_scope_and_objective.md`
@@ -55,7 +77,14 @@ Current live-script replay/UI dataset:
 7. `documentation/mos/07_run_record_2026-03-01_knyc_kmia_cojoined_blend12.md`
 8. `documentation/mos/08_run_record_2026-03-01_knyc_kmia_cojoined_blend12_fractionalkelly_no_outlier_gt2000.md`
 9. `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
-10. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
+10. `documentation/mos/13_actionplan_station_full_flow_sqlite.md`
+11. `documentation/mos/14_station_full_flow_sqlite_runbook.md`
+12. `documentation/mos/15_station_full_flow_sqlite_data_contracts.md`
+13. `documentation/mos/16_run_record_2026-03-04_cojoined_blend12_knyc_kmia_kmdw_openplus30m_risk7p5_cap700_2024_2025.md`
+14. `documentation/mos/17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
+15. `documentation/mos/18_engineering_spec_2026-03-04_generic_cojoined_backtester_cli_and_station_mapping.md`
+16. `documentation/mos/19_engineering_spec_2026-03-04_live_inference_station_generic_and_shared_bundle_module.md`
+17. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
 
 ## Document Map
 
@@ -85,6 +114,20 @@ Current live-script replay/UI dataset:
   - co-joined backtest replay where per-day forecasts are generated from the live inference script instead of parquet prediction files.
 - `12_run_record_2026-03-02_ui_toggle_and_2026_live_script_replay.md`
   - 2026 co-joined replay extension and UI dataset toggle (`2024-2025` vs `2026`).
+- `13_actionplan_station_full_flow_sqlite.md`
+  - implementation actionplan for station onboarding with SQLite-first canonical stores and live `blend_12` parity gates.
+- `14_station_full_flow_sqlite_runbook.md`
+  - operator runbook for executing the full station pipeline, recovery patterns, and expected outputs.
+- `15_station_full_flow_sqlite_data_contracts.md`
+  - canonical schema/contract spec for NWS/MOS SQLite stores and compatibility exports.
+- `16_run_record_2026-03-04_cojoined_blend12_knyc_kmia_kmdw_openplus30m_risk7p5_cap700_2024_2025.md`
+  - audited 3-station co-joined fixed-risk run (`KNYC`, `KMIA`, `KMDW`) with full artifact and comparison record.
+- `17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
+  - UI engineering run record for table virtualization and station contribution scoring panel.
+- `18_engineering_spec_2026-03-04_generic_cojoined_backtester_cli_and_station_mapping.md`
+  - detailed CLI/spec refactor record for generic multi-station co-joined backtesting.
+- `19_engineering_spec_2026-03-04_live_inference_station_generic_and_shared_bundle_module.md`
+  - live inference station-generic refactor and shared blend_12 bundle module specification.
 
 ## Canonical Scripts
 
@@ -169,6 +212,25 @@ Note:
   - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026.json`
 - 2026 side-aware table:
   - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p30_win75_risk6_cap500_minprice10c_live_script_2026_with_balance.csv`
+
+### Co-Joined Fixed-Risk 3-Station (KNYC+KMIA+KMDW, 2024-2025)
+
+- run record:
+  - `documentation/mos/16_run_record_2026-03-04_cojoined_blend12_knyc_kmia_kmdw_openplus30m_risk7p5_cap700_2024_2025.md`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025.json`
+- sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025.json`
+- side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025_with_balance.csv`
+
+### UI Performance + Station Contribution Analytics
+
+- run record:
+  - `documentation/mos/17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
+- core UI files:
+  - `ui/result_viewer/src/App.jsx`
+  - `ui/result_viewer/src/styles.css`
 
 ## Claim Hygiene Rule
 

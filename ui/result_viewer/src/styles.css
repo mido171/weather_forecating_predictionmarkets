@@ -390,6 +390,155 @@ h1 span {
   margin-top: 14px;
 }
 
+.stationScorePanel {
+  padding: 14px;
+}
+
+.stationScoreHead {
+  display: grid;
+  gap: 6px;
+}
+
+.stationScoreNote {
+  margin: 0;
+  color: #b8c7f6;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stationScoreScope {
+  margin: 0;
+  color: #9bb0eb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stationScoreFormula {
+  margin: 0;
+  color: #8196d7;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.stationScoreGrid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.stationCard {
+  border: 1px solid #223c7d;
+  border-radius: 12px;
+  background: rgba(8, 20, 58, 0.92);
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.stationTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.stationName {
+  font-size: 17px;
+  font-weight: 800;
+  color: #dce6ff;
+}
+
+.stationScoreBadge {
+  min-width: 58px;
+  text-align: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 18px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.scoreStrong {
+  color: #052015;
+  background: linear-gradient(90deg, #2de6ad, #6cf4c8);
+  border-color: #7cf6d0;
+}
+
+.scoreMid {
+  color: #2a1a02;
+  background: linear-gradient(90deg, #ffbe3b, #ffd57b);
+  border-color: #ffd990;
+}
+
+.scoreWeak {
+  color: #3a0718;
+  background: linear-gradient(90deg, #ff6f95, #ff9db7);
+  border-color: #ffabc1;
+}
+
+.stationPnlRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.stationPnlShare {
+  color: #9db0e8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stationScoreTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: #162a62;
+  overflow: hidden;
+}
+
+.stationScoreFill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.stationScoreFill.scoreStrong {
+  background: linear-gradient(90deg, #26dca4, #67f1c3);
+}
+
+.stationScoreFill.scoreMid {
+  background: linear-gradient(90deg, #f4aa1e, #ffd073);
+}
+
+.stationScoreFill.scoreWeak {
+  background: linear-gradient(90deg, #f1567d, #ff9db7);
+}
+
+.stationMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stationMetricLabel {
+  color: #7890d2;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.stationMetricValue {
+  margin-top: 2px;
+  color: #dbe5ff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
 .breakdownList {
   margin-top: 8px;
   max-height: 230px;
@@ -571,11 +720,19 @@ h1 span {
   color: #d9e2ff;
 }
 
+.tableMeta {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #8ea1df;
+  font-weight: 700;
+}
+
 .tableWrap {
   max-height: 72vh;
   overflow: auto;
   border: 1px solid #1e3170;
   border-radius: 10px;
+  contain: content;
 }
 
 table {
@@ -616,6 +773,16 @@ tbody tr.rowLoss {
 
 tbody tr:hover {
   background: rgba(44, 84, 178, 0.3);
+}
+
+.virtualSpacer td {
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.virtualSpacer:hover {
+  background: transparent;
 }
 
 td.resultWin,

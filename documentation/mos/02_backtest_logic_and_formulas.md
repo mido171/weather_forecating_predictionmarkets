@@ -5,7 +5,7 @@ This document is the canonical execution + arithmetic spec for MOS backtests.
 It covers:
 
 - single-station execution,
-- co-joined KNYC/KMIA execution,
+- co-joined multi-station execution,
 - effective-cutoff (gate + open-delay) semantics,
 - sizing formulas,
 - outlier-filtered post-processing.
@@ -27,13 +27,12 @@ For each `target_date_local = T`:
 7. Apply filters (`EV`, `model_win_prob`), choose best candidate by strategy policy.
 8. Enter max one trade for day.
 
-### 1.2 Co-Joined Flow (KNYC + KMIA)
+### 1.2 Co-Joined Flow (N Stations)
 
 For each `target_date_local = T`:
 
-1. Load both day files if present:
-   - `KNYC_YYYYMMDD.csv`
-   - `KMIA_YYYYMMDD.csv`
+1. Load each configured station day file if present:
+   - `<FILE_PREFIX>_YYYYMMDD.csv` per station.
 2. Parse/sort timestamps in UTC.
 3. Compute `gate_cutoff_utc`.
 4. Per station compute `effective_cutoff_utc`:
@@ -164,7 +163,7 @@ For open-delay runs:
 
 - `delay_minutes = 30` (open+30m variants)
 - each station has its own `market_open_utc`
-- therefore effective cutoff can differ between KNYC and KMIA on same day.
+- therefore effective cutoff can differ across stations on same day.
 
 ## 9) Outlier-Filtered Recalculation Protocol
 
@@ -191,3 +190,11 @@ Latest strict reference (see run record `09`):
 - filters: `EV >= 0.18`, `model_win_prob >= 0.67`
 - base stream sizing: fixed risk `6.5%`, cap `$500`
 - strict reporting transform: fractional Kelly `0.15`, cap `$500`, remove `pnl > 2000`, recalc bankroll
+
+Extended fixed-risk multi-station reference (see run record `16`):
+
+- gate: `T-1 12:00Z`
+- open delay: `+30 minutes after station market open`
+- filters: `EV >= 0.25`, `model_win_prob >= 0.85`, `min_market_price >= 0.25`
+- sizing: fixed risk `7.5%`, cap `$700`
+- stations: `KNYC`, `KMIA`, `KMDW`

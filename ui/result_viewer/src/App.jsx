@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 import {
   Area,
@@ -17,15 +17,15 @@ const DATASET_OPTIONS = [
   {
     key: "2024-2025",
     label: "2024-2025",
-    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_fractionalkellyceiling_risk7p5_kelly0p12_cap700_2024_2025_best_highreturn_smooth_highwin_stable_meanprice65_with_balance.csv",
+    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025_with_balance.csv",
     params: [
+      "Stations: KNYC + KMIA + KMDW",
+      "Period: 2024-10-01 -> 2025-12-31",
       "EV >= 0.25",
       "Win >= 0.85",
-      "Risk ceiling 7.5%",
-      "Kelly fraction 0.12",
-      "Stake cap $700",
       "Side price >= 25c",
-      "Mean entry <= 65c",
+      "Risk fraction 7.5% (balance-based)",
+      "Stake cap $700",
       "Entry >= max(T-1 12:00Z, open+30m)",
     ],
   },
@@ -48,6 +48,8 @@ const DATASET_OPTIONS = [
 ];
 
 const DEFAULT_DATASET_KEY = "2024-2025";
+const TABLE_ROW_HEIGHT = 42;
+const TABLE_OVERSCAN_ROWS = 14;
 
 function resolveCsvOverride() {
   const envCsv = String(import.meta.env.VITE_TRADES_CSV_FILE ?? "").trim();
@@ -214,6 +216,111 @@ function computeStreaks(rows) {
   return { maxWin, maxLoss };
 }
 
+function clamp01(v) {
+  if (!Number.isFinite(v)) return 0;
+  return Math.max(0, Math.min(1, v));
+}
+
+function formatProfitFactor(value) {
+  if (!Number.isFinite(value)) return "INF";
+  return value.toFixed(2);
+}
+
+function buildStationContribution(rows) {
+  const byStation = new Map();
+  let totalPnl = 0;
+  const firstPnl = rows.length ? Number(rows[0]["Profit made ($)"] || 0) : 0;
+  const startBalance = rows.length ? Number(rows[0]["Balance after trade ($)"] || 0) - firstPnl : 0;
+  const portfolioPeakBalance = rows.reduce(
+    (acc, row) => Math.max(acc, Number(row["Balance after trade ($)"] || 0)),
+    startBalance
+  );
+
+  for (const row of rows) {
+    const station = String(row.Station || "Unknown").trim() || "Unknown";
+    const pnl = Number(row["Profit made ($)"] || 0);
+    const isWin = String(row.Result).toLowerCase() === "win";
+    totalPnl += pnl;
+
+    if (!byStation.has(station)) {
+      byStation.set(station, {
+        station,
+        trades: 0,
+        wins: 0,
+        losses: 0,
+        pnl: 0,
+        grossProfit: 0,
+        grossLossAbs: 0,
+        cumPnl: 0,
+        peakPnl: 0,
+        maxDrawdownAbsUsd: 0,
+      });
+    }
+
+    const item = byStation.get(station);
+    item.trades += 1;
+    item.wins += isWin ? 1 : 0;
+    item.losses += isWin ? 0 : 1;
+    item.pnl += pnl;
+    if (pnl >= 0) item.grossProfit += pnl;
+    else item.grossLossAbs += -pnl;
+
+    item.cumPnl += pnl;
+    item.peakPnl = Math.max(item.peakPnl, item.cumPnl);
+    const ddAbs = Math.max(0, item.peakPnl - item.cumPnl);
+    item.maxDrawdownAbsUsd = Math.max(item.maxDrawdownAbsUsd, ddAbs);
+  }
+
+  const stationRows = [...byStation.values()];
+  const maxTrades = Math.max(1, ...stationRows.map((x) => x.trades));
+  const maxPositivePnl = Math.max(0, ...stationRows.map((x) => x.pnl));
+
+  const scored = stationRows.map((x) => {
+    const winRate = x.trades ? x.wins / x.trades : 0;
+    const lossRate = x.trades ? x.losses / x.trades : 0;
+    const profitFactor = x.grossLossAbs > 0 ? x.grossProfit / x.grossLossAbs : x.grossProfit > 0 ? Number.POSITIVE_INFINITY : 0;
+    const pfNorm = clamp01((Number.isFinite(profitFactor) ? Math.min(profitFactor, 3) : 3) / 3);
+    const tradeNorm = clamp01(Math.sqrt(x.trades / maxTrades));
+    const pnlNorm = maxPositivePnl > 0 ? clamp01(Math.max(0, x.pnl) / maxPositivePnl) : 0;
+    const drawdownPortfolioPct = portfolioPeakBalance > 0 ? x.maxDrawdownAbsUsd / portfolioPeakBalance : 0;
+    const drawdownPenalty = clamp01(drawdownPortfolioPct);
+
+    // 0-100 station score: rewards win rate, PF, volume, pnl; penalizes losses and drawdown.
+    const scoreRaw =
+      100 *
+      (0.32 * winRate +
+        0.24 * pfNorm +
+        0.16 * tradeNorm +
+        0.20 * pnlNorm -
+        0.05 * lossRate -
+        0.13 * drawdownPenalty);
+
+    return {
+      station: x.station,
+      trades: x.trades,
+      wins: x.wins,
+      losses: x.losses,
+      winRate,
+      pnl: x.pnl,
+      pnlShare: totalPnl !== 0 ? x.pnl / totalPnl : 0,
+      grossProfit: x.grossProfit,
+      grossLossAbs: x.grossLossAbs,
+      profitFactor,
+      maxDrawdownAbsUsd: x.maxDrawdownAbsUsd,
+      maxDrawdownPortfolioPct: drawdownPortfolioPct,
+      score: Math.max(0, Math.min(100, scoreRaw)),
+    };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.pnl !== a.pnl) return b.pnl - a.pnl;
+    return b.trades - a.trades;
+  });
+
+  return { rows: scored, totalPnl };
+}
+
 function buildDrawdownSeries(rows) {
   if (!rows.length) {
     return { series: [], peakIndex: null, troughIndex: null, troughPct: 0 };
@@ -264,6 +371,9 @@ function App() {
   const [error, setError] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("ALL");
   const [selectedDataset, setSelectedDataset] = useState(resolveInitialDatasetKey);
+  const [tableScrollTop, setTableScrollTop] = useState(0);
+  const [tableViewportHeight, setTableViewportHeight] = useState(0);
+  const tableWrapRef = useRef(null);
 
   const csvOverride = useMemo(() => resolveCsvOverride(), []);
   const csvFile = useMemo(() => {
@@ -278,6 +388,22 @@ function App() {
     () => DATASET_OPTIONS.find((x) => x.key === selectedDataset)?.params ?? [],
     [selectedDataset],
   );
+
+  useEffect(() => {
+    const node = tableWrapRef.current;
+    if (!node) return undefined;
+    const syncHeight = () => {
+      setTableViewportHeight(node.clientHeight || 0);
+    };
+    syncHeight();
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(syncHeight);
+      observer.observe(node);
+      return () => observer.disconnect();
+    }
+    window.addEventListener("resize", syncHeight);
+    return () => window.removeEventListener("resize", syncHeight);
+  }, [rows.length, selectedMonth, selectedDataset]);
 
   useEffect(() => {
     async function load() {
@@ -322,6 +448,13 @@ function App() {
     }
     load();
   }, [csvFile]);
+
+  useEffect(() => {
+    setTableScrollTop(0);
+    if (tableWrapRef.current) {
+      tableWrapRef.current.scrollTop = 0;
+    }
+  }, [selectedMonth, selectedDataset, csvFile]);
 
   const summary = useMemo(() => {
     if (!rows.length) {
@@ -447,6 +580,28 @@ function App() {
     return rows.filter((r) => r.monthKey === selectedMonth);
   }, [rows, selectedMonth]);
 
+  const stationContribution = useMemo(() => buildStationContribution(filteredRows), [filteredRows]);
+
+  const virtualizedTable = useMemo(() => {
+    const total = filteredRows.length;
+    if (!total) {
+      return { rows: [], start: 0, end: 0, topPad: 0, bottomPad: 0, total: 0 };
+    }
+    const viewport = Math.max(320, tableViewportHeight || 0);
+    const firstVisible = Math.floor(tableScrollTop / TABLE_ROW_HEIGHT);
+    const start = Math.max(0, firstVisible - TABLE_OVERSCAN_ROWS);
+    const visibleCount = Math.ceil(viewport / TABLE_ROW_HEIGHT) + TABLE_OVERSCAN_ROWS * 2;
+    const end = Math.min(total, start + visibleCount);
+    return {
+      rows: filteredRows.slice(start, end),
+      start,
+      end,
+      topPad: start * TABLE_ROW_HEIGHT,
+      bottomPad: Math.max(0, (total - end) * TABLE_ROW_HEIGHT),
+      total,
+    };
+  }, [filteredRows, tableScrollTop, tableViewportHeight]);
+
   const filteredSummary = useMemo(() => {
     const wins = filteredRows.filter((r) => String(r.Result).toLowerCase() === "win").length;
     const losses = filteredRows.filter((r) => String(r.Result).toLowerCase() === "loss").length;
@@ -524,7 +679,7 @@ function App() {
             Equity <span>Tracker</span>
           </h1>
           <p className="subLine">
-            KNYC + KMIA · Window {datasetLabel} · {monthRangeText} · {summary.trades} trades
+            Portfolio | Window {datasetLabel} | {monthRangeText} | {summary.trades} trades
           </p>
           <div className="paramChips">
             {datasetParams.map((item) => (
@@ -646,6 +801,89 @@ function App() {
             <p>peak-to-trough</p>
           </div>
         </article>
+      </section>
+
+      <section className="panel stationScorePanel fullWidthPanel">
+        <div className="stationScoreHead">
+          <p className="cardLabel">Station Contribution Score</p>
+          <p className="stationScoreScope">
+            Scope: {selectedMonth === "ALL" ? "All trades in selected dataset" : `Month ${monthLabel(selectedMonth)}`}
+          </p>
+          <p className="stationScoreNote">
+            Score (0-100) rewards win rate, profit factor, trade count, and profit; penalizes loss rate and drawdown.
+          </p>
+          <p className="stationScoreFormula">
+            Drawdown term is relative to total portfolio peak balance in this scope.
+          </p>
+          <p className="stationScoreFormula">
+            score = 100 x (0.32 win + 0.24 pf + 0.16 volume + 0.20 pnl - 0.05 losses - 0.13 dd_vs_portfolio)
+          </p>
+        </div>
+        <div className="stationScoreGrid">
+          {stationContribution.rows.length === 0 ? (
+            <div className="stationCard">
+              <div className="stationName">No station rows in this filter.</div>
+            </div>
+          ) : null}
+          {stationContribution.rows.map((station, index) => {
+            const scoreRounded = Math.round(station.score);
+            const scoreClass =
+              scoreRounded >= 75 ? "scoreStrong" : scoreRounded >= 55 ? "scoreMid" : "scoreWeak";
+            const pnlSharePct = station.pnlShare * 100;
+            return (
+              <article key={station.station} className="stationCard">
+                <div className="stationTopRow">
+                  <div className="stationName">
+                    #{index + 1} {station.station}
+                  </div>
+                  <div className={`stationScoreBadge ${scoreClass}`}>{scoreRounded}</div>
+                </div>
+
+                <div className="stationPnlRow">
+                  <span className={station.pnl >= 0 ? "greenText" : "redText"}>{prettyCompact(station.pnl)}</span>
+                  <span className="stationPnlShare">{pnlSharePct >= 0 ? "+" : ""}{pnlSharePct.toFixed(1)}% portfolio P&L</span>
+                </div>
+
+                <div className="stationScoreTrack">
+                  <div className={`stationScoreFill ${scoreClass}`} style={{ width: `${scoreRounded}%` }} />
+                </div>
+
+                <div className="stationMetricGrid">
+                  <div>
+                    <div className="stationMetricLabel">Win</div>
+                    <div className="stationMetricValue">{pct(station.winRate)}</div>
+                  </div>
+                  <div>
+                    <div className="stationMetricLabel">PF</div>
+                    <div className="stationMetricValue">{formatProfitFactor(station.profitFactor)}</div>
+                  </div>
+                  <div>
+                    <div className="stationMetricLabel">Trades</div>
+                    <div className="stationMetricValue">{station.trades}</div>
+                  </div>
+                  <div>
+                    <div className="stationMetricLabel">W-L</div>
+                    <div className="stationMetricValue">
+                      {station.wins}-{station.losses}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="stationMetricLabel">Max DD vs Portfolio</div>
+                    <div className="stationMetricValue redText">
+                      -{pct(station.maxDrawdownPortfolioPct)} ({prettyCompact(station.maxDrawdownAbsUsd)})
+                    </div>
+                  </div>
+                  <div>
+                    <div className="stationMetricLabel">Balance Contrib</div>
+                    <div className={`stationMetricValue ${station.pnl >= 0 ? "greenText" : "redText"}`}>
+                      {prettyCompact(station.pnl)}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       <section className="panel breakdownPanel fullWidthPanel">
@@ -879,7 +1117,15 @@ function App() {
         <h2 className="tableTitle">
           Full Trade Table {selectedMonth === "ALL" ? "" : `(${monthLabel(selectedMonth)})`}
         </h2>
-        <div className="tableWrap">
+        <div className="tableMeta">
+          Showing {virtualizedTable.total === 0 ? 0 : virtualizedTable.start + 1}-
+          {virtualizedTable.end} of {virtualizedTable.total} rows
+        </div>
+        <div
+          className="tableWrap"
+          ref={tableWrapRef}
+          onScroll={(event) => setTableScrollTop(event.currentTarget.scrollTop)}
+        >
           <table>
             <thead>
               <tr>
@@ -889,7 +1135,12 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => {
+              {virtualizedTable.topPad > 0 ? (
+                <tr className="virtualSpacer">
+                  <td colSpan={COLUMNS.length} style={{ height: `${virtualizedTable.topPad}px` }} />
+                </tr>
+              ) : null}
+              {virtualizedTable.rows.map((row) => {
                 const isWin = String(row.Result).toLowerCase() === "win";
                 return (
                   <tr key={row.id} className={isWin ? "rowWin" : "rowLoss"}>
@@ -928,6 +1179,11 @@ function App() {
                   </tr>
                 );
               })}
+              {virtualizedTable.bottomPad > 0 ? (
+                <tr className="virtualSpacer">
+                  <td colSpan={COLUMNS.length} style={{ height: `${virtualizedTable.bottomPad}px` }} />
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>

@@ -9,7 +9,7 @@ Produce reproducible, leakage-safe, execution-time-correct backtests for Kalshi 
 Current supported strategy families:
 
 1. Single-station runs (`KNYC`) for baseline/matrix analysis.
-2. Co-joined runs (`KNYC` + `KMIA`) with one trade/day globally.
+2. Co-joined multi-station runs (`KNYC` + `KMIA` + optional additional stations such as `KMDW`) with one trade/day globally.
 
 The system is designed to be robust against:
 
@@ -101,3 +101,7 @@ Strict historical (no open-delay):
 Current strict reference (open+30m + fractional-Kelly + outlier-filtered recalc):
 
 - `documentation/mos/09_run_record_2026-03-02_knyc_kmia_cojoined_blend12_openplus30m_fractionalkelly_no_outlier_gt2000.md`
+
+Extended fixed-risk 3-station co-joined reference (`KNYC` + `KMIA` + `KMDW`):
+
+- `documentation/mos/16_run_record_2026-03-04_cojoined_blend12_knyc_kmia_kmdw_openplus30m_risk7p5_cap700_2024_2025.md`

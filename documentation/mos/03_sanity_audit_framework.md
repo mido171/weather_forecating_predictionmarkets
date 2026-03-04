@@ -37,7 +37,7 @@ Representative output:
 
 - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_all_available_blend00_ev0p1_win60_risk5p5pct_entry1530z_cap400.json`
 
-## 3) Primary Audit (Co-Joined KNYC + KMIA)
+## 3) Primary Audit (Co-Joined Multi-Station)
 
 Primary co-joined audit is produced by:
 
@@ -66,6 +66,8 @@ Representative outputs:
   - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_risk6p5_cap500_base.json`
 - strict open+30m post-processed:
   - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_fractionalkelly0p15_cap500_no_outlier_gt2000_recalc.json`
+- fixed-risk 3-station (`KNYC` + `KMIA` + `KMDW`):
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025.json`
 
 ## 4) Day-Level Debug Audit (Co-Joined)
 
@@ -83,6 +85,7 @@ This is the forensic layer for:
 Representative file:
 
 - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\day_debug_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p18_win67_risk6p5_cap500_base.json`
+- `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\day_debug_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025.json`
 
 ## 5) Deep/Post-Processing Audit
 

@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: kalshi-api-service
+
+kalshi:
+  environment: PROD
+  auth-enabled: true
+  trading-enabled: true
+  auth-debug: false
+
+  timeouts:
+    connect-timeout-ms: 5000
+    request-timeout-ms: 10000
+
+  retry:
+    max-retries: 3
+    base-backoff-ms: 250
+    max-backoff-ms: 3000
+
+  rate-limiting:
+    max-read-requests-per-second: 30
+    max-write-requests-per-second: 10
+
+  web-socket:
+    enabled: true
+    max-reconnect-attempts: 0
+    reconnect-base-backoff-ms: 500
+    watchdog-timeout-seconds: 30
+
+  guardrails:
+    enabled: true
+    default-max-buy-contracts: 1
+    fail-closed-on-unknown-order-state: true
+    cancel-resting-on-cap-breach: true
+    startup-reconcile: true
+    market-overrides: {}
+
+  smoke:
+    enabled: false
+    market-ticker: ""
+    side: yes
+    desired-contracts: 1
+    buy-max-cost-cents: 100
+    orderbook-depth: 20
+    orderbook-warmup-seconds: 5
+
+logging:
+  level:
+    root: INFO
+    com.predictionmarkets.weather.kalshiapi: INFO

@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,7 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
   private static final String TYPE_OK = "ok";
   private static final String TYPE_SUBSCRIBED = "subscribed";
   private static final String TYPE_ERROR = "error";
+  private static final int REST_FALLBACK_REFRESH_SECONDS = 2;
 
   private final KalshiExecutionProperties properties;
   private final KalshiSignerProvider signerProvider;
@@ -80,6 +82,10 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
   private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
   private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
   private final AtomicLong lastInboundNanos = new AtomicLong(System.nanoTime());
+  private final AtomicLong snapshotMsgCount = new AtomicLong(0);
+  private final AtomicLong deltaMsgCount = new AtomicLong(0);
+  private final AtomicLong deltaAppliedCount = new AtomicLong(0);
+  private final AtomicLong deltaDroppedCount = new AtomicLong(0);
   private final AtomicInteger commandId = new AtomicInteger(1);
 
   private final Set<String> trackedMarkets = ConcurrentHashMap.newKeySet();
@@ -111,6 +117,7 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
       return t;
     });
     startWatchdog();
+    startRestFallbackRefresh();
   }
 
   @Override
@@ -150,6 +157,7 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     }
 
     subscribeOrderbookDelta();
+    hydrateTrackedMarketsFromRestAsync("tracked_market_update");
   }
 
   @Override
@@ -235,12 +243,15 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     if (trackedMarkets.isEmpty()) {
       return;
     }
-    WsSubscribeParams params = new WsSubscribeParams(
-        List.of(CHANNEL_ORDERBOOK_DELTA),
-        null,
-        List.copyOf(trackedMarkets));
-    WsSubscribeCommand command = new WsSubscribeCommand(commandId.getAndIncrement(), params);
-    sendCommand(command);
+    for (String marketTicker : List.copyOf(trackedMarkets)) {
+      int id = commandId.getAndIncrement();
+      WsSubscribeParams params = new WsSubscribeParams(
+          List.of(CHANNEL_ORDERBOOK_DELTA),
+          null,
+          List.of(marketTicker));
+      WsSubscribeCommand command = new WsSubscribeCommand(id, params);
+      sendCommand(command);
+    }
   }
 
   private void sendCommand(Object command) {
@@ -249,6 +260,7 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     }
     try {
       String payload = objectMapper.writeValueAsString(command);
+      log.debug("Kalshi WS send command {}", payload);
       outboundSinkRef.get().emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST);
     } catch (Exception ex) {
       log.warn("Failed to serialize websocket command: {}", ex.toString());
@@ -265,7 +277,14 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
         continue;
       }
       if (CHANNEL_ORDERBOOK_DELTA.equals(subscription.channel())) {
-        marketTickersBySid.put(subscription.sid(), Set.copyOf(trackedMarkets));
+        Set<String> mappedTickers = resolveSubscriptionTickers(subscription);
+        if (!mappedTickers.isEmpty()) {
+          marketTickersBySid.put(subscription.sid(), mappedTickers);
+          log.info("Kalshi WS subscription sid={} mappedTickers={}", subscription.sid(), mappedTickers);
+        } else {
+          log.warn("Kalshi WS subscription sid={} had no resolved tickers", subscription.sid());
+        }
+        hydrateTrackedMarketsFromRestAsync("subscription_ack");
       }
     }
   }
@@ -275,11 +294,16 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     if (snapshot == null || snapshot.msg() == null) {
       return;
     }
+    long count = snapshotMsgCount.incrementAndGet();
     if (snapshot.sid() != null) {
       sequenceTracker.reset(snapshot.sid());
       sequenceTracker.evaluate(snapshot.sid(), snapshot.seq());
     }
     orderBookStore.applySnapshot(snapshot.msg());
+    if (count <= 5 || count % 250 == 0) {
+      log.debug("Kalshi WS snapshot count={} sid={} seq={} market={}",
+          count, snapshot.sid(), snapshot.seq(), snapshot.msg().marketTicker());
+    }
   }
 
   private void handleOrderbookDelta(JsonNode root) {
@@ -287,6 +311,7 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     if (delta == null) {
       return;
     }
+    long count = deltaMsgCount.incrementAndGet();
 
     Integer sid = delta.sid();
     Long seq = delta.seq();
@@ -298,9 +323,21 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
 
     String marketTicker = extractMarketTicker(delta.msg(), sid);
     if (!StringUtils.hasText(marketTicker)) {
+      long dropped = deltaDroppedCount.incrementAndGet();
+      log.debug("Dropping orderbook delta with unresolved market sid={} mappedMarkets={}",
+          sid, sid == null ? Set.of() : marketTickersBySid.getOrDefault(sid, Set.of()));
+      if (dropped % 250 == 0) {
+        log.info("Kalshi WS deltas seen={} applied={} dropped={}",
+            count, deltaAppliedCount.get(), dropped);
+      }
       return;
     }
     orderBookStore.applyDelta(marketTicker, delta.msg());
+    long applied = deltaAppliedCount.incrementAndGet();
+    if (applied <= 5 || applied % 250 == 0) {
+      log.debug("Applied orderbook delta count={} sid={} seq={} market={}",
+          applied, sid, seq, marketTicker);
+    }
   }
 
   private void handleSequenceIssue(Integer sid, Long seq, SequenceResult result) {
@@ -329,6 +366,24 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     });
   }
 
+  private void hydrateTrackedMarketsFromRestAsync(String reason) {
+    Set<String> marketSnapshot = Set.copyOf(trackedMarkets);
+    if (marketSnapshot.isEmpty()) {
+      return;
+    }
+    scheduler.execute(() -> {
+      for (String marketTicker : marketSnapshot) {
+        try {
+          var restOrderbook = marketDataApi.getOrderbook(marketTicker, 0);
+          orderBookStore.applyRestSnapshot(marketTicker, restOrderbook);
+        } catch (Exception ex) {
+          log.debug("Skipping REST depth hydrate market={} reason={} error={}",
+              marketTicker, reason, ex.toString());
+        }
+      }
+    });
+  }
+
   private void handleError(JsonNode root) {
     WsErrorResponse errorResponse = objectMapper.convertValue(root, WsErrorResponse.class);
     if (errorResponse == null || errorResponse.msg() == null) {
@@ -351,6 +406,26 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     return marketTickers.iterator().next();
   }
 
+  private Set<String> resolveSubscriptionTickers(WsSubscription subscription) {
+    Set<String> resolved = new LinkedHashSet<>();
+
+    if (StringUtils.hasText(subscription.marketTicker())) {
+      resolved.add(subscription.marketTicker().trim().toUpperCase());
+    }
+    if (subscription.marketTickers() != null) {
+      for (String ticker : subscription.marketTickers()) {
+        if (StringUtils.hasText(ticker)) {
+          resolved.add(ticker.trim().toUpperCase());
+        }
+      }
+    }
+    if (resolved.isEmpty() && trackedMarkets.size() == 1) {
+      resolved.add(trackedMarkets.iterator().next());
+    }
+
+    return Set.copyOf(resolved);
+  }
+
   private HttpHeaders buildHeaders() {
     HttpHeaders headers = new HttpHeaders();
     if (properties.isAuthEnabled()) {
@@ -366,6 +441,14 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     scheduler.scheduleAtFixedRate(this::runWatchdog, periodSeconds, periodSeconds, TimeUnit.SECONDS);
   }
 
+  private void startRestFallbackRefresh() {
+    scheduler.scheduleAtFixedRate(
+        this::runRestFallbackRefresh,
+        REST_FALLBACK_REFRESH_SECONDS,
+        REST_FALLBACK_REFRESH_SECONDS,
+        TimeUnit.SECONDS);
+  }
+
   private void runWatchdog() {
     if (shuttingDown.get() || !isSessionOpen()) {
       return;
@@ -376,6 +459,26 @@ public class DefaultKalshiOrderBookService implements KalshiOrderBookService, Di
     }
     log.warn("Kalshi websocket watchdog triggered after {} seconds without inbound data", elapsedSeconds);
     handleDisconnect("watchdog", null);
+  }
+
+  private void runRestFallbackRefresh() {
+    if (shuttingDown.get()) {
+      return;
+    }
+
+    Set<String> marketSnapshot = Set.copyOf(trackedMarkets);
+    if (marketSnapshot.isEmpty()) {
+      return;
+    }
+
+    for (String marketTicker : marketSnapshot) {
+      try {
+        var restOrderbook = marketDataApi.getOrderbook(marketTicker, 0);
+        orderBookStore.applyRestSnapshot(marketTicker, restOrderbook);
+      } catch (Exception ex) {
+        log.debug("Skipping fallback REST refresh market={} error={}", marketTicker, ex.toString());
+      }
+    }
   }
 
   private boolean isSessionOpen() {

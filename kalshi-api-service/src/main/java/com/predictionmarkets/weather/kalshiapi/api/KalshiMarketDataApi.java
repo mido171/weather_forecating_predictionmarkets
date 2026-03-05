@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.kalshiapi.api;
 
 import com.predictionmarkets.weather.kalshiapi.http.KalshiHttpClient;
+import com.predictionmarkets.weather.kalshiapi.model.market.EventResponse;
 import com.predictionmarkets.weather.kalshiapi.model.market.GetOrderbookResponse;
 import com.predictionmarkets.weather.kalshiapi.model.market.GetTradesQuery;
 import com.predictionmarkets.weather.kalshiapi.model.market.GetTradesResponse;
@@ -18,6 +19,10 @@ public class KalshiMarketDataApi {
 
   public MarketResponse getMarket(String ticker) {
     return httpClient.getPublic("/markets/" + ticker, null, MarketResponse.class);
+  }
+
+  public EventResponse getEvent(String eventTicker) {
+    return httpClient.getPublic("/events/" + eventTicker, null, EventResponse.class);
   }
 
   public GetOrderbookResponse getOrderbook(String ticker) {

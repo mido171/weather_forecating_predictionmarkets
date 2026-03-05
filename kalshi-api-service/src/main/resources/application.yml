@@ -7,6 +7,9 @@ kalshi:
   auth-enabled: true
   trading-enabled: true
   auth-debug: false
+  credentials-path: ${KALSHI_CREDENTIALS_PATH:}
+  api-key-id: ${KALSHI_API_KEY_ID:}
+  private-key-pem-path: ${KALSHI_PRIVATE_KEY_PEM_PATH:}
 
   timeouts:
     connect-timeout-ms: 5000
@@ -26,6 +29,36 @@ kalshi:
     max-reconnect-attempts: 0
     reconnect-base-backoff-ms: 500
     watchdog-timeout-seconds: 30
+
+  live-trading:
+    enabled: true
+    market-resolve-interval-seconds: 60
+    publish-interval-millis: 750
+    inference-refresh-interval-seconds: 15
+    inference-invoke-enabled: true
+    inference-invoke-python-executable: python
+    inference-invoke-script-path: tools/live/mos_quantile_live_inference.py
+    inference-invoke-timeout-seconds: 180
+    inference-root-dir: D:\Ahmed\data\live\mos_quantile_live_inference
+    inference-report-file-name: inference_report.json
+    opportunities-min-win-probability: 0.85
+    opportunities-max-count: 100
+    next-target-date-cutoff-local-time: "17:45"
+    top-levels-per-side: 8
+    frontend-ws-path: /ws/live-orderbooks
+    stations:
+      - station-id: KNYC
+        display-name: New York
+        series-ticker: KXHIGHNY
+        zone-id: America/New_York
+      - station-id: KMIA
+        display-name: Miami
+        series-ticker: KXHIGHMIA
+        zone-id: America/New_York
+      - station-id: KMDW
+        display-name: Chicago Midway
+        series-ticker: KXHIGHCHI
+        zone-id: America/Chicago
 
   guardrails:
     enabled: true

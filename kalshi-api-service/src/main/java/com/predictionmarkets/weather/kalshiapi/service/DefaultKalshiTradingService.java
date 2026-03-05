@@ -161,6 +161,25 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
           exposureSnapshot);
       resultByClientOrderId.put(clientOrderId, result);
       return result;
+    } catch (KalshiApiException apiException) {
+      if (isDeterministicClientReject(apiException)) {
+        ExposureSnapshot exposureSnapshot = exposureGuardService.recomputeExposure(
+            request.marketTicker(),
+            request.side(),
+            preflight.effectiveCap());
+        boolean halted = exposureGuardService.isTradingHalted(request.marketTicker(), request.side());
+        return new TradeOrderResult(
+            false,
+            true,
+            halted,
+            deterministicRejectReason(apiException),
+            null,
+            clientOrderId,
+            request.contractsRequested(),
+            0,
+            exposureSnapshot);
+      }
+      return handleUnknownSubmitOutcome(request, preflight, clientOrderId, apiException, marketSideKey);
     } catch (Exception ex) {
       return handleUnknownSubmitOutcome(request, preflight, clientOrderId, ex, marketSideKey);
     }
@@ -251,9 +270,18 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
     Integer yesPrice = null;
     Integer noPrice = null;
     Integer buyMaxCost = null;
+    OrderType createOrderType = request.orderType();
     TimeInForce timeInForce;
     if (request.orderType() == OrderType.MARKET) {
-      buyMaxCost = request.buyMaxCostCents();
+      // Kalshi currently validates create-order payloads as requiring a side price field.
+      // We model "market buy" as an IOC limit buy capped by buy_max_cost/count.
+      int marketLikeLimitPrice = marketLikeLimitPriceCents(request.buyMaxCostCents(), contractsToSubmit);
+      if (request.side() == Side.YES) {
+        yesPrice = marketLikeLimitPrice;
+      } else {
+        noPrice = marketLikeLimitPrice;
+      }
+      createOrderType = OrderType.LIMIT;
       timeInForce = TimeInForce.IMMEDIATE_OR_CANCEL;
     } else {
       if (request.side() == Side.YES) {
@@ -270,7 +298,7 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
         clientOrderId,
         contractsToSubmit,
         null,
-        request.orderType(),
+        createOrderType,
         yesPrice,
         noPrice,
         null,
@@ -280,6 +308,21 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
         false,
         null,
         null);
+  }
+
+  private int marketLikeLimitPriceCents(Integer buyMaxCostCents, int contractsToSubmit) {
+    if (buyMaxCostCents == null || buyMaxCostCents < 1) {
+      throw new IllegalArgumentException("buyMaxCostCents must be >= 1");
+    }
+    if (contractsToSubmit < 1) {
+      throw new IllegalArgumentException("contractsToSubmit must be >= 1");
+    }
+    int maxPerContract = buyMaxCostCents / contractsToSubmit;
+    if (maxPerContract < 1) {
+      throw new IllegalArgumentException(
+          "buyMaxCostCents is too low for contractsToSubmit: " + buyMaxCostCents + " for " + contractsToSubmit);
+    }
+    return Math.min(99, maxPerContract);
   }
 
   private void validateBuyRequestType(TradeOrderRequest request, OrderType expected) {
@@ -325,6 +368,22 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
       return "connection_interrupted";
     }
     return ex.getClass().getSimpleName();
+  }
+
+  private boolean isDeterministicClientReject(KalshiApiException ex) {
+    int status = ex.getStatusCode();
+    return status >= 400 && status < 500;
+  }
+
+  private String deterministicRejectReason(KalshiApiException ex) {
+    String details = null;
+    if (ex.getApiError() != null && ex.getApiError().details() != null) {
+      details = ex.getApiError().details().asText();
+    }
+    if (StringUtils.hasText(details)) {
+      return "api_rejected_" + ex.getStatusCode() + ": " + details;
+    }
+    return "api_rejected_" + ex.getStatusCode();
   }
 
   private static boolean matchesMarket(String candidate, String expectedTicker) {

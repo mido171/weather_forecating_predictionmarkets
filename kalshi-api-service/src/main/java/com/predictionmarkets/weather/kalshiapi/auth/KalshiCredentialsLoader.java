@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.util.regex.Matcher;
@@ -75,15 +76,27 @@ public class KalshiCredentialsLoader {
 
   private Resource resolveResource(String location) {
     String trimmed = location.trim();
+    if (isWindowsAbsolutePath(trimmed)) {
+      return new FileSystemResource(Path.of(trimmed));
+    }
+
+    try {
+      Path asPath = Path.of(trimmed);
+      if (asPath.isAbsolute() || Files.exists(asPath)) {
+        return new FileSystemResource(asPath);
+      }
+    } catch (InvalidPathException ex) {
+      // Not a filesystem path; continue to resource-loader resolution.
+    }
+
     if (trimmed.contains(":")) {
       return resourceLoader.getResource(trimmed);
     }
-
-    Path asPath = Path.of(trimmed);
-    if (asPath.isAbsolute() || Files.exists(asPath)) {
-      return new FileSystemResource(asPath);
-    }
     return resourceLoader.getResource("classpath:" + trimmed);
+  }
+
+  private boolean isWindowsAbsolutePath(String value) {
+    return value != null && value.matches("^[A-Za-z]:[\\\\/].*");
   }
 
   private String readResource(Resource resource, String description) {

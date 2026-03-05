@@ -103,6 +103,16 @@ def parse_args() -> argparse.Namespace:
         help="CSV store directory (default: artifacts/live_store).",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging.")
+    parser.add_argument(
+        "--output-json",
+        help="Optional path to write the final structured result JSON.",
+    )
+    parser.add_argument(
+        "--stdout-json",
+        choices=["full", "none"],
+        default="full",
+        help="Emit structured result JSON to stdout (default: full).",
+    )
     return parser.parse_args()
 
 
@@ -1359,7 +1369,15 @@ def main() -> int:
         },
         "threshold_probs": threshold_probs,
     }
-    print(json.dumps(output, indent=2))
+    if args.output_json:
+        output_path = Path(args.output_json).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output["output_json_path"] = str(output_path)
+        output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
+        logger.info("Wrote output JSON to %s", output_path)
+
+    if args.stdout_json == "full":
+        print(json.dumps(output, indent=2))
     return 0
 
 

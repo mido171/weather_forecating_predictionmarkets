@@ -230,7 +230,8 @@ def configure_logger(log_file: Path, level: str) -> logging.Logger:
     logger.handlers.clear()
     fmt = logging.Formatter("%(asctime)sZ %(levelname)s %(message)s", "%Y-%m-%dT%H:%M:%S")
 
-    sh = logging.StreamHandler(sys.stdout)
+    # Keep logs on stderr so stdout can be consumed as a clean JSON channel by script invokers.
+    sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(fmt)
     logger.addHandler(sh)
 
@@ -1256,6 +1257,12 @@ def parse_args() -> argparse.Namespace:
     p.set_defaults(auto_download_market=True)
 
     p.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    p.add_argument(
+        "--stdout-json",
+        default="full",
+        choices=["full", "summary", "none"],
+        help="Structured JSON object emitted on stdout: full report, summary view, or disabled.",
+    )
     return p.parse_args()
 
 
@@ -1475,7 +1482,8 @@ def main() -> int:
             str(failure_path),
             int(len(lagging_slices)),
         )
-        print(json.dumps(failure_report, indent=2))
+        if args.stdout_json != "none":
+            print(json.dumps(failure_report, indent=2))
         return 2
 
     total_feature_rows = int(sum(v["total_features"] for v in feature_rollup_by_station.values()))
@@ -1527,24 +1535,25 @@ def main() -> int:
         report[f"inference_{sid.lower()}"] = inference_blocks[sid]
 
     report_path = out_dir / "inference_report.json"
+    report["report_path"] = str(report_path)
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     logger.info("REPORT_WRITTEN path=%s", str(report_path))
 
-    print(
-        json.dumps(
-            {
-                "target_date_local": target_date.isoformat(),
-                "inference_by_station": report["inference_by_station"],
-                "leakage_proof_summary": {
-                    "passes_all_guardrails": report["leakage_proof"]["passes_all_guardrails"],
-                    "global_guardrail_counters": report["leakage_proof"]["global_guardrail_counters"],
-                    "feature_level_rollup_global": report["leakage_proof"]["feature_level_rollup_global"],
-                },
-                "report_path": str(report_path),
-            },
-            indent=2,
-        )
-    )
+    summary_payload = {
+        "target_date_local": target_date.isoformat(),
+        "inference_by_station": report["inference_by_station"],
+        "leakage_proof_summary": {
+            "passes_all_guardrails": report["leakage_proof"]["passes_all_guardrails"],
+            "global_guardrail_counters": report["leakage_proof"]["global_guardrail_counters"],
+            "feature_level_rollup_global": report["leakage_proof"]["feature_level_rollup_global"],
+        },
+        "report_path": str(report_path),
+    }
+    if args.stdout_json == "full":
+        print(json.dumps(report, indent=2))
+    elif args.stdout_json == "summary":
+        print(json.dumps(summary_payload, indent=2))
+
     logger.info("RUN_DONE target_date=%s", target_date.isoformat())
     return 0
 

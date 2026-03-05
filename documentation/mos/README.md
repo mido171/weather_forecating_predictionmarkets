@@ -84,7 +84,9 @@ Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
 14. `documentation/mos/17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
 15. `documentation/mos/18_engineering_spec_2026-03-04_generic_cojoined_backtester_cli_and_station_mapping.md`
 16. `documentation/mos/19_engineering_spec_2026-03-04_live_inference_station_generic_and_shared_bundle_module.md`
-17. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
+17. `documentation/mos/20_engineering_spec_2026-03-04_bucket_probability_interpolation_yes_no.md`
+18. `documentation/mos/21_engineering_spec_2026-03-05_live_orderbook_target_date_inference_autorefresh.md`
+19. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
 
 ## Document Map
 
@@ -128,6 +130,10 @@ Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
   - detailed CLI/spec refactor record for generic multi-station co-joined backtesting.
 - `19_engineering_spec_2026-03-04_live_inference_station_generic_and_shared_bundle_module.md`
   - live inference station-generic refactor and shared blend_12 bundle module specification.
+- `20_engineering_spec_2026-03-04_bucket_probability_interpolation_yes_no.md`
+  - exact quantile interpolation, PMF construction, and YES/NO bucket probability derivation used by live inference.
+- `21_engineering_spec_2026-03-05_live_orderbook_target_date_inference_autorefresh.md`
+  - full implementation spec for live orderbook date switching, backend inference invocation endpoint, and UI 10s auto-refresh stop-on-populated behavior.
 
 ## Canonical Scripts
 

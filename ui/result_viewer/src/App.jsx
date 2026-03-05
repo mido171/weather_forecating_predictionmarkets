@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import LiveTradingPage from "./LiveTradingPage";
 
 const DATASET_OPTIONS = [
   {
@@ -47,7 +48,14 @@ const DATASET_OPTIONS = [
   },
 ];
 
+const BACKTESTING_PAGE_KEY = "backtesting";
+const LIVE_TRADING_PAGE_KEY = "live-trading";
+const APP_MENU_OPTIONS = [
+  { key: BACKTESTING_PAGE_KEY, label: "Backtesting" },
+  { key: LIVE_TRADING_PAGE_KEY, label: "Live trading" },
+];
 const DEFAULT_DATASET_KEY = "2024-2025";
+const DEFAULT_PAGE_KEY = BACKTESTING_PAGE_KEY;
 const TABLE_ROW_HEIGHT = 42;
 const TABLE_OVERSCAN_ROWS = 14;
 
@@ -70,6 +78,15 @@ function resolveInitialDatasetKey() {
     return queryDataset;
   }
   return DEFAULT_DATASET_KEY;
+}
+
+function resolveInitialPageKey() {
+  if (typeof window === "undefined") return DEFAULT_PAGE_KEY;
+  const queryPage = String(new URLSearchParams(window.location.search).get("page") ?? "").trim().toLowerCase();
+  if (queryPage && APP_MENU_OPTIONS.some((x) => x.key === queryPage)) {
+    return queryPage;
+  }
+  return DEFAULT_PAGE_KEY;
 }
 
 function resolveDatasetCsv(datasetKey) {
@@ -369,6 +386,7 @@ function App() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activePage, setActivePage] = useState(resolveInitialPageKey);
   const [selectedMonth, setSelectedMonth] = useState("ALL");
   const [selectedDataset, setSelectedDataset] = useState(resolveInitialDatasetKey);
   const [tableScrollTop, setTableScrollTop] = useState(0);
@@ -406,6 +424,12 @@ function App() {
   }, [rows.length, selectedMonth, selectedDataset]);
 
   useEffect(() => {
+    if (activePage !== BACKTESTING_PAGE_KEY) {
+      setLoading(false);
+      setError("");
+      return undefined;
+    }
+
     async function load() {
       setLoading(true);
       setError("");
@@ -446,15 +470,20 @@ function App() {
         setLoading(false);
       }
     }
+
     load();
-  }, [csvFile]);
+    return undefined;
+  }, [activePage, csvFile]);
 
   useEffect(() => {
+    if (activePage !== BACKTESTING_PAGE_KEY) {
+      return;
+    }
     setTableScrollTop(0);
     if (tableWrapRef.current) {
       tableWrapRef.current.scrollTop = 0;
     }
-  }, [selectedMonth, selectedDataset, csvFile]);
+  }, [activePage, selectedMonth, selectedDataset, csvFile]);
 
   const summary = useMemo(() => {
     if (!rows.length) {
@@ -643,19 +672,38 @@ function App() {
     return `${first} -> ${last}`;
   }, [monthlyData]);
 
-  if (loading) {
+  if (activePage === BACKTESTING_PAGE_KEY && loading) {
     return <div className="page loading">Loading trade results...</div>;
   }
 
-  if (error) {
+  if (activePage === BACKTESTING_PAGE_KEY && error) {
     return <div className="page error">Failed to load data: {error}</div>;
   }
 
   return (
-    <div className="page">
-      <div className="ambient ambientOne" />
-      <div className="ambient ambientTwo" />
+    <div className={`page ${activePage === LIVE_TRADING_PAGE_KEY ? "pageLive" : ""}`}>
+      {activePage === BACKTESTING_PAGE_KEY ? (
+        <>
+          <div className="ambient ambientOne" />
+          <div className="ambient ambientTwo" />
+        </>
+      ) : null}
 
+      <nav className={`mainMenuBar ${activePage === LIVE_TRADING_PAGE_KEY ? "mainMenuBarLive" : ""}`} aria-label="Main menu">
+        {APP_MENU_OPTIONS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={`mainMenuBtn ${activePage === item.key ? "active" : ""}`}
+            onClick={() => setActivePage(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {activePage === BACKTESTING_PAGE_KEY ? (
+        <>
       <header className="topHeader">
         <div>
           <p className="microTitle">Strategy B - Filtered Portfolio</p>
@@ -1188,6 +1236,10 @@ function App() {
           </table>
         </div>
       </section>
+        </>
+      ) : (
+        <LiveTradingPage />
+      )}
     </div>
   );
 }

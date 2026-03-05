@@ -43,6 +43,76 @@ body {
   padding: 20px 14px 28px;
 }
 
+.page.pageLive {
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
+  height: auto;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  background: #070d18;
+}
+
+.page.pageLive .lt-workstation {
+  flex: none;
+  min-height: 0;
+}
+
+.mainMenuBar {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid #21346f;
+  background: rgba(7, 16, 48, 0.88);
+}
+
+.mainMenuBar.mainMenuBarLive {
+  margin-bottom: 0;
+  border-color: #2a3b5e;
+  background: rgba(11, 18, 32, 0.94);
+}
+
+.mainMenuBar.mainMenuBarLive .mainMenuBtn {
+  color: #b9c6e6;
+}
+
+.mainMenuBar.mainMenuBarLive .mainMenuBtn.active {
+  color: #0b1a13;
+  border-color: #6ee7b7;
+  background: linear-gradient(90deg, #22c55e, #86efac);
+}
+
+.mainMenuBtn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #9fb0e9;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.mainMenuBtn:hover {
+  background: rgba(36, 56, 116, 0.6);
+  color: #dce6ff;
+}
+
+.mainMenuBtn.active {
+  border-color: #2de6ad;
+  color: #103123;
+  background: linear-gradient(90deg, #2de6ad, #22d3a2);
+}
+
 .ambient {
   position: absolute;
   border-radius: 999px;
@@ -389,6 +459,7 @@ h1 span {
 .fullWidthPanel {
   margin-top: 14px;
 }
+
 
 .stationScorePanel {
   padding: 14px;
@@ -813,6 +884,12 @@ td.pnlLoss {
 }
 
 @media (max-width: 900px) {
+  .page.pageLive {
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+  }
+
   .topHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -846,9 +923,23 @@ td.pnlLoss {
     padding: 14px 10px 24px;
   }
 
+  .page.pageLive {
+    padding: 8px 8px 10px;
+  }
+
   .datasetToggleBar {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .mainMenuBar {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mainMenuBtn {
+    flex: 1 1 0;
+    text-align: center;
   }
 
   .datasetToggleBtn {
@@ -885,3 +976,4 @@ td.pnlLoss {
     height: 340px;
   }
 }
+

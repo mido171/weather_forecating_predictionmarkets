@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.kalshiapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,8 +74,42 @@ class DefaultKalshiOrderBookServiceTest {
       Thread.sleep(25L);
     }
 
-    verify(marketDataApi).getOrderbook("MKT1", 0);
+    verify(marketDataApi, atLeastOnce()).getOrderbook("MKT1", 0);
     assertThat(service.snapshot("MKT1").bestYesBidCents()).isEqualTo(55);
     assertThat(service.snapshot("MKT1").bestNoBidCents()).isEqualTo(45);
+  }
+
+  @Test
+  void deltaWithoutMarketTickerUsesSidToTickerMappingFromAck() {
+    KalshiExecutionProperties properties = new KalshiExecutionProperties();
+    properties.getWebSocket().setEnabled(false);
+    properties.setAuthEnabled(false);
+
+    KalshiMarketDataApi marketDataApi = mock(KalshiMarketDataApi.class);
+
+    service = new DefaultKalshiOrderBookService(
+        properties,
+        mock(KalshiSignerProvider.class),
+        new ObjectMapper(),
+        new SequenceTracker(new SimpleMeterRegistry()),
+        new OrderBookStore(),
+        marketDataApi);
+
+    service.replaceTrackedMarkets(Set.of("MKT1", "MKT2"));
+
+    service.onMessage("""
+        {"id":10,"type":"ok","subscriptions":[
+          {"channel":"orderbook_delta","sid":101,"market_ticker":"MKT1"},
+          {"channel":"orderbook_delta","sid":102,"market_ticker":"MKT2"}
+        ]}
+        """);
+    service.onMessage("""
+        {"type":"orderbook_snapshot","sid":101,"seq":1,"msg":{"market_ticker":"MKT1","yes":[[60,5]],"no":[[40,4]]}}
+        """);
+    service.onMessage("""
+        {"type":"orderbook_delta","sid":101,"seq":2,"msg":{"yes":[[61,5]]}}
+        """);
+
+    assertThat(service.snapshot("MKT1").bestYesBidCents()).isEqualTo(61);
   }
 }

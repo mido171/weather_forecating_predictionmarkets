@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.kalshiapi.service;
 
 import com.predictionmarkets.weather.kalshiapi.api.KalshiOrdersApi;
+import com.predictionmarkets.weather.kalshiapi.api.KalshiPortfolioApi;
 import com.predictionmarkets.weather.kalshiapi.config.KalshiExecutionProperties;
 import com.predictionmarkets.weather.kalshiapi.http.KalshiApiException;
 import com.predictionmarkets.weather.kalshiapi.model.common.Action;
@@ -10,15 +11,28 @@ import com.predictionmarkets.weather.kalshiapi.model.common.TimeInForce;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.CancelOrderResponse;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.CreateOrderRequest;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.CreateOrderResponse;
+import com.predictionmarkets.weather.kalshiapi.model.portfolio.GetBalanceResponse;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.GetOrdersQuery;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.GetOrdersResponse;
+import com.predictionmarkets.weather.kalshiapi.model.portfolio.GetPositionsQuery;
+import com.predictionmarkets.weather.kalshiapi.model.portfolio.GetPositionsResponse;
+import com.predictionmarkets.weather.kalshiapi.model.portfolio.MarketPosition;
 import com.predictionmarkets.weather.kalshiapi.model.portfolio.Order;
 import com.predictionmarkets.weather.kalshiapi.trading.ExposureSnapshot;
+import com.predictionmarkets.weather.kalshiapi.trading.KalshiAccountBalance;
+import com.predictionmarkets.weather.kalshiapi.trading.KalshiAccountSnapshot;
+import com.predictionmarkets.weather.kalshiapi.trading.KalshiPositionExposure;
 import com.predictionmarkets.weather.kalshiapi.trading.TradeOrderRequest;
 import com.predictionmarkets.weather.kalshiapi.trading.TradeOrderResult;
 import com.predictionmarkets.weather.kalshiapi.trading.TradePreflightDecision;
-import java.time.Duration;
+import com.predictionmarkets.weather.kalshiapi.util.PriceUtils;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -35,8 +49,11 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
   private static final Logger log = LoggerFactory.getLogger(DefaultKalshiTradingService.class);
   private static final int ORDERS_PAGE_SIZE = 1_000;
   private static final int MAX_PAGES = 50;
+  private static final int POSITIONS_PAGE_SIZE = 1_000;
+  private static final int MAX_POSITION_PAGES = 50;
 
   private final KalshiOrdersApi ordersApi;
+  private final KalshiPortfolioApi portfolioApi;
   private final ExposureGuardService exposureGuardService;
   private final KalshiExecutionProperties properties;
 
@@ -46,9 +63,11 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
   private final Map<String, String> unknownOutcomeByClientOrderId = new ConcurrentHashMap<>();
 
   public DefaultKalshiTradingService(KalshiOrdersApi ordersApi,
+                                     KalshiPortfolioApi portfolioApi,
                                      ExposureGuardService exposureGuardService,
                                      KalshiExecutionProperties properties) {
     this.ordersApi = ordersApi;
+    this.portfolioApi = portfolioApi;
     this.exposureGuardService = exposureGuardService;
     this.properties = properties;
   }
@@ -73,6 +92,63 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
   @Override
   public void resetTradingHalt(String marketTicker, Side side) {
     exposureGuardService.resetTradingHalt(marketTicker, side);
+  }
+
+  @Override
+  public KalshiAccountBalance getAccountBalance() {
+    GetBalanceResponse response = portfolioApi.getBalance();
+    if (response == null) {
+      return new KalshiAccountBalance(null, null, null, null, null);
+    }
+    return new KalshiAccountBalance(
+        response.balance(),
+        centsToDollars(response.balance()),
+        response.portfolioValue(),
+        centsToDollars(response.portfolioValue()),
+        response.updatedTs());
+  }
+
+  @Override
+  public List<KalshiPositionExposure> getOpenPositionsWithExposure() {
+    List<KalshiPositionExposure> positions = new ArrayList<>();
+    for (MarketPosition marketPosition : fetchAllPositions()) {
+      if (marketPosition == null || !StringUtils.hasText(marketPosition.marketTicker())) {
+        continue;
+      }
+      int netContracts = parseSignedContracts(marketPosition.position(), marketPosition.positionFp());
+      if (netContracts == 0) {
+        continue;
+      }
+      long exposureCents = Math.abs((long) netContracts) * 100L;
+      positions.add(new KalshiPositionExposure(
+          marketPosition.marketTicker().trim().toUpperCase(Locale.ROOT),
+          netContracts,
+          netSide(netContracts),
+          exposureCents,
+          centsToDollars(exposureCents)));
+    }
+    positions.sort(Comparator.comparingLong((KalshiPositionExposure p) -> p.exposureCents() == null ? 0L : p.exposureCents()).reversed()
+        .thenComparing(KalshiPositionExposure::marketTicker));
+    return positions;
+  }
+
+  @Override
+  public KalshiAccountSnapshot getAccountSnapshot() {
+    KalshiAccountBalance balance = getAccountBalance();
+    List<KalshiPositionExposure> positions = getOpenPositionsWithExposure();
+    long totalExposureCents = 0L;
+    for (KalshiPositionExposure position : positions) {
+      if (position == null || position.exposureCents() == null) {
+        continue;
+      }
+      totalExposureCents += position.exposureCents();
+    }
+    return new KalshiAccountSnapshot(
+        Instant.now(),
+        balance,
+        totalExposureCents,
+        centsToDollars(totalExposureCents),
+        List.copyOf(positions));
   }
 
   private TradeOrderResult placeBuyInternal(TradeOrderRequest request) {
@@ -384,6 +460,57 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
       return "api_rejected_" + ex.getStatusCode() + ": " + details;
     }
     return "api_rejected_" + ex.getStatusCode();
+  }
+
+  private List<MarketPosition> fetchAllPositions() {
+    List<MarketPosition> positions = new ArrayList<>();
+    String cursor = null;
+    int pages = 0;
+    while (pages < MAX_POSITION_PAGES) {
+      GetPositionsResponse response = portfolioApi.getPositions(new GetPositionsQuery(
+          cursor,
+          POSITIONS_PAGE_SIZE,
+          null));
+      List<MarketPosition> page = response == null ? Collections.emptyList() : response.marketPositions();
+      if (page == null || page.isEmpty()) {
+        break;
+      }
+      positions.addAll(page);
+      cursor = response.cursor();
+      if (!StringUtils.hasText(cursor)) {
+        break;
+      }
+      pages++;
+    }
+    return positions;
+  }
+
+  private int parseSignedContracts(Integer intCount, String fpCount) {
+    if (intCount != null) {
+      return intCount;
+    }
+    if (!StringUtils.hasText(fpCount)) {
+      return 0;
+    }
+    BigDecimal value = PriceUtils.parseDecimal(fpCount);
+    return value.setScale(0, RoundingMode.DOWN).intValue();
+  }
+
+  private static String netSide(int netContracts) {
+    if (netContracts > 0) {
+      return "YES";
+    }
+    if (netContracts < 0) {
+      return "NO";
+    }
+    return "FLAT";
+  }
+
+  private static Double centsToDollars(Long cents) {
+    if (cents == null) {
+      return null;
+    }
+    return cents / 100.0;
   }
 
   private static boolean matchesMarket(String candidate, String expectedTicker) {

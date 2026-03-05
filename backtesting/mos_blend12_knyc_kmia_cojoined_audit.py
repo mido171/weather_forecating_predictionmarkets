@@ -195,6 +195,8 @@ def run_live_inference_for_target(
             str(out_dir),
             "--log-level",
             str(script_log_level),
+            "--stdout-json",
+            "summary",
         ]
         completed = subprocess.run(cmd, text=True, capture_output=True, check=False)
         if completed.returncode != 0:

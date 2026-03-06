@@ -100,6 +100,15 @@ function formatTargetDateLabel(isoDate) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function describeOpportunityDate(isoDate, referenceMillis) {
+  const label = formatTargetDateLabel(isoDate);
+  const referenceDate = isoLocalDateFromMillis(referenceMillis);
+  const tomorrowDate = shiftIsoDate(referenceDate, 1);
+  if (isoDate === referenceDate) return `Today · ${label}`;
+  if (isoDate === tomorrowDate) return `Tomorrow · ${label}`;
+  return label;
+}
+
 function shouldDefaultToTomorrow(nowMillis) {
   const now = new Date(nowMillis);
   const hour = now.getHours();
@@ -706,7 +715,7 @@ const LiveTopBar = memo(function LiveTopBar({
     <header className="lt-topBar">
       <div className="lt-topBarTitleWrap">
         <h1 className="lt-topBarTitle">Live Orderbook Monitor</h1>
-        <p className="lt-topBarSub">KNYC / KMIA / KMDW</p>
+        <p className="lt-topBarSub">KNYC / KMIA / KMDW / KLAX</p>
       </div>
       <div className="lt-topBarMeta">
         <span className={`lt-stateChip state-${connectionState.toLowerCase()}`}>{connectionState}</span>
@@ -720,8 +729,8 @@ const LiveTopBar = memo(function LiveTopBar({
 });
 
 const OpportunitiesPanel = memo(function OpportunitiesPanel({
-  filteredRows,
-  allRows,
+  filteredRowsByDate,
+  allRowsByDate,
   showAllRows,
   onToggleShowAllRows,
   dateOptions,
@@ -731,17 +740,28 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
   isAutoInferenceActive,
   onToggleAutoInference,
   autoInferenceStatus,
+  nowMillis,
 }) {
-  const filtered = Array.isArray(filteredRows) ? filteredRows : [];
-  const all = Array.isArray(allRows) ? allRows : [];
   const dates = Array.isArray(dateOptions) ? dateOptions : [];
-  const modeRows = showAllRows ? all : filtered;
-  const rows = showAllRows ? modeRows : modeRows.slice(0, DEFAULT_OPPORTUNITY_ROWS);
-  const dateLabel = formatTargetDateLabel(selectedDate);
   const modeLabel = showAllRows
-    ? `Target ${dateLabel} - All opportunities sorted by EV`
-    : `Target ${dateLabel} - Win threshold: ${formatProbabilityPct(WIN_THRESHOLD)} - Sorted by EV (top ${DEFAULT_OPPORTUNITY_ROWS})`;
+    ? "All opportunities sorted by EV for each target date"
+    : `Win threshold: ${formatProbabilityPct(WIN_THRESHOLD)} - Sorted by EV (top ${DEFAULT_OPPORTUNITY_ROWS}) for each target date`;
   const toggleLabel = showAllRows ? `Show Win >= ${formatProbabilityPct(WIN_THRESHOLD)}` : "Show All by EV";
+  const activeDateLabel = selectedDate ? describeOpportunityDate(selectedDate, nowMillis) : "--";
+  const sections = dates.map((date) => {
+    const filtered = Array.isArray(filteredRowsByDate?.[date]) ? filteredRowsByDate[date] : [];
+    const all = Array.isArray(allRowsByDate?.[date]) ? allRowsByDate[date] : [];
+    const modeRows = showAllRows ? all : filtered;
+    const rows = showAllRows ? modeRows : modeRows.slice(0, DEFAULT_OPPORTUNITY_ROWS);
+    return {
+      date,
+      title: describeOpportunityDate(date, nowMillis),
+      filteredCount: filtered.length,
+      totalCount: all.length,
+      modeCount: modeRows.length,
+      rows,
+    };
+  });
 
   return (
     <section className="lt-opportunitiesPanel">
@@ -757,15 +777,13 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
                   className={["lt-opportunitiesDateBtn", date === selectedDate ? "is-active" : ""].join(" ")}
                   onClick={() => onSelectDate(date)}
                 >
-                  {formatTargetDateLabel(date)}
+                  {describeOpportunityDate(date, nowMillis)}
                 </button>
               ))}
             </div>
           ) : null}
           <span className="lt-opportunitiesMeta">{modeLabel}</span>
-          <span className="lt-opportunitiesCount">
-            Showing {rows.length} / {modeRows.length}
-          </span>
+          <span className="lt-opportunitiesCount">Active refresh target: {activeDateLabel}</span>
           <button
             type="button"
             className={["lt-opportunitiesAutoBtn", isAutoInferenceActive ? "is-active" : ""].join(" ")}
@@ -781,53 +799,77 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
 
       {autoInferenceStatus ? <div className="lt-opportunitiesAutoStatus">{autoInferenceStatus}</div> : null}
 
-      {rows.length === 0 ? (
-        <div className="lt-opportunitiesEmpty">
-          {isLoading
-            ? `Loading opportunities for ${dateLabel}...`
-            : showAllRows
-            ? "No opportunities available from current station frame."
-            : `No opportunities currently meet ${formatProbabilityPct(WIN_THRESHOLD)} win probability.`}
-        </div>
-      ) : (
-        <div className="lt-opportunitiesTableWrap">
-          <table className="lt-opportunitiesTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Station</th>
-                <th>Bucket</th>
-                <th>Side</th>
-                <th>Model win</th>
-                <th>Entry</th>
-                <th>EV</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, idx) => (
-                <tr key={`${row.marketTicker}-${row.side}-${idx}`}>
-                  <td>{idx + 1}</td>
-                  <td>{row.stationId}</td>
-                  <td>
-                    <div className="lt-opportunityBucket">{row.bucketLabel}</div>
-                    <div className="lt-opportunityTicker">{row.marketTicker}</div>
-                  </td>
-                  <td>
-                    <span className={["lt-opportunitySide", row.side === "YES" ? "yes" : "no"].join(" ")}>
-                      {row.side}
-                    </span>
-                  </td>
-                  <td>{formatProbabilityPct(row.modelWinProbability)}</td>
-                  <td>{formatPriceCents(row.entryPriceCents)}</td>
-                  <td className={["lt-opportunityEv", toFiniteNumber(row.ev) >= 0 ? "positive" : "negative"].join(" ")}>
-                    {formatEvCents(row.ev)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="lt-opportunitiesGrid">
+        {sections.map((section) => (
+          <article
+            key={section.date}
+            className={["lt-opportunitySection", section.date === selectedDate ? "is-active" : ""].join(" ")}
+          >
+            <button
+              type="button"
+              className="lt-opportunitySectionHeader"
+              onClick={() => onSelectDate(section.date)}
+            >
+              <div>
+                <h3 className="lt-opportunitySectionTitle">{section.title}</h3>
+                <p className="lt-opportunitySectionMeta">
+                  Showing {section.rows.length} / {section.modeCount}
+                  {showAllRows ? ` · total ${section.totalCount}` : ` · win >= ${formatProbabilityPct(WIN_THRESHOLD)}: ${section.filteredCount}`}
+                </p>
+              </div>
+              {section.date === selectedDate ? <span className="lt-opportunitySectionBadge">Active</span> : null}
+            </button>
+
+            {section.rows.length === 0 ? (
+              <div className="lt-opportunitiesEmpty">
+                {isLoading
+                  ? `Loading opportunities for ${section.title}...`
+                  : showAllRows
+                  ? "No opportunities available from current station frame."
+                  : `No opportunities currently meet ${formatProbabilityPct(WIN_THRESHOLD)} win probability.`}
+              </div>
+            ) : (
+              <div className="lt-opportunitiesTableWrap">
+                <table className="lt-opportunitiesTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Station</th>
+                      <th>Bucket</th>
+                      <th>Side</th>
+                      <th>Model win</th>
+                      <th>Entry</th>
+                      <th>EV</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {section.rows.map((row, idx) => (
+                      <tr key={`${section.date}-${row.marketTicker}-${row.side}-${idx}`}>
+                        <td>{idx + 1}</td>
+                        <td>{row.stationId}</td>
+                        <td>
+                          <div className="lt-opportunityBucket">{row.bucketLabel}</div>
+                          <div className="lt-opportunityTicker">{row.marketTicker}</div>
+                        </td>
+                        <td>
+                          <span className={["lt-opportunitySide", row.side === "YES" ? "yes" : "no"].join(" ")}>
+                            {row.side}
+                          </span>
+                        </td>
+                        <td>{formatProbabilityPct(row.modelWinProbability)}</td>
+                        <td>{formatPriceCents(row.entryPriceCents)}</td>
+                        <td className={["lt-opportunityEv", toFiniteNumber(row.ev) >= 0 ? "positive" : "negative"].join(" ")}>
+                          {formatEvCents(row.ev)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
     </section>
   );
 });
@@ -1600,10 +1642,14 @@ export default function LiveTradingPage() {
     return liveFrameOpportunities;
   }, [selectedOpportunitiesDate, opportunityRowsByDate, liveFrameOpportunities]);
 
-  const thresholdOpportunities = useMemo(
-    () => selectedDateOpportunities.filter((row) => toFiniteNumber(row?.modelWinProbability) >= WIN_THRESHOLD),
-    [selectedDateOpportunities],
-  );
+  const thresholdRowsByDate = useMemo(() => {
+    const next = {};
+    for (const date of opportunitiesDateOptions) {
+      const rows = Array.isArray(opportunityRowsByDate[date]) ? opportunityRowsByDate[date] : [];
+      next[date] = rows.filter((row) => toFiniteNumber(row?.modelWinProbability) >= WIN_THRESHOLD);
+    }
+    return next;
+  }, [opportunitiesDateOptions, opportunityRowsByDate]);
 
   useEffect(() => {
     if (!isAutoInferenceActive || !selectedOpportunitiesDate) {
@@ -1764,8 +1810,8 @@ export default function LiveTradingPage() {
       />
 
       <OpportunitiesPanel
-        filteredRows={thresholdOpportunities}
-        allRows={selectedDateOpportunities}
+        filteredRowsByDate={thresholdRowsByDate}
+        allRowsByDate={opportunityRowsByDate}
         showAllRows={showAllOpportunities}
         onToggleShowAllRows={toggleShowAllOpportunities}
         dateOptions={opportunitiesDateOptions}
@@ -1775,6 +1821,7 @@ export default function LiveTradingPage() {
         isAutoInferenceActive={isAutoInferenceActive}
         onToggleAutoInference={toggleAutoInference}
         autoInferenceStatus={autoInferenceStatus}
+        nowMillis={nowMillis}
       />
 
       {wsError ? <div className="lt-globalError">Feed error: {wsError}</div> : null}
@@ -1783,7 +1830,7 @@ export default function LiveTradingPage() {
         {stations.length === 0 ? (
           <article className="lt-emptyState">
             <h2>No live station frame yet</h2>
-            <p>Waiting for KNYC, KMIA, and KMDW orderbook frames.</p>
+            <p>Waiting for KNYC, KMIA, KMDW, and KLAX orderbook frames.</p>
           </article>
         ) : null}
 

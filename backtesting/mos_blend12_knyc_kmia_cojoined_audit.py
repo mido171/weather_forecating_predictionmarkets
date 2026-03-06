@@ -55,6 +55,20 @@ def normalize_price(v: float) -> float:
 def parse_bucket_label(label: str) -> Optional[Bucket]:
     s = str(label).strip().lower().replace(" to ", "-")
     s = re.sub(r"\s+", " ", s)
+    lt_match = re.search(r"<\s*(\d+)", s)
+    if lt_match:
+        bound = int(lt_match.group(1)) - 1
+        return Bucket(label_raw=str(label), lo=None, hi=bound, mode="or_below")
+    le_match = re.search(r"<=\s*(\d+)", s)
+    if le_match:
+        return Bucket(label_raw=str(label), lo=None, hi=int(le_match.group(1)), mode="or_below")
+    gt_match = re.search(r">\s*(\d+)", s)
+    if gt_match:
+        bound = int(gt_match.group(1)) + 1
+        return Bucket(label_raw=str(label), lo=bound, hi=None, mode="or_above")
+    ge_match = re.search(r">=\s*(\d+)", s)
+    if ge_match:
+        return Bucket(label_raw=str(label), lo=int(ge_match.group(1)), hi=None, mode="or_above")
     nums = [int(x) for x in re.findall(r"\d+", s)]
     if ("or below" in s or "or less" in s) and nums:
         return Bucket(label_raw=str(label), lo=None, hi=nums[0], mode="or_below")
@@ -174,17 +188,48 @@ def load_truth_map(path: Path) -> Dict[str, float]:
     return out
 
 
+def _extract_live_report_block(report: Dict, station_id: str) -> Dict:
+    report_blocks = report.get("inference_by_station", {}) if isinstance(report.get("inference_by_station"), dict) else {}
+    block = report_blocks.get(station_id, {})
+    if not block:
+        block = report.get(f"inference_{station_id.lower()}", {})
+    return block if isinstance(block, dict) else {}
+
+
+def _missing_live_report_stations(report: Dict, station_ids: List[str]) -> List[str]:
+    missing: List[str] = []
+    for station_id in station_ids:
+        block = _extract_live_report_block(report, station_id)
+        quantiles = block.get("quantiles", {}) if isinstance(block, dict) else {}
+        if not isinstance(quantiles, dict) or not quantiles:
+            missing.append(station_id)
+    return missing
+
+
 def run_live_inference_for_target(
     target_day: pd.Timestamp,
     live_script_path: Path,
     live_root: Path,
     python_bin: str,
     script_log_level: str,
+    station_ids: List[str],
 ) -> Dict:
     day_key = pd.Timestamp(target_day).strftime("%Y-%m-%d")
     out_dir = live_root / f"target_{pd.Timestamp(target_day).strftime('%Y%m%d')}"
     report_path = out_dir / "inference_report.json"
-    if not report_path.exists():
+    rerun_reason = ""
+    if report_path.exists():
+        try:
+            existing_report = json.loads(report_path.read_text(encoding="utf-8"))
+        except Exception:
+            existing_report = {}
+        missing_station_ids = _missing_live_report_stations(existing_report, station_ids)
+        if missing_station_ids:
+            rerun_reason = f"missing_station_blocks:{','.join(missing_station_ids)}"
+    else:
+        rerun_reason = "report_missing"
+
+    if rerun_reason:
         out_dir.mkdir(parents=True, exist_ok=True)
         cmd = [
             python_bin,
@@ -224,7 +269,13 @@ def run_live_inference_for_target(
             )
     if not report_path.exists():
         raise FileNotFoundError(f"Missing live inference report after run for target={day_key}: {report_path}")
-    return json.loads(report_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    missing_station_ids = _missing_live_report_stations(report, station_ids)
+    if missing_station_ids:
+        raise RuntimeError(
+            f"Live inference report missing requested stations for target={day_key}: {','.join(missing_station_ids)}"
+        )
+    return report
 
 
 def load_predictions_from_live_script(
@@ -259,6 +310,7 @@ def load_predictions_from_live_script(
                 live_root=live_root,
                 python_bin=python_bin,
                 script_log_level=script_log_level,
+                station_ids=station_ids,
             )
         except Exception as exc:
             stats["days_live_inference_failed"] += 1
@@ -270,12 +322,8 @@ def load_predictions_from_live_script(
             continue
         stats["days_with_live_report"] += 1
 
-        report_blocks = report.get("inference_by_station", {}) if isinstance(report.get("inference_by_station"), dict) else {}
         for station_id in station_ids:
-            block = report_blocks.get(station_id, {})
-            if not block:
-                key = f"inference_{station_id.lower()}"
-                block = report.get(key, {})
+            block = _extract_live_report_block(report, station_id)
             q = block.get("quantiles", {})
             if not q:
                 continue
@@ -843,6 +891,7 @@ def build_sideaware_with_balance_table(trades_df: pd.DataFrame) -> pd.DataFrame:
     t["entry_ts_utc"] = pd.to_datetime(t["entry_timestamp_utc"], utc=True)
     t["entry_stockholm_date"] = t["entry_ts_utc"].dt.tz_convert(ZoneInfo("Europe/Stockholm")).dt.strftime("%Y-%m-%d")
     t["entry_stockholm"] = t["entry_ts_utc"].dt.tz_convert(ZoneInfo("Europe/Stockholm")).dt.strftime("%Y-%m-%d %H:%M:%S %Z")
+    t["bucket_raw_display"] = t["bucket_raw"].map(lambda raw: parse_bucket_label(str(raw)).canonical_label() if parse_bucket_label(str(raw)) is not None else str(raw))
     return pd.DataFrame({
         "Target date (Local)": t["target_date_local"],
         "Market file day (Local)": t["market_file_date_local"],
@@ -850,7 +899,7 @@ def build_sideaware_with_balance_table(trades_df: pd.DataFrame) -> pd.DataFrame:
         "Entry time (Stockholm)": t["entry_stockholm"],
         "Station": t["station_id"],
         "Bucket": t["bucket"],
-        "Bucket raw (market)": t["bucket_raw"],
+        "Bucket raw (market)": t["bucket_raw_display"],
         "Side": t["side"],
         "Market win % (side)": (t["market_price"] * 100.0).round(2),
         "Model win %": (t["model_win_prob"] * 100.0).round(2),
@@ -877,6 +926,7 @@ def build_stockholm_display_table(trades_df: pd.DataFrame) -> pd.DataFrame:
     t["entry_ts_utc"] = pd.to_datetime(t["entry_timestamp_utc"], utc=True)
     t["entry_stockholm_date"] = t["entry_ts_utc"].dt.tz_convert(ZoneInfo("Europe/Stockholm")).dt.strftime("%Y-%m-%d")
     t["entry_stockholm"] = t["entry_ts_utc"].dt.tz_convert(ZoneInfo("Europe/Stockholm")).dt.strftime("%Y-%m-%d %H:%M:%S %Z")
+    t["bucket_raw_display"] = t["bucket_raw"].map(lambda raw: parse_bucket_label(str(raw)).canonical_label() if parse_bucket_label(str(raw)) is not None else str(raw))
     return pd.DataFrame({
         "Target date (Local)": t["target_date_local"],
         "Market file day (Local)": t["market_file_date_local"],
@@ -884,7 +934,7 @@ def build_stockholm_display_table(trades_df: pd.DataFrame) -> pd.DataFrame:
         "Entry time (Stockholm)": t["entry_stockholm"],
         "Station": t["station_id"],
         "Bucket": t["bucket"],
-        "Bucket raw (market)": t["bucket_raw"],
+        "Bucket raw (market)": t["bucket_raw_display"],
         "Side": t["side"],
         "Market win % (side)": (t["market_price"] * 100.0).round(2),
         "Model win %": (t["model_win_prob"] * 100.0).round(2),
@@ -912,6 +962,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--pred-test-kmia", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\test_predictions.parquet")
     p.add_argument("--pred-dev-kmdw", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\dev_predictions.parquet")
     p.add_argument("--pred-test-kmdw", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\test_predictions.parquet")
+    p.add_argument("--pred-dev-klax", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KLAX\03_blends\blend_12\dev_predictions.parquet")
+    p.add_argument("--pred-test-klax", default=r"D:\Ahmed\data\kalshi\Experiments\MOS_KLAX\03_blends\blend_12\test_predictions.parquet")
     p.add_argument(
         "--live-script-path",
         default=str((Path(__file__).resolve().parents[1] / "tools" / "live" / "mos_quantile_live_inference.py")),
@@ -922,9 +974,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--truth-csv-knyc", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KNYC_settled_tmax.csv")
     p.add_argument("--truth-csv-kmia", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KMIA_settled_tmax.csv")
     p.add_argument("--truth-csv-kmdw", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KMDW_settled_tmax_2002_2026.csv")
+    p.add_argument("--truth-csv-klax", default=r"D:\Ahmed\data\kalshi\training_data\02_truth\KLAX_settled_tmax_2002_2026.csv")
     p.add_argument("--kalshi-root-knyc", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighny_2024_10_01_to_2025_12_31")
     p.add_argument("--kalshi-root-kmia", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighmia_2024_10_01_to_2025_12_31")
     p.add_argument("--kalshi-root-kmdw", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighchi_2024_10_01_to_2026_03_03")
+    p.add_argument("--kalshi-root-klax", default=r"D:\Ahmed\data\kalshi\kalshi_history\kxhighlax_2025_01_01_to_2026_03_05")
     p.add_argument("--start-date", default="2024-10-01")
     p.add_argument("--end-date", default="2025-12-31")
     p.add_argument("--entry-hour-z", type=int, default=12)
@@ -958,11 +1012,31 @@ def main() -> None:
     kalshi_root_map = parse_json_mapping(args.kalshi_root_by_station_json)
     file_prefix_map = parse_json_mapping(args.file_prefix_by_station_json)
 
-    legacy_pred_dev = {"KNYC": str(args.pred_dev_knyc), "KMIA": str(args.pred_dev_kmia), "KMDW": str(args.pred_dev_kmdw)}
-    legacy_pred_test = {"KNYC": str(args.pred_test_knyc), "KMIA": str(args.pred_test_kmia), "KMDW": str(args.pred_test_kmdw)}
-    legacy_truth = {"KNYC": str(args.truth_csv_knyc), "KMIA": str(args.truth_csv_kmia), "KMDW": str(args.truth_csv_kmdw)}
-    legacy_kalshi_root = {"KNYC": str(args.kalshi_root_knyc), "KMIA": str(args.kalshi_root_kmia), "KMDW": str(args.kalshi_root_kmdw)}
-    legacy_file_prefix = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW"}
+    legacy_pred_dev = {
+        "KNYC": str(args.pred_dev_knyc),
+        "KMIA": str(args.pred_dev_kmia),
+        "KMDW": str(args.pred_dev_kmdw),
+        "KLAX": str(args.pred_dev_klax),
+    }
+    legacy_pred_test = {
+        "KNYC": str(args.pred_test_knyc),
+        "KMIA": str(args.pred_test_kmia),
+        "KMDW": str(args.pred_test_kmdw),
+        "KLAX": str(args.pred_test_klax),
+    }
+    legacy_truth = {
+        "KNYC": str(args.truth_csv_knyc),
+        "KMIA": str(args.truth_csv_kmia),
+        "KMDW": str(args.truth_csv_kmdw),
+        "KLAX": str(args.truth_csv_klax),
+    }
+    legacy_kalshi_root = {
+        "KNYC": str(args.kalshi_root_knyc),
+        "KMIA": str(args.kalshi_root_kmia),
+        "KMDW": str(args.kalshi_root_kmdw),
+        "KLAX": str(args.kalshi_root_klax),
+    }
+    legacy_file_prefix = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW", "KLAX": "KLAX"}
 
     if str(args.prediction_source) == "parquet":
         pred_maps: Dict[str, Dict[str, pd.Series]] = {}

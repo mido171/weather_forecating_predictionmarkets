@@ -44,17 +44,25 @@ DEFAULT_IEM_BASE_URL = "https://mesonet.agron.iastate.edu"
 DEFAULT_MODEL_BUNDLE_KNYC = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS\03_blends\blend_12\live_model_bundle_v2_20260302")
 DEFAULT_MODEL_BUNDLE_KMIA = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS_KMIA\03_blends\blend_12\live_model_bundle_v2_20260302")
 DEFAULT_MODEL_BUNDLE_KMDW = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS_KMDW\03_blends\blend_12\live_model_bundle_v2_20260304")
+DEFAULT_MODEL_BUNDLE_KLAX = Path(r"D:\Ahmed\data\kalshi\Experiments\MOS_KLAX\03_blends\blend_12\live_model_bundle_v2_20260305")
 
 DEFAULT_MOS_ARCHIVE_KNYC = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KNYC_mos_archive_2000_2025.csv.gz")
 DEFAULT_MOS_ARCHIVE_KMIA = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KMIA_mos_archive_2000_2025.csv.gz")
 DEFAULT_MOS_ARCHIVE_KMDW = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KMDW_mos_archive_2002_2026.csv.gz")
+DEFAULT_MOS_ARCHIVE_KLAX = Path(r"D:\Ahmed\data\kalshi\training_data\04_mos\archive_merged\KLAX_mos_archive_2002_2026.csv.gz")
 DEFAULT_TRUTH_KNYC = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KNYC_settled_tmax.csv")
 DEFAULT_TRUTH_KMIA = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KMIA_settled_tmax.csv")
 DEFAULT_TRUTH_KMDW = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KMDW_settled_tmax_2002_2026.csv")
+DEFAULT_TRUTH_KLAX = Path(r"D:\Ahmed\data\kalshi\training_data\02_truth\KLAX_settled_tmax_2002_2026.csv")
 
-DEFAULT_SERIES_BY_STATION = {"KNYC": "KXHIGHNY", "KMIA": "KXHIGHMIA", "KMDW": "KXHIGHCHI"}
-DEFAULT_FILE_PREFIX_BY_STATION = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW"}
-DEFAULT_ZONE_BY_STATION = {"KNYC": "America/New_York", "KMIA": "America/New_York", "KMDW": "America/Chicago"}
+DEFAULT_SERIES_BY_STATION = {"KNYC": "KXHIGHNY", "KMIA": "KXHIGHMIA", "KMDW": "KXHIGHCHI", "KLAX": "KXHIGHLAX"}
+DEFAULT_FILE_PREFIX_BY_STATION = {"KNYC": "KNYC", "KMIA": "KMIA", "KMDW": "KMDW", "KLAX": "KLAX"}
+DEFAULT_ZONE_BY_STATION = {
+    "KNYC": "America/New_York",
+    "KMIA": "America/New_York",
+    "KMDW": "America/Chicago",
+    "KLAX": "America/Los_Angeles",
+}
 
 QUANTILES = list(blend12_bundle.QUANTILES)
 QUANTILE_COLUMNS = list(blend12_bundle.QUANTILE_COLUMNS)
@@ -247,6 +255,20 @@ def configure_logger(log_file: Path, level: str) -> logging.Logger:
 def parse_bucket_label(label: str) -> Optional[Bucket]:
     s = str(label).strip().lower().replace(" to ", "-")
     s = re.sub(r"\s+", " ", s)
+    lt_match = re.search(r"<\s*(\d+)", s)
+    if lt_match:
+        bound = int(lt_match.group(1)) - 1
+        return Bucket(label_raw=str(label), lo=None, hi=bound, mode="or_below")
+    le_match = re.search(r"<=\s*(\d+)", s)
+    if le_match:
+        return Bucket(label_raw=str(label), lo=None, hi=int(le_match.group(1)), mode="or_below")
+    gt_match = re.search(r">\s*(\d+)", s)
+    if gt_match:
+        bound = int(gt_match.group(1)) + 1
+        return Bucket(label_raw=str(label), lo=bound, hi=None, mode="or_above")
+    ge_match = re.search(r">=\s*(\d+)", s)
+    if ge_match:
+        return Bucket(label_raw=str(label), lo=int(ge_match.group(1)), hi=None, mode="or_above")
     nums = [int(x) for x in re.findall(r"\d+", s)]
     if ("or below" in s or "or less" in s) and nums:
         return Bucket(label_raw=str(label), lo=None, hi=nums[0], mode="or_below")
@@ -1171,6 +1193,7 @@ def resolve_station_configs(args: argparse.Namespace, live_root: Path) -> List[S
         market_root_knyc = Path(args.market_root_knyc) if args.market_root_knyc else (live_root / "kalshi" / "knyc")
         market_root_kmia = Path(args.market_root_kmia) if args.market_root_kmia else (live_root / "kalshi" / "kmia")
         market_root_kmdw = Path(args.market_root_kmdw) if args.market_root_kmdw else (live_root / "kalshi" / "kmdw")
+        market_root_klax = Path(args.market_root_klax) if args.market_root_klax else (live_root / "kalshi" / "klax")
         configs = [
             StationConfig(
                 station_id="KMIA",
@@ -1191,6 +1214,16 @@ def resolve_station_configs(args: argparse.Namespace, live_root: Path) -> List[S
                 bundle_dir=Path(args.bundle_dir_kmdw),
                 mos_archive_path=Path(args.mos_archive_kmdw),
                 truth_csv_path=Path(args.truth_csv_kmdw),
+            ),
+            StationConfig(
+                station_id="KLAX",
+                zoneid=DEFAULT_ZONE_BY_STATION["KLAX"],
+                series=DEFAULT_SERIES_BY_STATION["KLAX"],
+                file_prefix=DEFAULT_FILE_PREFIX_BY_STATION["KLAX"],
+                market_root=market_root_klax,
+                bundle_dir=Path(args.bundle_dir_klax),
+                mos_archive_path=Path(args.mos_archive_klax),
+                truth_csv_path=Path(args.truth_csv_klax),
             ),
             StationConfig(
                 station_id="KNYC",
@@ -1229,12 +1262,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--bundle-dir-knyc", default=str(DEFAULT_MODEL_BUNDLE_KNYC))
     p.add_argument("--bundle-dir-kmia", default=str(DEFAULT_MODEL_BUNDLE_KMIA))
     p.add_argument("--bundle-dir-kmdw", default=str(DEFAULT_MODEL_BUNDLE_KMDW))
+    p.add_argument("--bundle-dir-klax", default=str(DEFAULT_MODEL_BUNDLE_KLAX))
     p.add_argument("--mos-archive-knyc", default=str(DEFAULT_MOS_ARCHIVE_KNYC))
     p.add_argument("--mos-archive-kmia", default=str(DEFAULT_MOS_ARCHIVE_KMIA))
     p.add_argument("--mos-archive-kmdw", default=str(DEFAULT_MOS_ARCHIVE_KMDW))
+    p.add_argument("--mos-archive-klax", default=str(DEFAULT_MOS_ARCHIVE_KLAX))
     p.add_argument("--truth-csv-knyc", default=str(DEFAULT_TRUTH_KNYC))
     p.add_argument("--truth-csv-kmia", default=str(DEFAULT_TRUTH_KMIA))
     p.add_argument("--truth-csv-kmdw", default=str(DEFAULT_TRUTH_KMDW))
+    p.add_argument("--truth-csv-klax", default=str(DEFAULT_TRUTH_KLAX))
 
     p.add_argument("--auto-train-bundle", dest="auto_train_bundle", action="store_true")
     p.add_argument("--no-auto-train-bundle", dest="auto_train_bundle", action="store_false")
@@ -1243,6 +1279,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--market-root-knyc", default=None)
     p.add_argument("--market-root-kmia", default=None)
     p.add_argument("--market-root-kmdw", default=None)
+    p.add_argument("--market-root-klax", default=None)
     p.add_argument("--station-configs-json", default=None)
     p.add_argument("--station-id", default=None, help="Single-station mode station id (e.g. KATL)")
     p.add_argument("--station-zoneid", default=None, help="Single-station mode timezone (e.g. America/New_York)")

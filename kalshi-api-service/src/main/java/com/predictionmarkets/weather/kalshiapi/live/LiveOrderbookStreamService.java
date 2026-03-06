@@ -67,6 +67,14 @@ public class LiveOrderbookStreamService implements DisposableBean {
           .appendPattern("MMM d uuuu")
           .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
           .toFormatter(Locale.ENGLISH);
+  private static final Pattern QUESTION_BUCKET_PATTERN =
+      Pattern.compile("(?i)\\bbe\\s+(.+?)\\s+on\\s+[A-Za-z]+\\s+\\d{1,2},\\s*\\d{4}\\??");
+  private static final Pattern LESS_THAN_BUCKET_PATTERN =
+      Pattern.compile("^<\\s*(\\d+)\\s*$");
+  private static final Pattern GREATER_THAN_BUCKET_PATTERN =
+      Pattern.compile("^>\\s*(\\d+)\\s*$");
+  private static final Pattern RANGE_BUCKET_PATTERN =
+      Pattern.compile("^(\\d+)\\s*(?:-|to)\\s*(\\d+)\\s*$", Pattern.CASE_INSENSITIVE);
   private static final Pattern NUMERIC_PATTERN = Pattern.compile("(\\d+)");
   private static final int PMF_SUPPORT_LO = -20;
   private static final int PMF_SUPPORT_HI = 130;
@@ -86,8 +94,8 @@ public class LiveOrderbookStreamService implements DisposableBean {
       new AtomicReference<>(Map.of());
   private final AtomicReference<Set<String>> trackedMarkets =
       new AtomicReference<>(Set.of());
-  private final AtomicReference<InferenceSnapshot> latestInference =
-      new AtomicReference<>(InferenceSnapshot.empty());
+  private final AtomicReference<InferenceIndex> latestInference =
+      new AtomicReference<>(InferenceIndex.empty());
   private final AtomicReference<LiveOrderbookFrame> latestFrame = new AtomicReference<>();
   private final Sinks.Many<LiveOrderbookFrame> sink = Sinks.many().replay().latest();
 
@@ -262,23 +270,38 @@ public class LiveOrderbookStreamService implements DisposableBean {
   }
 
   private void refreshInference() throws IOException {
-    Path reportPath = findLatestInferenceReport();
-    if (reportPath == null) {
-      latestInference.set(InferenceSnapshot.empty());
+    List<Path> reportPaths = findInferenceReportCandidates();
+    if (reportPaths.isEmpty()) {
+      latestInference.set(InferenceIndex.empty());
       return;
     }
 
-    FileTime modified = Files.getLastModifiedTime(reportPath);
-    InferenceSnapshot current = latestInference.get();
-    if (current.matches(reportPath, modified)) {
+    Map<String, Long> signature = new LinkedHashMap<>();
+    for (Path reportPath : reportPaths) {
+      signature.put(reportPath.toAbsolutePath().normalize().toString(), lastModifiedMillisSafe(reportPath));
+    }
+
+    InferenceIndex current = latestInference.get();
+    if (current.matches(signature)) {
       return;
     }
 
-    JsonNode report = objectMapper.readTree(reportPath.toFile());
-    String targetDateLocal = textOrNull(report.path("target_date_local"));
-    Map<String, StationInference> stationInference = new HashMap<>();
-    JsonNode inferenceByStation = report.path("inference_by_station");
-    if (inferenceByStation.isObject()) {
+    Map<String, Map<String, StationInferenceVersioned>> byDateMutable = new LinkedHashMap<>();
+    int loadedReports = 0;
+    for (Path reportPath : reportPaths) {
+      FileTime modified = Files.getLastModifiedTime(reportPath);
+      JsonNode report = objectMapper.readTree(reportPath.toFile());
+      String targetDateLocal = textOrNull(report.path("target_date_local"));
+      if (!StringUtils.hasText(targetDateLocal)) {
+        continue;
+      }
+      JsonNode inferenceByStation = report.path("inference_by_station");
+      if (!inferenceByStation.isObject()) {
+        continue;
+      }
+      loadedReports += 1;
+      Map<String, StationInferenceVersioned> byStation =
+          byDateMutable.computeIfAbsent(targetDateLocal, ignored -> new LinkedHashMap<>());
       inferenceByStation.fields().forEachRemaining(entry -> {
         JsonNode stationNode = entry.getValue();
         String stationId = normalizeStationId(textOrNull(stationNode.path("station_id")));
@@ -290,33 +313,43 @@ public class LiveOrderbookStreamService implements DisposableBean {
         }
         Map<String, Double> quantilesByLabel = parseQuantilesByLabel(stationNode.path("quantiles"));
         Map<Double, Double> quantilesByTau = parseQuantilesByTau(quantilesByLabel);
-        stationInference.put(
+        StationInference nextInference = new StationInference(
             stationId,
-            new StationInference(
-                stationId,
-                textOrNull(stationNode.path("target_date_local")),
-                textOrNull(stationNode.path("runtime_utc")),
-                numberOrNull(stationNode.path("prediction_point_tmax_f")),
-                Map.copyOf(quantilesByLabel),
-                Map.copyOf(quantilesByTau)));
+            textOrNull(stationNode.path("target_date_local")),
+            textOrNull(stationNode.path("runtime_utc")),
+            numberOrNull(stationNode.path("prediction_point_tmax_f")),
+            Map.copyOf(quantilesByLabel),
+            Map.copyOf(quantilesByTau));
+        StationInferenceVersioned previous = byStation.get(stationId);
+        if (previous == null || modified.compareTo(previous.reportModifiedTime()) >= 0) {
+          byStation.put(stationId, new StationInferenceVersioned(nextInference, modified));
+        }
       });
     }
 
-    latestInference.set(new InferenceSnapshot(
-        reportPath,
-        modified,
-        targetDateLocal,
-        Map.copyOf(stationInference)));
-    log.info("Live inference report loaded path={} stations={}", reportPath, stationInference.size());
+    Map<String, Map<String, StationInference>> byDate = new LinkedHashMap<>();
+    int loadedStations = 0;
+    for (Map.Entry<String, Map<String, StationInferenceVersioned>> entry : byDateMutable.entrySet()) {
+      Map<String, StationInference> immutableByStation = new LinkedHashMap<>();
+      for (Map.Entry<String, StationInferenceVersioned> stationEntry : entry.getValue().entrySet()) {
+        immutableByStation.put(stationEntry.getKey(), stationEntry.getValue().stationInference());
+      }
+      loadedStations += immutableByStation.size();
+      byDate.put(entry.getKey(), Map.copyOf(immutableByStation));
+    }
+
+    latestInference.set(new InferenceIndex(Map.copyOf(signature), Map.copyOf(byDate)));
+    log.info("Live inference index loaded reports={} targetDates={} stationSnapshots={}",
+        loadedReports, byDate.size(), loadedStations);
   }
 
-  private Path findLatestInferenceReport() throws IOException {
+  private List<Path> findInferenceReportCandidates() throws IOException {
     if (!StringUtils.hasText(properties.getInferenceRootDir())) {
-      return null;
+      return List.of();
     }
     Path root = Path.of(properties.getInferenceRootDir());
     if (!Files.isDirectory(root)) {
-      return null;
+      return List.of();
     }
     String reportFileName = StringUtils.hasText(properties.getInferenceReportFileName())
         ? properties.getInferenceReportFileName().trim()
@@ -335,11 +368,8 @@ public class LiveOrderbookStreamService implements DisposableBean {
           .forEach(candidates::add);
     }
 
-    if (candidates.isEmpty()) {
-      return null;
-    }
     candidates.sort(Comparator.comparingLong(this::lastModifiedMillisSafe).reversed());
-    return candidates.get(0);
+    return candidates;
   }
 
   private StationRuntimeState resolveStation(LiveTradingProperties.Station station,
@@ -477,9 +507,10 @@ public class LiveOrderbookStreamService implements DisposableBean {
   }
 
   private MarketDescriptor toMarketDescriptor(Market market) {
-    String bucketLabel = StringUtils.hasText(market.subtitle())
+    String rawBucketLabel = StringUtils.hasText(market.subtitle())
         ? market.subtitle().trim()
         : (StringUtils.hasText(market.title()) ? market.title().trim() : market.ticker());
+    String bucketLabel = canonicalizeBucketLabel(rawBucketLabel);
     return new MarketDescriptor(
         market.ticker().trim().toUpperCase(Locale.ROOT),
         bucketLabel,
@@ -487,11 +518,47 @@ public class LiveOrderbookStreamService implements DisposableBean {
         bucketSortKey(bucketLabel));
   }
 
+  private String canonicalizeBucketLabel(String rawLabel) {
+    if (!StringUtils.hasText(rawLabel)) {
+      return rawLabel;
+    }
+    String trimmed = rawLabel.trim();
+    Matcher questionMatcher = QUESTION_BUCKET_PATTERN.matcher(trimmed);
+    if (!questionMatcher.find()) {
+      return trimmed;
+    }
+    String bucketToken = questionMatcher.group(1)
+        .replace("°", "")
+        .replace("*", "")
+        .trim();
+
+    Matcher lessMatcher = LESS_THAN_BUCKET_PATTERN.matcher(bucketToken);
+    if (lessMatcher.matches()) {
+      int strike = Integer.parseInt(lessMatcher.group(1));
+      return Math.max(0, strike - 1) + "° or below";
+    }
+
+    Matcher greaterMatcher = GREATER_THAN_BUCKET_PATTERN.matcher(bucketToken);
+    if (greaterMatcher.matches()) {
+      int strike = Integer.parseInt(greaterMatcher.group(1));
+      return (strike + 1) + "° or above";
+    }
+
+    Matcher rangeMatcher = RANGE_BUCKET_PATTERN.matcher(bucketToken);
+    if (rangeMatcher.matches()) {
+      int lo = Integer.parseInt(rangeMatcher.group(1));
+      int hi = Integer.parseInt(rangeMatcher.group(2));
+      return Math.min(lo, hi) + "° to " + Math.max(lo, hi) + "°";
+    }
+
+    return trimmed;
+  }
+
   private String bucketSortKey(String label) {
     if (!StringUtils.hasText(label)) {
       return "z|9999|9999|";
     }
-    String normalized = label.toLowerCase(Locale.ROOT);
+    String normalized = canonicalizeBucketLabel(label).toLowerCase(Locale.ROOT);
     List<Integer> numbers = new ArrayList<>();
     Matcher matcher = NUMERIC_PATTERN.matcher(normalized);
     while (matcher.find()) {
@@ -522,7 +589,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
   private LiveOrderbookFrame buildFrame(Map<String, StationRuntimeState> stationStateByStationId,
                                         LocalDate targetDateOverride) {
     Instant asOfUtc = Instant.now(clock);
-    InferenceSnapshot inferenceSnapshot = latestInference.get();
+    InferenceIndex inferenceIndex = latestInference.get();
     List<LiveStationOrderbookView> stations = new ArrayList<>();
     List<LiveOpportunityView> opportunities = new ArrayList<>();
     Map<String, StationRuntimeState> resolvedStates =
@@ -532,7 +599,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
       StationRuntimeState stationState = resolvedStates.get(stationId);
       LocalDate inferenceTargetDate = stationState == null ? targetDateOverride : stationState.targetDateLocal();
       StationInference stationInference = selectStationInference(
-          inferenceSnapshot,
+          inferenceIndex,
           stationId,
           inferenceTargetDate);
       Map<Integer, Double> stationPmf = stationInference == null || stationInference.quantilesByTau().isEmpty()
@@ -638,17 +705,24 @@ public class LiveOrderbookStreamService implements DisposableBean {
     return new LiveOrderbookFrame(asOfUtc, stations, limited);
   }
 
-  private StationInference selectStationInference(InferenceSnapshot snapshot,
+  private StationInference selectStationInference(InferenceIndex index,
                                                   String stationId,
                                                   LocalDate targetDateLocal) {
-    if (snapshot == null || !StringUtils.hasText(stationId)) {
+    if (index == null || !StringUtils.hasText(stationId)) {
       return null;
     }
-    StationInference inference = snapshot.stationsById().get(stationId);
+    if (targetDateLocal == null) {
+      return null;
+    }
+    Map<String, StationInference> byStation = index.byTargetDate().get(targetDateLocal.toString());
+    if (byStation == null || byStation.isEmpty()) {
+      return null;
+    }
+    StationInference inference = byStation.get(normalizeStationId(stationId));
     if (inference == null) {
       return null;
     }
-    if (targetDateLocal == null || !StringUtils.hasText(inference.targetDateLocal())) {
+    if (!StringUtils.hasText(inference.targetDateLocal())) {
       return inference;
     }
     return targetDateLocal.toString().equals(inference.targetDateLocal()) ? inference : null;
@@ -783,7 +857,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
     if (!StringUtils.hasText(label)) {
       return null;
     }
-    String normalized = label.trim().toLowerCase(Locale.ROOT).replace(" to ", "-");
+    String normalized = canonicalizeBucketLabel(label).trim().toLowerCase(Locale.ROOT).replace(" to ", "-");
     List<Integer> numbers = new ArrayList<>();
     Matcher matcher = NUMERIC_PATTERN.matcher(normalized);
     while (matcher.find()) {
@@ -1040,18 +1114,22 @@ public class LiveOrderbookStreamService implements DisposableBean {
   ) {
   }
 
-  private record InferenceSnapshot(
-      Path reportPath,
-      FileTime reportModifiedTime,
-      String targetDateLocal,
-      Map<String, StationInference> stationsById
+  private record StationInferenceVersioned(
+      StationInference stationInference,
+      FileTime reportModifiedTime
   ) {
-    private static InferenceSnapshot empty() {
-      return new InferenceSnapshot(null, null, null, Map.of());
+  }
+
+  private record InferenceIndex(
+      Map<String, Long> sourceSignature,
+      Map<String, Map<String, StationInference>> byTargetDate
+  ) {
+    private static InferenceIndex empty() {
+      return new InferenceIndex(Map.of(), Map.of());
     }
 
-    private boolean matches(Path path, FileTime modified) {
-      return Objects.equals(reportPath, path) && Objects.equals(reportModifiedTime, modified);
+    private boolean matches(Map<String, Long> signature) {
+      return Objects.equals(sourceSignature, signature);
     }
   }
 }

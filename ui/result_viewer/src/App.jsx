@@ -16,11 +16,28 @@ import LiveTradingPage from "./LiveTradingPage";
 
 const DATASET_OPTIONS = [
   {
-    key: "2024-2025",
-    label: "2024-2025",
-    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025_with_balance.csv",
+    key: "2024-2025-top3",
+    label: "2024-2025 | Top #3",
+    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p30_win70_minprice25c_fractionalkelly0p20_cap700_live_script_2024_2025_with_balance.csv",
     params: [
-      "Stations: KNYC + KMIA + KMDW",
+      "Stations: KNYC + KMIA + KMDW + KLAX",
+      "Period: 2024-10-01 -> 2025-12-31",
+      "Displayed combo: #3 by final balance with max DD <= 25% and actual win >= 65%",
+      "EV >= 0.30",
+      "Win >= 0.70",
+      "Side price >= 25c",
+      "Fractional Kelly 0.20",
+      "Stake cap $700",
+      "Entry >= max(T-1 12:00Z, open+30m)",
+      "Prediction source: live-script replay",
+    ],
+  },
+  {
+    key: "2024-2025",
+    label: "2024-2025 | Fixed 7.5%",
+    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025_with_balance.csv",
+    params: [
+      "Stations: KNYC + KMIA + KMDW + KLAX",
       "Period: 2024-10-01 -> 2025-12-31",
       "EV >= 0.25",
       "Win >= 0.85",
@@ -28,6 +45,7 @@ const DATASET_OPTIONS = [
       "Risk fraction 7.5% (balance-based)",
       "Stake cap $700",
       "Entry >= max(T-1 12:00Z, open+30m)",
+      "Prediction source: live-script replay",
     ],
   },
   {
@@ -54,7 +72,7 @@ const APP_MENU_OPTIONS = [
   { key: BACKTESTING_PAGE_KEY, label: "Backtesting" },
   { key: LIVE_TRADING_PAGE_KEY, label: "Live trading" },
 ];
-const DEFAULT_DATASET_KEY = "2024-2025";
+const DEFAULT_DATASET_KEY = "2024-2025-top3";
 const DEFAULT_PAGE_KEY = BACKTESTING_PAGE_KEY;
 const TABLE_ROW_HEIGHT = 42;
 const TABLE_OVERSCAN_ROWS = 14;

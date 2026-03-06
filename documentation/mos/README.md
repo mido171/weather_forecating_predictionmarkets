@@ -66,6 +66,20 @@ Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
 - UI engineering record (virtualized table + station scoring):
   - `documentation/mos/17_run_record_2026-03-04_ui_full_trade_table_virtualization_and_station_contribution_scoring.md`
 
+Current fixed-risk 4-station (`KNYC+KMIA+KMDW+KLAX`) UI-backed dataset:
+
+- run record:
+  - `documentation/mos/22_run_record_2026-03-05_klax_onboarding_and_4station_2025_backtest_ui.md`
+- side-aware table (window `2025`):
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2025_with_balance.csv`
+
+Current fixed-risk 4-station (`KNYC+KMIA+KMDW+KLAX`) live-script replay UI-backed dataset:
+
+- run record:
+  - `documentation/mos/23_run_record_2026-03-06_4station_live_script_replay_ui.md`
+- side-aware table (window `2024-2025`):
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025_with_balance.csv`
+
 ## Mandatory Read Order
 
 1. `documentation/mos/00_scope_and_objective.md`
@@ -86,7 +100,9 @@ Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
 16. `documentation/mos/19_engineering_spec_2026-03-04_live_inference_station_generic_and_shared_bundle_module.md`
 17. `documentation/mos/20_engineering_spec_2026-03-04_bucket_probability_interpolation_yes_no.md`
 18. `documentation/mos/21_engineering_spec_2026-03-05_live_orderbook_target_date_inference_autorefresh.md`
-19. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
+19. `documentation/mos/22_run_record_2026-03-05_klax_onboarding_and_4station_2025_backtest_ui.md`
+20. `documentation/mos/23_run_record_2026-03-06_4station_live_script_replay_ui.md`
+21. `documentation/mos/05_troubleshooting_and_common_failure_modes.md`
 
 ## Document Map
 
@@ -134,6 +150,10 @@ Current fixed-risk multi-station (`KNYC+KMIA+KMDW`) UI-backed dataset:
   - exact quantile interpolation, PMF construction, and YES/NO bucket probability derivation used by live inference.
 - `21_engineering_spec_2026-03-05_live_orderbook_target_date_inference_autorefresh.md`
   - full implementation spec for live orderbook date switching, backend inference invocation endpoint, and UI 10s auto-refresh stop-on-populated behavior.
+- `22_run_record_2026-03-05_klax_onboarding_and_4station_2025_backtest_ui.md`
+  - KLAX onboarding, live bundle/parity validation, station-flow cojoined bugfix, and 4-station audited UI dataset.
+- `23_run_record_2026-03-06_4station_live_script_replay_ui.md`
+  - 4-station live-script replay dataset, replay-root provenance, and UI switch from parquet-backed KLAX to per-day live-script forecasts.
 
 ## Canonical Scripts
 
@@ -229,6 +249,28 @@ Note:
   - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025.json`
 - side-aware table:
   - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2024_2025_with_balance.csv`
+
+### Co-Joined Fixed-Risk 4-Station (KNYC+KMIA+KMDW+KLAX, 2025)
+
+- run record:
+  - `documentation/mos/22_run_record_2026-03-05_klax_onboarding_and_4station_2025_backtest_ui.md`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2025.json`
+- sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2025.json`
+- side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_2025_with_balance.csv`
+
+### Co-Joined Fixed-Risk 4-Station Live-Script Replay (KNYC+KMIA+KMDW+KLAX, 2024-2025)
+
+- run record:
+  - `documentation/mos/23_run_record_2026-03-06_4station_live_script_replay_ui.md`
+- summary:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\summary_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025.json`
+- sanity:
+  - `D:\Ahmed\data\kalshi\Experiments\MOS\05_backtest\sanity_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025.json`
+- side-aware table:
+  - `D:\Ahmed\data\kalshi\plots\all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025_with_balance.csv`
 
 ### UI Performance + Station Contribution Analytics
 

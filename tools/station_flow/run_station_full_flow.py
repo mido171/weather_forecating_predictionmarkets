@@ -30,6 +30,13 @@ if str(ROOT) not in sys.path:
 from tools.live import mos_blend12_bundle  # noqa: E402
 from tools.station_flow.station_metadata import resolve_station_metadata  # noqa: E402
 
+DEFAULT_SERIES_BY_STATION = {
+    "KNYC": "KXHIGHNY",
+    "KMIA": "KXHIGHMIA",
+    "KMDW": "KXHIGHCHI",
+    "KLAX": "KXHIGHLAX",
+}
+
 
 def now_utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -538,6 +545,11 @@ def main() -> int:
                     extra_series[sid] = m.series_ticker
                 except Exception:
                     sid = x
+            else:
+                mapped_series = DEFAULT_SERIES_BY_STATION.get(x)
+                if mapped_series:
+                    extra_series[x] = mapped_series
+                    extra_prefix[x] = x
             if sid not in stations:
                 stations.append(sid)
 

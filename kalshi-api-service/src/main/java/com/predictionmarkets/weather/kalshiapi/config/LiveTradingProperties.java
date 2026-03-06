@@ -196,6 +196,7 @@ public class LiveTradingProperties {
     defaults.add(new Station("KNYC", "KXHIGHNY", "America/New_York", "New York"));
     defaults.add(new Station("KMIA", "KXHIGHMIA", "America/New_York", "Miami"));
     defaults.add(new Station("KMDW", "KXHIGHCHI", "America/Chicago", "Chicago Midway"));
+    defaults.add(new Station("KLAX", "KXHIGHLAX", "America/Los_Angeles", "Los Angeles"));
     return defaults;
   }
 

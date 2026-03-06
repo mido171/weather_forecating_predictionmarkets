@@ -33,7 +33,6 @@ const RECENT_EVENT_RETENTION_MS = 30000;
 const HOT_WINDOW_MS = 3000;
 const GLOBAL_DELAYED_SECONDS = 2.5;
 const TOP_DEPTH_ROWS = 3;
-const WIN_THRESHOLD = 0.85;
 const DEFAULT_OPPORTUNITY_ROWS = 14;
 const OPPORTUNITIES_CUTOFF_HOUR = 17;
 const OPPORTUNITIES_CUTOFF_MINUTE = 45;
@@ -48,6 +47,19 @@ const TEMP_FORMATTER = new Intl.NumberFormat(undefined, {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
+const DEFAULT_LIVE_CONFIG = {
+  referenceLabel: "2024-2025 | Top #3",
+  periodLabel: "2024-10-01 -> 2025-12-31",
+  stationIds: ["KNYC", "KMIA", "KMDW", "KLAX"],
+  minWinProbability: 0.7,
+  minEv: 0.3,
+  minSidePriceProbability: 0.25,
+  sizingMode: "fractional_kelly",
+  kellyFraction: 0.2,
+  stakeCapUsd: 700,
+  entryRule: "Entry >= max(T-1 12:00Z, open+30m)",
+  predictionSource: "live-script replay",
+};
 
 function formatProbabilityPct(probability, missing = "--") {
   const value = toFiniteNumber(probability);
@@ -67,6 +79,64 @@ function formatTempF(value, missing = "--") {
   const numeric = toFiniteNumber(value);
   if (!Number.isFinite(numeric)) return missing;
   return `${TEMP_FORMATTER.format(numeric)}F`;
+}
+
+function formatKellyFraction(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  return numeric.toFixed(2);
+}
+
+function formatUsdWhole(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  return `$${Math.round(numeric).toLocaleString()}`;
+}
+
+function formatThresholdDecimal(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  return numeric.toFixed(2);
+}
+
+function normalizeLiveConfig(raw) {
+  const fallback = DEFAULT_LIVE_CONFIG;
+  const stationIds = Array.isArray(raw?.stationIds) && raw.stationIds.length
+    ? raw.stationIds.map((value) => String(value ?? "").trim()).filter(Boolean)
+    : fallback.stationIds;
+  return {
+    referenceLabel: String(raw?.referenceLabel ?? fallback.referenceLabel).trim() || fallback.referenceLabel,
+    periodLabel: String(raw?.periodLabel ?? fallback.periodLabel).trim() || fallback.periodLabel,
+    stationIds,
+    minWinProbability: Number.isFinite(toFiniteNumber(raw?.minWinProbability))
+      ? toFiniteNumber(raw?.minWinProbability)
+      : fallback.minWinProbability,
+    minEv: Number.isFinite(toFiniteNumber(raw?.minEv)) ? toFiniteNumber(raw?.minEv) : fallback.minEv,
+    minSidePriceProbability: Number.isFinite(toFiniteNumber(raw?.minSidePriceProbability))
+      ? toFiniteNumber(raw?.minSidePriceProbability)
+      : fallback.minSidePriceProbability,
+    sizingMode: String(raw?.sizingMode ?? fallback.sizingMode).trim() || fallback.sizingMode,
+    kellyFraction: Number.isFinite(toFiniteNumber(raw?.kellyFraction))
+      ? toFiniteNumber(raw?.kellyFraction)
+      : fallback.kellyFraction,
+    stakeCapUsd: Number.isFinite(toFiniteNumber(raw?.stakeCapUsd))
+      ? toFiniteNumber(raw?.stakeCapUsd)
+      : fallback.stakeCapUsd,
+    entryRule: String(raw?.entryRule ?? fallback.entryRule).trim() || fallback.entryRule,
+    predictionSource: String(raw?.predictionSource ?? fallback.predictionSource).trim() || fallback.predictionSource,
+  };
+}
+
+function meetsOpportunityFilters(row, config) {
+  const modelWin = toFiniteNumber(row?.modelWinProbability);
+  const ev = toFiniteNumber(row?.ev);
+  const entryPriceProb = toFiniteNumber(row?.entryPriceCents) / 100;
+  return Number.isFinite(modelWin)
+    && Number.isFinite(ev)
+    && Number.isFinite(entryPriceProb)
+    && modelWin >= config.minWinProbability
+    && ev >= config.minEv
+    && entryPriceProb >= config.minSidePriceProbability;
 }
 
 function quantileFromStation(station, key) {
@@ -710,12 +780,16 @@ const LiveTopBar = memo(function LiveTopBar({
   frame,
   nowMillis,
   freshnessSummary,
+  liveConfig,
 }) {
+  const stationLabel = Array.isArray(liveConfig?.stationIds) && liveConfig.stationIds.length
+    ? liveConfig.stationIds.join(" / ")
+    : "KNYC / KMIA / KMDW / KLAX";
   return (
     <header className="lt-topBar">
       <div className="lt-topBarTitleWrap">
         <h1 className="lt-topBarTitle">Live Orderbook Monitor</h1>
-        <p className="lt-topBarSub">KNYC / KMIA / KMDW / KLAX</p>
+        <p className="lt-topBarSub">{stationLabel} · {liveConfig?.referenceLabel ?? DEFAULT_LIVE_CONFIG.referenceLabel}</p>
       </div>
       <div className="lt-topBarMeta">
         <span className={`lt-stateChip state-${connectionState.toLowerCase()}`}>{connectionState}</span>
@@ -728,7 +802,38 @@ const LiveTopBar = memo(function LiveTopBar({
   );
 });
 
+const LiveStrategyBar = memo(function LiveStrategyBar({ liveConfig }) {
+  const config = normalizeLiveConfig(liveConfig);
+  const chips = [
+    `Reference backtest: ${config.referenceLabel}`,
+    `Period: ${config.periodLabel}`,
+    `Stations: ${config.stationIds.join(" + ")}`,
+    `EV >= ${formatThresholdDecimal(config.minEv)}`,
+    `Win >= ${formatThresholdDecimal(config.minWinProbability)}`,
+    `Side price >= ${Math.round(config.minSidePriceProbability * 100)}c`,
+    config.sizingMode === "fractional_kelly"
+      ? `Fractional Kelly ${formatKellyFraction(config.kellyFraction)}`
+      : `Sizing: ${config.sizingMode}`,
+    `Stake cap ${formatUsdWhole(config.stakeCapUsd)}`,
+    config.entryRule,
+    `Prediction source: ${config.predictionSource}`,
+  ];
+  return (
+    <section className="lt-strategyBar">
+      <div className="lt-strategyHeader">
+        <h2 className="lt-strategyTitle">Active Live Config</h2>
+      </div>
+      <div className="lt-strategyChips">
+        {chips.map((chip) => (
+          <span key={chip} className="lt-strategyChip">{chip}</span>
+        ))}
+      </div>
+    </section>
+  );
+});
+
 const OpportunitiesPanel = memo(function OpportunitiesPanel({
+  liveConfig,
   filteredRowsByDate,
   allRowsByDate,
   showAllRows,
@@ -742,11 +847,12 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
   autoInferenceStatus,
   nowMillis,
 }) {
+  const config = normalizeLiveConfig(liveConfig);
   const dates = Array.isArray(dateOptions) ? dateOptions : [];
   const modeLabel = showAllRows
     ? "All opportunities sorted by EV for each target date"
-    : `Win threshold: ${formatProbabilityPct(WIN_THRESHOLD)} - Sorted by EV (top ${DEFAULT_OPPORTUNITY_ROWS}) for each target date`;
-  const toggleLabel = showAllRows ? `Show Win >= ${formatProbabilityPct(WIN_THRESHOLD)}` : "Show All by EV";
+    : `Eligible by live config: EV >= ${formatThresholdDecimal(config.minEv)}, Win >= ${formatThresholdDecimal(config.minWinProbability)}, Side >= ${Math.round(config.minSidePriceProbability * 100)}c · sorted by EV (top ${DEFAULT_OPPORTUNITY_ROWS})`;
+  const toggleLabel = showAllRows ? "Show Eligible Only" : "Show All by EV";
   const activeDateLabel = selectedDate ? describeOpportunityDate(selectedDate, nowMillis) : "--";
   const sections = dates.map((date) => {
     const filtered = Array.isArray(filteredRowsByDate?.[date]) ? filteredRowsByDate[date] : [];
@@ -814,7 +920,9 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
                 <h3 className="lt-opportunitySectionTitle">{section.title}</h3>
                 <p className="lt-opportunitySectionMeta">
                   Showing {section.rows.length} / {section.modeCount}
-                  {showAllRows ? ` · total ${section.totalCount}` : ` · win >= ${formatProbabilityPct(WIN_THRESHOLD)}: ${section.filteredCount}`}
+                  {showAllRows
+                    ? ` · total ${section.totalCount}`
+                    : ` · eligible: ${section.filteredCount}`}
                 </p>
               </div>
               {section.date === selectedDate ? <span className="lt-opportunitySectionBadge">Active</span> : null}
@@ -826,7 +934,7 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
                   ? `Loading opportunities for ${section.title}...`
                   : showAllRows
                   ? "No opportunities available from current station frame."
-                  : `No opportunities currently meet ${formatProbabilityPct(WIN_THRESHOLD)} win probability.`}
+                  : "No opportunities currently meet the active live config."}
               </div>
             ) : (
               <div className="lt-opportunitiesTableWrap">
@@ -1306,6 +1414,7 @@ export default function LiveTradingPage() {
   const [showAllOpportunities, setShowAllOpportunities] = useState(false);
   const [selectedOpportunitiesDate, setSelectedOpportunitiesDate] = useState("");
   const [opportunityRowsByDate, setOpportunityRowsByDate] = useState({});
+  const [stationSnapshotsByDate, setStationSnapshotsByDate] = useState({});
   const [opportunityRowsLoading, setOpportunityRowsLoading] = useState(false);
   const [isAutoInferenceActive, setIsAutoInferenceActive] = useState(false);
   const [autoInferenceStatus, setAutoInferenceStatus] = useState("");
@@ -1327,7 +1436,7 @@ export default function LiveTradingPage() {
   const snapshotUrl = useMemo(() => resolveSnapshotUrl(), []);
   const inferenceRunUrl = useMemo(() => resolveInferenceRunUrl(), []);
 
-  const fetchOpportunitiesForDate = useCallback(async (targetDateLocal) => {
+  const fetchSnapshotForDate = useCallback(async (targetDateLocal) => {
     if (!targetDateLocal) return null;
     const url = snapshotUrlForTargetDate(snapshotUrl, targetDateLocal);
     const response = await fetch(url, { cache: "no-store" });
@@ -1336,7 +1445,10 @@ export default function LiveTradingPage() {
     }
     const payload = await response.json();
     const payloadStations = Array.isArray(payload?.stations) ? payload.stations.map(stationWithSortedBuckets) : [];
-    return buildAllOpportunitiesFromStations(payloadStations);
+    return {
+      stations: payloadStations,
+      opportunities: buildAllOpportunitiesFromStations(payloadStations),
+    };
   }, [snapshotUrl]);
 
   const invokeInferenceForDate = useCallback(async (targetDateLocal) => {
@@ -1555,12 +1667,16 @@ export default function LiveTradingPage() {
     }
   }, [frame]);
 
-  const stations = useMemo(() => {
+  const frameStations = useMemo(() => {
     const rawStations = Array.isArray(frame?.stations) ? frame.stations : [];
     return rawStations.map(stationWithSortedBuckets);
   }, [frame]);
+  const liveConfig = useMemo(() => normalizeLiveConfig({
+    ...DEFAULT_LIVE_CONFIG,
+    ...(frame?.config ?? {}),
+  }), [frame]);
 
-  const liveFrameOpportunities = useMemo(() => buildAllOpportunitiesFromStations(stations), [stations]);
+  const liveFrameOpportunities = useMemo(() => buildAllOpportunitiesFromStations(frameStations), [frameStations]);
   const opportunitiesMinuteBucket = Math.floor(nowMillis / 60000);
 
   const opportunitiesDateOptions = useMemo(() => {
@@ -1569,9 +1685,9 @@ export default function LiveTradingPage() {
     const localTomorrow = shiftIsoDate(localToday, 1);
     const preferredDate = shouldDefaultToTomorrow(clockMillis) ? localTomorrow : localToday;
     const alternateDate = preferredDate === localToday ? localTomorrow : localToday;
-    const frameDate = stations.find((station) => station?.targetDateLocal)?.targetDateLocal;
+    const frameDate = frameStations.find((station) => station?.targetDateLocal)?.targetDateLocal;
     return [...new Set([frameDate, preferredDate, alternateDate].filter(Boolean))].slice(0, 2);
-  }, [stations, opportunitiesMinuteBucket]);
+  }, [frameStations, opportunitiesMinuteBucket]);
 
   useEffect(() => {
     if (!opportunitiesDateOptions.length) return;
@@ -1581,13 +1697,17 @@ export default function LiveTradingPage() {
   }, [opportunitiesDateOptions, selectedOpportunitiesDate]);
 
   useEffect(() => {
-    const frameTargetDate = stations.find((station) => station?.targetDateLocal)?.targetDateLocal;
+    const frameTargetDate = frameStations.find((station) => station?.targetDateLocal)?.targetDateLocal;
     if (!frameTargetDate) return;
     setOpportunityRowsByDate((current) => ({
       ...current,
       [frameTargetDate]: liveFrameOpportunities,
     }));
-  }, [stations, liveFrameOpportunities]);
+    setStationSnapshotsByDate((current) => ({
+      ...current,
+      [frameTargetDate]: frameStations,
+    }));
+  }, [frameStations, liveFrameOpportunities]);
 
   useEffect(() => {
     let stopped = false;
@@ -1602,13 +1722,20 @@ export default function LiveTradingPage() {
       try {
         const fetched = await Promise.all(dates.map(async (targetDateLocal) => ([
           targetDateLocal,
-          await fetchOpportunitiesForDate(targetDateLocal),
+          await fetchSnapshotForDate(targetDateLocal),
         ])));
         if (stopped) return;
         setOpportunityRowsByDate((current) => {
           const next = { ...current };
-          for (const [date, rows] of fetched) {
-            next[date] = rows;
+          for (const [date, snapshot] of fetched) {
+            next[date] = Array.isArray(snapshot?.opportunities) ? snapshot.opportunities : [];
+          }
+          return next;
+        });
+        setStationSnapshotsByDate((current) => {
+          const next = { ...current };
+          for (const [date, snapshot] of fetched) {
+            next[date] = Array.isArray(snapshot?.stations) ? snapshot.stations : [];
           }
           return next;
         });
@@ -1632,30 +1759,30 @@ export default function LiveTradingPage() {
       stopped = true;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [fetchOpportunitiesForDate, opportunitiesDateOptions, wsStatus]);
-
-  const selectedDateOpportunities = useMemo(() => {
-    if (selectedOpportunitiesDate) {
-      const selected = opportunityRowsByDate[selectedOpportunitiesDate];
-      return Array.isArray(selected) ? selected : [];
-    }
-    return liveFrameOpportunities;
-  }, [selectedOpportunitiesDate, opportunityRowsByDate, liveFrameOpportunities]);
+  }, [fetchSnapshotForDate, opportunitiesDateOptions, wsStatus]);
 
   const thresholdRowsByDate = useMemo(() => {
     const next = {};
     for (const date of opportunitiesDateOptions) {
       const rows = Array.isArray(opportunityRowsByDate[date]) ? opportunityRowsByDate[date] : [];
-      next[date] = rows.filter((row) => toFiniteNumber(row?.modelWinProbability) >= WIN_THRESHOLD);
+      next[date] = rows.filter((row) => meetsOpportunityFilters(row, liveConfig));
     }
     return next;
-  }, [opportunitiesDateOptions, opportunityRowsByDate]);
+  }, [liveConfig, opportunitiesDateOptions, opportunityRowsByDate]);
+
+  const selectedDateEligibleOpportunities = useMemo(() => {
+    if (selectedOpportunitiesDate) {
+      const selected = thresholdRowsByDate[selectedOpportunitiesDate];
+      return Array.isArray(selected) ? selected : [];
+    }
+    return liveFrameOpportunities.filter((row) => meetsOpportunityFilters(row, liveConfig));
+  }, [liveConfig, liveFrameOpportunities, selectedOpportunitiesDate, thresholdRowsByDate]);
 
   useEffect(() => {
     if (!isAutoInferenceActive || !selectedOpportunitiesDate) {
       return undefined;
     }
-    if (selectedDateOpportunities.length > 0) {
+    if (selectedDateEligibleOpportunities.length > 0) {
       setAutoInferenceStatus(
         `Target ${formatTargetDateLabel(selectedOpportunitiesDate)} populated. Auto refresh stopped.`,
       );
@@ -1673,13 +1800,18 @@ export default function LiveTradingPage() {
       setAutoInferenceStatus(`Invoking live inference for ${dateLabel}...`);
       try {
         const runResult = await invokeInferenceForDate(selectedOpportunitiesDate);
-        const refreshedRows = await fetchOpportunitiesForDate(selectedOpportunitiesDate);
+        const refreshedSnapshot = await fetchSnapshotForDate(selectedOpportunitiesDate);
         if (stopped) return;
+        const refreshedRows = Array.isArray(refreshedSnapshot?.opportunities) ? refreshedSnapshot.opportunities : [];
         setOpportunityRowsByDate((current) => ({
           ...current,
-          [selectedOpportunitiesDate]: Array.isArray(refreshedRows) ? refreshedRows : [],
+          [selectedOpportunitiesDate]: refreshedRows,
         }));
-        if (Array.isArray(refreshedRows) && refreshedRows.length > 0) {
+        setStationSnapshotsByDate((current) => ({
+          ...current,
+          [selectedOpportunitiesDate]: Array.isArray(refreshedSnapshot?.stations) ? refreshedSnapshot.stations : [],
+        }));
+        if (refreshedRows.some((row) => meetsOpportunityFilters(row, liveConfig))) {
           setAutoInferenceStatus(`Target ${dateLabel} populated. Auto refresh stopped.`);
           setIsAutoInferenceActive(false);
           return;
@@ -1719,15 +1851,26 @@ export default function LiveTradingPage() {
       }
     };
   }, [
-    fetchOpportunitiesForDate,
+    fetchSnapshotForDate,
+    liveConfig,
     invokeInferenceForDate,
     isAutoInferenceActive,
-    selectedDateOpportunities.length,
+    selectedDateEligibleOpportunities.length,
     selectedOpportunitiesDate,
   ]);
 
+  const displayedStations = useMemo(() => {
+    if (selectedOpportunitiesDate) {
+      const selected = stationSnapshotsByDate[selectedOpportunitiesDate];
+      if (Array.isArray(selected) && selected.length > 0) {
+        return selected;
+      }
+    }
+    return frameStations;
+  }, [frameStations, selectedOpportunitiesDate, stationSnapshotsByDate]);
+
   const freshnessSummary = useMemo(() => {
-    const buckets = stations.flatMap((station) => station.buckets || []);
+    const buckets = displayedStations.flatMap((station) => station.buckets || []);
     let freshCount = 0;
     let staleCount = 0;
 
@@ -1747,7 +1890,7 @@ export default function LiveTradingPage() {
       freshCount,
       staleCount,
     };
-  }, [stations, nowMillis]);
+  }, [displayedStations, nowMillis]);
 
   const connectionState = deriveGlobalConnectionState(wsStatus, frame, nowMillis);
 
@@ -1781,15 +1924,24 @@ export default function LiveTradingPage() {
   const selectOpportunitiesDate = useCallback((targetDateLocal) => {
     setSelectedOpportunitiesDate(targetDateLocal);
     setAutoInferenceStatus("");
-    if (!targetDateLocal || Array.isArray(opportunityRowsByDate[targetDateLocal])) {
+    if (
+      !targetDateLocal ||
+      (Array.isArray(opportunityRowsByDate[targetDateLocal]) && Array.isArray(stationSnapshotsByDate[targetDateLocal]))
+    ) {
       return;
     }
     setOpportunityRowsLoading(true);
-    fetchOpportunitiesForDate(targetDateLocal)
-      .then((rows) => {
+    fetchSnapshotForDate(targetDateLocal)
+      .then((snapshot) => {
+        const rows = Array.isArray(snapshot?.opportunities) ? snapshot.opportunities : [];
+        const stations = Array.isArray(snapshot?.stations) ? snapshot.stations : [];
         setOpportunityRowsByDate((current) => ({
           ...current,
-          [targetDateLocal]: Array.isArray(rows) ? rows : [],
+          [targetDateLocal]: rows,
+        }));
+        setStationSnapshotsByDate((current) => ({
+          ...current,
+          [targetDateLocal]: stations,
         }));
       })
       .catch(() => {
@@ -1798,7 +1950,7 @@ export default function LiveTradingPage() {
       .finally(() => {
         setOpportunityRowsLoading(false);
       });
-  }, [fetchOpportunitiesForDate, opportunityRowsByDate]);
+  }, [fetchSnapshotForDate, opportunityRowsByDate, stationSnapshotsByDate]);
 
   return (
     <section className="lt-workstation">
@@ -1807,9 +1959,13 @@ export default function LiveTradingPage() {
         frame={frame}
         nowMillis={nowMillis}
         freshnessSummary={freshnessSummary}
+        liveConfig={liveConfig}
       />
 
+      <LiveStrategyBar liveConfig={liveConfig} />
+
       <OpportunitiesPanel
+        liveConfig={liveConfig}
         filteredRowsByDate={thresholdRowsByDate}
         allRowsByDate={opportunityRowsByDate}
         showAllRows={showAllOpportunities}
@@ -1827,14 +1983,14 @@ export default function LiveTradingPage() {
       {wsError ? <div className="lt-globalError">Feed error: {wsError}</div> : null}
 
       <div className="lt-stationGrid">
-        {stations.length === 0 ? (
+        {displayedStations.length === 0 ? (
           <article className="lt-emptyState">
             <h2>No live station frame yet</h2>
             <p>Waiting for KNYC, KMIA, KMDW, and KLAX orderbook frames.</p>
           </article>
         ) : null}
 
-        {stations.map((station) => (
+        {displayedStations.map((station) => (
           <StationColumn
             key={station.stationId}
             station={station}

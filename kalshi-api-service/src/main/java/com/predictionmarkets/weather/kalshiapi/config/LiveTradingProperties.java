@@ -54,10 +54,40 @@ public class LiveTradingProperties {
 
   @DecimalMin("0.0")
   @DecimalMax("1.0")
-  private double opportunitiesMinWinProbability = 0.85;
+  private double opportunitiesMinWinProbability = 0.70;
+
+  @DecimalMin("0.0")
+  @DecimalMax("1.0")
+  private double opportunitiesMinEv = 0.30;
+
+  @DecimalMin("0.0")
+  @DecimalMax("1.0")
+  private double opportunitiesMinSidePriceProbability = 0.25;
 
   @Min(1)
   private int opportunitiesMaxCount = 100;
+
+  @NotBlank
+  private String strategyReferenceLabel = "2024-2025 | Top #3";
+
+  @NotBlank
+  private String strategyPeriodLabel = "2024-10-01 -> 2025-12-31";
+
+  @NotBlank
+  private String strategySizingMode = "fractional_kelly";
+
+  @DecimalMin("0.0")
+  @DecimalMax("1.0")
+  private double strategyKellyFraction = 0.20;
+
+  @DecimalMin("0.0")
+  private double strategyStakeCapUsd = 700.0;
+
+  @NotBlank
+  private String strategyEntryRule = "Entry >= max(T-1 12:00Z, open+30m)";
+
+  @NotBlank
+  private String strategyPredictionSource = "live-script replay";
 
   @Valid
   @NotEmpty
@@ -181,6 +211,78 @@ public class LiveTradingProperties {
 
   public void setOpportunitiesMaxCount(int opportunitiesMaxCount) {
     this.opportunitiesMaxCount = opportunitiesMaxCount;
+  }
+
+  public double getOpportunitiesMinEv() {
+    return opportunitiesMinEv;
+  }
+
+  public void setOpportunitiesMinEv(double opportunitiesMinEv) {
+    this.opportunitiesMinEv = opportunitiesMinEv;
+  }
+
+  public double getOpportunitiesMinSidePriceProbability() {
+    return opportunitiesMinSidePriceProbability;
+  }
+
+  public void setOpportunitiesMinSidePriceProbability(double opportunitiesMinSidePriceProbability) {
+    this.opportunitiesMinSidePriceProbability = opportunitiesMinSidePriceProbability;
+  }
+
+  public String getStrategyReferenceLabel() {
+    return strategyReferenceLabel;
+  }
+
+  public void setStrategyReferenceLabel(String strategyReferenceLabel) {
+    this.strategyReferenceLabel = strategyReferenceLabel;
+  }
+
+  public String getStrategyPeriodLabel() {
+    return strategyPeriodLabel;
+  }
+
+  public void setStrategyPeriodLabel(String strategyPeriodLabel) {
+    this.strategyPeriodLabel = strategyPeriodLabel;
+  }
+
+  public String getStrategySizingMode() {
+    return strategySizingMode;
+  }
+
+  public void setStrategySizingMode(String strategySizingMode) {
+    this.strategySizingMode = strategySizingMode;
+  }
+
+  public double getStrategyKellyFraction() {
+    return strategyKellyFraction;
+  }
+
+  public void setStrategyKellyFraction(double strategyKellyFraction) {
+    this.strategyKellyFraction = strategyKellyFraction;
+  }
+
+  public double getStrategyStakeCapUsd() {
+    return strategyStakeCapUsd;
+  }
+
+  public void setStrategyStakeCapUsd(double strategyStakeCapUsd) {
+    this.strategyStakeCapUsd = strategyStakeCapUsd;
+  }
+
+  public String getStrategyEntryRule() {
+    return strategyEntryRule;
+  }
+
+  public void setStrategyEntryRule(String strategyEntryRule) {
+    this.strategyEntryRule = strategyEntryRule;
+  }
+
+  public String getStrategyPredictionSource() {
+    return strategyPredictionSource;
+  }
+
+  public void setStrategyPredictionSource(String strategyPredictionSource) {
+    this.strategyPredictionSource = strategyPredictionSource;
   }
 
   public List<Station> getStations() {

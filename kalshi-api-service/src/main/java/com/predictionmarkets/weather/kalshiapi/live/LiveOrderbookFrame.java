@@ -6,6 +6,7 @@ import java.util.List;
 public record LiveOrderbookFrame(
     Instant asOfUtc,
     List<LiveStationOrderbookView> stations,
-    List<LiveOpportunityView> opportunities
+    List<LiveOpportunityView> opportunities,
+    LiveStrategyConfigView config
 ) {
 }

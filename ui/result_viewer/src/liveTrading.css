@@ -136,6 +136,45 @@
   background: rgba(84, 24, 41, 0.4);
 }
 
+.lt-strategyBar {
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: rgba(22, 35, 57, 0.96);
+  padding: 10px 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.lt-strategyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lt-strategyTitle {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.lt-strategyChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lt-strategyChip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(16, 27, 46, 0.92);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
 .lt-opportunitiesPanel {
   border: 1px solid var(--border-strong);
   border-radius: 12px;

@@ -41,8 +41,17 @@ kalshi:
     inference-invoke-timeout-seconds: 180
     inference-root-dir: D:\Ahmed\data\live\mos_quantile_live_inference
     inference-report-file-name: inference_report.json
-    opportunities-min-win-probability: 0.85
+    opportunities-min-win-probability: 0.70
+    opportunities-min-ev: 0.30
+    opportunities-min-side-price-probability: 0.25
     opportunities-max-count: 100
+    strategy-reference-label: "2024-2025 | Top #3"
+    strategy-period-label: "2024-10-01 -> 2025-12-31"
+    strategy-sizing-mode: fractional_kelly
+    strategy-kelly-fraction: 0.20
+    strategy-stake-cap-usd: 700
+    strategy-entry-rule: "Entry >= max(T-1 12:00Z, open+30m)"
+    strategy-prediction-source: live-script replay
     next-target-date-cutoff-local-time: "17:45"
     top-levels-per-side: 8
     frontend-ws-path: /ws/live-orderbooks

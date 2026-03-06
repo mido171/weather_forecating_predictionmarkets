@@ -131,7 +131,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
     if (frame != null) {
       return frame;
     }
-    return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of());
+    return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of(), strategyConfigView());
   }
 
   public LiveOrderbookFrame currentSnapshot(LocalDate targetDateLocal) {
@@ -143,7 +143,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
       stationStates = resolveStationsForDate(targetDateLocal);
     }
     if (stationStates == null || stationStates.isEmpty()) {
-      return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of());
+      return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of(), strategyConfigView());
     }
     return buildFrame(stationStates, targetDateLocal);
   }
@@ -653,7 +653,8 @@ public class LiveOrderbookStreamService implements DisposableBean {
               "YES",
               yesModelWinProb,
               yesMarketProb,
-              yesAsk);
+              yesAsk,
+              yesEv);
           maybeAddOpportunity(
               opportunities,
               stationState.stationId(),
@@ -661,7 +662,8 @@ public class LiveOrderbookStreamService implements DisposableBean {
               "NO",
               noModelWinProb,
               noMarketProb,
-              noAsk);
+              noAsk,
+              noEv);
         }
 
         buckets.add(new LiveBucketOrderbookView(
@@ -702,7 +704,7 @@ public class LiveOrderbookStreamService implements DisposableBean {
     List<LiveOpportunityView> limited = opportunities.size() > maxCount
         ? new ArrayList<>(opportunities.subList(0, maxCount))
         : opportunities;
-    return new LiveOrderbookFrame(asOfUtc, stations, limited);
+    return new LiveOrderbookFrame(asOfUtc, stations, limited, strategyConfigView());
   }
 
   private StationInference selectStationInference(InferenceIndex index,
@@ -909,14 +911,21 @@ public class LiveOrderbookStreamService implements DisposableBean {
                                    String side,
                                    Double modelWinProbability,
                                    Double marketPriceProbability,
-                                   Integer entryPriceCents) {
-    if (modelWinProbability == null || marketPriceProbability == null) {
+                                   Integer entryPriceCents,
+                                   Double ev) {
+    if (modelWinProbability == null || marketPriceProbability == null || ev == null) {
       return;
     }
-    if (!Double.isFinite(modelWinProbability) || !Double.isFinite(marketPriceProbability)) {
+    if (!Double.isFinite(modelWinProbability) || !Double.isFinite(marketPriceProbability) || !Double.isFinite(ev)) {
       return;
     }
     if (modelWinProbability < properties.getOpportunitiesMinWinProbability()) {
+      return;
+    }
+    if (ev < properties.getOpportunitiesMinEv()) {
+      return;
+    }
+    if (marketPriceProbability < properties.getOpportunitiesMinSidePriceProbability()) {
       return;
     }
     opportunities.add(new LiveOpportunityView(
@@ -927,7 +936,27 @@ public class LiveOrderbookStreamService implements DisposableBean {
         modelWinProbability,
         marketPriceProbability,
         entryPriceCents,
-        modelWinProbability - marketPriceProbability));
+        ev));
+  }
+
+  private LiveStrategyConfigView strategyConfigView() {
+    List<String> stationIds = properties.getStations().stream()
+        .map(LiveTradingProperties.Station::getStationId)
+        .filter(StringUtils::hasText)
+        .map(this::normalizeStationId)
+        .toList();
+    return new LiveStrategyConfigView(
+        properties.getStrategyReferenceLabel(),
+        properties.getStrategyPeriodLabel(),
+        stationIds,
+        properties.getOpportunitiesMinWinProbability(),
+        properties.getOpportunitiesMinEv(),
+        properties.getOpportunitiesMinSidePriceProbability(),
+        properties.getStrategySizingMode(),
+        properties.getStrategyKellyFraction(),
+        properties.getStrategyStakeCapUsd(),
+        properties.getStrategyEntryRule(),
+        properties.getStrategyPredictionSource());
   }
 
   private int compareOpportunities(LiveOpportunityView left, LiveOpportunityView right) {

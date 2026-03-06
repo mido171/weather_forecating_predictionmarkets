@@ -19,6 +19,8 @@ const DATASET_OPTIONS = [
     key: "2024-2025-top3",
     label: "2024-2025 | Top #3",
     csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p30_win70_minprice25c_fractionalkelly0p20_cap700_live_script_2024_2025_with_balance.csv",
+    periodStart: "2024-10-01",
+    periodEnd: "2025-12-31",
     params: [
       "Stations: KNYC + KMIA + KMDW + KLAX",
       "Period: 2024-10-01 -> 2025-12-31",
@@ -36,6 +38,8 @@ const DATASET_OPTIONS = [
     key: "2024-2025",
     label: "2024-2025 | Fixed 7.5%",
     csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_risk7p5_cap700_live_script_2024_2025_with_balance.csv",
+    periodStart: "2024-10-01",
+    periodEnd: "2025-12-31",
     params: [
       "Stations: KNYC + KMIA + KMDW + KLAX",
       "Period: 2024-10-01 -> 2025-12-31",
@@ -52,6 +56,8 @@ const DATASET_OPTIONS = [
     key: "2026",
     label: "2026",
     csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_fractionalkellyceiling_risk7p5_kelly0p12_cap700_live_script_2025oct_to_2026feb_with_balance.csv",
+    periodStart: "2025-10-01",
+    periodEnd: "2026-02-28",
     params: [
       "Period: 2025-10-01 -> 2026-02-28",
       "EV >= 0.25",
@@ -207,6 +213,21 @@ function minutesAfterOpen(entryTimeStockholm, marketOpenUtc) {
 function normalizeTargetDate(value) {
   const s = String(value ?? "").trim();
   return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
+}
+
+function parseIsoDateUtc(value) {
+  const s = normalizeTargetDate(value);
+  if (!s) return null;
+  const [year, month, day] = s.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function daysInclusive(startDateIso, endDateIso) {
+  const start = parseIsoDateUtc(startDateIso);
+  const end = parseIsoDateUtc(endDateIso);
+  if (!start || !end) return 0;
+  const diffDays = Math.floor((end.getTime() - start.getTime()) / 86400000);
+  return diffDays >= 0 ? diffDays + 1 : 0;
 }
 
 function median(values) {
@@ -424,6 +445,13 @@ function App() {
     () => DATASET_OPTIONS.find((x) => x.key === selectedDataset)?.params ?? [],
     [selectedDataset],
   );
+  const datasetPeriod = useMemo(() => {
+    const option = DATASET_OPTIONS.find((x) => x.key === selectedDataset);
+    return {
+      start: normalizeTargetDate(option?.periodStart),
+      end: normalizeTargetDate(option?.periodEnd),
+    };
+  }, [selectedDataset]);
 
   useEffect(() => {
     const node = tableWrapRef.current;
@@ -516,14 +544,19 @@ function App() {
         startBalance: 0,
         peakBalance: 0,
         roi: 0,
+        cagr: 0,
         profitFactor: 0,
         avgRR: 0,
         meanEntryPricePct: 0,
         mmeMinutes: 0,
-        avgEv: 0,
         medianEv: 0,
         bestWin: 0,
         maxDrawdown: 0,
+        coverageDaysTraded: 0,
+        coverageDaysTotal: 0,
+        daysCoverage: 0,
+        coveragePeriodStart: "",
+        coveragePeriodEnd: "",
         stationCounts: {},
         streaks: { maxWin: 0, maxLoss: 0 },
       };
@@ -543,7 +576,6 @@ function App() {
     );
     const roi = startBalance > 0 ? (finalBalance - startBalance) / startBalance : 0;
     const evValues = rows.map((r) => r.EV);
-    const avgEv = evValues.reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0) / rows.length;
     const medianEv = median(evValues);
     const grossProfit = rows.reduce((sum, r) => sum + Math.max(0, r["Profit made ($)"] || 0), 0);
     const grossLossAbs = rows.reduce((sum, r) => sum + Math.max(0, -(r["Profit made ($)"] || 0)), 0);
@@ -569,6 +601,23 @@ function App() {
       return acc;
     }, {});
     const streaks = computeStreaks(rows);
+    const tradedDates = new Set(
+      rows
+        .map((r) => normalizeTargetDate(r["Target date (Local)"] || r.tradeDate))
+        .filter(Boolean)
+    );
+    const sortedTradeDates = [...tradedDates].sort();
+    const fallbackStart = sortedTradeDates[0] ?? "";
+    const fallbackEnd = sortedTradeDates[sortedTradeDates.length - 1] ?? "";
+    const coveragePeriodStart = datasetPeriod.start || fallbackStart;
+    const coveragePeriodEnd = datasetPeriod.end || fallbackEnd;
+    const coverageDaysTotal = daysInclusive(coveragePeriodStart, coveragePeriodEnd);
+    const coverageDaysTraded = tradedDates.size;
+    const daysCoverage = coverageDaysTotal > 0 ? coverageDaysTraded / coverageDaysTotal : 0;
+    const cagr =
+      startBalance > 0 && finalBalance > 0 && coverageDaysTotal > 0
+        ? Math.pow(finalBalance / startBalance, 365 / coverageDaysTotal) - 1
+        : 0;
 
     return {
       trades: rows.length,
@@ -581,18 +630,23 @@ function App() {
       startBalance,
       peakBalance,
       roi,
+      cagr,
       profitFactor,
       avgRR,
       meanEntryPricePct,
       mmeMinutes,
-      avgEv,
       medianEv,
       bestWin,
       maxDrawdown,
+      coverageDaysTraded,
+      coverageDaysTotal,
+      daysCoverage,
+      coveragePeriodStart,
+      coveragePeriodEnd,
       stationCounts,
       streaks,
     };
-  }, [rows]);
+  }, [datasetPeriod.end, datasetPeriod.start, rows]);
 
   const monthlyData = useMemo(() => {
     const bucket = new Map();
@@ -825,9 +879,9 @@ function App() {
           </div>
 
           <div className="panel metricCard">
-            <p className="cardLabel">Avg EV</p>
-            <h3 className="amber">{summary.avgEv.toFixed(3)}</h3>
-            <p>edge {(summary.avgEv * 100).toFixed(1)}pp</p>
+            <p className="cardLabel">CAGR</p>
+            <h3 className="green">{pct(summary.cagr)}</h3>
+            <p>annualized growth ({summary.coverageDaysTotal} days)</p>
           </div>
 
           <div className="panel metricCard">
@@ -854,6 +908,14 @@ function App() {
               {summary.streaks.maxWin}W / {summary.streaks.maxLoss}L
             </h3>
             <p>best / worst</p>
+          </div>
+
+          <div className="panel metricCard">
+            <p className="cardLabel">Days coverage</p>
+            <h3 className="violet">{pct(summary.daysCoverage)}</h3>
+            <p>
+              {summary.coverageDaysTraded} / {summary.coverageDaysTotal} traded days
+            </p>
           </div>
 
           <div className="panel drawdownCard">

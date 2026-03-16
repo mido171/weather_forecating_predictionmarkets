@@ -42,6 +42,9 @@ public class BacktestGridProperties {
   @DecimalMin("0.0")
   private double stakeCapUsd = 700.0;
 
+  @NotBlank
+  private String stakeCapValuesCsv = "500,600,700";
+
   @DecimalMin("0.0")
   @DecimalMax("1.0")
   private double selectionRiskFraction = 0.075;
@@ -89,6 +92,35 @@ public class BacktestGridProperties {
 
   @DecimalMin("0.0001")
   private double kellyStep = 0.01;
+
+  @Min(1)
+  private int dcaShortlistSize = 500;
+
+  @DecimalMin("0.0")
+  @DecimalMax("1.0")
+  private double shortlistMinCoverage = 0.55;
+
+  @Min(0)
+  private int shortlistMinTrades = 225;
+
+  @DecimalMin("0.0")
+  @DecimalMax("1.0")
+  private double shortlistMaxDrawdown = 0.35;
+
+  @NotBlank
+  private String dcaInitialFillFractionsCsv = "0.70,0.75,0.80,0.85,0.90,0.95";
+
+  @NotBlank
+  private String dcaTriggerBasesCsv = "from_initial_fill,from_last_fill";
+
+  @NotBlank
+  private String dcaTriggerStepsCsv = "0.03,0.05,0.07,0.10,0.15";
+
+  @NotBlank
+  private String dcaMaxAddsCsv = "1,2,3,4,5";
+
+  @NotBlank
+  private String dcaAddSchedulesCsv = "equal,front_loaded,back_loaded,geometric";
 
   @Min(1)
   private int threadCount = 40;
@@ -190,6 +222,14 @@ public class BacktestGridProperties {
 
   public void setStakeCapUsd(double stakeCapUsd) {
     this.stakeCapUsd = stakeCapUsd;
+  }
+
+  public String getStakeCapValuesCsv() {
+    return stakeCapValuesCsv;
+  }
+
+  public void setStakeCapValuesCsv(String stakeCapValuesCsv) {
+    this.stakeCapValuesCsv = stakeCapValuesCsv;
   }
 
   public double getSelectionRiskFraction() {
@@ -294,6 +334,78 @@ public class BacktestGridProperties {
 
   public void setKellyStep(double kellyStep) {
     this.kellyStep = kellyStep;
+  }
+
+  public int getDcaShortlistSize() {
+    return dcaShortlistSize;
+  }
+
+  public void setDcaShortlistSize(int dcaShortlistSize) {
+    this.dcaShortlistSize = dcaShortlistSize;
+  }
+
+  public double getShortlistMinCoverage() {
+    return shortlistMinCoverage;
+  }
+
+  public void setShortlistMinCoverage(double shortlistMinCoverage) {
+    this.shortlistMinCoverage = shortlistMinCoverage;
+  }
+
+  public int getShortlistMinTrades() {
+    return shortlistMinTrades;
+  }
+
+  public void setShortlistMinTrades(int shortlistMinTrades) {
+    this.shortlistMinTrades = shortlistMinTrades;
+  }
+
+  public double getShortlistMaxDrawdown() {
+    return shortlistMaxDrawdown;
+  }
+
+  public void setShortlistMaxDrawdown(double shortlistMaxDrawdown) {
+    this.shortlistMaxDrawdown = shortlistMaxDrawdown;
+  }
+
+  public String getDcaInitialFillFractionsCsv() {
+    return dcaInitialFillFractionsCsv;
+  }
+
+  public void setDcaInitialFillFractionsCsv(String dcaInitialFillFractionsCsv) {
+    this.dcaInitialFillFractionsCsv = dcaInitialFillFractionsCsv;
+  }
+
+  public String getDcaTriggerBasesCsv() {
+    return dcaTriggerBasesCsv;
+  }
+
+  public void setDcaTriggerBasesCsv(String dcaTriggerBasesCsv) {
+    this.dcaTriggerBasesCsv = dcaTriggerBasesCsv;
+  }
+
+  public String getDcaTriggerStepsCsv() {
+    return dcaTriggerStepsCsv;
+  }
+
+  public void setDcaTriggerStepsCsv(String dcaTriggerStepsCsv) {
+    this.dcaTriggerStepsCsv = dcaTriggerStepsCsv;
+  }
+
+  public String getDcaMaxAddsCsv() {
+    return dcaMaxAddsCsv;
+  }
+
+  public void setDcaMaxAddsCsv(String dcaMaxAddsCsv) {
+    this.dcaMaxAddsCsv = dcaMaxAddsCsv;
+  }
+
+  public String getDcaAddSchedulesCsv() {
+    return dcaAddSchedulesCsv;
+  }
+
+  public void setDcaAddSchedulesCsv(String dcaAddSchedulesCsv) {
+    this.dcaAddSchedulesCsv = dcaAddSchedulesCsv;
   }
 
   public int getThreadCount() {

@@ -52,6 +52,10 @@ public class KalshiHttpClient {
     return exchangeBlocking(RequestType.READ, true, HttpMethod.GET, path, uriCustomizer, null, responseType);
   }
 
+  public <T> T getAuthPriority(String path, Consumer<UriBuilder> uriCustomizer, Class<T> responseType) {
+    return exchangeBlocking(RequestType.READ, true, HttpMethod.GET, path, uriCustomizer, null, responseType, false);
+  }
+
   public <T, B> T postAuth(String path, B body, Class<T> responseType) {
     return exchangeBlocking(RequestType.WRITE, true, HttpMethod.POST, path, null, body, responseType);
   }
@@ -75,19 +79,33 @@ public class KalshiHttpClient {
                                   Consumer<UriBuilder> uriCustomizer,
                                   Object body,
                                   Class<T> responseType) {
+    return exchangeMono(requestType, authenticated, method, path, uriCustomizer, body, responseType, true);
+  }
+
+  private <T> Mono<T> exchangeMono(RequestType requestType,
+                                   boolean authenticated,
+                                   HttpMethod method,
+                                   String path,
+                                   Consumer<UriBuilder> uriCustomizer,
+                                   Object body,
+                                   Class<T> responseType,
+                                   boolean rateLimited) {
     if (requestType == RequestType.WRITE && !properties.isTradingEnabled()) {
       return Mono.error(new TradingDisabledException("Kalshi trading is disabled via kalshi.trading-enabled=false"));
     }
 
-    SimpleRateLimiter limiter = rateLimiters.limiterFor(requestType);
     WebClient client = authenticated ? authWebClient : publicWebClient;
     String sanitizedPath = sanitizePath(path);
     int permitsNeeded = permitsNeeded(requestType, method, sanitizedPath, body);
-
-    Mono<T> call = limiter.acquire(permitsNeeded)
-        .then(buildRequest(client, method, sanitizedPath, uriCustomizer, body))
+    Mono<T> requestCall = buildRequest(client, method, sanitizedPath, uriCustomizer, body)
         .flatMap(request -> request.exchangeToMono(response -> handleResponse(response, responseType)))
         .timeout(requestTimeout);
+    Mono<T> call = requestCall;
+
+    if (rateLimited) {
+      SimpleRateLimiter limiter = rateLimiters.limiterFor(requestType);
+      call = limiter.acquire(permitsNeeded).then(requestCall);
+    }
 
     if (requestType == RequestType.READ) {
       Retry retry = buildReadRetry();
@@ -106,7 +124,18 @@ public class KalshiHttpClient {
                                  Consumer<UriBuilder> uriCustomizer,
                                  Object body,
                                  Class<T> responseType) {
-    return exchangeMono(requestType, authenticated, method, path, uriCustomizer, body, responseType)
+    return exchangeBlocking(requestType, authenticated, method, path, uriCustomizer, body, responseType, true);
+  }
+
+  private <T> T exchangeBlocking(RequestType requestType,
+                                 boolean authenticated,
+                                 HttpMethod method,
+                                 String path,
+                                 Consumer<UriBuilder> uriCustomizer,
+                                 Object body,
+                                 Class<T> responseType,
+                                 boolean rateLimited) {
+    return exchangeMono(requestType, authenticated, method, path, uriCustomizer, body, responseType, rateLimited)
         .block(requestTimeout.plusSeconds(5));
   }
 

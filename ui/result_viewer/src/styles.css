@@ -391,6 +391,140 @@ h1 span {
   font-weight: 500;
 }
 
+.entrySplitCard {
+  grid-column: 1 / -1;
+  padding: 14px 16px;
+  display: grid;
+  gap: 14px;
+  border-color: #27468f;
+  background:
+    linear-gradient(180deg, rgba(8, 24, 71, 0.96), rgba(5, 13, 38, 0.96)),
+    rgba(7, 14, 42, 0.92);
+}
+
+.entrySplitHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.entrySplitMedian {
+  margin-top: 8px;
+  color: #dce6ff;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.entrySplitSub,
+.entrySplitNote {
+  margin: 0;
+  color: #8ea1df;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.entrySplitNote {
+  max-width: 360px;
+  text-align: right;
+}
+
+.entrySplitGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.entrySplitStat {
+  border: 1px solid #203d80;
+  border-radius: 12px;
+  background: rgba(8, 20, 58, 0.88);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.entrySplitName {
+  color: #9fb0e9;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.entrySplitRate {
+  font-size: clamp(28px, 2.8vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.entrySplitMeta {
+  color: #b7c7f5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.entrySplitTrack {
+  position: relative;
+  margin-top: 4px;
+  height: 10px;
+  border-radius: 999px;
+  background: #12265b;
+  overflow: hidden;
+}
+
+.entrySplitFill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.entrySplitFill.before {
+  background: linear-gradient(90deg, #1ddca8, #61e6c7);
+}
+
+.entrySplitFill.after {
+  background: linear-gradient(90deg, #ffb322, #ffd76f);
+}
+
+.entrySplitFill.tMinus1 {
+  background: linear-gradient(90deg, #8b5cf6, #b794ff);
+}
+
+.entrySplitFill.t {
+  background: linear-gradient(90deg, #ffb322, #ffd76f);
+}
+
+.entryDaySection {
+  display: grid;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.entryDayLabel,
+.entryDayOther {
+  margin: 0;
+  color: #9fb0e9;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.entryDayGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.entryDayStat {
+  border: 1px solid #203d80;
+  border-radius: 12px;
+  background: rgba(7, 17, 52, 0.82);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
 .green {
   color: var(--teal);
 }
@@ -901,6 +1035,19 @@ td.pnlLoss {
 
   .metricGrid {
     grid-template-columns: 1fr;
+  }
+
+  .entrySplitGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .entryDayGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .entrySplitNote {
+    max-width: none;
+    text-align: left;
   }
 
   .monthRow {

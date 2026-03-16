@@ -1,0 +1,1 @@
+# Worker model package scaffold.

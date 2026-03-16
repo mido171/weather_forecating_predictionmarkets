@@ -18,11 +18,11 @@ public class KalshiPortfolioApi {
   }
 
   public GetBalanceResponse getBalance() {
-    return httpClient.getAuth("/portfolio/balance", null, GetBalanceResponse.class);
+    return httpClient.getAuthPriority("/portfolio/balance", null, GetBalanceResponse.class);
   }
 
   public GetPositionsResponse getPositions(GetPositionsQuery query) {
-    return httpClient.getAuth("/portfolio/positions", query == null ? null : query::applyTo, GetPositionsResponse.class);
+    return httpClient.getAuthPriority("/portfolio/positions", query == null ? null : query::applyTo, GetPositionsResponse.class);
   }
 
   public GetFillsResponse getFills(GetFillsQuery query) {

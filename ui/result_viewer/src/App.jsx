@@ -54,20 +54,22 @@ const DATASET_OPTIONS = [
   },
   {
     key: "2026",
-    label: "2026",
-    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_tminus1_1200z_openplus30m_ev0p25_win85_minprice25c_fractionalkellyceiling_risk7p5_kelly0p12_cap700_live_script_2025oct_to_2026feb_with_balance.csv",
-    periodStart: "2025-10-01",
-    periodEnd: "2026-02-28",
+    label: "2026 | OOF",
+    csv: "/data/all_trades_sideaware_cojoined_blend12_knyc_kmia_kmdw_klax_tminus1_1200z_openplus30m_ev0p30_win70_minprice25c_fractionalkelly0p20_cap700_live_script_2026_oof_20260101_to_20260313_iem_supplemented_with_balance.csv",
+    periodStart: "2026-01-01",
+    periodEnd: "2026-03-13",
     params: [
-      "Period: 2025-10-01 -> 2026-02-28",
-      "EV >= 0.25",
-      "Win >= 0.85",
-      "Risk ceiling 7.5%",
-      "Kelly fraction 0.12",
-      "Stake cap $700",
+      "Stations: KNYC + KMIA + KMDW + KLAX",
+      "Period: 2026-01-01 -> 2026-03-13",
+      "OOF check for the current Top #3 variant",
+      "EV >= 0.30",
+      "Win >= 0.70",
       "Side price >= 25c",
+      "Fractional Kelly 0.20",
+      "Stake cap $700",
       "Entry >= max(T-1 12:00Z, open+30m)",
       "Prediction source: live-script replay",
+      "Truth tail supplement: IEM daily for missing NCEI March dates",
     ],
   },
 ];
@@ -185,22 +187,38 @@ function parseTradeDate(entryTime) {
   return entryTime.slice(0, 10);
 }
 
-function parseStockholmEntryToUtcMillis(entryTime) {
+function parseStockholmEntryParts(entryTime) {
   const s = String(entryTime ?? "").trim();
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (CET|CEST)$/);
   if (m) {
-    const year = Number(m[1]);
-    const month = Number(m[2]);
-    const day = Number(m[3]);
-    const hour = Number(m[4]);
-    const minute = Number(m[5]);
-    const second = Number(m[6]);
-    const zone = m[7];
-    const offsetMinutes = zone === "CEST" ? 120 : 60;
-    return Date.UTC(year, month - 1, day, hour, minute, second) - offsetMinutes * 60 * 1000;
+    return {
+      year: Number(m[1]),
+      month: Number(m[2]),
+      day: Number(m[3]),
+      hour: Number(m[4]),
+      minute: Number(m[5]),
+      second: Number(m[6]),
+      zone: m[7],
+    };
   }
+  return null;
+}
+
+function parseStockholmEntryToUtcMillis(entryTime) {
+  const parsed = parseStockholmEntryParts(entryTime);
+  if (parsed) {
+    const offsetMinutes = parsed.zone === "CEST" ? 120 : 60;
+    return Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsed.hour, parsed.minute, parsed.second) - offsetMinutes * 60 * 1000;
+  }
+  const s = String(entryTime ?? "").trim();
   const fallback = Date.parse(s);
   return Number.isFinite(fallback) ? fallback : NaN;
+}
+
+function parseStockholmEntryClockMinutes(entryTime) {
+  const parsed = parseStockholmEntryParts(entryTime);
+  if (!parsed) return NaN;
+  return parsed.hour * 60 + parsed.minute + parsed.second / 60;
 }
 
 function minutesAfterOpen(entryTimeStockholm, marketOpenUtc) {
@@ -236,6 +254,67 @@ function median(values) {
   const mid = Math.floor(finite.length / 2);
   if (finite.length % 2 === 1) return finite[mid];
   return (finite[mid - 1] + finite[mid]) / 2;
+}
+
+function formatClockMinutes(value) {
+  if (!Number.isFinite(value)) return "--:--";
+  const rounded = Math.round(value);
+  const normalized = ((rounded % 1440) + 1440) % 1440;
+  const hour = Math.floor(normalized / 60);
+  const minute = normalized % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function buildWinRateStats(rows) {
+  const wins = rows.filter((row) => String(row.Result).toLowerCase() === "win").length;
+  const losses = rows.filter((row) => String(row.Result).toLowerCase() === "loss").length;
+  return {
+    trades: rows.length,
+    wins,
+    losses,
+    winRate: rows.length ? wins / rows.length : 0,
+  };
+}
+
+function buildEntryDaySplit(rows) {
+  if (!rows.length) {
+    return {
+      tMinus1: 0,
+      t: 0,
+      other: 0,
+      total: 0,
+      tMinus1Pct: 0,
+      tPct: 0,
+      otherPct: 0,
+    };
+  }
+
+  let tMinus1 = 0;
+  let t = 0;
+  let other = 0;
+  let total = 0;
+
+  for (const row of rows) {
+    const targetDate = parseIsoDateUtc(row["Target date (Local)"]);
+    const entryDate = parseIsoDateUtc(row["Entry date (Stockholm)"]);
+    if (!targetDate || !entryDate) continue;
+
+    const diffDays = Math.round((targetDate.getTime() - entryDate.getTime()) / 86400000);
+    total += 1;
+    if (diffDays === 1) tMinus1 += 1;
+    else if (diffDays === 0) t += 1;
+    else other += 1;
+  }
+
+  return {
+    tMinus1,
+    t,
+    other,
+    total,
+    tMinus1Pct: total ? tMinus1 / total : 0,
+    tPct: total ? t / total : 0,
+    otherPct: total ? other / total : 0,
+  };
 }
 
 function computeMaxDrawdown(balanceSeries, startBalance) {
@@ -648,6 +727,43 @@ function App() {
     };
   }, [datasetPeriod.end, datasetPeriod.start, rows]);
 
+  const entryTimingSplit = useMemo(() => {
+    if (!rows.length) {
+      return {
+        medianEntryLabel: "--:--",
+        before: buildWinRateStats([]),
+        after: buildWinRateStats([]),
+      };
+    }
+
+    const parsedRows = rows
+      .map((row) => ({
+        row,
+        entryClockMinutes: parseStockholmEntryClockMinutes(row["Entry time (Stockholm)"]),
+      }))
+      .filter((item) => Number.isFinite(item.entryClockMinutes));
+
+    if (!parsedRows.length) {
+      return {
+        medianEntryLabel: "--:--",
+        before: buildWinRateStats([]),
+        after: buildWinRateStats([]),
+      };
+    }
+
+    const medianEntryMinutes = median(parsedRows.map((item) => item.entryClockMinutes));
+    const beforeRows = parsedRows.filter((item) => item.entryClockMinutes < medianEntryMinutes).map((item) => item.row);
+    const afterRows = parsedRows.filter((item) => item.entryClockMinutes >= medianEntryMinutes).map((item) => item.row);
+
+    return {
+      medianEntryLabel: formatClockMinutes(medianEntryMinutes),
+      before: buildWinRateStats(beforeRows),
+      after: buildWinRateStats(afterRows),
+    };
+  }, [rows]);
+
+  const entryDateSplit = useMemo(() => buildEntryDaySplit(rows), [rows]);
+
   const monthlyData = useMemo(() => {
     const bucket = new Map();
     for (const row of rows) {
@@ -858,6 +974,69 @@ function App() {
             <p className="cardLabel">Peak Balance</p>
             <h3 className="violet">{prettyCompact(summary.peakBalance)}</h3>
             <p>equity high-water mark</p>
+          </div>
+
+          <div className="panel entrySplitCard">
+            <div className="entrySplitHead">
+              <div>
+                <p className="cardLabel">Win % vs Median Entry Time</p>
+                <div className="entrySplitMedian">{entryTimingSplit.medianEntryLabel}</div>
+                <p className="entrySplitSub">split by Stockholm entry clock time</p>
+              </div>
+              <p className="entrySplitNote">Before uses times earlier than the median. At/after includes the median timestamp bucket.</p>
+            </div>
+
+            <div className="entrySplitGrid">
+              <div className="entrySplitStat">
+                <span className="entrySplitName">Before median</span>
+                <strong className="entrySplitRate green">{pct(entryTimingSplit.before.winRate)}</strong>
+                <span className="entrySplitMeta">
+                  {entryTimingSplit.before.wins}W / {entryTimingSplit.before.losses}L | {entryTimingSplit.before.trades} trades
+                </span>
+                <div className="entrySplitTrack">
+                  <div className="entrySplitFill before" style={{ width: `${entryTimingSplit.before.winRate * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="entrySplitStat">
+                <span className="entrySplitName">At/after median</span>
+                <strong className="entrySplitRate amber">{pct(entryTimingSplit.after.winRate)}</strong>
+                <span className="entrySplitMeta">
+                  {entryTimingSplit.after.wins}W / {entryTimingSplit.after.losses}L | {entryTimingSplit.after.trades} trades
+                </span>
+                <div className="entrySplitTrack">
+                  <div className="entrySplitFill after" style={{ width: `${entryTimingSplit.after.winRate * 100}%` }} />
+                </div>
+              </div>
+            </div>
+
+            <div className="entryDaySection">
+              <p className="entryDayLabel">Entry date vs target day</p>
+              <div className="entryDayGrid">
+                <div className="entryDayStat">
+                  <span className="entrySplitName">Entered on T-1</span>
+                  <strong className="entrySplitRate violet">{pct(entryDateSplit.tMinus1Pct)}</strong>
+                  <span className="entrySplitMeta">{entryDateSplit.tMinus1} of {entryDateSplit.total} trades</span>
+                  <div className="entrySplitTrack">
+                    <div className="entrySplitFill tMinus1" style={{ width: `${entryDateSplit.tMinus1Pct * 100}%` }} />
+                  </div>
+                </div>
+
+                <div className="entryDayStat">
+                  <span className="entrySplitName">Entered on T</span>
+                  <strong className="entrySplitRate amber">{pct(entryDateSplit.tPct)}</strong>
+                  <span className="entrySplitMeta">{entryDateSplit.t} of {entryDateSplit.total} trades</span>
+                  <div className="entrySplitTrack">
+                    <div className="entrySplitFill t" style={{ width: `${entryDateSplit.tPct * 100}%` }} />
+                  </div>
+                </div>
+              </div>
+              {entryDateSplit.other > 0 ? (
+                <p className="entryDayOther">
+                  Other entry-day offsets: {entryDateSplit.other} trades ({pct(entryDateSplit.otherPct)})
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="panel metricCard">

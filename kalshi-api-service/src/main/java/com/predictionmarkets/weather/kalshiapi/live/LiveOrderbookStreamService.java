@@ -131,7 +131,12 @@ public class LiveOrderbookStreamService implements DisposableBean {
     if (frame != null) {
       return frame;
     }
-    return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of(), strategyConfigView());
+    return new LiveOrderbookFrame(
+        Instant.now(clock),
+        List.of(),
+        List.of(),
+        strategyConfigView(),
+        availableTargetDateLabels(null));
   }
 
   public LiveOrderbookFrame currentSnapshot(LocalDate targetDateLocal) {
@@ -143,7 +148,12 @@ public class LiveOrderbookStreamService implements DisposableBean {
       stationStates = resolveStationsForDate(targetDateLocal);
     }
     if (stationStates == null || stationStates.isEmpty()) {
-      return new LiveOrderbookFrame(Instant.now(clock), List.of(), List.of(), strategyConfigView());
+      return new LiveOrderbookFrame(
+          Instant.now(clock),
+          List.of(),
+          List.of(),
+          strategyConfigView(),
+          availableTargetDateLabels(targetDateLocal));
     }
     return buildFrame(stationStates, targetDateLocal);
   }
@@ -704,7 +714,25 @@ public class LiveOrderbookStreamService implements DisposableBean {
     List<LiveOpportunityView> limited = opportunities.size() > maxCount
         ? new ArrayList<>(opportunities.subList(0, maxCount))
         : opportunities;
-    return new LiveOrderbookFrame(asOfUtc, stations, limited, strategyConfigView());
+    return new LiveOrderbookFrame(
+        asOfUtc,
+        stations,
+        limited,
+        strategyConfigView(),
+        availableTargetDateLabels(targetDateOverride));
+  }
+
+  private List<String> availableTargetDateLabels(LocalDate targetDateOverride) {
+    LinkedHashSet<String> ordered = new LinkedHashSet<>();
+    for (LocalDate targetDateLocal : stationStateByDate.get().keySet()) {
+      if (targetDateLocal != null) {
+        ordered.add(targetDateLocal.toString());
+      }
+    }
+    if (targetDateOverride != null) {
+      ordered.add(targetDateOverride.toString());
+    }
+    return List.copyOf(ordered);
   }
 
   private StationInference selectStationInference(InferenceIndex index,

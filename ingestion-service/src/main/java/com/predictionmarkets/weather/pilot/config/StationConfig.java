@@ -1,0 +1,79 @@
+package com.predictionmarkets.weather.pilot.config;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class StationConfig {
+  private String stationKey;
+  private String displayName;
+  private String timezone;
+  private Double latitude;
+  private Double longitude;
+  private Double elevationM;
+  private Integer metarResetMinute;
+  private List<StationAlias> aliases = new ArrayList<>();
+
+  public String getStationKey() {
+    return stationKey;
+  }
+
+  public void setStationKey(String stationKey) {
+    this.stationKey = stationKey;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public void setTimezone(String timezone) {
+    this.timezone = timezone;
+  }
+
+  public Double getLatitude() {
+    return latitude;
+  }
+
+  public void setLatitude(Double latitude) {
+    this.latitude = latitude;
+  }
+
+  public Double getLongitude() {
+    return longitude;
+  }
+
+  public void setLongitude(Double longitude) {
+    this.longitude = longitude;
+  }
+
+  public Double getElevationM() {
+    return elevationM;
+  }
+
+  public void setElevationM(Double elevationM) {
+    this.elevationM = elevationM;
+  }
+
+  public Integer getMetarResetMinute() {
+    return metarResetMinute;
+  }
+
+  public void setMetarResetMinute(Integer metarResetMinute) {
+    this.metarResetMinute = metarResetMinute;
+  }
+
+  public List<StationAlias> getAliases() {
+    return aliases;
+  }
+
+  public void setAliases(List<StationAlias> aliases) {
+    this.aliases = aliases == null ? new ArrayList<>() : aliases;
+  }
+}

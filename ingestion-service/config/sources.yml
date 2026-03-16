@@ -1,0 +1,61 @@
+sources:
+  - sourceName: iem_station_metadata
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: ncei_lcd_station_detail
+    sourceFamily: ncei
+    enabled: true
+    baseUrl: https://www.ncei.noaa.gov
+  - sourceName: acis_threadex
+    sourceFamily: acis
+    enabled: true
+    baseUrl: https://data.rcc-acis.org
+  - sourceName: iem_cli_json
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: iem_afos_cli
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: iem_asos_hourly
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: iem_asos_1min
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: iem_mos
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: ndfd_live_point
+    sourceFamily: nws
+    enabled: true
+    baseUrl: https://digital.weather.gov
+  - sourceName: ndfd_historical
+    sourceFamily: ncei
+    enabled: false
+    baseUrl: https://www.ncei.noaa.gov
+  - sourceName: threadex_acis
+    sourceFamily: acis
+    enabled: true
+    baseUrl: https://data.rcc-acis.org
+  - sourceName: climate_normals
+    sourceFamily: ncei
+    enabled: false
+    baseUrl: https://www.ncei.noaa.gov
+  - sourceName: iem_climodat
+    sourceFamily: iem
+    enabled: true
+    baseUrl: https://mesonet.agron.iastate.edu
+  - sourceName: lcdv2_aux
+    sourceFamily: ncei
+    enabled: false
+    baseUrl: https://www.ncei.noaa.gov
+  - sourceName: heavy_model_workers
+    sourceFamily: python_worker
+    enabled: false
+    baseUrl: local

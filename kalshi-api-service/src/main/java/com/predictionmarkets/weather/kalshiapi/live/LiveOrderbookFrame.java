@@ -7,6 +7,7 @@ public record LiveOrderbookFrame(
     Instant asOfUtc,
     List<LiveStationOrderbookView> stations,
     List<LiveOpportunityView> opportunities,
-    LiveStrategyConfigView config
+    LiveStrategyConfigView config,
+    List<String> availableTargetDates
 ) {
 }

@@ -190,6 +190,7 @@ public class MosBacktestGridService {
       double ev,
       int yTmax,
       int win,
+      int bucketColumnIndex,
       Instant firstEligibleTimestampUtc,
       int eligibleCountAtEntryTimestamp) {
   }
@@ -206,6 +207,7 @@ public class MosBacktestGridService {
   }
 
   private record BaseRow(
+      String baseStreamKey,
       String runId,
       double evMin,
       double winMin,
@@ -227,13 +229,22 @@ public class MosBacktestGridService {
   }
 
   private record ComboRow(
+      String comboKey,
+      String parentComboKey,
+      String baseStreamKey,
       String runId,
+      String executionMode,
       String sizingMode,
       double evMin,
       double winMin,
       Double riskFraction,
       Double kellyFraction,
       double stakeCapUsd,
+      Double dcaInitialFillFraction,
+      String dcaTriggerBasis,
+      Double dcaTriggerStep,
+      Integer dcaMaxAdds,
+      String dcaAddSchedule,
       String entryRule,
       String sidePriceRule,
       String stakeRule,
@@ -254,16 +265,49 @@ public class MosBacktestGridService {
       double riskFractionUsedAvg,
       double riskFractionUsedMin,
       double riskFractionUsedMax,
-      int stakeCapBreachCount) {
+      int stakeCapBreachCount,
+      double daysCoverage,
+      double cagr,
+      Double calmar,
+      double tradeWithAddRate,
+      double avgAddsExecutedPerTrade,
+      double avgFillCountPerTrade,
+      double capitalDeploymentRate) {
   }
 
   private record RankedComboRow(
       int rankPosition,
-      double compositeScorePfWinLowdd,
+      double compositeScoreRobust,
       ComboRow comboRow) {
   }
 
-  private record BaseStreamResult(BaseRow baseRow, List<ComboRow> comboRows) {
+  private record BaseStreamResult(BaseRow baseRow, List<TradeRow> baseTrades, List<ComboRow> comboRows) {
+  }
+
+  private record DcaConfig(
+      double initialFillFraction,
+      String triggerBasis,
+      double triggerStep,
+      int maxAdds,
+      String addSchedule) {
+  }
+
+  private record DcaSweepResult(String parentComboKey, List<ComboRow> comboRows) {
+  }
+
+  private record FillSimulation(
+      double invested,
+      double shares,
+      int addCount,
+      int fillCount,
+      boolean anyAddExecuted,
+      double capitalDeploymentRate) {
+  }
+
+  private record ParentShortlistRow(
+      int shortlistRank,
+      double shortlistScore,
+      ComboRow comboRow) {
   }
 
   private record Bucket(String labelRaw, Integer lo, Integer hi, String mode) {
@@ -988,6 +1032,14 @@ public class MosBacktestGridService {
     List<Double> winValues = buildGrid(properties.getWinStart(), properties.getWinEnd(), properties.getWinStep());
     List<Double> fixedRiskValues = buildGrid(properties.getFixedRiskStart(), properties.getFixedRiskEnd(), properties.getFixedRiskStep());
     List<Double> kellyValues = buildGrid(properties.getKellyStart(), properties.getKellyEnd(), properties.getKellyStep());
+    List<Double> stakeCapValues = parseDoubleCsv(properties.getStakeCapValuesCsv());
+    List<DcaConfig> dcaConfigs = buildDcaConfigs();
+    int requestedDayCount = enumerateDays().size();
+    int baseStreamCount = evValues.size() * winValues.size();
+    int parentComboCount = baseStreamCount * stakeCapValues.size() * (fixedRiskValues.size() + kellyValues.size());
+    int dcaVariantCount = dcaConfigs.size();
+    int targetDcaComboCount = properties.getDcaShortlistSize() * dcaVariantCount;
+    int totalTargetComboCount = parentComboCount + targetDcaComboCount;
 
     String entryRule = "entry_timestamp_utc >= max(T-1 " +
         String.format("%02d:%02dZ", properties.getEntryHourZ(), properties.getEntryMinuteZ()) +
@@ -996,6 +1048,34 @@ public class MosBacktestGridService {
     String sidePriceRule = "YES side uses normalized bucket price; NO side uses 1-YES.";
     String fixedStakeRule = "stake=min(balance_before*risk_fraction, stake_cap_usd)";
     String kellyStakeRule = "full_kelly=clamp((q-p)/(1-p),0,1); risk_fraction_used=kelly_fraction*full_kelly; stake=min(balance_before*risk_fraction_used, stake_cap_usd)";
+    String dcaStakeRule = "single_fill parent sizing, total risk frozen at entry; initial_fill_fraction*R at entry, remaining R deployed on first later quotes meeting adverse trigger and side_price>=0.25";
+
+    Map<String, Object> runPlan = new LinkedHashMap<>();
+    runPlan.put("run_id", runId);
+    runPlan.put("period_start", properties.getStartDate());
+    runPlan.put("period_end", properties.getEndDate());
+    runPlan.put("thread_count", properties.getThreadCount());
+    runPlan.put("stations", stationIds());
+    runPlan.put("min_market_price_fixed", properties.getMinMarketPrice());
+    runPlan.put("open_delay_minutes_fixed", properties.getMinEntryMinutesAfterOpen());
+    runPlan.put("base_stream_count", baseStreamCount);
+    runPlan.put("parent_combo_count", parentComboCount);
+    runPlan.put("dca_variant_count_per_parent", dcaVariantCount);
+    runPlan.put("dca_shortlist_target", properties.getDcaShortlistSize());
+    runPlan.put("target_dca_combo_count", targetDcaComboCount);
+    runPlan.put("target_total_combo_count", totalTargetComboCount);
+    runPlan.put("ev_values", evValues);
+    runPlan.put("win_values", winValues);
+    runPlan.put("stake_cap_values", stakeCapValues);
+    runPlan.put("fixed_risk_values", fixedRiskValues);
+    runPlan.put("kelly_values", kellyValues);
+    runPlan.put("dca_configs", dcaConfigs);
+    writeJson(runDir.resolve("kitchen_sink_run_plan.json"), runPlan);
+
+    log.info("Kitchen sink run plan: base_streams={} parent_combos={} dca_variants_per_parent={} dca_shortlist_target={} total_target_combos={}",
+        baseStreamCount, parentComboCount, dcaVariantCount, properties.getDcaShortlistSize(), totalTargetComboCount);
+    log.info("Locked invariants: min_market_price={} open_delay_minutes={} stake_cap_values={} fixed_risk_values={} kelly_values={}",
+        properties.getMinMarketPrice(), properties.getMinEntryMinutesAfterOpen(), stakeCapValues, fixedRiskValues, kellyValues);
 
     ExecutorService pool = Executors.newFixedThreadPool(properties.getThreadCount());
     CompletionService<BaseStreamResult> completionService = new ExecutorCompletionService<>(pool);
@@ -1005,27 +1085,30 @@ public class MosBacktestGridService {
         double taskEv = evMin;
         double taskWin = winMin;
         completionService.submit(() -> runBaseStream(
-            runId, runDir, stations, forecastStore, marketStore, fixedRiskValues, kellyValues,
-            entryRule, sidePriceRule, fixedStakeRule, kellyStakeRule, taskEv, taskWin));
+            runId, runDir, stations, forecastStore, marketStore, stakeCapValues, fixedRiskValues, kellyValues,
+            entryRule, sidePriceRule, fixedStakeRule, kellyStakeRule, taskEv, taskWin, requestedDayCount));
         taskCount++;
       }
     }
 
     List<BaseRow> baseRows = new ArrayList<>();
-    List<ComboRow> comboRows = new ArrayList<>();
+    List<ComboRow> parentComboRows = new ArrayList<>();
+    Map<String, List<TradeRow>> baseTradesByKey = new LinkedHashMap<>();
     try (var conn = openConnection(sqlitePath)) {
       conn.setAutoCommit(false);
       try (var baseStmt = conn.prepareStatement(
           "INSERT INTO backtest_base_streams (" +
-              "run_id,ev_min,win_min,trades,wins,losses,win_rate,final_balance,max_drawdown,days_without_trade_candidate," +
+              "base_stream_key,run_id,ev_min,win_min,trades,wins,losses,win_rate,final_balance,max_drawdown,days_without_trade_candidate," +
               "station_counts_json,side_counts_json,trades_csv_path,summary_json_path,sanity_json_path,day_debug_json_path," +
-              "sanity_passes_all_checks,sanity_checked_trades) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+              "sanity_passes_all_checks,sanity_checked_trades) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
            var comboStmt = conn.prepareStatement(
                "INSERT INTO backtest_combo_results (" +
-                   "run_id,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction,stake_cap_usd,entry_rule,side_price_rule,stake_rule," +
-                   "summary_json_path,sanity_json_path,trades,wins,losses,win_rate,profit_factor,final_balance,total_pnl,max_drawdown," +
-                   "avg_ev_at_trade,median_ev_at_trade,station_counts_json,side_counts_json,risk_fraction_used_avg,risk_fraction_used_min," +
-                   "risk_fraction_used_max,stake_cap_breach_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+                   "combo_key,parent_combo_key,base_stream_key,run_id,execution_mode,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction," +
+                   "stake_cap_usd,dca_initial_fill_fraction,dca_trigger_basis,dca_trigger_step,dca_max_adds,dca_add_schedule,entry_rule,side_price_rule,stake_rule," +
+                   "summary_json_path,sanity_json_path,trades,wins,losses,win_rate,profit_factor,final_balance,total_pnl,max_drawdown,avg_ev_at_trade,median_ev_at_trade," +
+                   "station_counts_json,side_counts_json,risk_fraction_used_avg,risk_fraction_used_min,risk_fraction_used_max,stake_cap_breach_count,days_coverage,cagr,calmar," +
+                   "trade_with_add_rate,avg_adds_executed_per_trade,avg_fill_count_per_trade,capital_deployment_rate) " +
+                   "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
         for (int done = 1; done <= taskCount; done++) {
           Future<BaseStreamResult> future = completionService.take();
           BaseStreamResult result = future.get();
@@ -1037,17 +1120,114 @@ public class MosBacktestGridService {
           }
           conn.commit();
           baseRows.add(result.baseRow());
-          comboRows.addAll(result.comboRows());
-          log.info("Completed base stream {}/{} ev_min={} win_min={} trades={}",
-              done, taskCount, result.baseRow().evMin(), result.baseRow().winMin(), result.baseRow().trades());
+          parentComboRows.addAll(result.comboRows());
+          baseTradesByKey.put(result.baseRow().baseStreamKey(), result.baseTrades());
+          log.info("Stage 1/3 base stream {}/{} complete: base_stream_key={} ev_min={} win_min={} trades={} parent_combos_persisted={}",
+              done, taskCount, result.baseRow().baseStreamKey(), result.baseRow().evMin(), result.baseRow().winMin(),
+              result.baseRow().trades(), parentComboRows.size());
         }
       }
     } finally {
       pool.shutdownNow();
     }
 
-    writeRankingsAndRunMeta(sqlitePath, runId, runDir, entryRule, sidePriceRule, fixedStakeRule, kellyStakeRule,
-        evValues, winValues, fixedRiskValues, kellyValues, forecastStore, baseRows, comboRows);
+    log.info("Stage 1/3 complete: base_streams={} parent_combos={} forecast_success_days={} forecast_failed_days={}",
+        baseRows.size(), parentComboRows.size(), forecastStore.forecastSuccessDayCount(), forecastStore.forecastFailedDayCount());
+
+    List<ParentShortlistRow> shortlist = shortlistParentCombos(parentComboRows, requestedDayCount);
+    writeJson(runDir.resolve("parent_shortlist_summary.json"), Map.of(
+        "requested_shortlist_size", properties.getDcaShortlistSize(),
+        "actual_shortlist_size", shortlist.size(),
+        "min_trades", properties.getShortlistMinTrades(),
+        "min_days_coverage", properties.getShortlistMinCoverage(),
+        "max_drawdown", properties.getShortlistMaxDrawdown(),
+        "top_shortlist", shortlist.stream().limit(25).map(row -> {
+          Map<String, Object> item = new LinkedHashMap<>();
+          item.put("shortlist_rank", row.shortlistRank());
+          item.put("shortlist_score", row.shortlistScore());
+          item.put("combo_key", row.comboRow().comboKey());
+          item.put("sizing_mode", row.comboRow().sizingMode());
+          item.put("ev_min", row.comboRow().evMin());
+          item.put("win_min", row.comboRow().winMin());
+          item.put("stake_cap_usd", row.comboRow().stakeCapUsd());
+          item.put("risk_fraction", row.comboRow().riskFraction());
+          item.put("kelly_fraction", row.comboRow().kellyFraction());
+          item.put("trades", row.comboRow().trades());
+          item.put("final_balance", row.comboRow().finalBalance());
+          item.put("max_drawdown", row.comboRow().maxDrawdown());
+          item.put("days_coverage", row.comboRow().daysCoverage());
+          item.put("cagr", row.comboRow().cagr());
+          item.put("calmar", row.comboRow().calmar());
+          return item;
+        }).toList()
+    ));
+    persistParentShortlist(sqlitePath, shortlist);
+    log.info("Stage 2/3 shortlist complete: shortlisted_parents={} dca_variants_per_parent={} target_dca_combos={}",
+        shortlist.size(), dcaVariantCount, shortlist.size() * dcaVariantCount);
+
+    int persistedDcaComboCount = 0;
+    ExecutorService dcaPool = Executors.newFixedThreadPool(properties.getThreadCount());
+    CompletionService<DcaSweepResult> dcaCompletionService = new ExecutorCompletionService<>(dcaPool);
+    for (ParentShortlistRow shortlisted : shortlist) {
+      dcaCompletionService.submit(() -> runDcaSweepForParent(
+          runId,
+          shortlisted.comboRow(),
+          baseTradesByKey.get(shortlisted.comboRow().baseStreamKey()),
+          marketStore,
+          dcaConfigs,
+          entryRule,
+          sidePriceRule,
+          dcaStakeRule,
+          requestedDayCount));
+    }
+
+    try (var conn = openConnection(sqlitePath)) {
+      conn.setAutoCommit(false);
+      try (var comboStmt = conn.prepareStatement(
+          "INSERT INTO backtest_combo_results (" +
+              "combo_key,parent_combo_key,base_stream_key,run_id,execution_mode,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction," +
+              "stake_cap_usd,dca_initial_fill_fraction,dca_trigger_basis,dca_trigger_step,dca_max_adds,dca_add_schedule,entry_rule,side_price_rule,stake_rule," +
+              "summary_json_path,sanity_json_path,trades,wins,losses,win_rate,profit_factor,final_balance,total_pnl,max_drawdown,avg_ev_at_trade,median_ev_at_trade," +
+              "station_counts_json,side_counts_json,risk_fraction_used_avg,risk_fraction_used_min,risk_fraction_used_max,stake_cap_breach_count,days_coverage,cagr,calmar," +
+              "trade_with_add_rate,avg_adds_executed_per_trade,avg_fill_count_per_trade,capital_deployment_rate) " +
+              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+        for (int done = 1; done <= shortlist.size(); done++) {
+          DcaSweepResult result = dcaCompletionService.take().get();
+          for (ComboRow comboRow : result.comboRows()) {
+            insertComboRow(comboStmt, comboRow);
+            comboStmt.executeUpdate();
+          }
+          conn.commit();
+          persistedDcaComboCount += result.comboRows().size();
+          if (done <= 10 || done % 25 == 0 || done == shortlist.size()) {
+            log.info("Stage 3/3 DCA parent {}/{} complete: parent_combo_key={} dca_variants_persisted={} total_dca_persisted={}",
+                done, shortlist.size(), result.parentComboKey(), result.comboRows().size(), persistedDcaComboCount);
+          }
+        }
+      }
+    } finally {
+      dcaPool.shutdownNow();
+    }
+
+    log.info("Stage 3/3 complete: dca_combos_persisted={} grand_total_combos={}",
+        persistedDcaComboCount, parentComboRows.size() + persistedDcaComboCount);
+
+    writeRankingsAndRunMeta(
+        sqlitePath,
+        runId,
+        runDir,
+        entryRule,
+        sidePriceRule,
+        fixedStakeRule,
+        kellyStakeRule,
+        dcaStakeRule,
+        forecastStore,
+        baseRows,
+        baseStreamCount,
+        parentComboRows.size(),
+        shortlist.size(),
+        dcaConfigs.size(),
+        persistedDcaComboCount);
   }
 
   private BaseStreamResult runBaseStream(String runId,
@@ -1055,6 +1235,7 @@ public class MosBacktestGridService {
                                          List<ResolvedStation> stations,
                                          ForecastStore forecastStore,
                                          Map<MarketKey, MarketDay> marketStore,
+                                         List<Double> stakeCapValues,
                                          List<Double> fixedRiskValues,
                                          List<Double> kellyValues,
                                          String entryRule,
@@ -1062,7 +1243,8 @@ public class MosBacktestGridService {
                                          String fixedStakeRule,
                                          String kellyStakeRule,
                                          double evMin,
-                                         double winMin) throws Exception {
+                                         double winMin,
+                                         int requestedDayCount) throws Exception {
     List<Candidate> chosen = new ArrayList<>();
     Map<String, Object> dayDebug = new LinkedHashMap<>();
     Map<String, Object> counts = new LinkedHashMap<>();
@@ -1128,7 +1310,9 @@ public class MosBacktestGridService {
     writeJson(sanityPath, sanity);
     writeJson(debugPath, dayDebug);
 
+    String baseStreamKey = "base_ev" + evTag + "_win" + winTag;
     BaseRow baseRow = new BaseRow(
+        baseStreamKey,
         runId,
         evMin,
         winMin,
@@ -1150,24 +1334,72 @@ public class MosBacktestGridService {
     );
 
     List<ComboRow> comboRows = new ArrayList<>();
-    for (double riskFraction : fixedRiskValues) {
-      ComboMetrics metrics = simulateBankroll(trades, "fixed_risk", riskFraction, null);
-      comboRows.add(metrics.toComboRow(runId, evMin, winMin, properties.getStakeCapUsd(), entryRule, sidePriceRule, fixedStakeRule,
-          summaryPath.toString(), sanityPath.toString()));
-    }
-    for (double kellyFraction : kellyValues) {
-      ComboMetrics metrics = simulateBankroll(trades, "fractional_kelly", null, kellyFraction);
-      comboRows.add(metrics.toComboRow(runId, evMin, winMin, properties.getStakeCapUsd(), entryRule, sidePriceRule, kellyStakeRule,
-          summaryPath.toString(), sanityPath.toString()));
+    for (double stakeCapUsd : stakeCapValues) {
+      for (double riskFraction : fixedRiskValues) {
+        ComboMetrics metrics = simulateExecution(trades, marketStore, "single_fill", "fixed_risk", riskFraction, null, stakeCapUsd, null);
+        comboRows.add(metrics.toComboRow(
+            baseStreamKey,
+            runId,
+            null,
+            "single_fill",
+            evMin,
+            winMin,
+            riskFraction,
+            null,
+            stakeCapUsd,
+            null,
+            null,
+            null,
+            null,
+            null,
+            entryRule,
+            sidePriceRule,
+            fixedStakeRule,
+            summaryPath.toString(),
+            sanityPath.toString(),
+            properties.getStartBalance(),
+            requestedDayCount));
+      }
+      for (double kellyFraction : kellyValues) {
+        ComboMetrics metrics = simulateExecution(trades, marketStore, "single_fill", "fractional_kelly", null, kellyFraction, stakeCapUsd, null);
+        comboRows.add(metrics.toComboRow(
+            baseStreamKey,
+            runId,
+            null,
+            "single_fill",
+            evMin,
+            winMin,
+            null,
+            kellyFraction,
+            stakeCapUsd,
+            null,
+            null,
+            null,
+            null,
+            null,
+            entryRule,
+            sidePriceRule,
+            kellyStakeRule,
+            summaryPath.toString(),
+            sanityPath.toString(),
+            properties.getStartBalance(),
+            requestedDayCount));
+      }
     }
 
-    return new BaseStreamResult(baseRow, comboRows);
+    return new BaseStreamResult(baseRow, trades, comboRows);
   }
 
   private void createResultTables(Path sqlitePath) throws Exception {
     try (var conn = openConnection(sqlitePath); var stmt = conn.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS backtest_base_streams");
+      stmt.executeUpdate("DROP TABLE IF EXISTS backtest_combo_results");
+      stmt.executeUpdate("DROP TABLE IF EXISTS backtest_ranked_scores");
+      stmt.executeUpdate("DROP TABLE IF EXISTS backtest_run_meta");
+      stmt.executeUpdate("DROP TABLE IF EXISTS backtest_parent_shortlist");
       stmt.executeUpdate(
           "CREATE TABLE IF NOT EXISTS backtest_base_streams (" +
+              "base_stream_key TEXT NOT NULL," +
               "run_id TEXT NOT NULL," +
               "ev_min REAL NOT NULL," +
               "win_min REAL NOT NULL," +
@@ -1190,13 +1422,22 @@ public class MosBacktestGridService {
       );
       stmt.executeUpdate(
           "CREATE TABLE IF NOT EXISTS backtest_combo_results (" +
+              "combo_key TEXT NOT NULL," +
+              "parent_combo_key TEXT," +
+              "base_stream_key TEXT NOT NULL," +
               "run_id TEXT NOT NULL," +
+              "execution_mode TEXT NOT NULL," +
               "sizing_mode TEXT NOT NULL," +
               "ev_min REAL NOT NULL," +
               "win_min REAL NOT NULL," +
               "risk_fraction REAL," +
               "kelly_fraction REAL," +
               "stake_cap_usd REAL NOT NULL," +
+              "dca_initial_fill_fraction REAL," +
+              "dca_trigger_basis TEXT," +
+              "dca_trigger_step REAL," +
+              "dca_max_adds INTEGER," +
+              "dca_add_schedule TEXT," +
               "entry_rule TEXT NOT NULL," +
               "side_price_rule TEXT NOT NULL," +
               "stake_rule TEXT NOT NULL," +
@@ -1217,20 +1458,36 @@ public class MosBacktestGridService {
               "risk_fraction_used_avg REAL NOT NULL," +
               "risk_fraction_used_min REAL NOT NULL," +
               "risk_fraction_used_max REAL NOT NULL," +
-              "stake_cap_breach_count INTEGER NOT NULL" +
+              "stake_cap_breach_count INTEGER NOT NULL," +
+              "days_coverage REAL NOT NULL," +
+              "cagr REAL NOT NULL," +
+              "calmar REAL," +
+              "trade_with_add_rate REAL NOT NULL," +
+              "avg_adds_executed_per_trade REAL NOT NULL," +
+              "avg_fill_count_per_trade REAL NOT NULL," +
+              "capital_deployment_rate REAL NOT NULL" +
               ")"
       );
       stmt.executeUpdate(
           "CREATE TABLE IF NOT EXISTS backtest_ranked_scores (" +
               "rank_position INTEGER NOT NULL," +
-              "composite_score_pf_win_lowdd REAL NOT NULL," +
+              "composite_score_robust REAL NOT NULL," +
+              "combo_key TEXT NOT NULL," +
+              "parent_combo_key TEXT," +
+              "base_stream_key TEXT NOT NULL," +
               "run_id TEXT NOT NULL," +
+              "execution_mode TEXT NOT NULL," +
               "sizing_mode TEXT NOT NULL," +
               "ev_min REAL NOT NULL," +
               "win_min REAL NOT NULL," +
               "risk_fraction REAL," +
               "kelly_fraction REAL," +
               "stake_cap_usd REAL NOT NULL," +
+              "dca_initial_fill_fraction REAL," +
+              "dca_trigger_basis TEXT," +
+              "dca_trigger_step REAL," +
+              "dca_max_adds INTEGER," +
+              "dca_add_schedule TEXT," +
               "entry_rule TEXT NOT NULL," +
               "side_price_rule TEXT NOT NULL," +
               "stake_rule TEXT NOT NULL," +
@@ -1251,7 +1508,36 @@ public class MosBacktestGridService {
               "risk_fraction_used_avg REAL NOT NULL," +
               "risk_fraction_used_min REAL NOT NULL," +
               "risk_fraction_used_max REAL NOT NULL," +
-              "stake_cap_breach_count INTEGER NOT NULL" +
+              "stake_cap_breach_count INTEGER NOT NULL," +
+              "days_coverage REAL NOT NULL," +
+              "cagr REAL NOT NULL," +
+              "calmar REAL," +
+              "trade_with_add_rate REAL NOT NULL," +
+              "avg_adds_executed_per_trade REAL NOT NULL," +
+              "avg_fill_count_per_trade REAL NOT NULL," +
+              "capital_deployment_rate REAL NOT NULL" +
+              ")"
+      );
+      stmt.executeUpdate(
+          "CREATE TABLE IF NOT EXISTS backtest_parent_shortlist (" +
+              "shortlist_rank INTEGER NOT NULL," +
+              "shortlist_score REAL NOT NULL," +
+              "combo_key TEXT NOT NULL," +
+              "base_stream_key TEXT NOT NULL," +
+              "run_id TEXT NOT NULL," +
+              "execution_mode TEXT NOT NULL," +
+              "sizing_mode TEXT NOT NULL," +
+              "ev_min REAL NOT NULL," +
+              "win_min REAL NOT NULL," +
+              "risk_fraction REAL," +
+              "kelly_fraction REAL," +
+              "stake_cap_usd REAL NOT NULL," +
+              "trades INTEGER NOT NULL," +
+              "final_balance REAL NOT NULL," +
+              "max_drawdown REAL NOT NULL," +
+              "days_coverage REAL NOT NULL," +
+              "cagr REAL NOT NULL," +
+              "calmar REAL" +
               ")"
       );
       stmt.executeUpdate(
@@ -1267,10 +1553,15 @@ public class MosBacktestGridService {
               "side_price_rule TEXT NOT NULL," +
               "stake_rule_fixed TEXT NOT NULL," +
               "stake_rule_fractional_kelly TEXT NOT NULL," +
+              "stake_rule_dca TEXT NOT NULL," +
               "requested_day_count INTEGER NOT NULL," +
               "forecast_success_day_count INTEGER NOT NULL," +
               "forecast_failed_day_count INTEGER NOT NULL," +
               "base_stream_count INTEGER NOT NULL," +
+              "parent_combo_count INTEGER NOT NULL," +
+              "shortlist_parent_count INTEGER NOT NULL," +
+              "dca_variant_count_per_parent INTEGER NOT NULL," +
+              "dca_combo_count INTEGER NOT NULL," +
               "combo_count INTEGER NOT NULL," +
               "out_dir TEXT NOT NULL," +
               "sqlite_path TEXT NOT NULL" +
@@ -1280,24 +1571,25 @@ public class MosBacktestGridService {
   }
 
   private void insertBaseRow(java.sql.PreparedStatement stmt, BaseRow row) throws Exception {
-    stmt.setString(1, row.runId());
-    stmt.setDouble(2, row.evMin());
-    stmt.setDouble(3, row.winMin());
-    stmt.setInt(4, row.trades());
-    stmt.setInt(5, row.wins());
-    stmt.setInt(6, row.losses());
-    stmt.setDouble(7, row.winRate());
-    stmt.setDouble(8, row.finalBalance());
-    stmt.setDouble(9, row.maxDrawdown());
-    stmt.setInt(10, row.daysWithoutTradeCandidate());
-    stmt.setString(11, row.stationCountsJson());
-    stmt.setString(12, row.sideCountsJson());
-    stmt.setString(13, row.tradesCsvPath());
-    stmt.setString(14, row.summaryJsonPath());
-    stmt.setString(15, row.sanityJsonPath());
-    stmt.setString(16, row.dayDebugJsonPath());
-    stmt.setInt(17, row.sanityPassesAllChecks() ? 1 : 0);
-    stmt.setInt(18, row.sanityCheckedTrades());
+    stmt.setString(1, row.baseStreamKey());
+    stmt.setString(2, row.runId());
+    stmt.setDouble(3, row.evMin());
+    stmt.setDouble(4, row.winMin());
+    stmt.setInt(5, row.trades());
+    stmt.setInt(6, row.wins());
+    stmt.setInt(7, row.losses());
+    stmt.setDouble(8, row.winRate());
+    stmt.setDouble(9, row.finalBalance());
+    stmt.setDouble(10, row.maxDrawdown());
+    stmt.setInt(11, row.daysWithoutTradeCandidate());
+    stmt.setString(12, row.stationCountsJson());
+    stmt.setString(13, row.sideCountsJson());
+    stmt.setString(14, row.tradesCsvPath());
+    stmt.setString(15, row.summaryJsonPath());
+    stmt.setString(16, row.sanityJsonPath());
+    stmt.setString(17, row.dayDebugJsonPath());
+    stmt.setInt(18, row.sanityPassesAllChecks() ? 1 : 0);
+    stmt.setInt(19, row.sanityCheckedTrades());
   }
 
   private void insertComboRow(java.sql.PreparedStatement stmt, ComboRow row) throws Exception {
@@ -1305,34 +1597,54 @@ public class MosBacktestGridService {
   }
 
   private void insertComboRow(java.sql.PreparedStatement stmt, ComboRow row, int indexOffset) throws Exception {
-    stmt.setString(1 + indexOffset, row.runId());
-    stmt.setString(2 + indexOffset, row.sizingMode());
-    stmt.setDouble(3 + indexOffset, row.evMin());
-    stmt.setDouble(4 + indexOffset, row.winMin());
-    bindDouble(stmt, 5 + indexOffset, row.riskFraction());
-    bindDouble(stmt, 6 + indexOffset, row.kellyFraction());
-    stmt.setDouble(7 + indexOffset, row.stakeCapUsd());
-    stmt.setString(8 + indexOffset, row.entryRule());
-    stmt.setString(9 + indexOffset, row.sidePriceRule());
-    stmt.setString(10 + indexOffset, row.stakeRule());
-    stmt.setString(11 + indexOffset, row.summaryJsonPath());
-    stmt.setString(12 + indexOffset, row.sanityJsonPath());
-    stmt.setInt(13 + indexOffset, row.trades());
-    stmt.setInt(14 + indexOffset, row.wins());
-    stmt.setInt(15 + indexOffset, row.losses());
-    stmt.setDouble(16 + indexOffset, row.winRate());
-    bindDouble(stmt, 17 + indexOffset, row.profitFactor());
-    stmt.setDouble(18 + indexOffset, row.finalBalance());
-    stmt.setDouble(19 + indexOffset, row.totalPnl());
-    stmt.setDouble(20 + indexOffset, row.maxDrawdown());
-    stmt.setDouble(21 + indexOffset, row.avgEvAtTrade());
-    stmt.setDouble(22 + indexOffset, row.medianEvAtTrade());
-    stmt.setString(23 + indexOffset, row.stationCountsJson());
-    stmt.setString(24 + indexOffset, row.sideCountsJson());
-    stmt.setDouble(25 + indexOffset, row.riskFractionUsedAvg());
-    stmt.setDouble(26 + indexOffset, row.riskFractionUsedMin());
-    stmt.setDouble(27 + indexOffset, row.riskFractionUsedMax());
-    stmt.setInt(28 + indexOffset, row.stakeCapBreachCount());
+    stmt.setString(1 + indexOffset, row.comboKey());
+    stmt.setString(2 + indexOffset, row.parentComboKey());
+    stmt.setString(3 + indexOffset, row.baseStreamKey());
+    stmt.setString(4 + indexOffset, row.runId());
+    stmt.setString(5 + indexOffset, row.executionMode());
+    stmt.setString(6 + indexOffset, row.sizingMode());
+    stmt.setDouble(7 + indexOffset, row.evMin());
+    stmt.setDouble(8 + indexOffset, row.winMin());
+    bindDouble(stmt, 9 + indexOffset, row.riskFraction());
+    bindDouble(stmt, 10 + indexOffset, row.kellyFraction());
+    stmt.setDouble(11 + indexOffset, row.stakeCapUsd());
+    bindDouble(stmt, 12 + indexOffset, row.dcaInitialFillFraction());
+    stmt.setString(13 + indexOffset, row.dcaTriggerBasis());
+    bindDouble(stmt, 14 + indexOffset, row.dcaTriggerStep());
+    if (row.dcaMaxAdds() == null) {
+      stmt.setNull(15 + indexOffset, java.sql.Types.INTEGER);
+    } else {
+      stmt.setInt(15 + indexOffset, row.dcaMaxAdds());
+    }
+    stmt.setString(16 + indexOffset, row.dcaAddSchedule());
+    stmt.setString(17 + indexOffset, row.entryRule());
+    stmt.setString(18 + indexOffset, row.sidePriceRule());
+    stmt.setString(19 + indexOffset, row.stakeRule());
+    stmt.setString(20 + indexOffset, row.summaryJsonPath());
+    stmt.setString(21 + indexOffset, row.sanityJsonPath());
+    stmt.setInt(22 + indexOffset, row.trades());
+    stmt.setInt(23 + indexOffset, row.wins());
+    stmt.setInt(24 + indexOffset, row.losses());
+    stmt.setDouble(25 + indexOffset, row.winRate());
+    bindDouble(stmt, 26 + indexOffset, row.profitFactor());
+    stmt.setDouble(27 + indexOffset, row.finalBalance());
+    stmt.setDouble(28 + indexOffset, row.totalPnl());
+    stmt.setDouble(29 + indexOffset, row.maxDrawdown());
+    stmt.setDouble(30 + indexOffset, row.avgEvAtTrade());
+    stmt.setDouble(31 + indexOffset, row.medianEvAtTrade());
+    stmt.setString(32 + indexOffset, row.stationCountsJson());
+    stmt.setString(33 + indexOffset, row.sideCountsJson());
+    stmt.setDouble(34 + indexOffset, row.riskFractionUsedAvg());
+    stmt.setDouble(35 + indexOffset, row.riskFractionUsedMin());
+    stmt.setDouble(36 + indexOffset, row.riskFractionUsedMax());
+    stmt.setInt(37 + indexOffset, row.stakeCapBreachCount());
+    stmt.setDouble(38 + indexOffset, row.daysCoverage());
+    stmt.setDouble(39 + indexOffset, row.cagr());
+    bindDouble(stmt, 40 + indexOffset, row.calmar());
+    stmt.setDouble(41 + indexOffset, row.tradeWithAddRate());
+    stmt.setDouble(42 + indexOffset, row.avgAddsExecutedPerTrade());
+    stmt.setDouble(43 + indexOffset, row.avgFillCountPerTrade());
+    stmt.setDouble(44 + indexOffset, row.capitalDeploymentRate());
   }
 
   private record SelectionResult(Candidate candidate, Map<String, Object> status) {
@@ -1480,6 +1792,7 @@ public class MosBacktestGridService {
               evYes,
               (int) Math.round(ctx.prediction().yTmax()),
               column.bucket().contains((int) Math.round(ctx.prediction().yTmax())) ? 1 : 0,
+              i,
               timestamp,
               0
           ));
@@ -1504,6 +1817,7 @@ public class MosBacktestGridService {
               evNo,
               (int) Math.round(ctx.prediction().yTmax()),
               column.bucket().contains((int) Math.round(ctx.prediction().yTmax())) ? 0 : 1,
+              i,
               timestamp,
               0
           ));
@@ -1701,14 +2015,14 @@ public class MosBacktestGridService {
         failures.compute("market_file_missing", (k, v) -> v + 1);
         continue;
       }
-      int columnIndex = -1;
-      Bucket bucket = null;
-      for (int i = 0; i < marketDay.columns().size(); i++) {
-        if (Objects.equals(marketDay.columns().get(i).rawLabel(), trade.candidate().bucketRaw())) {
-          columnIndex = i;
-          bucket = marketDay.columns().get(i).bucket();
-          break;
-        }
+      int columnIndex = trade.candidate().bucketColumnIndex();
+      Bucket bucket = columnIndex >= 0 && columnIndex < marketDay.columns().size()
+          ? marketDay.columns().get(columnIndex).bucket()
+          : null;
+      if (columnIndex >= 0 && columnIndex < marketDay.columns().size()
+          && !Objects.equals(marketDay.columns().get(columnIndex).rawLabel(), trade.candidate().bucketRaw())) {
+        columnIndex = -1;
+        bucket = null;
       }
       if (columnIndex < 0) {
         failures.compute("bucket_not_found", (k, v) -> v + 1);
@@ -1796,29 +2110,106 @@ public class MosBacktestGridService {
       double riskFractionUsedAvg,
       double riskFractionUsedMin,
       double riskFractionUsedMax,
-      int stakeCapBreachCount) {
+      int stakeCapBreachCount,
+      double tradeWithAddRate,
+      double avgAddsExecutedPerTrade,
+      double avgFillCountPerTrade,
+      double capitalDeploymentRate) {
 
-    ComboRow toComboRow(String runId,
+    ComboRow toComboRow(String baseStreamKey,
+                        String runId,
+                        String parentComboKey,
+                        String executionMode,
                         double evMin,
                         double winMin,
+                        Double riskFraction,
+                        Double kellyFraction,
                         double stakeCapUsd,
+                        Double dcaInitialFillFraction,
+                        String dcaTriggerBasis,
+                        Double dcaTriggerStep,
+                        Integer dcaMaxAdds,
+                        String dcaAddSchedule,
                         String entryRule,
                         String sidePriceRule,
                         String stakeRule,
                         String summaryJsonPath,
-                        String sanityJsonPath) throws Exception {
+                        String sanityJsonPath,
+                        double startBalance,
+                        int requestedDayCount) throws Exception {
+      double daysCoverage = requestedDayCount <= 0 ? 0.0 : (double) trades / requestedDayCount;
+      double cagr = computeCagr(startBalance, finalBalance, requestedDayCount);
+      Double calmar = (maxDrawdown > 1e-12 && Double.isFinite(cagr)) ? cagr / maxDrawdown : null;
+      String comboKey = buildComboKey(
+          baseStreamKey,
+          executionMode,
+          sizingMode,
+          evMin,
+          winMin,
+          riskFraction,
+          kellyFraction,
+          stakeCapUsd,
+          dcaInitialFillFraction,
+          dcaTriggerBasis,
+          dcaTriggerStep,
+          dcaMaxAdds,
+          dcaAddSchedule);
       return new ComboRow(
-          runId, sizingMode, evMin, winMin, riskFraction, kellyFraction, stakeCapUsd,
-          entryRule, sidePriceRule, stakeRule, summaryJsonPath, sanityJsonPath,
-          trades, wins, losses, winRate, profitFactor, finalBalance, totalPnl, maxDrawdown,
-          avgEvAtTrade, medianEvAtTrade,
+          comboKey,
+          parentComboKey,
+          baseStreamKey,
+          runId,
+          executionMode,
+          sizingMode,
+          evMin,
+          winMin,
+          riskFraction,
+          kellyFraction,
+          stakeCapUsd,
+          dcaInitialFillFraction,
+          dcaTriggerBasis,
+          dcaTriggerStep,
+          dcaMaxAdds,
+          dcaAddSchedule,
+          entryRule,
+          sidePriceRule,
+          stakeRule,
+          summaryJsonPath,
+          sanityJsonPath,
+          trades,
+          wins,
+          losses,
+          winRate,
+          profitFactor,
+          finalBalance,
+          totalPnl,
+          maxDrawdown,
+          avgEvAtTrade,
+          medianEvAtTrade,
           STATIC_MAPPER.writeValueAsString(stationCounts),
           STATIC_MAPPER.writeValueAsString(sideCounts),
-          riskFractionUsedAvg, riskFractionUsedMin, riskFractionUsedMax, stakeCapBreachCount);
+          riskFractionUsedAvg,
+          riskFractionUsedMin,
+          riskFractionUsedMax,
+          stakeCapBreachCount,
+          daysCoverage,
+          cagr,
+          calmar,
+          tradeWithAddRate,
+          avgAddsExecutedPerTrade,
+          avgFillCountPerTrade,
+          capitalDeploymentRate);
     }
   }
 
-  private ComboMetrics simulateBankroll(List<TradeRow> baseTrades, String sizingMode, Double riskFraction, Double kellyFraction) {
+  private ComboMetrics simulateExecution(List<TradeRow> baseTrades,
+                                         Map<MarketKey, MarketDay> marketStore,
+                                         String executionMode,
+                                         String sizingMode,
+                                         Double riskFraction,
+                                         Double kellyFraction,
+                                         double stakeCapUsd,
+                                         DcaConfig dcaConfig) {
     double balance = properties.getStartBalance();
     double peak = balance;
     double maxDrawdown = 0.0;
@@ -1831,39 +2222,63 @@ public class MosBacktestGridService {
     Map<String, Integer> stationCounts = new LinkedHashMap<>();
     Map<String, Integer> sideCounts = new LinkedHashMap<>();
     int stakeCapBreaches = 0;
+    int tradesWithAdd = 0;
+    int totalAdds = 0;
+    int totalFillCount = 0;
+    double totalCapitalDeploymentRate = 0.0;
 
     for (TradeRow trade : baseTrades) {
-      double price = trade.candidate().marketPrice();
-      double modelWinProb = trade.candidate().modelWinProb();
-      double usedRisk;
-      if ("fixed_risk".equals(sizingMode)) {
-        usedRisk = riskFraction == null ? 0.0 : riskFraction;
-      } else {
-        double fullKelly = (price <= 0.0 || price >= 1.0) ? 0.0 : (modelWinProb - price) / (1.0 - price);
-        fullKelly = Math.max(0.0, Math.min(1.0, fullKelly));
-        usedRisk = (kellyFraction == null ? 0.0 : kellyFraction) * fullKelly;
-      }
-      double stake = Math.min(balance * usedRisk, properties.getStakeCapUsd());
-      if (stake > properties.getStakeCapUsd() + 1e-9) {
+      Candidate candidate = trade.candidate();
+      double balanceBefore = balance;
+      double plannedRisk = plannedRiskFraction(candidate.marketPrice(), candidate.modelWinProb(), sizingMode, riskFraction, kellyFraction);
+      double stakeBudget = Math.min(balanceBefore * plannedRisk, stakeCapUsd);
+      if (stakeBudget > stakeCapUsd + 1e-9) {
         stakeCapBreaches++;
       }
-      double shares = price > 0.0 ? stake / price : 0.0;
-      double pnl = trade.candidate().win() == 1 ? shares * (1.0 - price) : -stake;
+
+      FillSimulation fillSimulation;
+      if ("dca".equals(executionMode) && dcaConfig != null) {
+        fillSimulation = simulateDcaFills(
+            candidate,
+            marketStore.get(new MarketKey(candidate.stationId(), LocalDate.parse(candidate.targetDateLocal()))),
+            stakeBudget,
+            dcaConfig,
+            properties.getMinMarketPrice());
+      } else {
+        double shares = candidate.marketPrice() > 0.0 ? stakeBudget / candidate.marketPrice() : 0.0;
+        fillSimulation = new FillSimulation(
+            stakeBudget,
+            shares,
+            0,
+            stakeBudget > 0.0 ? 1 : 0,
+            false,
+            stakeBudget > 0.0 ? 1.0 : 0.0);
+      }
+
+      double invested = fillSimulation.invested();
+      double shares = fillSimulation.shares();
+      double pnl = candidate.win() == 1 ? shares - invested : -invested;
       balance += pnl;
       peak = Math.max(peak, balance);
       double drawdown = peak <= 0.0 ? 0.0 : (peak - balance) / peak;
       maxDrawdown = Math.max(maxDrawdown, drawdown);
-      if (trade.candidate().win() == 1) {
+      if (candidate.win() == 1) {
         wins++;
         grossProfit += pnl;
       } else {
         losses++;
         grossLoss += -pnl;
       }
-      evs.add(trade.candidate().ev());
-      usedFractions.add(usedRisk);
-      stationCounts.merge(trade.candidate().stationId(), 1, Integer::sum);
-      sideCounts.merge(trade.candidate().side(), 1, Integer::sum);
+      evs.add(candidate.ev());
+      usedFractions.add(balanceBefore > 0.0 ? invested / balanceBefore : 0.0);
+      stationCounts.merge(candidate.stationId(), 1, Integer::sum);
+      sideCounts.merge(candidate.side(), 1, Integer::sum);
+      if (fillSimulation.anyAddExecuted()) {
+        tradesWithAdd++;
+      }
+      totalAdds += fillSimulation.addCount();
+      totalFillCount += fillSimulation.fillCount();
+      totalCapitalDeploymentRate += fillSimulation.capitalDeploymentRate();
     }
 
     List<Double> sortedEvs = new ArrayList<>(evs);
@@ -1872,14 +2287,15 @@ public class MosBacktestGridService {
     if (!sortedEvs.isEmpty() && sortedEvs.size() % 2 == 0) {
       medianEv = (sortedEvs.get(sortedEvs.size() / 2 - 1) + sortedEvs.get(sortedEvs.size() / 2)) / 2.0;
     }
+    int tradeCount = baseTrades.size();
     return new ComboMetrics(
         sizingMode,
         riskFraction,
         kellyFraction,
-        baseTrades.size(),
+        tradeCount,
         wins,
         losses,
-        baseTrades.isEmpty() ? 0.0 : (double) wins / baseTrades.size(),
+        tradeCount == 0 ? 0.0 : (double) wins / tradeCount,
         grossLoss > 0.0 ? grossProfit / grossLoss : null,
         balance,
         balance - properties.getStartBalance(),
@@ -1891,8 +2307,316 @@ public class MosBacktestGridService {
         usedFractions.stream().mapToDouble(Double::doubleValue).average().orElse(0.0),
         usedFractions.stream().mapToDouble(Double::doubleValue).min().orElse(0.0),
         usedFractions.stream().mapToDouble(Double::doubleValue).max().orElse(0.0),
-        stakeCapBreaches
-    );
+        stakeCapBreaches,
+        tradeCount == 0 ? 0.0 : (double) tradesWithAdd / tradeCount,
+        tradeCount == 0 ? 0.0 : (double) totalAdds / tradeCount,
+        tradeCount == 0 ? 0.0 : (double) totalFillCount / tradeCount,
+        tradeCount == 0 ? 0.0 : totalCapitalDeploymentRate / tradeCount);
+  }
+
+  private FillSimulation simulateDcaFills(Candidate candidate,
+                                          MarketDay marketDay,
+                                          double stakeBudget,
+                                          DcaConfig dcaConfig,
+                                          double minMarketPrice) {
+    if (stakeBudget <= 0.0 || marketDay == null || dcaConfig == null) {
+      return new FillSimulation(0.0, 0.0, 0, 0, false, 0.0);
+    }
+
+    double entryPrice = candidate.marketPrice();
+    if (!Double.isFinite(entryPrice) || entryPrice <= 0.0) {
+      return new FillSimulation(0.0, 0.0, 0, 0, false, 0.0);
+    }
+
+    double initialStake = stakeBudget * dcaConfig.initialFillFraction();
+    double invested = initialStake;
+    double shares = initialStake / entryPrice;
+    double remainingBudget = Math.max(0.0, stakeBudget - initialStake);
+    int addCount = 0;
+    int fillCount = initialStake > 0.0 ? 1 : 0;
+    boolean anyAddExecuted = false;
+    if (remainingBudget <= 0.0 || dcaConfig.maxAdds() <= 0) {
+      return new FillSimulation(invested, shares, addCount, fillCount, anyAddExecuted, stakeBudget <= 0.0 ? 0.0 : invested / stakeBudget);
+    }
+
+    double[] addWeights = normalizedAddWeights(dcaConfig.maxAdds(), dcaConfig.addSchedule());
+    Instant lastFillTime = candidate.entryTimestampUtc();
+    double lastFillPrice = entryPrice;
+    double initialFillPrice = entryPrice;
+    for (int addIndex = 0; addIndex < dcaConfig.maxAdds(); addIndex++) {
+      double triggerPrice = "from_initial_fill".equals(dcaConfig.triggerBasis())
+          ? initialFillPrice - dcaConfig.triggerStep() * (addIndex + 1)
+          : lastFillPrice - dcaConfig.triggerStep();
+      if (triggerPrice + 1e-12 < minMarketPrice) {
+        break;
+      }
+
+      Instant fillTime = null;
+      double fillPrice = Double.NaN;
+      for (Map.Entry<Instant, MarketRow> entry : marketDay.rowsByTimestamp().tailMap(lastFillTime, false).entrySet()) {
+        double sidePrice = sidePriceAt(candidate, entry.getValue());
+        if (!Double.isFinite(sidePrice) || sidePrice + 1e-12 < minMarketPrice) {
+          continue;
+        }
+        if (sidePrice <= triggerPrice + 1e-12) {
+          fillTime = entry.getKey();
+          fillPrice = sidePrice;
+          break;
+        }
+      }
+      if (fillTime == null || !Double.isFinite(fillPrice) || fillPrice <= 0.0) {
+        break;
+      }
+
+      double sliceStake = remainingBudget * addWeights[addIndex];
+      if (sliceStake <= 0.0) {
+        continue;
+      }
+      invested += sliceStake;
+      shares += sliceStake / fillPrice;
+      addCount++;
+      fillCount++;
+      anyAddExecuted = true;
+      lastFillTime = fillTime;
+      lastFillPrice = fillPrice;
+    }
+
+    return new FillSimulation(
+        invested,
+        shares,
+        addCount,
+        fillCount,
+        anyAddExecuted,
+        stakeBudget <= 0.0 ? 0.0 : invested / stakeBudget);
+  }
+
+  private double sidePriceAt(Candidate candidate, MarketRow row) {
+    int idx = candidate.bucketColumnIndex();
+    if (idx < 0 || idx >= row.values().length) {
+      return Double.NaN;
+    }
+    double pYes = normalizePrice(row.values()[idx]);
+    if (!Double.isFinite(pYes)) {
+      return Double.NaN;
+    }
+    return "YES".equals(candidate.side()) ? pYes : (1.0 - pYes);
+  }
+
+  private double plannedRiskFraction(double marketPrice,
+                                     double modelWinProb,
+                                     String sizingMode,
+                                     Double riskFraction,
+                                     Double kellyFraction) {
+    if ("fixed_risk".equals(sizingMode)) {
+      return riskFraction == null ? 0.0 : riskFraction;
+    }
+    double fullKelly = (marketPrice <= 0.0 || marketPrice >= 1.0) ? 0.0 : (modelWinProb - marketPrice) / (1.0 - marketPrice);
+    fullKelly = Math.max(0.0, Math.min(1.0, fullKelly));
+    return (kellyFraction == null ? 0.0 : kellyFraction) * fullKelly;
+  }
+
+  private double[] normalizedAddWeights(int maxAdds, String addSchedule) {
+    double[] weights = new double[maxAdds];
+    for (int i = 0; i < maxAdds; i++) {
+      weights[i] = switch (addSchedule) {
+        case "front_loaded" -> maxAdds - i;
+        case "back_loaded" -> i + 1;
+        case "geometric" -> Math.pow(2.0, i);
+        default -> 1.0;
+      };
+    }
+    double total = Arrays.stream(weights).sum();
+    if (total <= 0.0) {
+      Arrays.fill(weights, 1.0 / maxAdds);
+      return weights;
+    }
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = weights[i] / total;
+    }
+    return weights;
+  }
+
+  private List<DcaConfig> buildDcaConfigs() {
+    List<Double> initialFillFractions = parseDoubleCsv(properties.getDcaInitialFillFractionsCsv());
+    List<String> triggerBases = parseStringCsv(properties.getDcaTriggerBasesCsv());
+    List<Double> triggerSteps = parseDoubleCsv(properties.getDcaTriggerStepsCsv());
+    List<Integer> maxAddsValues = parseIntegerCsv(properties.getDcaMaxAddsCsv());
+    List<String> addSchedules = parseStringCsv(properties.getDcaAddSchedulesCsv());
+    List<DcaConfig> configs = new ArrayList<>();
+    for (double initialFillFraction : initialFillFractions) {
+      for (String triggerBasis : triggerBases) {
+        for (double triggerStep : triggerSteps) {
+          for (int maxAdds : maxAddsValues) {
+            for (String addSchedule : addSchedules) {
+              configs.add(new DcaConfig(initialFillFraction, triggerBasis, triggerStep, maxAdds, addSchedule));
+            }
+          }
+        }
+      }
+    }
+    return configs;
+  }
+
+  private List<ParentShortlistRow> shortlistParentCombos(List<ComboRow> parentComboRows, int requestedDayCount) {
+    List<ComboRow> eligible = new ArrayList<>();
+    for (ComboRow row : parentComboRows) {
+      if (row.trades() < properties.getShortlistMinTrades()) {
+        continue;
+      }
+      if (row.daysCoverage() + 1e-12 < properties.getShortlistMinCoverage()) {
+        continue;
+      }
+      if (row.maxDrawdown() - 1e-12 > properties.getShortlistMaxDrawdown()) {
+        continue;
+      }
+      eligible.add(row);
+    }
+    log.info("Shortlist filter pass count: eligible={} of parent_combos={} (min_trades={} min_coverage={} max_drawdown={})",
+        eligible.size(), parentComboRows.size(), properties.getShortlistMinTrades(),
+        properties.getShortlistMinCoverage(), properties.getShortlistMaxDrawdown());
+
+    List<ComboRow> rankingPool = eligible.size() >= properties.getDcaShortlistSize() ? eligible : parentComboRows;
+    if (rankingPool == parentComboRows) {
+      log.warn("Eligible parent combos {} below requested shortlist size {}; falling back to full parent pool",
+          eligible.size(), properties.getDcaShortlistSize());
+    }
+
+    Map<String, Double> scoreByComboKey = robustScores(rankingPool);
+    rankingPool.sort(
+        Comparator.<ComboRow>comparingDouble(row -> scoreByComboKey.getOrDefault(row.comboKey(), 0.0)).reversed()
+            .thenComparing(Comparator.comparingDouble(ComboRow::cagr).reversed())
+            .thenComparing(Comparator.comparingDouble(ComboRow::finalBalance).reversed())
+            .thenComparingDouble(ComboRow::maxDrawdown)
+            .thenComparing(ComboRow::comboKey));
+
+    List<ParentShortlistRow> out = new ArrayList<>();
+    int limit = Math.min(properties.getDcaShortlistSize(), rankingPool.size());
+    for (int i = 0; i < limit; i++) {
+      ComboRow row = rankingPool.get(i);
+      out.add(new ParentShortlistRow(i + 1, scoreByComboKey.getOrDefault(row.comboKey(), 0.0), row));
+    }
+    return out;
+  }
+
+  private void persistParentShortlist(Path sqlitePath, List<ParentShortlistRow> shortlist) throws Exception {
+    try (var conn = openConnection(sqlitePath)) {
+      conn.setAutoCommit(false);
+      try (var deleteStmt = conn.createStatement()) {
+        deleteStmt.executeUpdate("DELETE FROM backtest_parent_shortlist");
+      }
+      try (var stmt = conn.prepareStatement(
+          "INSERT INTO backtest_parent_shortlist (" +
+              "shortlist_rank,shortlist_score,combo_key,base_stream_key,run_id,execution_mode,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction," +
+              "stake_cap_usd,trades,final_balance,max_drawdown,days_coverage,cagr,calmar) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+        for (ParentShortlistRow row : shortlist) {
+          stmt.setInt(1, row.shortlistRank());
+          stmt.setDouble(2, row.shortlistScore());
+          stmt.setString(3, row.comboRow().comboKey());
+          stmt.setString(4, row.comboRow().baseStreamKey());
+          stmt.setString(5, row.comboRow().runId());
+          stmt.setString(6, row.comboRow().executionMode());
+          stmt.setString(7, row.comboRow().sizingMode());
+          stmt.setDouble(8, row.comboRow().evMin());
+          stmt.setDouble(9, row.comboRow().winMin());
+          bindDouble(stmt, 10, row.comboRow().riskFraction());
+          bindDouble(stmt, 11, row.comboRow().kellyFraction());
+          stmt.setDouble(12, row.comboRow().stakeCapUsd());
+          stmt.setInt(13, row.comboRow().trades());
+          stmt.setDouble(14, row.comboRow().finalBalance());
+          stmt.setDouble(15, row.comboRow().maxDrawdown());
+          stmt.setDouble(16, row.comboRow().daysCoverage());
+          stmt.setDouble(17, row.comboRow().cagr());
+          bindDouble(stmt, 18, row.comboRow().calmar());
+          stmt.executeUpdate();
+        }
+      }
+      conn.commit();
+    }
+  }
+
+  private DcaSweepResult runDcaSweepForParent(String runId,
+                                              ComboRow parentComboRow,
+                                              List<TradeRow> baseTrades,
+                                              Map<MarketKey, MarketDay> marketStore,
+                                              List<DcaConfig> dcaConfigs,
+                                              String entryRule,
+                                              String sidePriceRule,
+                                              String dcaStakeRule,
+                                              int requestedDayCount) throws Exception {
+    if (baseTrades == null) {
+      throw new IllegalStateException("Missing base trades for " + parentComboRow.baseStreamKey());
+    }
+    List<ComboRow> out = new ArrayList<>(dcaConfigs.size());
+    for (DcaConfig config : dcaConfigs) {
+      ComboMetrics metrics = simulateExecution(
+          baseTrades,
+          marketStore,
+          "dca",
+          parentComboRow.sizingMode(),
+          parentComboRow.riskFraction(),
+          parentComboRow.kellyFraction(),
+          parentComboRow.stakeCapUsd(),
+          config);
+      out.add(metrics.toComboRow(
+          parentComboRow.baseStreamKey(),
+          runId,
+          parentComboRow.comboKey(),
+          "dca",
+          parentComboRow.evMin(),
+          parentComboRow.winMin(),
+          parentComboRow.riskFraction(),
+          parentComboRow.kellyFraction(),
+          parentComboRow.stakeCapUsd(),
+          config.initialFillFraction(),
+          config.triggerBasis(),
+          config.triggerStep(),
+          config.maxAdds(),
+          config.addSchedule(),
+          entryRule,
+          sidePriceRule,
+          dcaStakeRule,
+          parentComboRow.summaryJsonPath(),
+          parentComboRow.sanityJsonPath(),
+          properties.getStartBalance(),
+          requestedDayCount));
+    }
+    return new DcaSweepResult(parentComboRow.comboKey(), out);
+  }
+
+  private Map<String, Double> robustScores(List<ComboRow> rows) {
+    Map<String, Double> out = new LinkedHashMap<>();
+    if (rows.isEmpty()) {
+      return out;
+    }
+    double maxPfLog = 0.0;
+    double maxCagrLog = 0.0;
+    double maxCalmarLog = 0.0;
+    for (ComboRow row : rows) {
+      maxPfLog = Math.max(maxPfLog, Math.log1p(Math.max(0.0, row.profitFactor() == null ? 0.0 : row.profitFactor())));
+      maxCagrLog = Math.max(maxCagrLog, Math.log1p(Math.max(0.0, row.cagr())));
+      maxCalmarLog = Math.max(maxCalmarLog, Math.log1p(Math.max(0.0, row.calmar() == null ? 0.0 : row.calmar())));
+    }
+    maxPfLog = maxPfLog <= 0.0 ? 1.0 : maxPfLog;
+    maxCagrLog = maxCagrLog <= 0.0 ? 1.0 : maxCagrLog;
+    maxCalmarLog = maxCalmarLog <= 0.0 ? 1.0 : maxCalmarLog;
+    for (ComboRow row : rows) {
+      double pfComponent = Math.log1p(Math.max(0.0, row.profitFactor() == null ? 0.0 : row.profitFactor())) / maxPfLog;
+      double cagrComponent = Math.log1p(Math.max(0.0, row.cagr())) / maxCagrLog;
+      double calmarComponent = Math.log1p(Math.max(0.0, row.calmar() == null ? 0.0 : row.calmar())) / maxCalmarLog;
+      double drawdownComponent = Math.max(0.0, 1.0 - row.maxDrawdown());
+      double winComponent = Math.max(0.0, row.winRate());
+      double coverageComponent = Math.max(0.0, row.daysCoverage());
+      double score = Math.pow(
+          Math.max(1e-12, pfComponent)
+              * Math.max(1e-12, cagrComponent)
+              * Math.max(1e-12, calmarComponent)
+              * Math.max(1e-12, drawdownComponent)
+              * Math.max(1e-12, winComponent)
+              * Math.max(1e-12, coverageComponent),
+          1.0 / 6.0);
+      out.put(row.comboKey(), score);
+    }
+    return out;
   }
 
   private void writeRankingsAndRunMeta(Path sqlitePath,
@@ -1902,73 +2626,115 @@ public class MosBacktestGridService {
                                        String sidePriceRule,
                                        String fixedStakeRule,
                                        String kellyStakeRule,
-                                       List<Double> evValues,
-                                       List<Double> winValues,
-                                       List<Double> fixedRiskValues,
-                                       List<Double> kellyValues,
+                                       String dcaStakeRule,
                                        ForecastStore forecastStore,
                                        List<BaseRow> baseRows,
-                                       List<ComboRow> comboRows) throws Exception {
-    List<Map<String, Object>> scoreRows = new ArrayList<>();
-    for (ComboRow row : comboRows) {
-      double pfComponent = row.profitFactor() == null ? 0.0 : Math.log1p(row.profitFactor());
-      Map<String, Object> scoreRow = new LinkedHashMap<>();
-      scoreRow.put("combo_row", row);
-      scoreRow.put("pf_component_raw", pfComponent);
-      scoreRow.put("win_rate", row.winRate());
-      scoreRow.put("max_drawdown", row.maxDrawdown());
-      scoreRows.add(scoreRow);
+                                       int baseStreamCount,
+                                       int parentComboCount,
+                                       int shortlistParentCount,
+                                       int dcaVariantCountPerParent,
+                                       int dcaComboCount) throws Exception {
+    record RankingCarrier(String comboKey, double score, double finalBalance, double maxDrawdown, String sizingMode) {}
+
+    List<RankingCarrier> carriers = new ArrayList<>();
+    try (var conn = openConnection(sqlitePath)) {
+      double maxPfLog = 0.0;
+      double maxCagrLog = 0.0;
+      double maxCalmarLog = 0.0;
+      try (var stmt = conn.prepareStatement(
+          "SELECT profit_factor,cagr,calmar FROM backtest_combo_results");
+           var rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          double pf = rs.getObject("profit_factor") == null ? 0.0 : rs.getDouble("profit_factor");
+          double cagr = rs.getDouble("cagr");
+          double calmar = rs.getObject("calmar") == null ? 0.0 : rs.getDouble("calmar");
+          maxPfLog = Math.max(maxPfLog, Math.log1p(Math.max(0.0, pf)));
+          maxCagrLog = Math.max(maxCagrLog, Math.log1p(Math.max(0.0, cagr)));
+          maxCalmarLog = Math.max(maxCalmarLog, Math.log1p(Math.max(0.0, calmar)));
+        }
+      }
+      maxPfLog = maxPfLog <= 0.0 ? 1.0 : maxPfLog;
+      maxCagrLog = maxCagrLog <= 0.0 ? 1.0 : maxCagrLog;
+      maxCalmarLog = maxCalmarLog <= 0.0 ? 1.0 : maxCalmarLog;
+      try (var stmt = conn.prepareStatement(
+          "SELECT combo_key,profit_factor,cagr,calmar,win_rate,days_coverage,max_drawdown,final_balance,sizing_mode FROM backtest_combo_results");
+           var rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          double pf = rs.getObject("profit_factor") == null ? 0.0 : rs.getDouble("profit_factor");
+          double cagr = rs.getDouble("cagr");
+          double calmar = rs.getObject("calmar") == null ? 0.0 : rs.getDouble("calmar");
+          double drawdown = rs.getDouble("max_drawdown");
+          double winRate = rs.getDouble("win_rate");
+          double daysCoverage = rs.getDouble("days_coverage");
+          double finalBalance = rs.getDouble("final_balance");
+          String comboKey = rs.getString("combo_key");
+          String sizingMode = rs.getString("sizing_mode");
+          double pfComponent = Math.log1p(Math.max(0.0, pf)) / maxPfLog;
+          double cagrComponent = Math.log1p(Math.max(0.0, cagr)) / maxCagrLog;
+          double calmarComponent = Math.log1p(Math.max(0.0, calmar)) / maxCalmarLog;
+          double drawdownComponent = Math.max(0.0, 1.0 - drawdown);
+          double winComponent = Math.max(0.0, winRate);
+          double coverageComponent = Math.max(0.0, daysCoverage);
+          double score = Math.pow(
+              Math.max(1e-12, pfComponent)
+                  * Math.max(1e-12, cagrComponent)
+                  * Math.max(1e-12, calmarComponent)
+                  * Math.max(1e-12, drawdownComponent)
+                  * Math.max(1e-12, winComponent)
+                  * Math.max(1e-12, coverageComponent),
+              1.0 / 6.0);
+          carriers.add(new RankingCarrier(comboKey, score, finalBalance, drawdown, sizingMode));
+        }
+      }
     }
-    double maxPfLog = scoreRows.stream().mapToDouble(r -> ((Number) r.get("pf_component_raw")).doubleValue()).max().orElse(1.0);
-    if (maxPfLog <= 0.0) {
-      maxPfLog = 1.0;
-    }
-    for (Map<String, Object> row : scoreRows) {
-      double pfComponent = ((Number) row.get("pf_component_raw")).doubleValue() / maxPfLog;
-      double winComponent = ((Number) row.get("win_rate")).doubleValue();
-      double drawdownComponent = Math.max(0.0, 1.0 - ((Number) row.get("max_drawdown")).doubleValue());
-      row.put("composite_score_pf_win_lowdd", Math.cbrt(pfComponent * winComponent * drawdownComponent));
-    }
-    scoreRows.sort(
-        Comparator
-            .comparingDouble((Map<String, Object> row) -> -doubleValue(row.get("composite_score_pf_win_lowdd")))
-            .thenComparingDouble(row -> -((ComboRow) row.get("combo_row")).finalBalance())
-            .thenComparingDouble(row -> ((ComboRow) row.get("combo_row")).maxDrawdown())
-            .thenComparing(row -> ((ComboRow) row.get("combo_row")).sizingMode())
-    );
-    List<RankedComboRow> rankedRows = new ArrayList<>();
-    for (int i = 0; i < scoreRows.size(); i++) {
-      rankedRows.add(new RankedComboRow(
-          i + 1,
-          doubleValue(scoreRows.get(i).get("composite_score_pf_win_lowdd")),
-          (ComboRow) scoreRows.get(i).get("combo_row")));
-    }
+
+    carriers.sort(
+        Comparator.comparingDouble(RankingCarrier::score).reversed()
+            .thenComparing(Comparator.comparingDouble(RankingCarrier::finalBalance).reversed())
+            .thenComparingDouble(RankingCarrier::maxDrawdown)
+            .thenComparing(RankingCarrier::sizingMode)
+            .thenComparing(RankingCarrier::comboKey));
 
     try (var conn = openConnection(sqlitePath)) {
       conn.setAutoCommit(false);
       try (var deleteRank = conn.createStatement()) {
         deleteRank.executeUpdate("DELETE FROM backtest_ranked_scores");
         deleteRank.executeUpdate("DELETE FROM backtest_run_meta");
+        deleteRank.executeUpdate("DROP TABLE IF EXISTS tmp_backtest_rank_order");
+        deleteRank.executeUpdate("CREATE TEMP TABLE tmp_backtest_rank_order (rank_position INTEGER NOT NULL, composite_score_robust REAL NOT NULL, combo_key TEXT NOT NULL)");
       }
-      try (var rankStmt = conn.prepareStatement(
-          "INSERT INTO backtest_ranked_scores (" +
-              "rank_position,composite_score_pf_win_lowdd," +
-              "run_id,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction,stake_cap_usd,entry_rule,side_price_rule,stake_rule," +
-              "summary_json_path,sanity_json_path,trades,wins,losses,win_rate,profit_factor,final_balance,total_pnl,max_drawdown," +
-              "avg_ev_at_trade,median_ev_at_trade,station_counts_json,side_counts_json,risk_fraction_used_avg,risk_fraction_used_min," +
-              "risk_fraction_used_max,stake_cap_breach_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
-        for (RankedComboRow rankedRow : rankedRows) {
-          rankStmt.setInt(1, rankedRow.rankPosition());
-          rankStmt.setDouble(2, rankedRow.compositeScorePfWinLowdd());
-          insertComboRow(rankStmt, rankedRow.comboRow(), 2);
-          rankStmt.executeUpdate();
+      try (var tmpStmt = conn.prepareStatement(
+          "INSERT INTO tmp_backtest_rank_order (rank_position,composite_score_robust,combo_key) VALUES (?,?,?)")) {
+        for (int i = 0; i < carriers.size(); i++) {
+          RankingCarrier carrier = carriers.get(i);
+          tmpStmt.setInt(1, i + 1);
+          tmpStmt.setDouble(2, carrier.score());
+          tmpStmt.setString(3, carrier.comboKey());
+          tmpStmt.executeUpdate();
+          if ((i + 1) % 50000 == 0 || i + 1 == carriers.size()) {
+            log.info("Ranking load progress {}/{}", i + 1, carriers.size());
+          }
         }
+      }
+      try (var rankInsert = conn.createStatement()) {
+        rankInsert.executeUpdate(
+            "INSERT INTO backtest_ranked_scores (" +
+                "rank_position,composite_score_robust,combo_key,parent_combo_key,base_stream_key,run_id,execution_mode,sizing_mode,ev_min,win_min,risk_fraction,kelly_fraction," +
+                "stake_cap_usd,dca_initial_fill_fraction,dca_trigger_basis,dca_trigger_step,dca_max_adds,dca_add_schedule,entry_rule,side_price_rule,stake_rule,summary_json_path,sanity_json_path," +
+                "trades,wins,losses,win_rate,profit_factor,final_balance,total_pnl,max_drawdown,avg_ev_at_trade,median_ev_at_trade,station_counts_json,side_counts_json," +
+                "risk_fraction_used_avg,risk_fraction_used_min,risk_fraction_used_max,stake_cap_breach_count,days_coverage,cagr,calmar,trade_with_add_rate,avg_adds_executed_per_trade," +
+                "avg_fill_count_per_trade,capital_deployment_rate) " +
+                "SELECT r.rank_position,r.composite_score_robust,c.combo_key,c.parent_combo_key,c.base_stream_key,c.run_id,c.execution_mode,c.sizing_mode,c.ev_min,c.win_min,c.risk_fraction,c.kelly_fraction," +
+                "c.stake_cap_usd,c.dca_initial_fill_fraction,c.dca_trigger_basis,c.dca_trigger_step,c.dca_max_adds,c.dca_add_schedule,c.entry_rule,c.side_price_rule,c.stake_rule,c.summary_json_path,c.sanity_json_path," +
+                "c.trades,c.wins,c.losses,c.win_rate,c.profit_factor,c.final_balance,c.total_pnl,c.max_drawdown,c.avg_ev_at_trade,c.median_ev_at_trade,c.station_counts_json,c.side_counts_json," +
+                "c.risk_fraction_used_avg,c.risk_fraction_used_min,c.risk_fraction_used_max,c.stake_cap_breach_count,c.days_coverage,c.cagr,c.calmar,c.trade_with_add_rate,c.avg_adds_executed_per_trade," +
+                "c.avg_fill_count_per_trade,c.capital_deployment_rate FROM tmp_backtest_rank_order r JOIN backtest_combo_results c ON c.combo_key = r.combo_key ORDER BY r.rank_position");
       }
       try (var metaStmt = conn.prepareStatement(
           "INSERT INTO backtest_run_meta (" +
-              "run_id,created_at_utc,start_date,end_date,stations_json,forecast_live_root,thread_count,entry_rule,side_price_rule," +
-              "stake_rule_fixed,stake_rule_fractional_kelly,requested_day_count,forecast_success_day_count,forecast_failed_day_count," +
-              "base_stream_count,combo_count,out_dir,sqlite_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+              "run_id,created_at_utc,start_date,end_date,stations_json,forecast_live_root,thread_count,entry_rule,side_price_rule,stake_rule_fixed,stake_rule_fractional_kelly,stake_rule_dca," +
+              "requested_day_count,forecast_success_day_count,forecast_failed_day_count,base_stream_count,parent_combo_count,shortlist_parent_count,dca_variant_count_per_parent,dca_combo_count,combo_count,out_dir,sqlite_path) " +
+              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
         metaStmt.setString(1, runId);
         metaStmt.setString(2, OffsetDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         metaStmt.setString(3, properties.getStartDate());
@@ -1980,18 +2746,24 @@ public class MosBacktestGridService {
         metaStmt.setString(9, sidePriceRule);
         metaStmt.setString(10, fixedStakeRule);
         metaStmt.setString(11, kellyStakeRule);
-        metaStmt.setInt(12, enumerateDays().size());
-        metaStmt.setInt(13, forecastStore.forecastSuccessDayCount());
-        metaStmt.setInt(14, forecastStore.forecastFailedDayCount());
-        metaStmt.setInt(15, baseRows.size());
-        metaStmt.setInt(16, comboRows.size());
-        metaStmt.setString(17, runDir.toString());
-        metaStmt.setString(18, sqlitePath.toString());
+        metaStmt.setString(12, dcaStakeRule);
+        metaStmt.setInt(13, enumerateDays().size());
+        metaStmt.setInt(14, forecastStore.forecastSuccessDayCount());
+        metaStmt.setInt(15, forecastStore.forecastFailedDayCount());
+        metaStmt.setInt(16, baseStreamCount);
+        metaStmt.setInt(17, parentComboCount);
+        metaStmt.setInt(18, shortlistParentCount);
+        metaStmt.setInt(19, dcaVariantCountPerParent);
+        metaStmt.setInt(20, dcaComboCount);
+        metaStmt.setInt(21, parentComboCount + dcaComboCount);
+        metaStmt.setString(22, runDir.toString());
+        metaStmt.setString(23, sqlitePath.toString());
         metaStmt.executeUpdate();
       }
       conn.commit();
     }
 
+    int totalComboCount = parentComboCount + dcaComboCount;
     Map<String, Object> runSummary = new LinkedHashMap<>();
     runSummary.put("run_id", runId);
     runSummary.put("sqlite_path", sqlitePath.toString());
@@ -2002,18 +2774,104 @@ public class MosBacktestGridService {
     runSummary.put("forecast_success_day_count", forecastStore.forecastSuccessDayCount());
     runSummary.put("forecast_failed_day_count", forecastStore.forecastFailedDayCount());
     runSummary.put("base_stream_count", baseRows.size());
-    runSummary.put("combo_count", comboRows.size());
+    runSummary.put("parent_combo_count", parentComboCount);
+    runSummary.put("shortlist_parent_count", shortlistParentCount);
+    runSummary.put("dca_variant_count_per_parent", dcaVariantCountPerParent);
+    runSummary.put("dca_combo_count", dcaComboCount);
+    runSummary.put("combo_count", totalComboCount);
     writeJson(runDir.resolve("run_summary.json"), runSummary);
     writeJson(runDir.resolve("run_sanity.json"), Map.of(
         "run_id", runId,
-        "passes_all_checks", baseRows.stream().allMatch(BaseRow::sanityPassesAllChecks)
-            && comboRows.stream().mapToInt(ComboRow::stakeCapBreachCount).sum() == 0,
+        "passes_all_checks", baseRows.stream().allMatch(BaseRow::sanityPassesAllChecks),
         "forecast_success_day_count", forecastStore.forecastSuccessDayCount(),
         "forecast_failed_day_count", forecastStore.forecastFailedDayCount(),
         "base_stream_count", baseRows.size(),
-        "combo_count", comboRows.size(),
+        "parent_combo_count", parentComboCount,
+        "dca_combo_count", dcaComboCount,
+        "combo_count", totalComboCount,
         "sqlite_path", sqlitePath.toString()
     ));
+  }
+
+  private static double computeCagr(double startBalance, double finalBalance, int requestedDayCount) {
+    if (requestedDayCount <= 0 || startBalance <= 0.0 || finalBalance <= 0.0) {
+      return 0.0;
+    }
+    return Math.pow(finalBalance / startBalance, 365.0 / requestedDayCount) - 1.0;
+  }
+
+  private static String buildComboKey(String baseStreamKey,
+                                      String executionMode,
+                                      String sizingMode,
+                                      double evMin,
+                                      double winMin,
+                                      Double riskFraction,
+                                      Double kellyFraction,
+                                      double stakeCapUsd,
+                                      Double dcaInitialFillFraction,
+                                      String dcaTriggerBasis,
+                                      Double dcaTriggerStep,
+                                      Integer dcaMaxAdds,
+                                      String dcaAddSchedule) {
+    List<String> parts = new ArrayList<>();
+    parts.add(baseStreamKey);
+    parts.add(executionMode);
+    parts.add(sizingMode);
+    parts.add("ev" + tag(evMin));
+    parts.add("win" + tag(winMin));
+    if (riskFraction != null) {
+      parts.add("risk" + tag(riskFraction));
+    }
+    if (kellyFraction != null) {
+      parts.add("kelly" + tag(kellyFraction));
+    }
+    parts.add("cap" + tag(stakeCapUsd));
+    if (dcaInitialFillFraction != null) {
+      parts.add("init" + tag(dcaInitialFillFraction));
+    }
+    if (dcaTriggerBasis != null && !dcaTriggerBasis.isBlank()) {
+      parts.add(dcaTriggerBasis);
+    }
+    if (dcaTriggerStep != null) {
+      parts.add("step" + tag(dcaTriggerStep));
+    }
+    if (dcaMaxAdds != null) {
+      parts.add("adds" + dcaMaxAdds);
+    }
+    if (dcaAddSchedule != null && !dcaAddSchedule.isBlank()) {
+      parts.add(dcaAddSchedule);
+    }
+    return String.join("|", parts);
+  }
+
+  private List<Double> parseDoubleCsv(String csv) {
+    List<Double> out = new ArrayList<>();
+    for (String token : parseStringCsv(csv)) {
+      out.add(Double.parseDouble(token));
+    }
+    return out;
+  }
+
+  private List<Integer> parseIntegerCsv(String csv) {
+    List<Integer> out = new ArrayList<>();
+    for (String token : parseStringCsv(csv)) {
+      out.add(Integer.parseInt(token));
+    }
+    return out;
+  }
+
+  private List<String> parseStringCsv(String csv) {
+    List<String> out = new ArrayList<>();
+    if (csv == null || csv.isBlank()) {
+      return out;
+    }
+    for (String token : csv.split(",")) {
+      String trimmed = token.trim();
+      if (!trimmed.isEmpty()) {
+        out.add(trimmed);
+      }
+    }
+    return out;
   }
 
   private List<Double> buildGrid(double start, double end, double step) {
@@ -2028,7 +2886,7 @@ public class MosBacktestGridService {
     return out;
   }
 
-  private String tag(double value) {
+  private static String tag(double value) {
     String text = BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     return text.replace(".", "p");
   }

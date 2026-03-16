@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,7 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
   private final Map<String, String> inFlightIntentByMarketSide = new ConcurrentHashMap<>();
   private final Map<String, TradeOrderResult> resultByClientOrderId = new ConcurrentHashMap<>();
   private final Map<String, String> unknownOutcomeByClientOrderId = new ConcurrentHashMap<>();
+  private final AtomicReference<KalshiAccountBalance> lastKnownAccountBalance = new AtomicReference<>();
 
   public DefaultKalshiTradingService(KalshiOrdersApi ordersApi,
                                      KalshiPortfolioApi portfolioApi,
@@ -96,16 +98,31 @@ public class DefaultKalshiTradingService implements KalshiTradingService {
 
   @Override
   public KalshiAccountBalance getAccountBalance() {
-    GetBalanceResponse response = portfolioApi.getBalance();
-    if (response == null) {
-      return new KalshiAccountBalance(null, null, null, null, null);
+    try {
+      GetBalanceResponse response = portfolioApi.getBalance();
+      KalshiAccountBalance balance = response == null
+          ? new KalshiAccountBalance(null, null, null, null, null)
+          : new KalshiAccountBalance(
+              response.balance(),
+              centsToDollars(response.balance()),
+              response.portfolioValue(),
+              centsToDollars(response.portfolioValue()),
+              response.updatedTs());
+      if (balance.balanceCents() != null || balance.portfolioValueCents() != null) {
+        lastKnownAccountBalance.set(balance);
+      }
+      return balance;
+    } catch (RuntimeException ex) {
+      KalshiAccountBalance cached = lastKnownAccountBalance.get();
+      if (cached != null) {
+        log.warn(
+            "Failed to refresh Kalshi account balance; returning cached balance updatedTs={}",
+            cached.updatedTs(),
+            ex);
+        return cached;
+      }
+      throw ex;
     }
-    return new KalshiAccountBalance(
-        response.balance(),
-        centsToDollars(response.balance()),
-        response.portfolioValue(),
-        centsToDollars(response.portfolioValue()),
-        response.updatedTs());
   }
 
   @Override

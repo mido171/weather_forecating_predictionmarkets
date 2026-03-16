@@ -1,0 +1,25 @@
+stations:
+  - stationKey: knyc_central_park
+    displayName: KNYC / Central Park
+    timezone: America/New_York
+    latitude: 40.77898
+    longitude: -73.96925
+    elevationM: 27.0
+    metarResetMinute: 51
+    aliases:
+      - type: icao
+        value: KNYC
+      - type: iem_asos_station
+        value: NYC
+      - type: iem_asos_network
+        value: NY_ASOS
+      - type: wban
+        value: "94728"
+      - type: ghcnh_or_ghcnd
+        value: USW00094728
+      - type: climodat_station
+        value: NYTNYC
+      - type: climodat_network
+        value: NYCLIMATE
+      - type: raw_cli_pil
+        value: CLINYC

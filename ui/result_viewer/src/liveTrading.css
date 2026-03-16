@@ -250,6 +250,33 @@
   font-weight: 700;
 }
 
+.lt-opportunitiesBalanceChip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(16, 27, 44, 0.92);
+}
+
+.lt-opportunitiesBalanceChip.is-ready {
+  border-color: rgba(34, 197, 94, 0.62);
+  color: #d7ffe8;
+  background: rgba(25, 59, 44, 0.82);
+}
+
+.lt-opportunitiesBalanceChip.is-loading {
+  border-color: rgba(251, 191, 36, 0.52);
+  color: #fff0ca;
+  background: rgba(79, 59, 19, 0.78);
+}
+
+.lt-opportunitiesBalanceChip.is-error {
+  border-color: rgba(255, 123, 144, 0.62);
+  color: #ffd2dd;
+  background: rgba(84, 24, 41, 0.78);
+}
+
 .lt-opportunitiesToggle {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -384,7 +411,7 @@
 .lt-opportunitiesTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 880px;
 }
 
 .lt-opportunitiesTable th,
@@ -447,6 +474,38 @@
   color: #ffc8d1;
 }
 
+.lt-opportunitySizeCol {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.lt-opportunitySizeHeadValue {
+  color: var(--text-muted);
+}
+
+.lt-opportunitySizeHeadMeta,
+.lt-opportunitySizeMeta {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.lt-opportunitySizeCell {
+  white-space: nowrap;
+}
+
+.lt-opportunitySizeValue {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.lt-opportunitySizeMeta.is-capped {
+  color: #ffe1a8;
+}
+
 .lt-stationGrid {
   flex: none;
   min-height: 0;
@@ -455,6 +514,131 @@
   grid-template-columns: repeat(3, minmax(360px, 1fr));
   overflow: visible;
   align-items: start;
+}
+
+.lt-recentBalancePanel {
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: rgba(21, 35, 58, 0.94);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.lt-recentBalanceHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lt-recentBalanceTitleWrap {
+  display: grid;
+  gap: 6px;
+}
+
+.lt-recentBalanceTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.lt-recentBalanceSub {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.lt-recentBalanceChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.lt-recentBalanceNote {
+  border: 1px solid rgba(90, 117, 159, 0.42);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(16, 27, 44, 0.92);
+}
+
+.lt-recentBalanceChartWrap {
+  height: 320px;
+}
+
+.lt-recentBalanceFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.lt-recentBalanceFooter strong {
+  color: var(--text-strong);
+}
+
+.lt-recentBalanceFooter .positive {
+  color: #c7ffe0;
+}
+
+.lt-recentBalanceFooter .negative {
+  color: #ffd0d9;
+}
+
+.lt-recentBalanceTooltip {
+  min-width: 190px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(90, 117, 159, 0.55);
+  border-radius: 10px;
+  padding: 10px 11px;
+  background: rgba(12, 22, 38, 0.96);
+  color: var(--text);
+  box-shadow: 0 12px 28px rgba(5, 10, 20, 0.35);
+}
+
+.lt-recentBalanceTooltipDate {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.lt-recentBalanceTooltipRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lt-recentBalanceTooltipRow strong {
+  color: var(--text-strong);
+}
+
+.lt-recentBalanceTooltipRow .positive {
+  color: #c7ffe0;
+}
+
+.lt-recentBalanceTooltipRow .negative {
+  color: #ffd0d9;
+}
+
+.lt-recentBalanceTooltipMode {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 .lt-emptyState {
@@ -1206,6 +1390,14 @@
   }
 
   .lt-topBarMeta {
+    justify-content: flex-start;
+  }
+
+  .lt-recentBalanceHead {
+    flex-direction: column;
+  }
+
+  .lt-recentBalanceChips {
     justify-content: flex-start;
   }
 }

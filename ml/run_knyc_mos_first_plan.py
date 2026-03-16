@@ -33,7 +33,7 @@ class SliceDef:
     train_start: str
 
 
-SLICE_DEFS = [
+DEFAULT_SLICE_DEFS = [
     SliceDef("gfs_00", "GFS", 0, "2009-01-01"),
     SliceDef("nam_00", "NAM", 0, "2009-01-01"),
     SliceDef("gfs_12", "GFS", 12, "2009-01-01"),
@@ -41,6 +41,11 @@ SLICE_DEFS = [
     SliceDef("gfs_06", "GFS", 6, "2004-01-01"),
     SliceDef("gfs_18", "GFS", 18, "2004-01-01"),
 ]
+
+COMMON_SLICE_IDS_BY_HOUR = {
+    0: ("gfs_00", "nam_00"),
+    12: ("gfs_12", "nam_12"),
+}
 
 
 def setup_logging() -> None:
@@ -106,6 +111,53 @@ def interp(h: np.ndarray, v: np.ndarray, target: float) -> float:
     if len(h2) == 1:
         return float(v2[0])
     return float(np.interp(target, h2, v2))
+
+
+def resolve_slice_defs(
+    mos: pd.DataFrame,
+    *,
+    common_train_start_policy: str,
+    common_train_start: str | None,
+) -> list[SliceDef]:
+    out = [SliceDef(s.sid, s.model, s.runtime_hour, s.train_start) for s in DEFAULT_SLICE_DEFS]
+    if common_train_start_policy == "legacy":
+        if common_train_start:
+            out = [SliceDef(s.sid, s.model, s.runtime_hour, common_train_start if s.sid in {x for pair in COMMON_SLICE_IDS_BY_HOUR.values() for x in pair} else s.train_start) for s in out]
+        return out
+    if common_train_start_policy == "manual":
+        if not common_train_start:
+            raise ValueError("--common-train-start is required when --common-train-start-policy=manual")
+        return [
+            SliceDef(
+                s.sid,
+                s.model,
+                s.runtime_hour,
+                common_train_start if s.sid in {x for pair in COMMON_SLICE_IDS_BY_HOUR.values() for x in pair} else s.train_start,
+            )
+            for s in out
+        ]
+    if common_train_start_policy != "earliest-common":
+        raise ValueError(f"Unsupported common train-start policy: {common_train_start_policy}")
+
+    common_start_by_sid: dict[str, str] = {}
+    for runtime_hour, pair in COMMON_SLICE_IDS_BY_HOUR.items():
+        starts: list[pd.Timestamp] = []
+        for sid in pair:
+            sdef = next(s for s in out if s.sid == sid)
+            d = mos[(mos["model"] == sdef.model) & (mos["runtime_hour_utc"] == sdef.runtime_hour)].copy()
+            d = d[d["runtime_date_local"] == (d["target_date_local"] - pd.Timedelta(days=1))]
+            if d.empty:
+                raise ValueError(f"No eligible rows found while resolving earliest-common train start for slice={sid}")
+            starts.append(pd.Timestamp(d["target_date_local"].min()).normalize())
+        common_start_ts = max(starts)
+        if common_train_start:
+            common_start_ts = max(common_start_ts, pd.Timestamp(common_train_start).normalize())
+        for sid in pair:
+            common_start_by_sid[sid] = common_start_ts.strftime("%Y-%m-%d")
+    return [
+        SliceDef(s.sid, s.model, s.runtime_hour, common_start_by_sid.get(s.sid, s.train_start))
+        for s in out
+    ]
 
 
 def build_slice(mos: pd.DataFrame, truth: pd.DataFrame, s: SliceDef, station_zoneid: str) -> pd.DataFrame:
@@ -450,6 +502,8 @@ def main() -> None:
     parser.add_argument("--dev-end", default="2023-12-31")
     parser.add_argument("--test-start", default="2024-01-01")
     parser.add_argument("--test-end", default="2025-12-31")
+    parser.add_argument("--common-train-start-policy", choices=["legacy", "manual", "earliest-common"], default="legacy")
+    parser.add_argument("--common-train-start", default=None, help="Optional ISO date floor for common GFS/NAM slices.")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -464,6 +518,12 @@ def main() -> None:
 
     truth = load_truth(Path(args.truth_csv))
     mos = load_mos(Path(args.mos_csv), str(args.station_zoneid))
+    slice_defs = resolve_slice_defs(
+        mos,
+        common_train_start_policy=str(args.common_train_start_policy),
+        common_train_start=str(args.common_train_start) if args.common_train_start else None,
+    )
+    LOGGER.info("Resolved slice train starts: %s", {s.sid: s.train_start for s in slice_defs})
     features = [
         "mos_tmax_raw", "mos_tmin_raw", "mos_dtr_raw", "mos_tmax_hour_local", "tmp_09", "tmp_12", "tmp_15", "tmp_18", "tmp_21",
         "heat_09_15", "heat_12_18", "cool_18_21", "nx_high", "nx_low", "dpt_09", "dpt_15", "dpt_21", "dep_15", "dep_21", "dpt_change_09_15",
@@ -476,7 +536,7 @@ def main() -> None:
     residual: dict[str, dict[str, Any]] = {}
     raw_rows = []
 
-    for s in SLICE_DEFS:
+    for s in slice_defs:
         LOGGER.info("Building %s", s.sid)
         sdf = build_slice(mos, truth, s, str(args.station_zoneid))
         slices[s.sid] = sdf
@@ -647,6 +707,11 @@ def main() -> None:
             "generated_at_utc": utc_now_iso(),
             "inputs": {"mos_csv": args.mos_csv, "truth_csv": args.truth_csv},
             "splits": {"dev_start": args.dev_start, "dev_end": args.dev_end, "test_start": args.test_start, "test_end": args.test_end},
+            "train_start_policy": {
+                "common_train_start_policy": args.common_train_start_policy,
+                "common_train_start_floor": args.common_train_start,
+                "resolved_train_starts_by_slice": {s.sid: s.train_start for s in slice_defs},
+            },
             "top2_knn": [s for s, _ in top2],
             "best_overall": best,
         },
@@ -658,6 +723,7 @@ def main() -> None:
                 f"- Generated UTC: {utc_now_iso()}",
                 f"- Best row: {best}",
                 "- Chronology: monthly OOF on dev, frozen design to test.",
+                f"- Train starts by slice: {{ {', '.join(f'{s.sid}: {s.train_start}' for s in slice_defs)} }}",
                 "- KNN candidates always candidate_date < query_date.",
                 "- Blend weights tuned on dev only.",
             ]

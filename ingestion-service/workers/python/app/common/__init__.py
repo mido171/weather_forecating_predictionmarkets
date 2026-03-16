@@ -1,0 +1,1 @@
+# Worker common package scaffold.

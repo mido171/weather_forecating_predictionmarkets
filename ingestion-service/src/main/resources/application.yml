@@ -18,6 +18,7 @@ logging:
     root: INFO
     org.springframework.boot.context.config: DEBUG
     com.predictionmarkets.weather.gribstream: DEBUG
+    com.predictionmarkets.weather.pilot: INFO
 
 evomi:
   proxy:
@@ -226,3 +227,31 @@ weathercom:
     max-response-body-chars: 50000
     rate-limit:
       permits-per-second: 2.0
+
+pilot:
+  knyc:
+    enabled: false
+    sqlite-root: D:/Ahmed/data/sqlite/MOS_aggregate_V2.0
+    sqlite-file-name: knyc_central_park_ingestion.sqlite
+    config-dir: ingestion-service/config
+    data-dir: ingestion-service/data
+    parser-version: knyc-pilot-v1
+    default-station-key: knyc_central_park
+    max-http-retries: 4
+    connect-timeout-ms: 10000
+    read-timeout-ms: 60000
+    jobs:
+      bootstrap-enabled: true
+      lightweight-enabled: true
+      heavy-enabled: false
+      snapshot-enabled: true
+      smoke-enabled: false
+      smoke-target-date-local: 2026-03-16
+      smoke-ndfd-historical-date-local: 2026-03-15
+      smoke-threadex-start-date-local: 2025-01-01
+      smoke-climodat-start-date-local: 2025-01-01
+      smoke-cli-start-year: 2025
+      smoke-cli-end-year: 2026
+      smoke-mos-lookback-days: 30
+      smoke-hourly-lookback-days: 14
+      smoke-one-minute-lookback-days: 7

@@ -1,10 +1,30 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Area,
+  CartesianGrid,
+  LabelList,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import "./liveTrading.css";
+import {
+  buildAllOpportunitiesFromStations,
+  calculateFractionalKellyPositionSize,
+  chooseAvailableTargetDates,
+  retainRecordKeys,
+  shouldRevalidateSnapshotMeta,
+  snapshotMetaFromData,
+  stationWithSortedBuckets,
+} from "./liveTradingData.js";
 import {
   AGE_THRESHOLDS,
   ageBand,
   ageSeconds,
-  bucketSortKey,
   classifyDelta,
   depthBarPct,
   formatAgeFromIso,
@@ -21,9 +41,12 @@ import {
 const DEFAULT_WS_PATH = "/ws/live-orderbooks";
 const DEFAULT_SNAPSHOT_PATH = "/api/live-trading/orderbooks/snapshot";
 const DEFAULT_INFERENCE_RUN_PATH = "/api/live-trading/inference/run";
+const DEFAULT_ACCOUNT_BALANCE_PATH = "/api/live-trading/account/balance";
 const DEV_FALLBACK_WS_URL = "ws://localhost:8080/ws/live-orderbooks";
 const DEV_FALLBACK_SNAPSHOT_URL = "http://localhost:8080/api/live-trading/orderbooks/snapshot";
 const DEV_FALLBACK_INFERENCE_RUN_URL = "http://localhost:8080/api/live-trading/inference/run";
+const DEV_FALLBACK_ACCOUNT_BALANCE_URL = "http://localhost:8080/api/live-trading/account/balance";
+const RECENT_LIVE_BALANCE_CURVE_PATH = "/data/live_trade_balance_recent_ex_haywire_20260314.json";
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 10000;
 const STRONG_PULSE_MS = 950;
@@ -39,19 +62,27 @@ const OPPORTUNITIES_CUTOFF_MINUTE = 45;
 const OPPORTUNITIES_POLL_CONNECTED_MS = 10000;
 const OPPORTUNITIES_POLL_DISCONNECTED_MS = 3000;
 const INFERENCE_AUTO_REFRESH_INTERVAL_MS = 10000;
+const ACCOUNT_BALANCE_POLL_MS = 15000;
+const SNAPSHOT_REVALIDATE_MAX_AGE_MS = 15000;
+const LIVE_CLOCK_TICK_MS = 1000;
 const PCT_FORMATTER = new Intl.NumberFormat(undefined, {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
+});
+const USD_COMPACT_FORMATTER = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
 });
 const TEMP_FORMATTER = new Intl.NumberFormat(undefined, {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
+const OPPORTUNITIES_MIN_WIN_PROBABILITY = 0.6;
 const DEFAULT_LIVE_CONFIG = {
   referenceLabel: "2024-2025 | Top #3",
   periodLabel: "2024-10-01 -> 2025-12-31",
   stationIds: ["KNYC", "KMIA", "KMDW", "KLAX"],
-  minWinProbability: 0.7,
+  minWinProbability: OPPORTUNITIES_MIN_WIN_PROBABILITY,
   minEv: 0.3,
   minSidePriceProbability: 0.25,
   sizingMode: "fractional_kelly",
@@ -91,6 +122,26 @@ function formatUsdWhole(value, missing = "--") {
   const numeric = toFiniteNumber(value);
   if (!Number.isFinite(numeric)) return missing;
   return `$${Math.round(numeric).toLocaleString()}`;
+}
+
+function formatUsdCompact(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  return `$${USD_COMPACT_FORMATTER.format(numeric)}`;
+}
+
+function formatUsdSigned(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  const sign = numeric > 0 ? "+" : numeric < 0 ? "-" : "";
+  return `${sign}$${USD_COMPACT_FORMATTER.format(Math.abs(numeric))}`;
+}
+
+function formatUsdAxis(value, missing = "--") {
+  const numeric = toFiniteNumber(value);
+  if (!Number.isFinite(numeric)) return missing;
+  const sign = numeric < 0 ? "-" : "";
+  return `${sign}$${USD_COMPACT_FORMATTER.format(Math.abs(numeric))}`;
 }
 
 function formatThresholdDecimal(value, missing = "--") {
@@ -137,6 +188,11 @@ function meetsOpportunityFilters(row, config) {
     && modelWin >= config.minWinProbability
     && ev >= config.minEv
     && entryPriceProb >= config.minSidePriceProbability;
+}
+
+function meetsOpportunityWinFloor(row, config) {
+  const modelWin = toFiniteNumber(row?.modelWinProbability);
+  return Number.isFinite(modelWin) && modelWin >= config.minWinProbability;
 }
 
 function quantileFromStation(station, key) {
@@ -187,76 +243,18 @@ function shouldDefaultToTomorrow(nowMillis) {
     || (hour === OPPORTUNITIES_CUTOFF_HOUR && minute >= OPPORTUNITIES_CUTOFF_MINUTE);
 }
 
+function displayOpportunityDate(isoDate) {
+  return formatTargetDateLabel(isoDate);
+}
+
+function isAbortError(error) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 function snapshotUrlForTargetDate(snapshotUrl, targetDateLocal) {
   if (!targetDateLocal) return snapshotUrl;
   const separator = snapshotUrl.includes("?") ? "&" : "?";
   return `${snapshotUrl}${separator}targetDateLocal=${encodeURIComponent(targetDateLocal)}`;
-}
-
-function compareOpportunityRows(left, right) {
-  const leftEv = toFiniteNumber(left?.ev);
-  const rightEv = toFiniteNumber(right?.ev);
-  const byEv = (rightEv ?? Number.NEGATIVE_INFINITY) - (leftEv ?? Number.NEGATIVE_INFINITY);
-  if (byEv !== 0) return byEv;
-
-  const leftWin = toFiniteNumber(left?.modelWinProbability);
-  const rightWin = toFiniteNumber(right?.modelWinProbability);
-  const byWin = (rightWin ?? Number.NEGATIVE_INFINITY) - (leftWin ?? Number.NEGATIVE_INFINITY);
-  if (byWin !== 0) return byWin;
-
-  const leftPrice = toFiniteNumber(left?.entryPriceCents);
-  const rightPrice = toFiniteNumber(right?.entryPriceCents);
-  const byPrice = (leftPrice ?? Number.POSITIVE_INFINITY) - (rightPrice ?? Number.POSITIVE_INFINITY);
-  if (byPrice !== 0) return byPrice;
-
-  const byStation = String(left?.stationId ?? "").localeCompare(String(right?.stationId ?? ""));
-  if (byStation !== 0) return byStation;
-  const byBucket = String(left?.bucketLabel ?? "").localeCompare(String(right?.bucketLabel ?? ""));
-  if (byBucket !== 0) return byBucket;
-  return String(left?.side ?? "").localeCompare(String(right?.side ?? ""));
-}
-
-function buildAllOpportunitiesFromStations(stations) {
-  if (!Array.isArray(stations) || stations.length === 0) return [];
-  const rows = [];
-  for (const station of stations) {
-    const stationId = String(station?.stationId ?? "").trim();
-    const buckets = Array.isArray(station?.buckets) ? station.buckets : [];
-    for (const bucket of buckets) {
-      const yesWin = toFiniteNumber(bucket?.yesModelWinProbability);
-      const yesEv = toFiniteNumber(bucket?.yesEv);
-      const yesEntry = toFiniteNumber(bucket?.yesAskCents);
-      if (Number.isFinite(yesWin) && Number.isFinite(yesEv) && Number.isFinite(yesEntry)) {
-        rows.push({
-          stationId,
-          marketTicker: bucket?.marketTicker,
-          bucketLabel: bucket?.bucketLabel,
-          side: "YES",
-          modelWinProbability: yesWin,
-          marketPriceProbability: yesEntry / 100,
-          entryPriceCents: yesEntry,
-          ev: yesEv,
-        });
-      }
-
-      const noWin = toFiniteNumber(bucket?.noModelWinProbability);
-      const noEv = toFiniteNumber(bucket?.noEv);
-      const noEntry = toFiniteNumber(bucket?.noAskCents);
-      if (Number.isFinite(noWin) && Number.isFinite(noEv) && Number.isFinite(noEntry)) {
-        rows.push({
-          stationId,
-          marketTicker: bucket?.marketTicker,
-          bucketLabel: bucket?.bucketLabel,
-          side: "NO",
-          modelWinProbability: noWin,
-          marketPriceProbability: noEntry / 100,
-          entryPriceCents: noEntry,
-          ev: noEv,
-        });
-      }
-    }
-  }
-  return rows.sort(compareOpportunityRows);
 }
 
 function resolveWsUrl() {
@@ -302,6 +300,37 @@ function resolveInferenceRunUrl() {
     return `${protocol}//${host}:${backendPort}${DEFAULT_INFERENCE_RUN_PATH}`;
   }
   return DEFAULT_INFERENCE_RUN_PATH;
+}
+
+function resolveAccountBalanceUrl() {
+  const envUrl = String(import.meta.env.VITE_LIVE_TRADING_ACCOUNT_BALANCE_URL ?? "").trim();
+  if (envUrl) return envUrl;
+  if (typeof window === "undefined") return DEV_FALLBACK_ACCOUNT_BALANCE_URL;
+
+  const backendPort = String(import.meta.env.VITE_LIVE_TRADING_BACKEND_PORT ?? "8080").trim() || "8080";
+  const currentPort = String(window.location.port ?? "").trim();
+  if (currentPort && currentPort !== backendPort) {
+    const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+    const host = window.location.hostname || "localhost";
+    return `${protocol}//${host}:${backendPort}${DEFAULT_ACCOUNT_BALANCE_PATH}`;
+  }
+  return DEFAULT_ACCOUNT_BALANCE_PATH;
+}
+
+function resolveBalanceUsd(payload) {
+  const balanceDollars = toFiniteNumber(payload?.balanceDollars);
+  if (Number.isFinite(balanceDollars)) return balanceDollars;
+
+  const balanceCents = toFiniteNumber(payload?.balanceCents);
+  if (Number.isFinite(balanceCents)) return balanceCents / 100;
+
+  const portfolioValueDollars = toFiniteNumber(payload?.portfolioValueDollars);
+  if (Number.isFinite(portfolioValueDollars)) return portfolioValueDollars;
+
+  const portfolioValueCents = toFiniteNumber(payload?.portfolioValueCents);
+  if (Number.isFinite(portfolioValueCents)) return portfolioValueCents / 100;
+
+  return null;
 }
 
 function levelToModel(level) {
@@ -681,15 +710,6 @@ function deriveGlobalConnectionState(wsStatus, frame, nowMillis) {
   return "DELAYED";
 }
 
-function stationWithSortedBuckets(station) {
-  const bucketsRaw = Array.isArray(station?.buckets) ? station.buckets : [];
-  const buckets = [...bucketsRaw].sort((a, b) => bucketSortKey(a?.bucketLabel).localeCompare(bucketSortKey(b?.bucketLabel)));
-  return {
-    ...station,
-    buckets,
-  };
-}
-
 function recentEventModel(recentEvents, ticker, nowMillis) {
   const event = recentEvents[ticker];
   if (!event) {
@@ -834,6 +854,8 @@ const LiveStrategyBar = memo(function LiveStrategyBar({ liveConfig }) {
 
 const OpportunitiesPanel = memo(function OpportunitiesPanel({
   liveConfig,
+  accountBalanceUsd,
+  accountBalanceStatus,
   filteredRowsByDate,
   allRowsByDate,
   showAllRows,
@@ -850,10 +872,20 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
   const config = normalizeLiveConfig(liveConfig);
   const dates = Array.isArray(dateOptions) ? dateOptions : [];
   const modeLabel = showAllRows
-    ? "All opportunities sorted by EV for each target date"
+    ? `All opportunities with Win >= ${formatThresholdDecimal(config.minWinProbability)} sorted by EV for each target date`
     : `Eligible by live config: EV >= ${formatThresholdDecimal(config.minEv)}, Win >= ${formatThresholdDecimal(config.minWinProbability)}, Side >= ${Math.round(config.minSidePriceProbability * 100)}c · sorted by EV (top ${DEFAULT_OPPORTUNITY_ROWS})`;
   const toggleLabel = showAllRows ? "Show Eligible Only" : "Show All by EV";
-  const activeDateLabel = selectedDate ? describeOpportunityDate(selectedDate, nowMillis) : "--";
+  const activeDateLabel = selectedDate ? displayOpportunityDate(selectedDate) : "--";
+  const hasBalance = Number.isFinite(toFiniteNumber(accountBalanceUsd));
+  const balanceLabel = hasBalance
+    ? formatUsdCompact(accountBalanceUsd)
+    : accountBalanceStatus === "error"
+    ? "unavailable"
+    : "loading...";
+  const balanceChipClassName = [
+    "lt-opportunitiesBalanceChip",
+    hasBalance ? "is-ready" : accountBalanceStatus === "error" ? "is-error" : "is-loading",
+  ].join(" ");
   const sections = dates.map((date) => {
     const filtered = Array.isArray(filteredRowsByDate?.[date]) ? filteredRowsByDate[date] : [];
     const all = Array.isArray(allRowsByDate?.[date]) ? allRowsByDate[date] : [];
@@ -861,7 +893,7 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
     const rows = showAllRows ? modeRows : modeRows.slice(0, DEFAULT_OPPORTUNITY_ROWS);
     return {
       date,
-      title: describeOpportunityDate(date, nowMillis),
+      title: displayOpportunityDate(date),
       filteredCount: filtered.length,
       totalCount: all.length,
       modeCount: modeRows.length,
@@ -883,13 +915,14 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
                   className={["lt-opportunitiesDateBtn", date === selectedDate ? "is-active" : ""].join(" ")}
                   onClick={() => onSelectDate(date)}
                 >
-                  {describeOpportunityDate(date, nowMillis)}
+                  {displayOpportunityDate(date)}
                 </button>
               ))}
             </div>
           ) : null}
           <span className="lt-opportunitiesMeta">{modeLabel}</span>
           <span className="lt-opportunitiesCount">Active refresh target: {activeDateLabel}</span>
+          <span className={balanceChipClassName}>Balance: {balanceLabel}</span>
           <button
             type="button"
             className={["lt-opportunitiesAutoBtn", isAutoInferenceActive ? "is-active" : ""].join(" ")}
@@ -948,29 +981,51 @@ const OpportunitiesPanel = memo(function OpportunitiesPanel({
                       <th>Model win</th>
                       <th>Entry</th>
                       <th>EV</th>
+                      <th className="lt-opportunitySizeCol">
+                        <div className="lt-opportunitySizeHeadValue">Size</div>
+                        <div className="lt-opportunitySizeHeadMeta">@ {balanceLabel}</div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {section.rows.map((row, idx) => (
-                      <tr key={`${section.date}-${row.marketTicker}-${row.side}-${idx}`}>
-                        <td>{idx + 1}</td>
-                        <td>{row.stationId}</td>
-                        <td>
-                          <div className="lt-opportunityBucket">{row.bucketLabel}</div>
-                          <div className="lt-opportunityTicker">{row.marketTicker}</div>
-                        </td>
-                        <td>
-                          <span className={["lt-opportunitySide", row.side === "YES" ? "yes" : "no"].join(" ")}>
-                            {row.side}
-                          </span>
-                        </td>
-                        <td>{formatProbabilityPct(row.modelWinProbability)}</td>
-                        <td>{formatPriceCents(row.entryPriceCents)}</td>
-                        <td className={["lt-opportunityEv", toFiniteNumber(row.ev) >= 0 ? "positive" : "negative"].join(" ")}>
-                          {formatEvCents(row.ev)}
-                        </td>
-                      </tr>
-                    ))}
+                    {section.rows.map((row, idx) => {
+                      const positionSize = calculateFractionalKellyPositionSize({
+                        balanceUsd: accountBalanceUsd,
+                        modelWinProbability: row.modelWinProbability,
+                        entryPriceCents: row.entryPriceCents,
+                        ev: row.ev,
+                        kellyFraction: config.kellyFraction,
+                        stakeCapUsd: config.stakeCapUsd,
+                      });
+                      const sizeMeta = `${formatProbabilityPct(positionSize.riskFractionUsed)} Kelly${positionSize.isCapped ? " · cap" : ""}`;
+
+                      return (
+                        <tr key={`${section.date}-${row.marketTicker}-${row.side}-${idx}`}>
+                          <td>{idx + 1}</td>
+                          <td>{row.stationId}</td>
+                          <td>
+                            <div className="lt-opportunityBucket">{row.bucketLabel}</div>
+                            <div className="lt-opportunityTicker">{row.marketTicker}</div>
+                          </td>
+                          <td>
+                            <span className={["lt-opportunitySide", row.side === "YES" ? "yes" : "no"].join(" ")}>
+                              {row.side}
+                            </span>
+                          </td>
+                          <td>{formatProbabilityPct(row.modelWinProbability)}</td>
+                          <td>{formatPriceCents(row.entryPriceCents)}</td>
+                          <td className={["lt-opportunityEv", toFiniteNumber(row.ev) >= 0 ? "positive" : "negative"].join(" ")}>
+                            {formatEvCents(row.ev)}
+                          </td>
+                          <td className="lt-opportunitySizeCell">
+                            <div className="lt-opportunitySizeValue">{formatUsdCompact(positionSize.stakeUsd)}</div>
+                            <div className={["lt-opportunitySizeMeta", positionSize.isCapped ? "is-capped" : ""].join(" ")}>
+                              {sizeMeta}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1407,6 +1462,213 @@ const StationColumn = memo(function StationColumn({
   );
 });
 
+const RecentLiveBalanceTooltip = memo(function RecentLiveBalanceTooltip({
+  active,
+  payload,
+  hasEstimatedBalance,
+}) {
+  const point = Array.isArray(payload) && payload.length > 0 ? payload[0]?.payload : null;
+  if (!active || !point) return null;
+  return (
+    <div className="lt-recentBalanceTooltip">
+      <div className="lt-recentBalanceTooltipDate">{formatTargetDateLabel(point.targetDateLocal)}</div>
+      <div className="lt-recentBalanceTooltipRow">
+        <span>Balance</span>
+        <strong>{formatUsdAxis(point.balanceUsd)}</strong>
+      </div>
+      <div className="lt-recentBalanceTooltipRow">
+        <span>Day P&amp;L</span>
+        <strong className={point.dailyPnlUsd >= 0 ? "positive" : "negative"}>
+          {formatUsdSigned(point.dailyPnlUsd)}
+        </strong>
+      </div>
+      <div className="lt-recentBalanceTooltipRow">
+        <span>Cumulative</span>
+        <strong className={point.cumulativePnlUsd >= 0 ? "positive" : "negative"}>
+          {formatUsdSigned(point.cumulativePnlUsd)}
+        </strong>
+      </div>
+      <div className="lt-recentBalanceTooltipRow">
+        <span>Markets</span>
+        <strong>{point.marketCount}</strong>
+      </div>
+      <div className="lt-recentBalanceTooltipMode">
+        {hasEstimatedBalance ? "Estimated absolute balance" : "Normalized from $0 start"}
+      </div>
+    </div>
+  );
+});
+
+function RecentLiveBalanceValueLabel(props) {
+  const {
+    x,
+    y,
+    value,
+    index,
+  } = props ?? {};
+  const numericValue = toFiniteNumber(value);
+  if (!Number.isFinite(numericValue) || !Number.isFinite(x) || !Number.isFinite(y)) {
+    return null;
+  }
+
+  const labelY = Number(y) + (Number(index) % 2 === 0 ? -14 : 20);
+  return (
+    <text
+      x={x}
+      y={labelY}
+      textAnchor="middle"
+      fontSize="11"
+      fontWeight="800"
+      fill="#e9f7ff"
+      stroke="#0f1b2d"
+      strokeWidth="3"
+      paintOrder="stroke"
+      className="lt-recentBalancePointLabel"
+    >
+      {formatUsdAxis(numericValue)}
+    </text>
+  );
+}
+
+const RecentLiveBalancePanel = memo(function RecentLiveBalancePanel({
+  report,
+  accountBalanceUsd,
+}) {
+  const model = useMemo(() => {
+    const daily = Array.isArray(report?.daily) ? report.daily : [];
+    if (!daily.length) return null;
+
+    const summary = report?.summary ?? {};
+    const finalCumulativePnlUsd = Number.isFinite(toFiniteNumber(summary?.netPnlUsd))
+      ? toFiniteNumber(summary?.netPnlUsd)
+      : toFiniteNumber(daily[daily.length - 1]?.cumulativePnlUsd);
+    const currentBalanceUsd = toFiniteNumber(accountBalanceUsd);
+    const hasEstimatedBalance = Number.isFinite(currentBalanceUsd) && Number.isFinite(finalCumulativePnlUsd);
+    const estimatedStartBalanceUsd = hasEstimatedBalance
+      ? currentBalanceUsd - finalCumulativePnlUsd
+      : 0;
+
+    const series = daily.map((row) => {
+      const cumulativePnlUsd = toFiniteNumber(row?.cumulativePnlUsd);
+      return {
+        targetDateLocal: String(row?.targetDateLocal ?? "").trim(),
+        dailyPnlUsd: toFiniteNumber(row?.dailyPnlUsd),
+        cumulativePnlUsd,
+        marketCount: Number.isFinite(toFiniteNumber(row?.marketCount)) ? toFiniteNumber(row?.marketCount) : 0,
+        balanceUsd: estimatedStartBalanceUsd + cumulativePnlUsd,
+      };
+    }).filter((row) => row.targetDateLocal);
+
+    if (!series.length) return null;
+
+    const endBalanceUsd = series[series.length - 1].balanceUsd;
+    const peakBalanceUsd = series.reduce(
+      (best, row) => (Number.isFinite(row.balanceUsd) ? Math.max(best, row.balanceUsd) : best),
+      Number.NEGATIVE_INFINITY,
+    );
+    const troughBalanceUsd = series.reduce(
+      (best, row) => (Number.isFinite(row.balanceUsd) ? Math.min(best, row.balanceUsd) : best),
+      Number.POSITIVE_INFINITY,
+    );
+
+    return {
+      series,
+      hasEstimatedBalance,
+      estimatedStartBalanceUsd,
+      endBalanceUsd,
+      peakBalanceUsd,
+      troughBalanceUsd,
+      periodStart: String(report?.periodStart ?? "").trim(),
+      periodEnd: String(report?.periodEnd ?? "").trim(),
+      excludedTradeLabel: String(report?.excludedTrade?.label ?? report?.excludedTrade?.marketTicker ?? "").trim(),
+      tradeCount: Number.isFinite(toFiniteNumber(summary?.tradeCount)) ? toFiniteNumber(summary?.tradeCount) : series.length,
+      winRate: toFiniteNumber(summary?.winRate),
+      netPnlUsd: finalCumulativePnlUsd,
+    };
+  }, [accountBalanceUsd, report]);
+
+  if (!model) return null;
+
+  const baselineValue = model.hasEstimatedBalance ? model.estimatedStartBalanceUsd : 0;
+  const baselineLabel = model.hasEstimatedBalance ? "Est. start" : "Zero base";
+  const subtitleParts = [];
+  if (model.periodStart && model.periodEnd) {
+    subtitleParts.push(`${model.periodStart} -> ${model.periodEnd}`);
+  }
+  if (model.excludedTradeLabel) {
+    subtitleParts.push(`Excludes ${model.excludedTradeLabel}`);
+  }
+
+  return (
+    <section className="lt-recentBalancePanel">
+      <div className="lt-recentBalanceHead">
+        <div className="lt-recentBalanceTitleWrap">
+          <h2 className="lt-recentBalanceTitle">Recent Live Balance Evolution</h2>
+          <p className="lt-recentBalanceSub">{subtitleParts.join(" · ")}</p>
+        </div>
+        <div className="lt-recentBalanceChips">
+          <span className="lt-strategyChip">{baselineLabel}: {formatUsdCompact(baselineValue)}</span>
+          <span className="lt-strategyChip">End: {formatUsdCompact(model.endBalanceUsd)}</span>
+          <span className="lt-strategyChip">Net: {formatUsdSigned(model.netPnlUsd)}</span>
+          <span className="lt-strategyChip">Trades: {model.tradeCount}</span>
+          <span className="lt-strategyChip">Win: {formatProbabilityPct(model.winRate)}</span>
+        </div>
+      </div>
+
+      <div className="lt-recentBalanceNote">
+        {model.hasEstimatedBalance
+          ? "Curve is anchored to the current account balance and backsolves an estimated start-of-window balance from realized P&L in this sample."
+          : "Current account balance is unavailable, so the curve is shown as a normalized realized P&L path starting from $0."}
+      </div>
+
+      <div className="lt-recentBalanceChartWrap">
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={model.series} margin={{ top: 18, right: 18, left: 8, bottom: 6 }}>
+            <defs>
+              <linearGradient id="ltRecentBalanceFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2fd4bc" stopOpacity={0.32} />
+                <stop offset="100%" stopColor="#2fd4bc" stopOpacity={0.04} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#294062" />
+            <XAxis
+              dataKey="targetDateLocal"
+              stroke="#9aa9da"
+              tick={{ fontSize: 12 }}
+              tickFormatter={formatTargetDateLabel}
+            />
+            <YAxis
+              stroke="#9aa9da"
+              tick={{ fontSize: 12 }}
+              width={88}
+              tickFormatter={(value) => formatUsdAxis(value, "$0")}
+            />
+            <Tooltip content={<RecentLiveBalanceTooltip hasEstimatedBalance={model.hasEstimatedBalance} />} />
+            <ReferenceLine y={baselineValue} stroke="#5a759f" strokeDasharray="4 4" />
+            <Area type="monotone" dataKey="balanceUsd" stroke="none" fill="url(#ltRecentBalanceFill)" />
+            <Line
+              type="monotone"
+              dataKey="balanceUsd"
+              stroke="#2fd4bc"
+              strokeWidth={2.6}
+              dot={{ r: 3, fill: "#2fd4bc", strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: "#dffef7", stroke: "#0f1b2d", strokeWidth: 2 }}
+            >
+              <LabelList dataKey="balanceUsd" content={<RecentLiveBalanceValueLabel />} />
+            </Line>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="lt-recentBalanceFooter">
+        <span>Peak: <strong>{formatUsdAxis(model.peakBalanceUsd)}</strong></span>
+        <span>Trough: <strong>{formatUsdAxis(model.troughBalanceUsd)}</strong></span>
+        <span>Window result: <strong className={model.netPnlUsd >= 0 ? "positive" : "negative"}>{formatUsdSigned(model.netPnlUsd)}</strong></span>
+      </div>
+    </section>
+  );
+});
+
 export default function LiveTradingPage() {
   const [frame, setFrame] = useState(null);
   const [wsStatus, setWsStatus] = useState("connecting");
@@ -1415,9 +1677,14 @@ export default function LiveTradingPage() {
   const [selectedOpportunitiesDate, setSelectedOpportunitiesDate] = useState("");
   const [opportunityRowsByDate, setOpportunityRowsByDate] = useState({});
   const [stationSnapshotsByDate, setStationSnapshotsByDate] = useState({});
+  const [snapshotMetaByDate, setSnapshotMetaByDate] = useState({});
+  const [knownTargetDates, setKnownTargetDates] = useState([]);
   const [opportunityRowsLoading, setOpportunityRowsLoading] = useState(false);
   const [isAutoInferenceActive, setIsAutoInferenceActive] = useState(false);
   const [autoInferenceStatus, setAutoInferenceStatus] = useState("");
+  const [accountBalanceUsd, setAccountBalanceUsd] = useState(null);
+  const [accountBalanceStatus, setAccountBalanceStatus] = useState("loading");
+  const [recentBalanceReport, setRecentBalanceReport] = useState(null);
   const [nowMillis, setNowMillis] = useState(() => Date.now());
   const [markers, setMarkers] = useState({});
   const [recentEvents, setRecentEvents] = useState({});
@@ -1435,23 +1702,55 @@ export default function LiveTradingPage() {
   const wsUrl = useMemo(() => resolveWsUrl(), []);
   const snapshotUrl = useMemo(() => resolveSnapshotUrl(), []);
   const inferenceRunUrl = useMemo(() => resolveInferenceRunUrl(), []);
+  const accountBalanceUrl = useMemo(() => resolveAccountBalanceUrl(), []);
 
-  const fetchSnapshotForDate = useCallback(async (targetDateLocal) => {
+  const fetchSnapshotForDate = useCallback(async (targetDateLocal, options = {}) => {
     if (!targetDateLocal) return null;
     const url = snapshotUrlForTargetDate(snapshotUrl, targetDateLocal);
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: options.signal,
+    });
     if (!response.ok) {
       throw new Error(`Failed snapshot for ${targetDateLocal}: HTTP ${response.status}`);
     }
     const payload = await response.json();
-    const payloadStations = Array.isArray(payload?.stations) ? payload.stations.map(stationWithSortedBuckets) : [];
+    const payloadStations = Array.isArray(payload?.stations)
+      ? payload.stations.map(stationWithSortedBuckets).filter(Boolean)
+      : [];
     return {
       stations: payloadStations,
       opportunities: buildAllOpportunitiesFromStations(payloadStations),
+      availableTargetDates: Array.isArray(payload?.availableTargetDates)
+        ? payload.availableTargetDates.map((value) => String(value ?? "").trim()).filter(Boolean)
+        : [],
     };
   }, [snapshotUrl]);
 
-  const invokeInferenceForDate = useCallback(async (targetDateLocal) => {
+  const storeSnapshotForDate = useCallback((targetDateLocal, snapshot, fetchedAtMillis = Date.now()) => {
+    const rows = Array.isArray(snapshot?.opportunities) ? snapshot.opportunities : [];
+    const stations = Array.isArray(snapshot?.stations) ? snapshot.stations : [];
+    setOpportunityRowsByDate((current) => ({
+      ...current,
+      [targetDateLocal]: rows,
+    }));
+    setStationSnapshotsByDate((current) => ({
+      ...current,
+      [targetDateLocal]: stations,
+    }));
+    setSnapshotMetaByDate((current) => ({
+      ...current,
+      [targetDateLocal]: snapshotMetaFromData(stations, rows, fetchedAtMillis),
+    }));
+    if (Array.isArray(snapshot?.availableTargetDates) && snapshot.availableTargetDates.length > 0) {
+      setKnownTargetDates((current) => chooseAvailableTargetDates({
+        backendDates: [...current, ...snapshot.availableTargetDates],
+        cachedDates: [targetDateLocal],
+      }));
+    }
+  }, []);
+
+  const invokeInferenceForDate = useCallback(async (targetDateLocal, options = {}) => {
     if (!targetDateLocal) {
       throw new Error("target date is required");
     }
@@ -1459,6 +1758,7 @@ export default function LiveTradingPage() {
     const response = await fetch(url, {
       method: "POST",
       cache: "no-store",
+      signal: options.signal,
     });
     if (!response.ok) {
       throw new Error(`Inference invoke failed for ${targetDateLocal}: HTTP ${response.status}`);
@@ -1466,9 +1766,94 @@ export default function LiveTradingPage() {
     return response.json();
   }, [inferenceRunUrl]);
 
+  const fetchAccountBalance = useCallback(async (options = {}) => {
+    const response = await fetch(accountBalanceUrl, {
+      cache: "no-store",
+      signal: options.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`Failed account balance fetch: HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    return resolveBalanceUsd(payload);
+  }, [accountBalanceUrl]);
+
   useEffect(() => {
-    const timer = setInterval(() => setNowMillis(Date.now()), 200);
+    const timer = setInterval(() => setNowMillis(Date.now()), LIVE_CLOCK_TICK_MS);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let stopped = false;
+    let intervalId = null;
+    let inFlight = false;
+    let activeController = null;
+
+    const refreshAccountBalance = async () => {
+      if (stopped || inFlight) return;
+      inFlight = true;
+      const controller = new AbortController();
+      activeController = controller;
+      try {
+        const nextBalance = await fetchAccountBalance({ signal: controller.signal });
+        if (stopped) return;
+        if (!Number.isFinite(nextBalance)) {
+          setAccountBalanceStatus("error");
+          return;
+        }
+        setAccountBalanceUsd(nextBalance);
+        setAccountBalanceStatus("ready");
+      } catch (error) {
+        if (!isAbortError(error)) {
+          // Keep the last known balance if the account endpoint is temporarily unavailable.
+          setAccountBalanceStatus("error");
+        }
+      } finally {
+        if (activeController === controller) {
+          activeController = null;
+        }
+        inFlight = false;
+      }
+    };
+
+    refreshAccountBalance();
+    intervalId = setInterval(refreshAccountBalance, ACCOUNT_BALANCE_POLL_MS);
+
+    return () => {
+      stopped = true;
+      if (intervalId) clearInterval(intervalId);
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
+    };
+  }, [fetchAccountBalance]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(RECENT_LIVE_BALANCE_CURVE_PATH, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed recent live balance fetch: HTTP ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((payload) => {
+        setRecentBalanceReport(payload);
+      })
+      .catch((error) => {
+        if (!isAbortError(error)) {
+          setRecentBalanceReport(null);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const queueFrame = useCallback((payload) => {
@@ -1580,18 +1965,33 @@ export default function LiveTradingPage() {
   useEffect(() => {
     let stopped = false;
     let intervalId = null;
+    let inFlight = false;
+    let activeController = null;
 
     const pullSnapshot = async () => {
-      if (stopped) return;
+      if (stopped || inFlight) return;
+      inFlight = true;
+      const controller = new AbortController();
+      activeController = controller;
       try {
-        const response = await fetch(snapshotUrl, { cache: "no-store" });
+        const response = await fetch(snapshotUrl, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         if (!response.ok) return;
         const payload = await response.json();
         if (payload && Array.isArray(payload.stations) && payload.stations.length > 0) {
           queueFrame(payload);
         }
-      } catch (_) {
+      } catch (error) {
+        if (!isAbortError(error)) {
         // Snapshot fallback is best-effort when websocket is unavailable.
+        }
+      } finally {
+        if (activeController === controller) {
+          activeController = null;
+        }
+        inFlight = false;
       }
     };
 
@@ -1601,6 +2001,10 @@ export default function LiveTradingPage() {
     return () => {
       stopped = true;
       if (intervalId) clearInterval(intervalId);
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
     };
   }, [snapshotUrl, wsStatus, queueFrame]);
 
@@ -1669,11 +2073,12 @@ export default function LiveTradingPage() {
 
   const frameStations = useMemo(() => {
     const rawStations = Array.isArray(frame?.stations) ? frame.stations : [];
-    return rawStations.map(stationWithSortedBuckets);
+    return rawStations.map(stationWithSortedBuckets).filter(Boolean);
   }, [frame]);
   const liveConfig = useMemo(() => normalizeLiveConfig({
     ...DEFAULT_LIVE_CONFIG,
     ...(frame?.config ?? {}),
+    minWinProbability: OPPORTUNITIES_MIN_WIN_PROBABILITY,
   }), [frame]);
 
   const liveFrameOpportunities = useMemo(() => buildAllOpportunitiesFromStations(frameStations), [frameStations]);
@@ -1685,9 +2090,17 @@ export default function LiveTradingPage() {
     const localTomorrow = shiftIsoDate(localToday, 1);
     const preferredDate = shouldDefaultToTomorrow(clockMillis) ? localTomorrow : localToday;
     const alternateDate = preferredDate === localToday ? localTomorrow : localToday;
-    const frameDate = frameStations.find((station) => station?.targetDateLocal)?.targetDateLocal;
-    return [...new Set([frameDate, preferredDate, alternateDate].filter(Boolean))].slice(0, 2);
-  }, [frameStations, opportunitiesMinuteBucket]);
+    return chooseAvailableTargetDates({
+      backendDates: frame?.availableTargetDates,
+      frameStations,
+      cachedDates: [
+        ...Object.keys(opportunityRowsByDate),
+        ...Object.keys(stationSnapshotsByDate),
+        ...knownTargetDates,
+      ],
+      fallbackDates: [preferredDate, alternateDate],
+    });
+  }, [frame?.availableTargetDates, frameStations, knownTargetDates, opportunitiesMinuteBucket, opportunityRowsByDate, stationSnapshotsByDate]);
 
   useEffect(() => {
     if (!opportunitiesDateOptions.length) return;
@@ -1699,49 +2112,69 @@ export default function LiveTradingPage() {
   useEffect(() => {
     const frameTargetDate = frameStations.find((station) => station?.targetDateLocal)?.targetDateLocal;
     if (!frameTargetDate) return;
-    setOpportunityRowsByDate((current) => ({
-      ...current,
-      [frameTargetDate]: liveFrameOpportunities,
-    }));
-    setStationSnapshotsByDate((current) => ({
-      ...current,
-      [frameTargetDate]: frameStations,
-    }));
-  }, [frameStations, liveFrameOpportunities]);
+    storeSnapshotForDate(frameTargetDate, {
+      stations: frameStations,
+      opportunities: liveFrameOpportunities,
+      availableTargetDates: frame?.availableTargetDates,
+    }, Date.now());
+  }, [frame?.availableTargetDates, frameStations, liveFrameOpportunities, storeSnapshotForDate]);
+
+  const retainedTargetDateKeys = useMemo(() => {
+    const keys = new Set();
+    for (const date of opportunitiesDateOptions) {
+      const value = String(date ?? "").trim();
+      if (value) keys.add(value);
+    }
+    const selected = String(selectedOpportunitiesDate ?? "").trim();
+    if (selected) keys.add(selected);
+    for (const station of frameStations) {
+      const value = String(station?.targetDateLocal ?? "").trim();
+      if (value) keys.add(value);
+    }
+    return [...keys];
+  }, [frameStations, opportunitiesDateOptions, selectedOpportunitiesDate]);
+
+  useEffect(() => {
+    setOpportunityRowsByDate((current) => retainRecordKeys(current, retainedTargetDateKeys));
+    setStationSnapshotsByDate((current) => retainRecordKeys(current, retainedTargetDateKeys));
+    setSnapshotMetaByDate((current) => retainRecordKeys(current, retainedTargetDateKeys));
+  }, [retainedTargetDateKeys]);
 
   useEffect(() => {
     let stopped = false;
     let intervalId = null;
+    let inFlight = false;
+    let activeController = null;
     const dates = opportunitiesDateOptions;
     if (!dates.length) return undefined;
 
     const fetchOpportunitiesForDates = async () => {
+      if (stopped || inFlight) return;
+      inFlight = true;
+      const controller = new AbortController();
+      activeController = controller;
       if (!hasLoadedOpportunityDatesRef.current) {
         setOpportunityRowsLoading(true);
       }
       try {
         const fetched = await Promise.all(dates.map(async (targetDateLocal) => ([
           targetDateLocal,
-          await fetchSnapshotForDate(targetDateLocal),
+          await fetchSnapshotForDate(targetDateLocal, { signal: controller.signal }),
         ])));
         if (stopped) return;
-        setOpportunityRowsByDate((current) => {
-          const next = { ...current };
-          for (const [date, snapshot] of fetched) {
-            next[date] = Array.isArray(snapshot?.opportunities) ? snapshot.opportunities : [];
-          }
-          return next;
-        });
-        setStationSnapshotsByDate((current) => {
-          const next = { ...current };
-          for (const [date, snapshot] of fetched) {
-            next[date] = Array.isArray(snapshot?.stations) ? snapshot.stations : [];
-          }
-          return next;
-        });
-      } catch (_) {
+        const fetchedAtMillis = Date.now();
+        for (const [date, snapshot] of fetched) {
+          storeSnapshotForDate(date, snapshot, fetchedAtMillis);
+        }
+      } catch (error) {
+        if (!isAbortError(error)) {
         // Keep previous opportunities if one snapshot pull fails.
+        }
       } finally {
+        if (activeController === controller) {
+          activeController = null;
+        }
+        inFlight = false;
         if (!stopped) {
           hasLoadedOpportunityDatesRef.current = true;
           setOpportunityRowsLoading(false);
@@ -1758,14 +2191,27 @@ export default function LiveTradingPage() {
     return () => {
       stopped = true;
       if (intervalId) clearInterval(intervalId);
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
     };
-  }, [fetchSnapshotForDate, opportunitiesDateOptions, wsStatus]);
+  }, [fetchSnapshotForDate, opportunitiesDateOptions, storeSnapshotForDate, wsStatus]);
 
   const thresholdRowsByDate = useMemo(() => {
     const next = {};
     for (const date of opportunitiesDateOptions) {
       const rows = Array.isArray(opportunityRowsByDate[date]) ? opportunityRowsByDate[date] : [];
       next[date] = rows.filter((row) => meetsOpportunityFilters(row, liveConfig));
+    }
+    return next;
+  }, [liveConfig, opportunitiesDateOptions, opportunityRowsByDate]);
+
+  const winFloorRowsByDate = useMemo(() => {
+    const next = {};
+    for (const date of opportunitiesDateOptions) {
+      const rows = Array.isArray(opportunityRowsByDate[date]) ? opportunityRowsByDate[date] : [];
+      next[date] = rows.filter((row) => meetsOpportunityWinFloor(row, liveConfig));
     }
     return next;
   }, [liveConfig, opportunitiesDateOptions, opportunityRowsByDate]);
@@ -1792,25 +2238,21 @@ export default function LiveTradingPage() {
 
     let stopped = false;
     let intervalId = null;
+    let activeController = null;
 
     const runInferenceTick = async () => {
       if (stopped || autoInferenceInFlightRef.current) return;
       autoInferenceInFlightRef.current = true;
+      const controller = new AbortController();
+      activeController = controller;
       const dateLabel = formatTargetDateLabel(selectedOpportunitiesDate);
       setAutoInferenceStatus(`Invoking live inference for ${dateLabel}...`);
       try {
-        const runResult = await invokeInferenceForDate(selectedOpportunitiesDate);
-        const refreshedSnapshot = await fetchSnapshotForDate(selectedOpportunitiesDate);
+        const runResult = await invokeInferenceForDate(selectedOpportunitiesDate, { signal: controller.signal });
+        const refreshedSnapshot = await fetchSnapshotForDate(selectedOpportunitiesDate, { signal: controller.signal });
         if (stopped) return;
         const refreshedRows = Array.isArray(refreshedSnapshot?.opportunities) ? refreshedSnapshot.opportunities : [];
-        setOpportunityRowsByDate((current) => ({
-          ...current,
-          [selectedOpportunitiesDate]: refreshedRows,
-        }));
-        setStationSnapshotsByDate((current) => ({
-          ...current,
-          [selectedOpportunitiesDate]: Array.isArray(refreshedSnapshot?.stations) ? refreshedSnapshot.stations : [],
-        }));
+        storeSnapshotForDate(selectedOpportunitiesDate, refreshedSnapshot, Date.now());
         if (refreshedRows.some((row) => meetsOpportunityFilters(row, liveConfig))) {
           setAutoInferenceStatus(`Target ${dateLabel} populated. Auto refresh stopped.`);
           setIsAutoInferenceActive(false);
@@ -1834,9 +2276,13 @@ export default function LiveTradingPage() {
         }
       } catch (error) {
         if (stopped) return;
+        if (isAbortError(error)) return;
         const message = error instanceof Error ? error.message : String(error);
         setAutoInferenceStatus(`Inference invoke failed: ${message}`);
       } finally {
+        if (activeController === controller) {
+          activeController = null;
+        }
         autoInferenceInFlightRef.current = false;
       }
     };
@@ -1846,6 +2292,10 @@ export default function LiveTradingPage() {
 
     return () => {
       stopped = true;
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
       if (intervalId) {
         clearInterval(intervalId);
       }
@@ -1857,17 +2307,34 @@ export default function LiveTradingPage() {
     isAutoInferenceActive,
     selectedDateEligibleOpportunities.length,
     selectedOpportunitiesDate,
+    storeSnapshotForDate,
   ]);
 
   const displayedStations = useMemo(() => {
     if (selectedOpportunitiesDate) {
       const selected = stationSnapshotsByDate[selectedOpportunitiesDate];
       if (Array.isArray(selected) && selected.length > 0) {
-        return selected;
+        return selected.filter(Boolean);
       }
     }
-    return frameStations;
+    return frameStations.filter(Boolean);
   }, [frameStations, selectedOpportunitiesDate, stationSnapshotsByDate]);
+
+  const displayedTickers = useMemo(() => {
+    const keys = new Set();
+    for (const station of displayedStations) {
+      const buckets = Array.isArray(station?.buckets) ? station.buckets : [];
+      for (const bucket of buckets) {
+        const ticker = String(bucket?.marketTicker ?? "").trim();
+        if (ticker) keys.add(ticker);
+      }
+    }
+    return [...keys];
+  }, [displayedStations]);
+
+  useEffect(() => {
+    setExpandedByTicker((current) => retainRecordKeys(current, displayedTickers));
+  }, [displayedTickers]);
 
   const freshnessSummary = useMemo(() => {
     const buckets = displayedStations.flatMap((station) => station.buckets || []);
@@ -1924,25 +2391,16 @@ export default function LiveTradingPage() {
   const selectOpportunitiesDate = useCallback((targetDateLocal) => {
     setSelectedOpportunitiesDate(targetDateLocal);
     setAutoInferenceStatus("");
-    if (
-      !targetDateLocal ||
-      (Array.isArray(opportunityRowsByDate[targetDateLocal]) && Array.isArray(stationSnapshotsByDate[targetDateLocal]))
-    ) {
+    if (!targetDateLocal) {
+      return;
+    }
+    if (!shouldRevalidateSnapshotMeta(snapshotMetaByDate[targetDateLocal], Date.now(), SNAPSHOT_REVALIDATE_MAX_AGE_MS)) {
       return;
     }
     setOpportunityRowsLoading(true);
     fetchSnapshotForDate(targetDateLocal)
       .then((snapshot) => {
-        const rows = Array.isArray(snapshot?.opportunities) ? snapshot.opportunities : [];
-        const stations = Array.isArray(snapshot?.stations) ? snapshot.stations : [];
-        setOpportunityRowsByDate((current) => ({
-          ...current,
-          [targetDateLocal]: rows,
-        }));
-        setStationSnapshotsByDate((current) => ({
-          ...current,
-          [targetDateLocal]: stations,
-        }));
+        storeSnapshotForDate(targetDateLocal, snapshot, Date.now());
       })
       .catch(() => {
         // Keep prior date rows; selected date will show empty until next poll succeeds.
@@ -1950,7 +2408,7 @@ export default function LiveTradingPage() {
       .finally(() => {
         setOpportunityRowsLoading(false);
       });
-  }, [fetchSnapshotForDate, opportunityRowsByDate, stationSnapshotsByDate]);
+  }, [fetchSnapshotForDate, snapshotMetaByDate, storeSnapshotForDate]);
 
   return (
     <section className="lt-workstation">
@@ -1966,8 +2424,10 @@ export default function LiveTradingPage() {
 
       <OpportunitiesPanel
         liveConfig={liveConfig}
+        accountBalanceUsd={accountBalanceUsd}
+        accountBalanceStatus={accountBalanceStatus}
         filteredRowsByDate={thresholdRowsByDate}
-        allRowsByDate={opportunityRowsByDate}
+        allRowsByDate={winFloorRowsByDate}
         showAllRows={showAllOpportunities}
         onToggleShowAllRows={toggleShowAllOpportunities}
         dateOptions={opportunitiesDateOptions}
@@ -2002,6 +2462,11 @@ export default function LiveTradingPage() {
           />
         ))}
       </div>
+
+      <RecentLiveBalancePanel
+        report={recentBalanceReport}
+        accountBalanceUsd={accountBalanceUsd}
+      />
     </section>
   );
 }

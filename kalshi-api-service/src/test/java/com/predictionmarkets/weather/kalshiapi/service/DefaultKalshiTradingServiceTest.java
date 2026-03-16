@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.predictionmarkets.weather.kalshiapi.api.KalshiOrdersApi;
+import com.predictionmarkets.weather.kalshiapi.api.KalshiPortfolioApi;
 import com.predictionmarkets.weather.kalshiapi.config.KalshiExecutionProperties;
 import com.predictionmarkets.weather.kalshiapi.model.common.Action;
 import com.predictionmarkets.weather.kalshiapi.model.common.OrderType;
@@ -27,6 +28,7 @@ class DefaultKalshiTradingServiceTest {
   @Test
   void duplicateIntentDoesNotCreateSecondOrder() {
     KalshiOrdersApi ordersApi = mock(KalshiOrdersApi.class);
+    KalshiPortfolioApi portfolioApi = mock(KalshiPortfolioApi.class);
     ExposureGuardService guardService = mock(ExposureGuardService.class);
     KalshiExecutionProperties properties = props();
 
@@ -50,7 +52,7 @@ class DefaultKalshiTradingServiceTest {
     when(ordersApi.createOrder(any())).thenReturn(new CreateOrderResponse(
         order("O1", "MKT1", Side.YES, "cid-1")));
 
-    DefaultKalshiTradingService service = new DefaultKalshiTradingService(ordersApi, guardService, properties);
+    DefaultKalshiTradingService service = new DefaultKalshiTradingService(ordersApi, portfolioApi, guardService, properties);
     TradeOrderRequest request = new TradeOrderRequest("MKT1", Side.YES, 1, OrderType.MARKET, null, 100, "intent-1");
 
     var first = service.placeMarketBuy(request);
@@ -65,6 +67,7 @@ class DefaultKalshiTradingServiceTest {
   @Test
   void unknownWriteOutcomeFailsClosedWithoutResubmit() {
     KalshiOrdersApi ordersApi = mock(KalshiOrdersApi.class);
+    KalshiPortfolioApi portfolioApi = mock(KalshiPortfolioApi.class);
     ExposureGuardService guardService = mock(ExposureGuardService.class);
     KalshiExecutionProperties properties = props();
     properties.getGuardrails().setFailClosedOnUnknownOrderState(true);
@@ -87,7 +90,7 @@ class DefaultKalshiTradingServiceTest {
     when(ordersApi.createOrder(any())).thenThrow(new RuntimeException("timed out"));
     when(ordersApi.getOrders(any())).thenReturn(new GetOrdersResponse(java.util.List.of(), null));
 
-    DefaultKalshiTradingService service = new DefaultKalshiTradingService(ordersApi, guardService, properties);
+    DefaultKalshiTradingService service = new DefaultKalshiTradingService(ordersApi, portfolioApi, guardService, properties);
     TradeOrderRequest request = new TradeOrderRequest("MKT1", Side.YES, 1, OrderType.MARKET, null, 100, "intent-1");
 
     var first = service.placeMarketBuy(request);

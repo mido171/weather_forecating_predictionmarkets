@@ -17,6 +17,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -129,6 +130,10 @@ def build_request_url(base_url: str, location_id: str, api_key: str, units: str,
         "endDate": task.end_api,
     }
     return f"{base}{path}?{urlencode(params)}"
+
+
+def redact_api_key_in_url(url: str) -> str:
+    return re.sub(r"(apiKey=)[^&]+", r"\1REDACTED", str(url))
 
 
 def setup_logger(log_path: Path) -> logging.Logger:
@@ -266,6 +271,7 @@ def fetch_window(
     win_csv_dir = out_root / "window_csv"
     window_csv_path = win_csv_dir / f"{loc_safe}_{task.key}.csv"
     request_url = build_request_url(base_url, location_id, api_key, units, task)
+    request_url_redacted = redact_api_key_in_url(request_url)
 
     response_json_path = raw_dir / "response.json"
     existing_status_path = raw_dir / "http_status.txt"
@@ -293,7 +299,7 @@ def fetch_window(
                     observations_count=0,
                     window_csv_path=None,
                     raw_dir=raw_dir,
-                    request_url=request_url,
+                    request_url=request_url_redacted,
                     error=f"existing_json_parse_error: {exc}",
                     skipped_existing=True,
                 )
@@ -317,7 +323,7 @@ def fetch_window(
                 observations_count=len(payload.get("observations", [])) if isinstance(payload.get("observations"), list) else 0,
                 window_csv_path=window_csv_path,
                 raw_dir=raw_dir,
-                request_url=request_url,
+                request_url=request_url_redacted,
                 error="",
                 skipped_existing=True,
             )
@@ -325,7 +331,7 @@ def fetch_window(
     retries = max(0, max_retries)
     for attempt in range(1, retries + 2):
         t0 = time.time()
-        logger.info("REQUEST_START window=%s attempt=%d/%d url=%s", task.key, attempt, retries + 1, request_url)
+        logger.info("REQUEST_START window=%s attempt=%d/%d url=%s", task.key, attempt, retries + 1, request_url_redacted)
         err = ""
         status_code = 0
         body_bytes = b""
@@ -350,7 +356,7 @@ def fetch_window(
                 sha = hashlib.sha256(body_bytes).hexdigest()
                 raw_dir.mkdir(parents=True, exist_ok=True)
                 response_json_path.write_bytes(body_bytes)
-                write_text(raw_dir / "request_url.txt", request_url + "\n")
+                write_text(raw_dir / "request_url.txt", request_url_redacted + "\n")
                 write_text(raw_dir / "headers.json", json.dumps(headers, indent=2, ensure_ascii=True) + "\n")
                 write_text(raw_dir / "retrieved_at_utc.txt", retrieved + "\n")
                 write_text(raw_dir / "sha256.txt", sha + "\n")
@@ -369,7 +375,7 @@ def fetch_window(
                         observations_count=0,
                         window_csv_path=None,
                         raw_dir=raw_dir,
-                        request_url=request_url,
+                        request_url=request_url_redacted,
                         error=f"json_parse_error: {exc}",
                         skipped_existing=False,
                     )
@@ -394,7 +400,7 @@ def fetch_window(
                     observations_count=obs_count,
                     window_csv_path=window_csv_path,
                     raw_dir=raw_dir,
-                    request_url=request_url,
+                    request_url=request_url_redacted,
                     error="",
                     skipped_existing=False,
                 )
@@ -439,7 +445,7 @@ def fetch_window(
     raw_dir.mkdir(parents=True, exist_ok=True)
     if body_bytes:
         response_json_path.write_bytes(body_bytes)
-    write_text(raw_dir / "request_url.txt", request_url + "\n")
+    write_text(raw_dir / "request_url.txt", request_url_redacted + "\n")
     write_text(raw_dir / "headers.json", json.dumps(headers, indent=2, ensure_ascii=True) + "\n")
     write_text(raw_dir / "retrieved_at_utc.txt", retrieved + "\n")
     write_text(raw_dir / "sha256.txt", sha + "\n")
@@ -455,7 +461,7 @@ def fetch_window(
         observations_count=0,
         window_csv_path=None,
         raw_dir=raw_dir,
-        request_url=request_url,
+        request_url=request_url_redacted,
         error=err,
         skipped_existing=False,
     )

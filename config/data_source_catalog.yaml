@@ -1,0 +1,564 @@
+catalog_version: 1
+created_at_utc: "2026-06-19T00:00:00Z"
+scope: "HKO Tmax weather data acquisition only; Polymarket excluded"
+status_classes:
+  - P0_CRITICAL
+  - P1_HIGH_VALUE
+  - P2_FRONTIER
+  - UNAVAILABLE
+  - PAID
+  - CREDENTIAL_BLOCKED
+  - TERMS_BLOCKED
+  - DEFERRED_WITH_REASON
+
+sources:
+  - source_id: hko_clmmaxt_hko
+    family: A_hko_target_labels_daily_climate
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_hko_historical_daily_tmax_proxy
+    access_url: "https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=CLMMAXT&rformat=csv&station=HKO"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [daily_maximum_air_temperature]
+    stations_domain: [HKO]
+    native_cadence: daily
+    forecast_cycles: []
+    historical_start_end: "1884-present, provider file dependent"
+    archive_availability: public_latest_file
+    expected_latency: monthly_or_provider_update
+    revision_behavior: finalized history can revise
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: small_csv
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.csv"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_daily
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: ""
+    evidence: official HKO open-data endpoint in config/data_sources.yaml
+    next_action: parse complete CSV into bronze/silver daily HKO climate table with quality flags
+
+  - source_id: hko_daily_extract_operational
+    family: A_hko_target_labels_daily_climate
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_daily_extract_target_candidate
+    access_url: "https://www.hko.gov.hk/cis/dailyExtract/dailyExtract_{yyyymm}.xml"
+    documentation_url: "https://www.hko.gov.hk/en/cis/dailyExtract.htm"
+    license_terms: HKO terms apply
+    authentication: none
+    variables: [absolute_daily_max_c, daily_extract_fields]
+    stations_domain: [HKO]
+    native_cadence: daily
+    forecast_cycles: []
+    historical_start_end: current_month_plus_historical_year_payloads
+    archive_availability: public_payloads
+    expected_latency: daily_09_hkt_policy_for_this_goal
+    revision_behavior: month payload mutates as rows are added or revised
+    point_in_time_class: TARGET_ONLY
+    estimated_bytes: small_json_text
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.xml"
+    adapter: planned_daily_extract_operational_collector
+    backfill_status: SUPERSEDED_POLLING_FAMILY_CLOSED
+    live_status: scheduled_once_daily_not_rapid
+    last_success: null
+    coverage: "EXP-0005 through EXP-0032 captured unchanged June 2026 payload; future routine collection ledger-only"
+    blocker: "template adapter must bind yyyymm from operational date"
+    evidence: reports/polling_loop_postmortem.md
+    next_action: implement template-bound once-daily collector without experiment creation
+
+  - source_id: hko_daily_climate_elements
+    family: A_hko_target_labels_daily_climate
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_daily_climate_history
+    access_url: "https://www.hko.gov.hk/en/cis/downloadpage.htm"
+    documentation_url: "https://www.hko.gov.hk/en/cis/downloadpage.htm"
+    license_terms: HKO terms apply
+    authentication: none
+    variables: [temperature, humidity, pressure, rainfall, sunshine, radiation, wind, visibility, evaporation, uv_heat_indices]
+    stations_domain: [HKO]
+    native_cadence: daily
+    forecast_cycles: []
+    historical_start_end: element_specific_complete_history_required
+    archive_availability: public_interactive_downloads_and_possible_api
+    expected_latency: finalized_climate_update
+    revision_behavior: finalized history may revise
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: small_to_medium_csv
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: official element identifiers must be discovered from HKO documentation, not guessed
+    evidence: reset instruction section 5A
+    next_action: archive HKO documentation and enumerate official dataType identifiers
+
+  - source_id: hko_station_metadata
+    family: B_hko_station_metadata_history
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_station_identity_metadata
+    access_url: "https://www.hko.gov.hk/en/cis/stn.htm"
+    documentation_url: "https://www.hko.gov.hk/en/cis/stn.htm"
+    license_terms: HKO terms apply
+    authentication: none
+    variables: [station_code, name, latitude, longitude, elevation, measured_elements, operating_dates]
+    stations_domain: all_hko_stations
+    native_cadence: provider_updated
+    forecast_cycles: []
+    historical_start_end: station_specific
+    archive_availability: public_html
+    expected_latency: provider_update
+    revision_behavior: metadata page can change
+    point_in_time_class: METADATA
+    estimated_bytes: small_html
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.html"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_daily_metadata
+    last_success: null
+    coverage: not_started
+    blocker: ""
+    evidence: official HKO station page
+    next_action: fetch and parse station registry timeline with HKO-code joins
+
+  - source_id: hko_open_data_catalog
+    family: B_hko_station_metadata_history
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_open_data_endpoint_catalog
+    access_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [dataset_catalog, endpoint_documentation, update_cadence_metadata]
+    stations_domain: all_hko_open_data_products
+    native_cadence: provider_updated
+    forecast_cycles: []
+    historical_start_end: not_applicable
+    archive_availability: public_html
+    expected_latency: provider_update
+    revision_behavior: provider may change datasets, endpoints, or terms
+    point_in_time_class: METADATA
+    estimated_bytes: small_html
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.html"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_daily_metadata
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: ""
+    evidence: official HKO open-data catalog in config/data_sources.yaml
+    next_action: parse catalog links and resolve official resource URLs for remaining P0 feeds
+
+  - source_id: hko_latest_1min_temperature
+    family: C_high_frequency_hko_regional_observations
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_live_regional_temperature_feed
+    access_url: "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_temperature.csv"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [one_minute_mean_air_temperature]
+    stations_domain: all_feed_stations
+    native_cadence: approximately_10_minutes_publication
+    forecast_cycles: []
+    historical_start_end: latest_only_unless_self_archived
+    archive_availability: latest_public_feed
+    expected_latency: retrieved_at
+    revision_behavior: provisional_latest_feed
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_csv_per_publication
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.csv"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_10_min
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: historical minute backfill unknown
+    evidence: official HKO open-data endpoint in config/data_sources.yaml
+    next_action: parse every station row into bronze and continue prospective collection
+
+  - source_id: hko_since_midnight_maxmin
+    family: C_high_frequency_hko_regional_observations
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_live_since_midnight_max_min_feed
+    access_url: "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_since_midnight_maxmin.csv"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [maximum_since_midnight, minimum_since_midnight]
+    stations_domain: all_feed_stations
+    native_cadence: approximately_10_minutes_publication
+    forecast_cycles: []
+    historical_start_end: latest_only_unless_self_archived
+    archive_availability: latest_public_feed
+    expected_latency: retrieved_at
+    revision_behavior: provisional_latest_feed
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_csv_per_publication
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.csv"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_10_min
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: historical intraday max/min backfill unknown
+    evidence: official HKO open-data endpoint in config/data_sources.yaml
+    next_action: parse every station row into bronze and continue prospective collection
+
+  - source_id: hko_live_humidity_pressure_wind_rain_radiation
+    family: C_high_frequency_hko_regional_observations
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory and DATA.GOV.HK
+    authoritative_status: official_live_regional_observation_feeds
+    access_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO/DATA.GOV.HK terms apply
+    authentication: none
+    variables: [relative_humidity, dew_point, wet_bulb, pressure, wind, gust, rainfall, solar_radiation, sunshine, visibility]
+    stations_domain: all_available_feed_stations
+    native_cadence: feed_specific
+    forecast_cycles: []
+    historical_start_end: latest_only_unless_self_archived_or_data_gov_history
+    archive_availability: public_feed_discovery_required
+    expected_latency: retrieved_at
+    revision_behavior: provisional_latest_feeds
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_per_publication
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: exact official resource URLs and schemas must be resolved
+    evidence: reset instruction section 5C
+    next_action: enumerate DATA.GOV.HK resources and add one adapter per feed
+
+  - source_id: hko_local_weather_forecast
+    family: D_official_hko_forecast_vintages
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_forecast_vintage
+    access_url: "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=en"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [local_weather_forecast_text, max_min_temperature_forecast, weather_state, wind, humidity, warnings_context]
+    stations_domain: Hong_Kong
+    native_cadence: hourly_and_as_needed
+    forecast_cycles: issue_time_in_payload
+    historical_start_end: latest_only_unless_self_archived
+    archive_availability: latest_public_api
+    expected_latency: retrieved_at_plus_payload_update_time
+    revision_behavior: each changed payload is a vintage
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_json_per_issue
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.json"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_hourly
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: ""
+    evidence: official HKO weather API endpoint in config/data_sources.yaml
+    next_action: parse issue/update time and forecast max/min into bronze vintages
+
+  - source_id: hko_nine_day_forecast
+    family: D_official_hko_forecast_vintages
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_forecast_vintage
+    access_url: "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO open data terms apply
+    authentication: none
+    variables: [daily_forecast_tmax_tmin, weather, wind, humidity, rain_probability_if_present]
+    stations_domain: Hong_Kong
+    native_cadence: at_least_twice_daily_and_as_needed
+    forecast_cycles: issue_time_in_payload
+    historical_start_end: latest_only_unless_self_archived
+    archive_availability: latest_public_api
+    expected_latency: retrieved_at_plus_payload_update_time
+    revision_behavior: each changed payload is a vintage
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_json_per_issue
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.json"
+    adapter: acquisition_http_content_addressed
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_hourly
+    last_success: null
+    coverage: pending_from_retrieval_ledger
+    blocker: ""
+    evidence: official HKO weather API endpoint in config/data_sources.yaml
+    next_action: parse issue/update time and forecast daily values into bronze vintages
+
+  - source_id: operational_nwp_gfs_gefs_ecmwf_icon
+    family: E_operational_numerical_ai_forecast_archives
+    priority: P0_CRITICAL
+    provider: NOAA_NCEP_ECMWF_DWD
+    authoritative_status: official_operational_forecast_runs
+    access_url: "provider-specific official open archives"
+    documentation_url: "NOAA NOMADS/cloud, ECMWF open data, DWD opendata"
+    license_terms: provider-specific open-data terms
+    authentication: none_or_provider_specific_for_some_ecmwf_products
+    variables: [t2m, tmax_tmin, dew_point_humidity, wind, pressure, cloud, radiation, precipitation, cape_cin, pbl_height, pressure_level_fields, ensemble_members]
+    stations_domain: Hong_Kong_PRD_southern_China_East_Asia_domains
+    native_cadence: model_cycle_specific
+    forecast_cycles: [00, 06, 12, 18]
+    historical_start_end: archive_specific
+    archive_availability: public_archives_and_rolling_windows
+    expected_latency: actual_file_availability
+    revision_behavior: immutable_cycle_files
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: large
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.grib2"
+    adapter: NOT_IMPLEMENTED
+    backfill_status: NOT_STARTED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: server-side subset definitions and byte budget must be finalized before large backfill
+    evidence: reset instruction section 5E
+    next_action: implement NOAA GFS subset adapter first with cycle/member/lead manifest
+
+  - source_id: king_park_upper_air_and_regional_soundings
+    family: F_upper_air_vertical_profile_observations
+    priority: P0_CRITICAL
+    provider: HKO_WMO_NOAA_IGRA
+    authoritative_status: official_or_trusted_sounding_archives
+    access_url: "HKO open data catalog or NOAA IGRA"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: none_for_public_archives
+    variables: [pressure, height, temperature, dew_point, humidity, wind_direction, wind_speed, significant_levels]
+    stations_domain: King_Park_Hong_Kong_and_regional
+    native_cadence: typically_twice_daily
+    forecast_cycles: []
+    historical_start_end: full_lawful_history
+    archive_availability: public_archive_discovery_required
+    expected_latency: launch_and_processing_time
+    revision_behavior: preliminary_and_corrected_versions_possible
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: medium
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: exact HKO or IGRA station identifiers and access URLs must be confirmed
+    evidence: reset instruction section 5F
+    next_action: resolve station IDs and implement public archive backfill
+
+  - source_id: radar_nowcast_lightning
+    family: G_radar_rainfall_nowcasts_lightning
+    priority: P1_HIGH_VALUE
+    provider: Hong Kong Observatory
+    authoritative_status: official_operational_imagery_and_nowcasts
+    access_url: "HKO radar, rainfall nowcast and lightning pages"
+    documentation_url: "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm"
+    license_terms: HKO terms apply
+    authentication: none_for_public_products
+    variables: [radar_reflectivity, rainfall_nowcast, lightning_counts_or_strokes]
+    stations_domain: Hong_Kong_regional_grid
+    native_cadence: product_specific_5_to_15_minutes
+    forecast_cycles: issue_time_per_product
+    historical_start_end: limited_unless_self_archived
+    archive_availability: public_latest_and_possible_archives
+    expected_latency: retrieved_at_plus_product_issue_time
+    revision_behavior: each frame_or_issue_preserved
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: medium_to_large
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: product endpoints, color scales and georeferencing must be documented
+    evidence: reset instruction section 5G
+    next_action: archive product pages and implement first radar image collector
+
+  - source_id: satellite_cloud_aerosol
+    family: H_satellite_cloud_aerosol_observations
+    priority: P1_HIGH_VALUE
+    provider: Himawari_Fengyun_HKO_or_official_mirrors
+    authoritative_status: lawful_geostationary_cloud_context
+    access_url: "provider-specific official archives"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: provider_specific
+    variables: [visible, infrared, water_vapor, cloud_mask, cloud_top_temperature, aerosol_optical_depth]
+    stations_domain: Hong_Kong_and_regional_domain
+    native_cadence: scan_product_specific
+    forecast_cycles: []
+    historical_start_end: archive_specific
+    archive_availability: public_or_terms_limited
+    expected_latency: scan_time_plus_release_delay
+    revision_behavior: preserve original scans
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: large
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: NOT_IMPLEMENTED
+    backfill_status: NOT_STARTED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: lawful provider and product subset must be selected
+    evidence: reset instruction section 5H
+    next_action: document terms for Himawari and HKO imagery before acquisition
+
+  - source_id: tropical_cyclone_monsoon_synoptic
+    family: I_tropical_cyclone_monsoon_synoptic_information
+    priority: P1_HIGH_VALUE
+    provider: HKO_WMO_NOAA_official_agencies
+    authoritative_status: operational_advisory_vintages_and_retrospective_labels
+    access_url: "provider-specific"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: none_or_provider_specific
+    variables: [warnings, advisories, forecast_tracks, best_tracks_retrospective, fronts_troughs_monsoon_diagnostics, synop_metar]
+    stations_domain: Hong_Kong_southern_China_regional
+    native_cadence: advisory_or_observation_specific
+    forecast_cycles: advisory_issue_times
+    historical_start_end: archive_specific
+    archive_availability: mixed
+    expected_latency: issue_time_plus_retrieval
+    revision_behavior: never_substitute_final_best_track_for_operational_vintage
+    point_in_time_class: MIXED_POINT_IN_TIME_AND_RETROSPECTIVE_ONLY
+    estimated_bytes: medium
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: exact operational track/advisory endpoints must be confirmed
+    evidence: reset instruction section 5I
+    next_action: split operational advisories from retrospective best-track datasets in catalog
+
+  - source_id: marine_ocean_surface_state
+    family: J_marine_ocean_surface_state
+    priority: P1_HIGH_VALUE
+    provider: HKO_NOAA_official_ocean_providers
+    authoritative_status: official_or_lawful_ocean_context
+    access_url: "provider-specific"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: provider_specific
+    variables: [sea_surface_temperature, coastal_winds, buoys, ships, tides, ocean_analyses]
+    stations_domain: Hong_Kong_coastal_and_regional_waters
+    native_cadence: product_specific
+    forecast_cycles: []
+    historical_start_end: archive_specific
+    archive_availability: mixed
+    expected_latency: product_specific
+    revision_behavior: version_required
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: medium_to_large
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: NOT_IMPLEMENTED
+    backfill_status: NOT_STARTED
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: source selection and issue-time contracts required
+    evidence: reset instruction section 5J
+    next_action: select HKO local sea temperature and NOAA OISST/OSTIA lawful products
+
+  - source_id: reanalysis_mechanism_datasets
+    family: K_reanalysis_retrospective_mechanism_datasets
+    priority: P1_HIGH_VALUE
+    provider: Copernicus_NASA_NOAA
+    authoritative_status: retrospective_mechanism_context_only
+    access_url: "CDS and provider APIs"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: credentials_required_for_some
+    variables: [era5_single_levels, era5_pressure_levels, era5_land, merra2_or_cfsr_if_justified]
+    stations_domain: Hong_Kong_regional_and_synoptic_domains
+    native_cadence: hourly_or_product_specific
+    forecast_cycles: []
+    historical_start_end: product_specific
+    archive_availability: public_api_with_credentials
+    expected_latency: release_lag
+    revision_behavior: version_and_retrieval_date_required
+    point_in_time_class: RETROSPECTIVE_ONLY
+    estimated_bytes: large
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: CREDENTIAL_BLOCKED
+    backfill_status: CREDENTIAL_BLOCKED
+    live_status: not_applicable
+    last_success: null
+    coverage: not_started
+    blocker: CDS credentials and exact request subsets required
+    evidence: reset instruction section 5K and .env.example CDS fields
+    next_action: configure CDS credentials and write subset requests; mark RETROSPECTIVE_ONLY forever
+
+  - source_id: static_geospatial_deterministic_context
+    family: L_static_geospatial_deterministic_context
+    priority: P1_HIGH_VALUE
+    provider: official_open_geospatial_sources
+    authoritative_status: versioned_static_context
+    access_url: "https://www.geodata.gov.hk/gs/"
+    documentation_url: "https://www.geodata.gov.hk/gs/"
+    license_terms: source-specific
+    authentication: none_or_provider_specific
+    variables: [terrain, coastline, land_water_fraction, land_cover, urban_morphology, station_distance_bearing, solar_geometry]
+    stations_domain: Hong_Kong_and_station_network
+    native_cadence: static_versioned
+    forecast_cycles: []
+    historical_start_end: version_specific
+    archive_availability: public_or_terms_specific
+    expected_latency: not_applicable
+    revision_behavior: version_static_files
+    point_in_time_class: STATIC_METADATA
+    estimated_bytes: medium
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: NOT_IMPLEMENTED
+    backfill_status: NOT_STARTED
+    live_status: not_applicable
+    last_success: null
+    coverage: not_started
+    blocker: source selection and licensing review required
+    evidence: reset instruction section 5L
+    next_action: generate solar geometry locally and select official terrain/coastline sources
+
+  - source_id: frontier_context_inventory
+    family: M_frontier_context
+    priority: P2_FRONTIER
+    provider: multiple
+    authoritative_status: exploratory_only
+    access_url: "provider-specific"
+    documentation_url: "provider-specific"
+    license_terms: provider-specific
+    authentication: provider_specific
+    variables: [aerosol, air_quality, soil_wetness, vegetation, mjo_enso_monsoon_indices, trajectory_ready_fields]
+    stations_domain: Hong_Kong_regional_and_upstream_domains
+    native_cadence: product_specific
+    forecast_cycles: product_specific
+    historical_start_end: product_specific
+    archive_availability: mixed
+    expected_latency: product_specific
+    revision_behavior: product_specific
+    point_in_time_class: MIXED
+    estimated_bytes: unknown
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DEFERRED_WITH_REASON
+    backfill_status: DEFERRED_WITH_REASON
+    live_status: not_started
+    last_success: null
+    coverage: not_started
+    blocker: P2 must not delay incomplete P0 acquisition
+    evidence: reset instruction section 5M
+    next_action: revisit after P0 and P1 source families have active acquisition paths

@@ -4,15 +4,18 @@ Generated for HKO Daily Extract `2026-06`.
 
 ## Gate Status
 
-**G1 remains blocked.** This run proves polling/ledger mechanics and archive-first-observed evidence. It does not by itself prove provider first publication.
+**Rapid polling is superseded.** EXP-0032 preserved an interrupted unchanged
+fetch, but it is not an accepted research checkpoint. Future Daily Extract
+retrieval belongs to the weather-data acquisition collector and append-only
+retrieval ledger, not to experiment folders.
 
 ## Latest Poll
 
 - catalog hash: `f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb`
-- catalog retrieved_at: `2026-06-18T21:39:40.471661Z`
+- catalog retrieved_at: `2026-06-18T21:49:46.019287Z`
 - monthly source: `hko_daily_extract_202606`
 - monthly hash: `c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc`
-- monthly retrieved_at: `2026-06-18T21:39:42.317252Z`
+- monthly retrieved_at: `2026-06-18T21:49:47.131681Z`
 
 ## Ledger Summary
 
@@ -31,10 +34,11 @@ Generated for HKO Daily Extract `2026-06`.
 ## Artifacts
 
 - ledger CSV: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\data\gold\target_publication\daily_extract_first_seen.csv`
-- metrics JSON: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\experiments\EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent\results\metrics.json`
+- metrics JSON: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\experiments\EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent\results\metrics.json`
 
 ## Limitations
 
 - Rows already visible before active polling are only first observed by this archive.
 - Provider first-publication candidate status requires active absent-before-present evidence.
-- No predictive modelling or market backtesting was run.
+- This report must not trigger further polling experiments, predictive modelling,
+  or market backtesting.

@@ -1,0 +1,50 @@
+schedule_version: 1
+timezone: Asia/Hong_Kong
+policy:
+  scope: weather_data_acquisition_only
+  polymarket: excluded
+  routine_fetches_create_experiments: false
+  unchanged_hash_behavior: append_ledger_only
+  daily_extract_policy:
+    max_successful_fetches_per_local_day: 1
+    scheduled_local_time: "09:00"
+    retry_after_failure_hours: 6
+    no_rapid_polling: true
+
+sources:
+  - source_id: hko_daily_extract_month
+    enabled: true
+    schedule_type: daily_hkt
+    at_local_time: "09:00"
+    retry_after_failed_hours: 6
+    notes: "Template source; collector requires explicit yyyymm adapter before activation."
+  - source_id: hko_latest_1min_temperature
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_since_midnight_maxmin
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_local_weather_forecast
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 60
+    notes: "Official forecast vintage; changed payloads are separate vintages."
+  - source_id: hko_nine_day_forecast
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 60
+    notes: "Official forecast vintage; changed payloads are separate vintages."
+  - source_id: hko_clmmaxt_hko
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 1440
+    notes: "Historical daily Tmax proxy; latest file may revise history."
+  - source_id: hko_open_data_catalog
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 1440
+    notes: "Provider metadata and endpoint discovery."

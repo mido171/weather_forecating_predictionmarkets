@@ -8,6 +8,15 @@ from collections.abc import Sequence
 from decimal import Decimal
 from pathlib import Path
 
+from .acquisition import ensure_data_root, inspect_data_root
+from .bronze import build_bronze_latest
+from .collector import (
+    collect_source_ids,
+    run_due_schedules,
+    write_health_report,
+    write_inventory_reports,
+    write_machine_source_catalog,
+)
 from .config import SourceCatalog, find_repo_root
 from .doctor import doctor
 from .experiments import create_experiment, generate_index
@@ -120,6 +129,27 @@ def build_parser() -> argparse.ArgumentParser:
     market_sub = market_parser.add_subparsers(dest="market_command", required=True)
     snapshot_parser = market_sub.add_parser("snapshot-event")
     snapshot_parser.add_argument("--slug", required=True)
+
+    acquisition_parser = subparsers.add_parser(
+        "acquisition", help="Manage weather-only data acquisition infrastructure"
+    )
+    acquisition_sub = acquisition_parser.add_subparsers(
+        dest="acquisition_command", required=True
+    )
+    acquisition_sub.add_parser("init", help="Create/verify HKG_TMAX_DATA_ROOT layout")
+    collect_parser = acquisition_sub.add_parser(
+        "collect", help="Collect selected non-market sources into the acquisition data root"
+    )
+    collect_parser.add_argument("--source-id", action="append", required=True)
+    collect_parser.add_argument("--continue-on-error", action="store_true")
+    acquisition_sub.add_parser("run-due", help="Run due sources from config/collector_schedules.yaml")
+    acquisition_sub.add_parser("catalog", help="Write metadata/source_catalog.parquet")
+    acquisition_sub.add_parser("reports", help="Refresh acquisition inventory and coverage reports")
+    acquisition_sub.add_parser("health", help="Refresh reports/live_collector_health.md")
+    bronze_parser = acquisition_sub.add_parser(
+        "build-bronze", help="Build bronze Parquet for the latest successful raw retrieval"
+    )
+    bronze_parser.add_argument("--source-id", action="append", required=True)
 
     return parser
 
@@ -258,6 +288,88 @@ def main(argv: Sequence[str] | None = None) -> None:
                 )
             )
             return
+
+        if args.command == "acquisition":
+            if args.acquisition_command == "init":
+                data_root = ensure_data_root(root)
+                status = inspect_data_root(root)
+                print(
+                    json.dumps(
+                        {
+                            "data_root": str(data_root),
+                            "path_length": status.path_length,
+                            "free_bytes": status.free_bytes,
+                            "total_bytes": status.total_bytes,
+                            "long_path_risk": status.long_path_risk,
+                        },
+                        sort_keys=True,
+                    )
+                )
+                return
+            if args.acquisition_command == "collect":
+                outcomes = collect_source_ids(
+                    root,
+                    source_ids=args.source_id,
+                    continue_on_error=args.continue_on_error,
+                )
+                for outcome in outcomes:
+                    payload: dict[str, object] = {
+                        "source_id": outcome.source_id,
+                        "status": outcome.status,
+                        "message": outcome.message,
+                    }
+                    if outcome.record is not None:
+                        payload.update(
+                            {
+                                "content_sha256": outcome.record.content_sha256,
+                                "content_length": outcome.record.content_length,
+                                "content_path": str(outcome.record.content_path),
+                                "deduplicated": outcome.record.deduplicated,
+                            }
+                        )
+                    print(json.dumps(payload, sort_keys=True))
+                return
+            if args.acquisition_command == "run-due":
+                outcomes = run_due_schedules(root)
+                for outcome in outcomes:
+                    print(
+                        json.dumps(
+                            {
+                                "source_id": outcome.source_id,
+                                "status": outcome.status,
+                                "message": outcome.message,
+                            },
+                            sort_keys=True,
+                        )
+                    )
+                return
+            if args.acquisition_command == "catalog":
+                print(write_machine_source_catalog(root))
+                return
+            if args.acquisition_command == "reports":
+                for path in write_inventory_reports(root):
+                    print(path)
+                return
+            if args.acquisition_command == "health":
+                print(write_health_report(root))
+                return
+            if args.acquisition_command == "build-bronze":
+                data_root = ensure_data_root(root)
+                for source_id in args.source_id:
+                    dataset = build_bronze_latest(data_root, source_id=source_id)
+                    print(
+                        json.dumps(
+                            {
+                                "source_id": dataset.source_id,
+                                "content_sha256": dataset.content_sha256,
+                                "row_count": dataset.row_count,
+                                "parquet_path": str(dataset.parquet_path),
+                                "metadata_path": str(dataset.metadata_path),
+                            },
+                            sort_keys=True,
+                        )
+                    )
+                return
 
         parser.error("Unhandled command")
     except (ValidationError, RuntimeError, ValueError) as exc:

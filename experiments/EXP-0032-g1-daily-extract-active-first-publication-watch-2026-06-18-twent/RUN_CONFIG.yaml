@@ -1,0 +1,12 @@
+run:
+  experiment_id: "EXP-0032"
+  created_at_utc: "2026-06-18T21:44:55.561273Z"
+  status: SUPERSEDED
+  command: "Do not rerun. Superseded by acquisition reset."
+  code_commit: "efafc9dc90881f76c57651c1d307949ff152270d"
+  code_dirty: "interrupted polling scaffold preserved as superseded evidence"
+
+replacement:
+  collector_config: config/collector_schedules.yaml
+  data_root_env: HKG_TMAX_DATA_ROOT
+  routine_daily_extract_policy: ledger_only_no_experiment

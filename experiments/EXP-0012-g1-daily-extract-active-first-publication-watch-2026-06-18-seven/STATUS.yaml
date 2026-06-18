@@ -1,0 +1,30 @@
+experiment_id: EXP-0012
+title: "G1 Daily Extract active first-publication watch 2026-06-18 seventh continuation"
+created_at_utc: "2026-06-18T18:50:27.516209Z"
+updated_at_utc: "2026-06-18T18:56:41Z"
+status: ACCEPTED
+goal: G1
+owner: Codex
+
+decision:
+  primary_conclusion: "Seventh continuation poll completed six iterations; 2026-06-18 remained absent through 18:55:41Z. G1 remains blocked."
+  oos_delta: null
+  milestone_eligible: false
+
+gates:
+  target_parity: BLOCKED_PENDING_PROVIDER_FIRST_PUBLICATION
+  data_provenance: PASS
+  asof_leakage: PASS_TARGET_ONLY_NO_MODEL
+  reproducibility: PASS
+  locked_oos: NOT_APPLICABLE_NOT_OPENED
+  calibration: NOT_APPLICABLE
+  robustness: NOT_APPLICABLE
+  operational_viability: PASS_BOUNDED_POLLING_WITH_RETRY
+
+reviewers:
+  leakage: Codex self-review
+  reproducibility: Codex self-review
+
+artifacts:
+  metrics: results/metrics.json
+  predictions: null

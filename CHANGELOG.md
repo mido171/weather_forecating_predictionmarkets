@@ -74,6 +74,9 @@
 - Added EXP-0023 eighteenth continuation polling for `2026-06-18`; six more
   active poll iterations completed, archive sidecars were verified, and the
   watched row was still absent through `2026-06-18T20:24:33Z`.
+- Added EXP-0024 nineteenth continuation polling for `2026-06-18`; six more
+  active poll iterations completed, archive sidecars were verified, and the
+  watched row was still absent through `2026-06-18T20:33:50Z`.
 
 ## G0 smoke test — 2026-06-18
 

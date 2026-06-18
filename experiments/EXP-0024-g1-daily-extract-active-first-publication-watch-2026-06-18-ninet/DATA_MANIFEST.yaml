@@ -1,0 +1,57 @@
+manifest_version: 1
+experiment_id: EXP-0024
+status: ACCEPTED
+
+inputs:
+  - source_id: hko_daily_extract_catalog
+    role: target_publication_metadata
+    point_in_time_status: METADATA
+    date_range: 2026-06
+    raw_snapshot_metadata:
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203103.975663Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203137.027023Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203210.972545Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203243.859332Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203316.500027Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T203349.134961Z__f80772b68545c56e.metadata.json
+    content_sha256: f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb
+  - source_id: hko_daily_extract_202606
+    role: target_publication_candidate_payload
+    point_in_time_status: TARGET_ONLY
+    date_range: 2026-06
+    raw_snapshot_metadata:
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203105.785757Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203138.741014Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203212.282555Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203244.934023Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203317.838650Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T203350.378189Z__c50910ab74e2ba8b.metadata.json
+    content_sha256: c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc
+
+outputs:
+  - path: data/gold/target_publication/daily_extract_first_seen.csv
+    role: regenerated_first_seen_ledger
+    status: regenerated
+  - path: reports/daily_extract_publication.md
+    role: regenerated_publication_report
+    status: regenerated
+  - path: experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/results/metrics.json
+    role: experiment_metrics
+    status: generated
+
+watch:
+  target_local_date: "2026-06-18"
+  inherited_active_polling_start_at_utc: "2026-06-18T17:48:59.956593Z"
+  prior_absence_window_end_utc: "2026-06-18T20:24:33.638132Z"
+  current_absence_window_end_utc: "2026-06-18T20:33:50.378189Z"
+  row_count: 17
+  provider_first_candidate_count: 0
+  watched_status: missing_after_nineteenth_continuation_poll
+
+archive_verification:
+  raw_snapshot_count: 12
+  metadata_sidecar_count: 12
+  unique_raw_paths: true
+  content_hashes_match_sidecars: true
+  http_status: 200
+  request_response_metadata_present: true

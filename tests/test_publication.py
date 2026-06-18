@@ -4,6 +4,7 @@ import pytest
 
 from hkg_tmax.publication import (
     ARCHIVE_FIRST_OBSERVED,
+    PROVIDER_FIRST_CANDIDATE,
     REVISION_OBSERVED,
     PublicationError,
     build_daily_extract_publication_ledger,
@@ -64,6 +65,94 @@ def test_publication_ledger_tracks_first_latest_and_revisions(tmp_path) -> None:
     assert by_date["2026-06-02"].evidence_class == ARCHIVE_FIRST_OBSERVED
     assert by_date["2026-06-03"].evidence_class == ARCHIVE_FIRST_OBSERVED
     assert "not proof of provider first publication" in by_date["2026-06-03"].notes
+
+
+def test_publication_ledger_candidates_require_active_start_and_watched_date(
+    tmp_path,
+) -> None:
+    raw_root = tmp_path / "raw"
+    source_id = "hko_daily_extract_202606"
+    active_start = datetime(2026, 6, 18, 10, 30, tzinfo=UTC)
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0")]),
+        retrieved_at=datetime(2026, 6, 18, 10, tzinfo=UTC),
+        extension="xml",
+    )
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0"), ("02", "31.0"), ("03", "30.5")]),
+        retrieved_at=datetime(2026, 6, 18, 11, tzinfo=UTC),
+        extension="xml",
+    )
+
+    rows = build_daily_extract_publication_ledger(
+        raw_root=raw_root,
+        year=2026,
+        month=6,
+        source_id=source_id,
+        provider_first_candidate_after=active_start,
+        watched_candidate_dates=["2026-06-02"],
+    )
+
+    by_date = {row.local_date: row for row in rows}
+    assert by_date["2026-06-01"].evidence_class == ARCHIVE_FIRST_OBSERVED
+    assert by_date["2026-06-02"].evidence_class == PROVIDER_FIRST_CANDIDATE
+    assert by_date["2026-06-03"].evidence_class == ARCHIVE_FIRST_OBSERVED
+
+
+def test_publication_ledger_revision_overrides_candidate(tmp_path) -> None:
+    raw_root = tmp_path / "raw"
+    source_id = "hko_daily_extract_202606"
+    active_start = datetime(2026, 6, 18, 10, 30, tzinfo=UTC)
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("02", "31.0")]),
+        retrieved_at=datetime(2026, 6, 18, 11, tzinfo=UTC),
+        extension="xml",
+    )
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("02", "31.1")]),
+        retrieved_at=datetime(2026, 6, 18, 12, tzinfo=UTC),
+        extension="xml",
+    )
+
+    rows = build_daily_extract_publication_ledger(
+        raw_root=raw_root,
+        year=2026,
+        month=6,
+        source_id=source_id,
+        provider_first_candidate_after=active_start,
+        watched_candidate_dates=["2026-06-02"],
+    )
+
+    assert rows[0].evidence_class == REVISION_OBSERVED
+
+
+def test_publication_ledger_rejects_invalid_watched_date(tmp_path) -> None:
+    raw_root = tmp_path / "raw"
+    source_id = "hko_daily_extract_202606"
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0")]),
+        retrieved_at=datetime(2026, 6, 18, 10, tzinfo=UTC),
+        extension="xml",
+    )
+
+    with pytest.raises(PublicationError, match="Invalid watched candidate date"):
+        build_daily_extract_publication_ledger(
+            raw_root=raw_root,
+            year=2026,
+            month=6,
+            source_id=source_id,
+            watched_candidate_dates=["20260601"],
+        )
 
 
 def test_publication_ledger_requires_timezone_aware_candidate_marker(tmp_path) -> None:

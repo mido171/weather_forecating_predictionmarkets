@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 from hkg_tmax.config import find_repo_root
@@ -33,34 +35,70 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--metrics",
         type=Path,
-        default=Path(
-            "experiments/EXP-0003-g1-daily-extract-first-publication-polling/results/metrics.json"
-        ),
+        default=Path("reports/generated/daily_extract_publication_metrics.json"),
     )
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
+    parser.add_argument("--iterations", type=int, default=1)
+    parser.add_argument("--interval-seconds", type=float, default=0.0)
+    parser.add_argument(
+        "--active-polling-start-at",
+        help='Timezone-aware ISO timestamp, or "now"; required for provider-first candidates.',
+    )
+    parser.add_argument(
+        "--watch-candidate-date",
+        action="append",
+        default=[],
+        help="YYYY-MM-DD local date eligible for provider-first-publication candidate status.",
+    )
     return parser
+
+
+def _parse_active_start(value: str | None) -> datetime | None:
+    if value is None:
+        return None
+    if value == "now":
+        return datetime.now(UTC)
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("--active-polling-start-at must be timezone-aware")
+    return parsed.astimezone(UTC)
 
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.iterations < 1:
+        raise ValueError("--iterations must be >= 1")
+    if args.interval_seconds < 0:
+        raise ValueError("--interval-seconds must be >= 0")
     root = args.root.resolve() if args.root else find_repo_root()
     source_id = daily_extract_month_source_id(args.year, args.month)
+    active_start = _parse_active_start(args.active_polling_start_at)
     policy = FetchPolicy(
         timeout_seconds=args.timeout_seconds,
         user_agent="HKG-Tmax-Research/0.1 (+research-contact-required)",
     )
 
-    catalog_snapshot, monthly_snapshot = fetch_daily_extract_month(
-        root=root,
-        year=args.year,
-        month=args.month,
-        policy=policy,
-    )
+    catalog_snapshot = None
+    monthly_snapshot = None
+    for index in range(args.iterations):
+        catalog_snapshot, monthly_snapshot = fetch_daily_extract_month(
+            root=root,
+            year=args.year,
+            month=args.month,
+            policy=policy,
+        )
+        if index < args.iterations - 1:
+            time.sleep(args.interval_seconds)
+    if catalog_snapshot is None or monthly_snapshot is None:
+        raise RuntimeError("No Daily Extract poll iterations completed")
+
     rows = build_daily_extract_publication_ledger(
         raw_root=root / "data" / "raw",
         year=args.year,
         month=args.month,
         source_id=source_id,
+        provider_first_candidate_after=active_start,
+        watched_candidate_dates=args.watch_candidate_date,
     )
 
     output_path = (root / args.output).resolve()
@@ -73,6 +111,12 @@ def main() -> None:
         "year": args.year,
         "month": args.month,
         "source_id": source_id,
+        "poll_iterations_completed": args.iterations,
+        "interval_seconds": args.interval_seconds,
+        "active_polling_start_at": (
+            None if active_start is None else active_start.isoformat().replace("+00:00", "Z")
+        ),
+        "watched_candidate_dates": args.watch_candidate_date,
         "catalog_snapshot": {
             "sha256": catalog_snapshot.sha256,
             "retrieved_at": catalog_snapshot.retrieved_at.isoformat().replace("+00:00", "Z"),
@@ -111,6 +155,8 @@ def main() -> None:
         f"- evidence counts: `{summary['evidence_counts']}`",
         f"- revision count: `{summary['revision_count']}`",
         f"- provider first publication proven: `{summary['provider_first_publication_proven']}`",
+        f"- active polling start: `{metrics['active_polling_start_at']}`",
+        f"- watched candidate dates: `{args.watch_candidate_date}`",
         "",
         "## Artifacts",
         "",
@@ -121,7 +167,7 @@ def main() -> None:
         "",
         "- Rows already visible before active polling are only first observed by this archive.",
         "- Provider first-publication status requires repeated near-publication polling and review.",
-        "- No predictive modelling or Polymarket backtesting was run.",
+        "- No predictive modelling or market backtesting was run.",
         "",
     ]
     report_path.parent.mkdir(parents=True, exist_ok=True)

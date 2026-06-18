@@ -1,0 +1,24 @@
+run:
+  experiment_id: "EXP-0004"
+  command:
+    - ".\\.venv\\Scripts\\python.exe scripts\\poll_daily_extract.py --year 2026 --month 6 --iterations 2 --interval-seconds 1 --metrics experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/results/metrics.json"
+    - ".\\.venv\\Scripts\\python.exe -m pytest"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax validate all"
+    - ".\\.venv\\Scripts\\python.exe -m ruff check src tests scripts"
+    - ".\\.venv\\Scripts\\python.exe -m mypy src"
+  code_commit: "fcd541135aabe3391ecc40b3919649530d53f24c"
+  code_dirty: true
+
+candidate:
+  name: "bounded Daily Extract polling with watched-date candidate gate"
+  parameters:
+    year: 2026
+    month: 6
+    iterations: 2
+    interval_seconds: 1
+    watched_candidate_dates: []
+
+outputs:
+  metrics: results/metrics.json
+  report: ../../../reports/daily_extract_publication.md
+  publication_ledger: ../../../data/gold/target_publication/daily_extract_first_seen.csv

@@ -14,6 +14,9 @@
 - Added EXP-0003 Daily Extract polling infrastructure and a first-observation
   ledger for June 2026; it is accepted as infrastructure, while G1 remains
   blocked pending provider first-publication evidence.
+- Added EXP-0004 bounded Daily Extract polling with explicit metrics output and
+  watched-date provider-first candidate gating; G1 remains blocked until actual
+  provider first-publication evidence is observed.
 
 ## G0 smoke test — 2026-06-18
 

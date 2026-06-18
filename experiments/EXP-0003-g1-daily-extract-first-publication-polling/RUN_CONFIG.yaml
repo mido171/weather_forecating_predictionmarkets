@@ -3,7 +3,7 @@ run:
   created_at_utc: "2026-06-18T17:27:20.928035Z"
   command:
     - ".\\.venv\\Scripts\\python.exe -m hkg_tmax experiments create --title \"G1 Daily Extract first-publication polling\""
-    - ".\\.venv\\Scripts\\python.exe scripts\\poll_daily_extract.py --year 2026 --month 6"
+    - ".\\.venv\\Scripts\\python.exe scripts\\poll_daily_extract.py --year 2026 --month 6 --metrics experiments/EXP-0003-g1-daily-extract-first-publication-polling/results/metrics.json"
     - ".\\.venv\\Scripts\\python.exe -m pytest"
     - ".\\.venv\\Scripts\\python.exe -m hkg_tmax validate all"
     - ".\\.venv\\Scripts\\python.exe -m ruff check src tests scripts"

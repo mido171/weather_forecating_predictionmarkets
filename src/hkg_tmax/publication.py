@@ -152,10 +152,12 @@ def build_daily_extract_publication_ledger(
     month: int,
     source_id: str | None = None,
     provider_first_candidate_after: datetime | None = None,
+    watched_candidate_dates: Iterable[str] = (),
 ) -> list[DailyExtractPublicationRow]:
     source_id = source_id or daily_extract_month_source_id(year, month)
     if provider_first_candidate_after is not None and provider_first_candidate_after.tzinfo is None:
         raise PublicationError("provider_first_candidate_after must be timezone-aware")
+    watched = _validated_watched_dates(watched_candidate_dates)
     snapshots = load_snapshot_metadata(raw_root, source_id)
     if not snapshots:
         raise PublicationError(f"No raw snapshots available for {source_id}")
@@ -174,9 +176,11 @@ def build_daily_extract_publication_ledger(
         distinct_values = sorted({_value_key(row) for _, row in entries})
         revision_observed = len(distinct_values) > 1
         evidence_class = _evidence_class(
+            local_date,
             first_snapshot.retrieved_at,
             provider_first_candidate_after=provider_first_candidate_after,
             revision_observed=revision_observed,
+            watched_candidate_dates=watched,
         )
         notes = _notes_for(evidence_class, revision_observed)
         ledger.append(
@@ -207,16 +211,30 @@ def build_daily_extract_publication_ledger(
     return ledger
 
 
+def _validated_watched_dates(values: Iterable[str]) -> set[str]:
+    watched: set[str] = set()
+    for value in values:
+        try:
+            datetime.strptime(value, "%Y-%m-%d")
+        except ValueError as exc:
+            raise PublicationError(f"Invalid watched candidate date: {value}") from exc
+        watched.add(value)
+    return watched
+
+
 def _evidence_class(
+    local_date: str,
     first_retrieved_at: datetime,
     *,
     provider_first_candidate_after: datetime | None,
     revision_observed: bool,
+    watched_candidate_dates: set[str],
 ) -> str:
     if revision_observed:
         return REVISION_OBSERVED
     if (
         provider_first_candidate_after is not None
+        and local_date in watched_candidate_dates
         and first_retrieved_at >= provider_first_candidate_after.astimezone(UTC)
     ):
         return PROVIDER_FIRST_CANDIDATE

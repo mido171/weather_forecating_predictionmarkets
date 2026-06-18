@@ -12,7 +12,7 @@ py -3.11 -m venv .venv
 ## Run
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\poll_daily_extract.py --year 2026 --month 6
+.\.venv\Scripts\python.exe scripts\poll_daily_extract.py --year 2026 --month 6 --metrics experiments\EXP-0003-g1-daily-extract-first-publication-polling\results\metrics.json
 ```
 
 ## Expected Outputs

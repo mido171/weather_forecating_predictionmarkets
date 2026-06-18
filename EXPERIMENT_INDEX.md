@@ -7,6 +7,7 @@ Generated from experiment `STATUS.yaml` files.
 | [EXP-0001](experiments/EXP-0001-g0-repository-and-archive-smoke-test/README.md) | G0 repository and archive smoke test | ACCEPTED | G0 repository and immutable raw archive smoke test passed; predictive modelling remains gated. | None | PASS | PASS |
 | [EXP-0002](experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/README.md) | G1 Daily Extract and CLMMAXT target parity | BLOCKED | Latest HKO Daily Extract and latest CLMMAXT matched 31/31 May 2026 rows, but G1 is blocked pending first-publication Daily Extract evidence. | None | PASS_TARGET_ONLY_NO_MODEL | PASS_FOR_CHECKPOINT |
 | [EXP-0003](experiments/EXP-0003-g1-daily-extract-first-publication-polling/README.md) | G1 Daily Extract first-publication polling | ACCEPTED | Daily Extract polling and first-observation ledger mechanics passed for 17 June 2026 rows; G1 remains blocked pending provider first-publication evidence. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
+| [EXP-0004](experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/README.md) | G1 Daily Extract bounded polling candidate gating | ACCEPTED | Bounded Daily Extract polling and watched-date candidate gating passed; G1 remains blocked pending actual provider first-publication evidence. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 
 Regenerate with:
 

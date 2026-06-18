@@ -1,0 +1,32 @@
+experiment_id: "EXP-0004"
+title: "G1 Daily Extract bounded polling candidate gating"
+created_at_utc: "2026-06-18T17:33:58.120677Z"
+updated_at_utc: "2026-06-18T17:40:00Z"
+status: ACCEPTED
+goal: G1
+owner: Codex
+
+decision:
+  primary_conclusion: "Bounded Daily Extract polling and watched-date candidate gating passed; G1 remains blocked pending actual provider first-publication evidence."
+  oos_delta: null
+  milestone_eligible: false
+
+gates:
+  target_parity: BLOCKED_PENDING_PROVIDER_FIRST_PUBLICATION
+  data_provenance: PASS
+  asof_leakage: PASS_TARGET_ONLY_NO_MODEL
+  reproducibility: PASS
+  locked_oos: NOT_APPLICABLE_G1_INFRA
+  calibration: NOT_APPLICABLE_G1_INFRA
+  robustness: LIMITED_SINGLE_MONTH
+  operational_viability: PASS_BOUNDED_POLLING
+
+reviewers:
+  leakage: Codex self-review target-only checkpoint
+  reproducibility: Codex self-review after pytest/validate/ruff/mypy
+
+artifacts:
+  metrics: results/metrics.json
+  predictions: null
+  report: ../../../reports/daily_extract_publication.md
+  publication_ledger: ../../../data/gold/target_publication/daily_extract_first_seen.csv

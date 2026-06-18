@@ -26,6 +26,9 @@
 - Added EXP-0007 second continuation polling for `2026-06-18`; the Daily
   Extract monthly payload remained unchanged and the watched row was still
   absent.
+- Added EXP-0008 third continuation polling for `2026-06-18`; six more active
+  poll iterations completed, archive sidecars were verified, and the watched
+  row was still absent through `2026-06-18T18:20:46Z`.
 
 ## G0 smoke test — 2026-06-18
 

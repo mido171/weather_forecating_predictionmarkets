@@ -1,48 +1,39 @@
-# Weather Forecasting Prediction Markets
+# Weather Data Extraction
 
-Multi-module Java project for Epic #1 ingestion (Kalshi weather MOS + CLI).
+This branch is the extraction-focused cut of the original weather prediction markets repo.
 
-## Modules
-- models: JPA entities, enums, shared DTOs, Flyway migrations
-- common: shared utilities (time, HTTP, retries, hashing)
-- ingestion-service: Spring Boot app for ingestion jobs
+Kept here:
 
-## Build
-Requires Java 18 (configured in the parent POM).
+- Weather.com/Wunderground historical observation ingestion and daily max derivation.
+- IEM/Mesonet CLI, MOS, ASOS, AFOS, and Climodat fetchers.
+- NCEI/NWS/ACIS/NDFD truth and grid fetchers.
+- Gribstream history/forecast clients and parsers.
+- NOAA model-grid extraction workers using Herbie, direct GRIB, and xarray.
+- Kalshi market-data, candlestick, orderbook, and series metadata fetchers.
+- Polymarket public event/price/trade downloaders.
+- Small local readers/exporters used to pull extracted truth from DB tables.
 
-mvn clean install
+Removed from this cut:
 
-## Run ingestion-service (local / in-memory)
-Use the local profile to run against the in-memory H2 database.
+- Generated artifacts and model outputs.
+- UI app code.
+- Planning docs, Jiras, and long-form reports.
+- Model training sweeps and calibration experiments.
+- Backtest-only scripts that do not fetch or parse upstream data.
 
-mvn -pl ingestion-service spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=local"
+## Smoke Tests
 
-## Run ingestion-service (MySQL)
-Default profile is MySQL. Update connection settings if needed.
+Run the local smoke tests without hitting external APIs:
 
-SPRING_PROFILES_ACTIVE=mysql
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/weather_predictionmarkets?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=root
-
-mvn -pl ingestion-service spring-boot:run
-
-## Gribstream credentials
-The Gribstream ingestion paths require an API token. Set these before running the
-Gribstream executors:
-
-```text
-GRIBSTREAM_API_TOKEN=your-token
-GRIBSTREAM_AUTH_SCHEME=Bearer
+```powershell
+python -m compileall -q .
+python smoke_tests/smoke_extractors.py
 ```
 
-## Weather.com historical observations
-The Weather.com ingestion endpoints require an API key. Configure it through environment
-variables; never commit the key.
+Java compile smoke:
 
-```text
-WEATHERCOM_API_KEY=your-weathercom-key
+```powershell
+mvn -q -DskipTests package
 ```
 
-Relevant Spring config keys live under `weathercom.*` in
-`ingestion-service/src/main/resources/application.yml`.
+The smoke harness checks representative parser/normalizer paths for each upstream extraction family. Real live fetching still requires provider credentials and network access.

@@ -19,7 +19,7 @@ public class JobMetricsAccumulator {
   private long totalRows;
 
   public synchronized void recordRequest(double durationMs,
-                                         int bytesDownloaded,
+                                         long bytesDownloaded,
                                          int rowsParsed,
                                          String status) {
     totalRequests += 1;

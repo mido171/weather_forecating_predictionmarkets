@@ -1,0 +1,98 @@
+manifest_version: 1
+experiment_id: "EXP-0029"
+created_at_utc: "2026-06-18T21:14:48.483424Z"
+
+target:
+  target_version: HKO Daily Extract first-publication candidate
+  date_range: "2026-06-18"
+  row_count: 17
+  manifest_hash: null
+
+inputs:
+  - source_id: hko_daily_extract_catalog
+    point_in_time_status: METADATA
+    date_range: "2026-06"
+    entities: [Hong Kong Observatory]
+    variables: [coverage_catalog]
+    raw_manifest: data/raw/hko_daily_extract_catalog/2026/06/18/
+    raw_hashes:
+      - f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb
+    derived_version: null
+    schema_version: hko_daily_extract_catalog_current
+    row_count: 6
+    exclusions: []
+    license_notes: Subject to HKO terms.
+  - source_id: hko_daily_extract_202606
+    point_in_time_status: TARGET_ONLY
+    date_range: "2026-06"
+    entities: [HKO]
+    variables: ["Absolute Daily Max (deg. C)"]
+    raw_manifest: data/raw/hko_daily_extract_202606/2026/06/18/
+    raw_hashes:
+      - c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc
+    derived_version: null
+    schema_version: hko_daily_extract_month_current
+    row_count: 17
+    exclusions: [forecast_features, model_training, market_backtesting]
+    license_notes: Subject to HKO terms.
+  - source_id: exp_0028_metrics
+    point_in_time_status: TARGET_ONLY
+    date_range: "2026-06-18"
+    entities: [HKO]
+    variables: [prior_absence_checkpoint]
+    raw_manifest: experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+    raw_hashes: []
+    derived_version: EXP-0028
+    schema_version: poll_metrics_v1
+    row_count: 17
+    exclusions: []
+    license_notes: Internal experiment artifact.
+
+output_examples:
+  dataset_version: null
+  feature_manifest_hash: null
+  row_count: 17
+  max_available_at_check: not_applicable_target_only
+
+outputs:
+  - experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+  - reports/daily_extract_publication.md
+
+poll_result:
+  active_polling_start_at_utc: "2026-06-18T17:48:59.956593Z"
+  prior_absence_window_end_utc: "2026-06-18T21:10:15.704745Z"
+  current_absence_window_end_utc: "2026-06-18T21:21:19.382593Z"
+  catalog_retrieved_at_utc: "2026-06-18T21:21:17.558829Z"
+  monthly_retrieved_at_utc: "2026-06-18T21:21:19.382593Z"
+  catalog_sha256: f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb
+  monthly_sha256: c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc
+  poll_iterations_completed: 6
+  poll_snapshot_count: 6
+  provider_first_candidate_count: 0
+  provider_first_publication_proven: false
+  watched_candidate_dates_present: []
+  watched_candidate_dates_missing: ["2026-06-18"]
+  revision_count: 0
+
+archive_verification:
+  raw_snapshot_count: 12
+  metadata_sidecar_count: 12
+  unique_raw_paths: true
+  content_hashes_match_sidecars: true
+  http_status_200: true
+  request_response_metadata_present: true
+  problems: []
+
+sidecars:
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T211819.815314Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T211900.593681Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T211935.471050Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T212009.264690Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T212042.762563Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T212117.558829Z__f80772b68545c56e.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T211824.998416Z__c50910ab74e2ba8b.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T211903.367747Z__c50910ab74e2ba8b.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T211937.432471Z__c50910ab74e2ba8b.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T212010.737246Z__c50910ab74e2ba8b.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T212045.115745Z__c50910ab74e2ba8b.metadata.json
+  - data/raw/hko_daily_extract_202606/2026/06/18/20260618T212119.382593Z__c50910ab74e2ba8b.metadata.json

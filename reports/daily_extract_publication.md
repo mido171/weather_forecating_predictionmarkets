@@ -9,10 +9,10 @@ Generated for HKO Daily Extract `2026-06`.
 ## Latest Poll
 
 - catalog hash: `f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb`
-- catalog retrieved_at: `2026-06-18T19:27:31.890190Z`
+- catalog retrieved_at: `2026-06-18T19:35:50.746044Z`
 - monthly source: `hko_daily_extract_202606`
 - monthly hash: `c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc`
-- monthly retrieved_at: `2026-06-18T19:27:34.040827Z`
+- monthly retrieved_at: `2026-06-18T19:35:51.841825Z`
 
 ## Ledger Summary
 
@@ -31,7 +31,7 @@ Generated for HKO Daily Extract `2026-06`.
 ## Artifacts
 
 - ledger CSV: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\data\gold\target_publication\daily_extract_first_seen.csv`
-- metrics JSON: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\experiments\EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve\results\metrics.json`
+- metrics JSON: `C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\experiments\EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf\results\metrics.json`
 
 ## Limitations
 

@@ -1,0 +1,49 @@
+run:
+  experiment_id: "EXP-0002"
+  created_at_utc: "2026-06-18T17:00:23.286516Z"
+  command:
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax experiments create --title \"G1 Daily Extract and CLMMAXT target parity\""
+    - "archive HKO Daily Extract current/latest pages and CLMMAXT station=HKO"
+    - "archive HKO station metadata and source-contract evidence"
+    - "build data/gold/target_parity artifacts"
+    - "build reports/target_parity.md"
+    - ".\\.venv\\Scripts\\python.exe -m pytest"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax validate all"
+    - ".\\.venv\\Scripts\\python.exe -m ruff check src tests scripts"
+    - ".\\.venv\\Scripts\\python.exe -m mypy src"
+  seed: 20260618
+  additional_seeds: []
+  code_commit: "bcbccd5a6f18d573bfa7a8a8308d3893be123d9d"
+  code_dirty: true
+  dirty_patch_sha256: "pending_until_results_freeze"
+  python_version: "3.11.9 (MSC v.1938 64 bit AMD64)"
+  platform: "Windows-10-10.0.26200-SP0"
+  dependency_snapshot_sha256: "1620ada7725901e17d4ce0d580f660161aa83954748df84034e40a8b9bf41123"
+
+target:
+  version: "hko_daily_absolute_max_first_published_pending_g1"
+  horizon: "not applicable"
+
+split:
+  config: config/evaluation.yaml
+  version: null
+
+candidate:
+  name: "G1 HKO target-station Daily Extract and CLMMAXT parity adapter"
+  parameters:
+    market_family: "deferred"
+    hko_daily_extract_field: "Absolute Daily Max (deg. C)"
+    clmmaxt_station: "HKO"
+    decimal_type: "Decimal"
+    polymarket_backtesting: "deferred_by_user_instruction"
+
+baseline:
+  name: "none"
+  prediction_artifact: null
+  sha256: null
+
+outputs:
+  predictions: null
+  metrics: results/metrics.json
+  logs: logs/
+  artifacts: artifacts/

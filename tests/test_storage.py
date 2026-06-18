@@ -35,3 +35,16 @@ def test_identical_snapshot_same_timestamp_is_idempotent(tmp_path) -> None:
     second = store_raw_bytes(tmp_path, **kwargs)
     assert first.content_path == second.content_path
     assert first.sidecar_path == second.sidecar_path
+
+
+def test_long_source_id_does_not_make_temp_prefix_too_long(tmp_path) -> None:
+    snapshot = store_raw_bytes(
+        tmp_path,
+        source_id="source_" + "x" * 80,
+        content=b"payload",
+        retrieved_at=datetime(2026, 6, 18, 12, tzinfo=UTC),
+        extension="json",
+    )
+
+    assert snapshot.content_path.read_bytes() == b"payload"
+    assert json.loads(snapshot.sidecar_path.read_text())["content_sha256"] == snapshot.sha256

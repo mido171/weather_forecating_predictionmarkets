@@ -4,7 +4,10 @@ Generated from `config/data_sources.yaml`. Endpoint implementation and source-co
 
 | ID | Provider | Priority | Point-in-time role | Research role | Cadence | Access |
 |---|---|---|---|---|---|---|
-| hko_daily_extract | Hong Kong Observatory | P0 | TARGET_ONLY | canonical_target_candidate | daily | html_or_backing_request_discovery |
+| hko_daily_extract | Hong Kong Observatory | P0 | TARGET_ONLY | canonical_target_candidate | daily | html_shell_plus_backing_request_discovery |
+| hko_daily_extract_catalog | Hong Kong Observatory | P0 | METADATA | daily_extract_backing_coverage_index | provider_updated | http_json_text |
+| hko_daily_extract_month | Hong Kong Observatory | P0 | TARGET_ONLY | canonical_target_candidate_backing_payload | daily_until_month_finalized | http_json_text_template |
+| hko_daily_extract_year | Hong Kong Observatory | P1 | PROXY_WITH_LIMITATIONS | canonical_target_candidate_backing_payload | annual_or_provider_rollup | http_json_text_template |
 | hko_clmmaxt_hko | Hong Kong Observatory | P0 | PROXY_WITH_LIMITATIONS | candidate_historical_target_label | monthly_update_of_daily_history | http_csv |
 | hko_daily_climate_download | Hong Kong Observatory | P1 | PROXY_WITH_LIMITATIONS | historical_daily_elements | monthly_or_element_specific | interactive_download_and_api_discovery |
 | hko_open_data_catalog | Hong Kong Observatory | P0 | METADATA | authoritative_dataset_catalog | provider_updated | html |
@@ -47,13 +50,13 @@ Generated from `config/data_sources.yaml`. Endpoint implementation and source-co
 ## Counts by point-in-time role
 
 - **MARKET_ONLY:** 5
-- **METADATA:** 3
+- **METADATA:** 4
 - **OPERATIONAL_POINT_IN_TIME:** 21
 - **POTENTIAL_POINT_IN_TIME_ARCHIVE:** 1
-- **PROXY_WITH_LIMITATIONS:** 4
+- **PROXY_WITH_LIMITATIONS:** 5
 - **RETROSPECTIVE_ONLY:** 3
 - **STATIC_METADATA:** 1
-- **TARGET_ONLY:** 1
+- **TARGET_ONLY:** 2
 
 ## Required next action
 

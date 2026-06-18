@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from .fetch import FetchPolicy, fetch_and_archive
+from .hashing import sha256_text
 from .storage import RawSnapshot
 
 
@@ -22,9 +23,10 @@ def snapshot_polymarket_event(
     if not _SAFE_SLUG.fullmatch(slug):
         raise MarketError(f"Unsafe/invalid Polymarket event slug: {slug!r}")
     url = f"https://gamma-api.polymarket.com/events/slug/{slug}"
+    source_id = f"polymarket_event_{sha256_text(slug)[:16]}"
     return fetch_and_archive(
         url=url,
-        source_id=f"polymarket_event_{slug}",
+        source_id=source_id,
         raw_root=root / "data" / "raw",
         policy=policy,
     )

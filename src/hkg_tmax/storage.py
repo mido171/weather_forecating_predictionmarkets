@@ -40,7 +40,8 @@ def _atomic_write_new(path: Path, content: bytes) -> None:
             raise StorageError(f"Refusing to overwrite existing immutable path: {path}")
         return
 
-    fd, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    # Keep the temp prefix short so atomic writes remain usable on Windows paths.
+    fd, temporary_name = tempfile.mkstemp(prefix=".tmp-", dir=path.parent)
     temporary = Path(temporary_name)
     try:
         with os.fdopen(fd, "wb") as handle:

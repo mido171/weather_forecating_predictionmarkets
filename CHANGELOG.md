@@ -1,5 +1,17 @@
 # Changelog
 
+## G1 target-station checkpoint — 2026-06-18
+
+- Added HKO Daily Extract backing-payload parsing for `Absolute Daily Max (deg. C)`.
+- Fixed CLMMAXT parsing for real HKO bilingual CSV headers and footer rows.
+- Added fail-closed target adapter tests for missing source/field/value, ambiguous
+  date, unsupported precision, station mismatch, and source failure.
+- Generated a May 2026 latest-payload parity sample: 31/31 Daily Extract rows
+  matched CLMMAXT HKO.
+- Marked EXP-0002 `BLOCKED` pending first-publication Daily Extract evidence;
+  no predictive modelling or Polymarket backtesting was run.
+- Added source contracts for Daily Extract, CLMMAXT HKO, and HKO station metadata.
+
 ## G0 smoke test — 2026-06-18
 
 - Archived every `bootstrap_now` source twice and documented EXP-0001.

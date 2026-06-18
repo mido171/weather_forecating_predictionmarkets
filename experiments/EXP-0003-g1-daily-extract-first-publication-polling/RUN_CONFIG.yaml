@@ -1,0 +1,32 @@
+run:
+  experiment_id: "EXP-0003"
+  created_at_utc: "2026-06-18T17:27:20.928035Z"
+  command:
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax experiments create --title \"G1 Daily Extract first-publication polling\""
+    - ".\\.venv\\Scripts\\python.exe scripts\\poll_daily_extract.py --year 2026 --month 6"
+    - ".\\.venv\\Scripts\\python.exe -m pytest"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax validate all"
+    - ".\\.venv\\Scripts\\python.exe -m ruff check src tests scripts"
+    - ".\\.venv\\Scripts\\python.exe -m mypy src"
+  seed: null
+  code_commit: "25da86741a6ac7d770a8bddbde95bbca2a50deba"
+  code_dirty: true
+
+target:
+  version: "hko_daily_absolute_max_first_published_pending_g1"
+  year: 2026
+  month: 6
+  horizon: "not applicable"
+
+candidate:
+  name: "HKO Daily Extract first-observation polling ledger"
+  parameters:
+    catalog_source_id: "hko_daily_extract_catalog"
+    monthly_source_id_pattern: "hko_daily_extract_YYYYMM"
+    evidence_policy: "first archive observation is not provider first publication unless active pre-appearance polling is proven"
+    polymarket_backtesting: "deferred_by_user_instruction"
+
+outputs:
+  publication_ledger: "../../../data/gold/target_publication/daily_extract_first_seen.csv"
+  report: "../../../reports/daily_extract_publication.md"
+  metrics: "results/metrics.json"

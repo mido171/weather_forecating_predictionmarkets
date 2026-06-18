@@ -1,17 +1,17 @@
 program: HKG_TMAX_ELITE
 status: BOOTSTRAPPED
-current_goal: G0
+current_goal: G1
 
 goals:
   - id: G0
     title: Repository and archival smoke test
     depends_on: []
-    status: READY
+    status: ACCEPTED
     blocking: true
   - id: G1
     title: Settlement truth and historical-label parity
     depends_on: [G0]
-    status: BLOCKED
+    status: IN_PROGRESS_BLOCKED_ON_PROVIDER_FIRST_PUBLICATION
     blocking: true
   - id: G2
     title: Operational cutoff selection

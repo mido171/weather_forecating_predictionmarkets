@@ -11,6 +11,9 @@
 - Marked EXP-0002 `BLOCKED` pending first-publication Daily Extract evidence;
   no predictive modelling or Polymarket backtesting was run.
 - Added source contracts for Daily Extract, CLMMAXT HKO, and HKO station metadata.
+- Added EXP-0003 Daily Extract polling infrastructure and a first-observation
+  ledger for June 2026; it is accepted as infrastructure, while G1 remains
+  blocked pending provider first-publication evidence.
 
 ## G0 smoke test — 2026-06-18
 

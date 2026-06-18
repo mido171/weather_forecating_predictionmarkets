@@ -1,5 +1,5 @@
 registry_version: 1
-next_id: 3
+next_id: 4
 experiments:
 - id: EXP-0001
   title: G0 repository and archive smoke test
@@ -11,3 +11,8 @@ experiments:
   directory: EXP-0002-g1-daily-extract-and-clmmaxt-target-parity
   created_at_utc: '2026-06-18T17:00:23.286516Z'
   status: BLOCKED
+- id: EXP-0003
+  title: G1 Daily Extract first-publication polling
+  directory: EXP-0003-g1-daily-extract-first-publication-polling
+  created_at_utc: '2026-06-18T17:27:20.928035Z'
+  status: ACCEPTED

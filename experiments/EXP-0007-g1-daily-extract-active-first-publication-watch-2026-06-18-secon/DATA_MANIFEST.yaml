@@ -1,0 +1,35 @@
+manifest_version: 1
+experiment_id: "EXP-0007"
+updated_at_utc: "2026-06-18T18:11:00Z"
+target:
+  target_version: hko_daily_absolute_max_first_published_pending_g1
+  watched_local_date: "2026-06-18"
+  date_range: "2026-06 current-month Daily Extract second continuation watch"
+  inherited_active_polling_start_at: "2026-06-18T17:48:59.956593Z"
+  row_count: 17
+  watched_local_date_status: missing_after_second_continuation_poll
+inputs:
+  - source_id: hko_daily_extract_catalog
+    raw_manifests:
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180626.307809Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180659.927943Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180739.264090Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180819.048215Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180852.078397Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180925.081399Z__f80772b68545c56e.metadata.json
+    raw_hashes:
+      - f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb
+  - source_id: hko_daily_extract_202606
+    raw_manifests:
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180628.552819Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180701.390634Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180746.887342Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180820.323584Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180853.254824Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180927.640472Z__c50910ab74e2ba8b.metadata.json
+    raw_hashes:
+      - c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc
+outputs:
+  metrics: results/metrics.json
+  report: ../../../reports/daily_extract_publication.md
+  publication_ledger: ../../../data/gold/target_publication/daily_extract_first_seen.csv

@@ -23,6 +23,9 @@
 - Added EXP-0006 continuation polling for `2026-06-18`, per-iteration poll
   snapshot metrics, and explicit bounded fetch retries for transient provider
   disconnects.
+- Added EXP-0007 second continuation polling for `2026-06-18`; the Daily
+  Extract monthly payload remained unchanged and the watched row was still
+  absent.
 
 ## G0 smoke test — 2026-06-18
 

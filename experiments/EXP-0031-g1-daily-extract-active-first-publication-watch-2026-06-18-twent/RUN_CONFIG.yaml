@@ -1,0 +1,44 @@
+run:
+  experiment_id: "EXP-0031"
+  created_at_utc: "2026-06-18T21:33:53.549435Z"
+  command: ".\\.venv\\Scripts\\python.exe scripts\\poll_daily_extract.py --year 2026 --month 6 --iterations 6 --interval-seconds 30 --fetch-attempts 3 --retry-sleep-seconds 2 --active-polling-start-at 2026-06-18T17:48:59.956593Z --watch-candidate-date 2026-06-18 --metrics experiments\\EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent\\results\\metrics.json"
+  seed: null
+  additional_seeds: []
+  code_commit: "74ea05a525c89dbddd8f02ae4a008f113ca8540d"
+  code_dirty: "dirty: EXP-0031 predeclaration plus experiment registry/index reservation"
+  dirty_patch_sha256: null
+  python_version: "Python 3.11.9"
+  platform: "Windows-10-10.0.26200-SP0"
+  dependency_snapshot_sha256: "1620ada7725901e17d4ce0d580f660161aa83954748df84034e40a8b9bf41123"
+
+target:
+  version: HKO Daily Extract first-publication candidate
+  horizon: null
+
+split:
+  config: config/evaluation.yaml
+  version: not_applicable
+
+candidate:
+  name: Daily Extract active first-publication watch
+  parameters:
+    year: 2026
+    month: 6
+    iterations: 6
+    interval_seconds: 30
+    fetch_attempts: 3
+    retry_sleep_seconds: 2
+    active_polling_start_at_utc: "2026-06-18T17:48:59.956593Z"
+    watched_candidate_date: "2026-06-18"
+    inherited_absence_window_end_utc: "2026-06-18T21:29:42.956957Z"
+
+baseline:
+  name: null
+  prediction_artifact: null
+  sha256: null
+
+outputs:
+  predictions: null
+  metrics: results/metrics.json
+  logs: logs/
+  artifacts: artifacts/

@@ -20,6 +20,9 @@
 - Added EXP-0005 active Daily Extract watch for `2026-06-18` and tightened
   provider-first candidate gating to require active absent-before-present raw
   snapshots before candidate status.
+- Added EXP-0006 continuation polling for `2026-06-18`, per-iteration poll
+  snapshot metrics, and explicit bounded fetch retries for transient provider
+  disconnects.
 
 ## G0 smoke test — 2026-06-18
 

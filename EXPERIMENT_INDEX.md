@@ -9,6 +9,7 @@ Generated from experiment `STATUS.yaml` files.
 | [EXP-0003](experiments/EXP-0003-g1-daily-extract-first-publication-polling/README.md) | G1 Daily Extract first-publication polling | ACCEPTED | Daily Extract polling and first-observation ledger mechanics passed for 17 June 2026 rows; G1 remains blocked pending provider first-publication evidence. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 | [EXP-0004](experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/README.md) | G1 Daily Extract bounded polling candidate gating | ACCEPTED | Bounded Daily Extract polling and watched-date candidate gating passed; G1 remains blocked pending actual provider first-publication evidence. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 | [EXP-0005](experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 | ACCEPTED | Active watch completed four iterations; 2026-06-18 remained absent, and stricter absent-before-present candidate gating passed focused tests. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
+| [EXP-0006](experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 continuation | ACCEPTED | Continuation poll completed after adding tested bounded fetch retries; 2026-06-18 remained absent through 18:01:26Z. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 
 Regenerate with:
 

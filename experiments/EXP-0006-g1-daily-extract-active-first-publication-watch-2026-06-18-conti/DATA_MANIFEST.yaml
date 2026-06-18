@@ -1,0 +1,40 @@
+manifest_version: 1
+experiment_id: "EXP-0006"
+updated_at_utc: "2026-06-18T18:04:00Z"
+target:
+  target_version: hko_daily_absolute_max_first_published_pending_g1
+  watched_local_date: "2026-06-18"
+  date_range: "2026-06 current-month Daily Extract continuation watch"
+  inherited_active_polling_start_at: "2026-06-18T17:48:59.956593Z"
+  row_count: 17
+  watched_local_date_status: missing_after_continuation_poll
+inputs:
+  - source_id: hko_daily_extract_catalog
+    raw_manifests:
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T175605.701956Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T175644.354141Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T175835.607070Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T175910.518085Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T175943.299792Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180017.000654Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180051.628753Z__f80772b68545c56e.metadata.json
+      - data/raw/hko_daily_extract_catalog/2026/06/18/20260618T180125.542485Z__f80772b68545c56e.metadata.json
+    raw_hashes:
+      - f80772b68545c56e6842c34998696fd11b7b9a80c0088bb1f6e4da65102616eb
+  - source_id: hko_daily_extract_202606
+    raw_manifests:
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T175607.780924Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T175838.819074Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T175911.782138Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T175944.580074Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180018.534035Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180054.251974Z__c50910ab74e2ba8b.metadata.json
+      - data/raw/hko_daily_extract_202606/2026/06/18/20260618T180126.513653Z__c50910ab74e2ba8b.metadata.json
+    raw_hashes:
+      - c50910ab74e2ba8bff1f661fb1ae663d15b128dae0dfb4ed97c0e40c97bcbefc
+notes:
+  partial_aborted_attempt: "Initial EXP-0006 poll archived one paired monthly snapshot and one later catalog-only snapshot before HKO disconnected on a monthly request. Retry policy was added before the accepted rerun."
+outputs:
+  metrics: results/metrics.json
+  report: ../../../reports/daily_extract_publication.md
+  publication_ledger: ../../../data/gold/target_publication/daily_extract_first_seen.csv

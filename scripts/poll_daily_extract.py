@@ -38,6 +38,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("reports/generated/daily_extract_publication_metrics.json"),
     )
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
+    parser.add_argument("--fetch-attempts", type=int, default=3)
+    parser.add_argument("--retry-sleep-seconds", type=float, default=2.0)
     parser.add_argument("--iterations", type=int, default=1)
     parser.add_argument("--interval-seconds", type=float, default=0.0)
     parser.add_argument(
@@ -70,22 +72,48 @@ def main() -> None:
         raise ValueError("--iterations must be >= 1")
     if args.interval_seconds < 0:
         raise ValueError("--interval-seconds must be >= 0")
+    if args.fetch_attempts < 1:
+        raise ValueError("--fetch-attempts must be >= 1")
+    if args.retry_sleep_seconds < 0:
+        raise ValueError("--retry-sleep-seconds must be >= 0")
     root = args.root.resolve() if args.root else find_repo_root()
     source_id = daily_extract_month_source_id(args.year, args.month)
     active_start = _parse_active_start(args.active_polling_start_at)
     policy = FetchPolicy(
         timeout_seconds=args.timeout_seconds,
+        max_attempts=args.fetch_attempts,
+        retry_sleep_seconds=args.retry_sleep_seconds,
         user_agent="HKG-Tmax-Research/0.1 (+research-contact-required)",
     )
 
     catalog_snapshot = None
     monthly_snapshot = None
+    poll_snapshots = []
     for index in range(args.iterations):
         catalog_snapshot, monthly_snapshot = fetch_daily_extract_month(
             root=root,
             year=args.year,
             month=args.month,
             policy=policy,
+        )
+        poll_snapshots.append(
+            {
+                "iteration": index + 1,
+                "catalog_snapshot": {
+                    "sha256": catalog_snapshot.sha256,
+                    "retrieved_at": catalog_snapshot.retrieved_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
+                    "path": str(catalog_snapshot.content_path),
+                },
+                "monthly_snapshot": {
+                    "sha256": monthly_snapshot.sha256,
+                    "retrieved_at": monthly_snapshot.retrieved_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
+                    "path": str(monthly_snapshot.content_path),
+                },
+            }
         )
         if index < args.iterations - 1:
             time.sleep(args.interval_seconds)
@@ -115,6 +143,10 @@ def main() -> None:
         "month": args.month,
         "source_id": source_id,
         "poll_iterations_completed": args.iterations,
+        "poll_snapshot_count": len(poll_snapshots),
+        "poll_snapshots": poll_snapshots,
+        "fetch_attempts": args.fetch_attempts,
+        "retry_sleep_seconds": args.retry_sleep_seconds,
         "interval_seconds": args.interval_seconds,
         "active_polling_start_at": (
             None if active_start is None else active_start.isoformat().replace("+00:00", "Z")
@@ -160,6 +192,9 @@ def main() -> None:
         f"- evidence counts: `{summary['evidence_counts']}`",
         f"- revision count: `{summary['revision_count']}`",
         f"- provider first publication proven: `{summary['provider_first_publication_proven']}`",
+        f"- poll snapshot count: `{len(poll_snapshots)}`",
+        f"- fetch attempts per request: `{args.fetch_attempts}`",
+        f"- retry sleep seconds: `{args.retry_sleep_seconds}`",
         f"- active polling start: `{metrics['active_polling_start_at']}`",
         f"- watched candidate dates: `{args.watch_candidate_date}`",
         f"- watched candidate dates present: `{watched_present}`",

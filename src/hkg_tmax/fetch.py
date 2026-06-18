@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import mimetypes
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -22,6 +23,8 @@ class FetchPolicy:
     user_agent: str = "HKG-Tmax-Research/0.1"
     follow_redirects: bool = True
     max_bytes: int = 512 * 1024 * 1024
+    max_attempts: int = 1
+    retry_sleep_seconds: float = 0.0
 
 
 _SCRIPT_SUFFIXES = {"php", "aspx", "asp", "jsp", "cgi", "do", "action", "html", "htm"}
@@ -74,18 +77,32 @@ def fetch_and_archive(
     request_headers: Mapping[str, str] | None = None,
 ) -> RawSnapshot:
     policy = policy or FetchPolicy()
+    if policy.max_attempts < 1:
+        raise ValueError("FetchPolicy.max_attempts must be >= 1")
+    if policy.retry_sleep_seconds < 0:
+        raise ValueError("FetchPolicy.retry_sleep_seconds must be >= 0")
     headers = {"User-Agent": policy.user_agent, **dict(request_headers or {})}
-    retrieved_at = datetime.now(UTC)
 
-    try:
-        with httpx.Client(
-            timeout=policy.timeout_seconds,
-            follow_redirects=policy.follow_redirects,
-            headers=headers,
-        ) as client:
-            response = client.get(url)
-    except httpx.HTTPError as exc:
-        raise FetchError(f"Request failed for {source_id} at {url}: {exc}") from exc
+    response: httpx.Response | None = None
+    for attempt in range(1, policy.max_attempts + 1):
+        try:
+            with httpx.Client(
+                timeout=policy.timeout_seconds,
+                follow_redirects=policy.follow_redirects,
+                headers=headers,
+            ) as client:
+                response = client.get(url)
+            break
+        except httpx.HTTPError as exc:
+            if attempt == policy.max_attempts:
+                raise FetchError(
+                    f"Request failed for {source_id} at {url} "
+                    f"after {attempt} attempt(s): {exc}"
+                ) from exc
+            if policy.retry_sleep_seconds > 0:
+                time.sleep(policy.retry_sleep_seconds)
+    if response is None:
+        raise FetchError(f"Request failed for {source_id} at {url}: no response")
 
     retrieved_at = datetime.now(UTC)
     if response.status_code < 200 or response.status_code >= 300:

@@ -1,0 +1,30 @@
+experiment_id: "{{EXPERIMENT_ID}}"
+title: "{{TITLE}}"
+created_at_utc: "{{CREATED_AT_UTC}}"
+updated_at_utc: "{{CREATED_AT_UTC}}"
+status: PLANNED
+goal: null
+owner: null
+
+decision:
+  primary_conclusion: "Not run"
+  oos_delta: null
+  milestone_eligible: false
+
+gates:
+  target_parity: PENDING
+  data_provenance: PENDING
+  asof_leakage: PENDING
+  reproducibility: PENDING
+  locked_oos: PENDING
+  calibration: PENDING
+  robustness: PENDING
+  operational_viability: PENDING
+
+reviewers:
+  leakage: null
+  reproducibility: null
+
+artifacts:
+  metrics: results/metrics.json
+  predictions: results/predictions.parquet

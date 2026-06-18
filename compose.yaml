@@ -1,0 +1,11 @@
+services:
+  research:
+    build: .
+    working_dir: /workspace
+    env_file:
+      - .env
+    volumes:
+      - .:/workspace
+    command: bash
+    stdin_open: true
+    tty: true

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "experiment_metrics.schema.json",
+  "title": "Experiment metric summary",
+  "type": "object",
+  "required": [
+    "status",
+    "primary_metric"
+  ],
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "primary_metric": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "baseline": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "candidate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "delta": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "relative_delta": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "confidence_interval": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "sample_size": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "guardrails": {
+      "type": "object"
+    },
+    "subgroups": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,31 @@
+project:
+  id: hkg_tmax_elite
+  timezone: Asia/Hong_Kong
+  created_at_utc: "2026-06-18T00:00:00Z"
+  research_mode: point_in_time
+  live_trading_enabled: false
+  target_adapter_status: blocked_pending_g1
+  primary_horizon_status: blocked_pending_g2
+
+paths:
+  raw: data/raw
+  bronze: data/bronze
+  silver: data/silver
+  gold: data/gold
+  experiments: experiments
+  reports: reports
+
+immutability:
+  raw_overwrite_allowed: false
+  experiment_overwrite_allowed: false
+  hash_algorithm: sha256
+  preserve_http_headers: true
+  preserve_retrieval_time: true
+
+quality_gates:
+  require_target_parity: true
+  require_asof_audit: true
+  require_reproducibility_review: true
+  require_locked_oos: true
+  require_probabilistic_evaluation: true
+  require_market_costs_for_profit_claims: true

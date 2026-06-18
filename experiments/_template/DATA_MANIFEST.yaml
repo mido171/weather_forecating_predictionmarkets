@@ -1,0 +1,30 @@
+manifest_version: 1
+experiment_id: "{{EXPERIMENT_ID}}"
+created_at_utc: "{{CREATED_AT_UTC}}"
+
+target:
+  target_version: null
+  date_range: null
+  row_count: null
+  manifest_hash: null
+
+inputs: []
+# Each input:
+# - source_id:
+#   point_in_time_status:
+#   date_range:
+#   entities:
+#   variables:
+#   raw_manifest:
+#   raw_hashes:
+#   derived_version:
+#   schema_version:
+#   row_count:
+#   exclusions:
+#   license_notes:
+
+output_examples:
+  dataset_version: null
+  feature_manifest_hash: null
+  row_count: null
+  max_available_at_check: pending

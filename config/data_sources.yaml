@@ -1,0 +1,557 @@
+catalog_version: 1
+last_reviewed_utc: "2026-06-18T00:00:00Z"
+
+required_fields:
+  - id
+  - provider
+  - role
+  - access
+  - point_in_time_status
+
+sources:
+  - id: hko_daily_extract
+    provider: Hong Kong Observatory
+    role: canonical_target_candidate
+    access:
+      method: html_or_backing_request_discovery
+      url: https://www.hko.gov.hk/en/cis/dailyExtract.htm
+    cadence: daily
+    historical_range: interactive
+    point_in_time_status: TARGET_ONLY
+    availability_rule: first public appearance must be observed and archived
+    revision_policy: current Polymarket template ignores later revisions
+    priority: P0
+    tags: [bootstrap_now, target, hko]
+    notes: "Canonical only after G1 confirms exact product/field/date behavior."
+
+  - id: hko_clmmaxt_hko
+    provider: Hong Kong Observatory
+    role: candidate_historical_target_label
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=CLMMAXT&rformat=csv&station=HKO
+    cadence: monthly_update_of_daily_history
+    historical_range: "1884-present excluding documented gaps"
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: latest file is revised/finalized history, not necessarily first publication
+    revision_policy: verify against first-published Daily Extract
+    priority: P0
+    tags: [bootstrap_now, target_proxy, hko]
+
+  - id: hko_daily_climate_download
+    provider: Hong Kong Observatory
+    role: historical_daily_elements
+    access:
+      method: interactive_download_and_api_discovery
+      url: https://www.hko.gov.hk/en/cis/downloadpage.htm
+    cadence: monthly_or_element_specific
+    historical_range: element_specific
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: use for historical mechanisms; record update/revision behavior per element
+    revision_policy: finalized climate data may be revised
+    priority: P1
+    tags: [hko, climate]
+
+  - id: hko_open_data_catalog
+    provider: Hong Kong Observatory
+    role: authoritative_dataset_catalog
+    access:
+      method: html
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: provider_updated
+    historical_range: n/a
+    point_in_time_status: METADATA
+    availability_rule: archive catalog snapshots
+    revision_policy: provider may change endpoints/cadence
+    priority: P0
+    tags: [bootstrap_now, metadata, hko]
+
+  - id: hko_api_documentation
+    provider: Hong Kong Observatory
+    role: authoritative_api_and_station_metadata
+    access:
+      method: linked_pdf_from_catalog
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: provider_updated
+    historical_range: n/a
+    point_in_time_status: METADATA
+    availability_rule: archive PDF and hash
+    revision_policy: revalidate parsers when hash changes
+    priority: P0
+    tags: [metadata, hko]
+
+  - id: hko_latest_1min_temperature
+    provider: Hong Kong Observatory
+    role: live_station_network_temperature
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_temperature.csv
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: retrieved payload becomes available at successful retrieval; track source timestamp
+    revision_policy: provisional observations
+    priority: P0
+    tags: [bootstrap_now, live, temperature, hko]
+
+  - id: hko_since_midnight_maxmin
+    provider: Hong Kong Observatory
+    role: live_maximum_and_minimum_since_midnight
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_since_midnight_maxmin.csv
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: retrieved payload becomes available at successful retrieval
+    revision_policy: provisional observations
+    priority: P0
+    tags: [bootstrap_now, live, tmax_so_far, hko]
+
+  - id: hko_latest_relative_humidity
+    provider: Hong Kong Observatory
+    role: live_station_network_humidity
+    access:
+      method: dataset_page_then_resolve_resource
+      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-one-minute-mean-relative-humidity
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: record provider timestamp and retrieval timestamp
+    revision_policy: provisional
+    priority: P0
+    tags: [live, humidity, hko]
+
+  - id: hko_latest_pressure
+    provider: Hong Kong Observatory
+    role: live_station_network_pressure
+    access:
+      method: discover_from_open_data_catalog
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: no guessed endpoint; resolve and record official resource
+    revision_policy: provisional
+    priority: P1
+    tags: [live, pressure, hko]
+
+  - id: hko_latest_wind
+    provider: Hong Kong Observatory
+    role: live_station_network_wind
+    access:
+      method: dataset_page_then_resolve_resource
+      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-ten-minute-mean-wind-direction-wind-speed-and-maximum-gust
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: record provider timestamp and retrieval timestamp
+    revision_policy: provisional
+    priority: P0
+    tags: [live, wind, hko]
+
+  - id: hko_latest_solar_radiation
+    provider: Hong Kong Observatory
+    role: live_solar_radiation
+    access:
+      method: dataset_page_then_resolve_resource
+      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-one-minute-mean-global-solar-radiation
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve station/product differences
+    revision_policy: provisional
+    priority: P1
+    tags: [live, radiation, hko]
+
+  - id: hko_automatic_rainfall
+    provider: Hong Kong Observatory
+    role: live_station_network_rainfall
+    access:
+      method: discover_from_open_data_catalog
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: every_15_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve product-specific station semantics
+    revision_policy: provisional; HKO-labelled rainfall may differ from official climatological rainfall
+    priority: P0
+    tags: [live, rain, hko]
+
+  - id: hko_gridded_rainfall_nowcast
+    provider: Hong Kong Observatory
+    role: issued_rainfall_nowcast
+    access:
+      method: discover_from_open_data_catalog
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: every_12_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every issue with valid times
+    revision_policy: new issue supersedes but never overwrites older issue
+    priority: P1
+    tags: [nowcast, rain, hko]
+
+  - id: hko_radar
+    provider: Hong Kong Observatory
+    role: radar_images_and_derived_features
+    access:
+      method: official_image_pages_and_endpoint_discovery
+      url: https://www.hko.gov.hk/en/wxinfo/radars/radar_range1.htm
+    cadence: approximately_every_6_minutes
+    historical_range: limited_public_display_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive native image plus metadata; no future frames
+    revision_policy: preserve each frame
+    priority: P1
+    tags: [radar, rain, image, hko]
+
+  - id: hko_lightning
+    provider: Hong Kong Observatory
+    role: lightning_observations
+    access:
+      method: official_page_and_endpoint_discovery
+      url: https://www.hko.gov.hk/en/wxinfo/llis/gm_index.htm
+    cadence: page_approximately_5_minutes_counts_15_minutes
+    historical_range: limited_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive source timestamps
+    revision_policy: provisional
+    priority: P2
+    tags: [lightning, convection, hko]
+
+  - id: hko_satellite
+    provider: Hong Kong Observatory
+    role: satellite_imagery
+    access:
+      method: official_page_and_endpoint_discovery
+      url: https://www.hko.gov.hk/en/wxinfo/intersat/satellite/sate.htm
+    cadence: product_specific
+    historical_range: limited_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve channel, scan time, publication time, projection
+    revision_policy: preserve each image
+    priority: P1
+    tags: [satellite, cloud, image, hko]
+
+  - id: hko_local_weather_forecast
+    provider: Hong Kong Observatory
+    role: official_forecast_benchmark
+    access:
+      method: weather_api
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=en
+    cadence: hourly_and_as_needed
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed payload and issue/update time
+    revision_policy: each issue is a separate vintage
+    priority: P0
+    tags: [bootstrap_now, forecast, official, hko]
+
+  - id: hko_nine_day_forecast
+    provider: Hong Kong Observatory
+    role: official_forecast_benchmark
+    access:
+      method: weather_api
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en
+    cadence: at_least_twice_daily_and_as_needed
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive each forecast vintage
+    revision_policy: each issue is a separate vintage
+    priority: P0
+    tags: [bootstrap_now, forecast, official, hko]
+
+  - id: hko_automatic_regional_forecast
+    provider: Hong Kong Observatory
+    role: station_specific_automatic_forecast
+    access:
+      method: official_gis_service_discovery
+      url: https://www.hko.gov.hk/en/wxinfo/awsgis/remark_notes.html
+    cadence: product_specific
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive issue time and station/valid hour
+    revision_policy: each issue is a vintage
+    priority: P1
+    tags: [forecast, station, hko]
+
+  - id: hko_upper_air
+    provider: Hong Kong Observatory
+    role: king_s_park_soundings
+    access:
+      method: open_data_catalog_or_wmo_mirror
+      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+    cadence: typically_twice_daily
+    historical_range: source_specific
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: sounding launch/receipt time plus processing latency
+    revision_policy: distinguish preliminary and corrected
+    priority: P1
+    tags: [upper_air, sounding, hko]
+
+  - id: hko_station_metadata
+    provider: Hong Kong Observatory
+    role: station_identity_and_history
+    access:
+      method: html
+      url: https://www.hko.gov.hk/en/cis/stn.htm
+    cadence: provider_updated
+    historical_range: station_specific
+    point_in_time_status: METADATA
+    availability_rule: archive snapshots and effective dates
+    revision_policy: provider may update metadata
+    priority: P0
+    tags: [metadata, stations, hko]
+
+  - id: hko_historical_archive_api
+    provider: DATA.GOV.HK
+    role: historical_version_discovery
+    access:
+      method: api_specification
+      url: https://data.gov.hk/en/help/api-spec#historicalAPI
+    cadence: daily
+    historical_range: dataset_specific
+    point_in_time_status: POTENTIAL_POINT_IN_TIME_ARCHIVE
+    availability_rule: inspect list-files/list-file-versions/get-file timestamps in GMT+8
+    revision_policy: preserve exact file version
+    priority: P0
+    tags: [archive, versions, data_gov_hk]
+
+  - id: ecmwf_open_ifs_aifs
+    provider: ECMWF
+    role: operational_nwp_and_ai_forecasts
+    access:
+      method: open_forecast_data
+      url: https://www.ecmwf.int/en/forecasts/datasets/open-data
+    cadence: cycle_and_product_specific
+    historical_range: rolling_public_archive_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every cycle/member; use actual file appearance time
+    revision_policy: never replace an older cycle
+    priority: P0
+    tags: [nwp, ensemble, ai, forecast]
+
+  - id: noaa_gfs
+    provider: NOAA NCEP
+    role: operational_global_deterministic_forecast
+    access:
+      method: nomads_or_cloud_archive
+      url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/
+    cadence: four_cycles_daily
+    historical_range: archive_specific
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: use actual file availability and cycle metadata
+    revision_policy: archive immutable cycle files
+    priority: P0
+    tags: [nwp, forecast, noaa]
+
+  - id: noaa_gefs
+    provider: NOAA NCEP
+    role: operational_global_ensemble_forecast
+    access:
+      method: nomads_or_cloud_archive
+      url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gens/prod/
+    cadence: cycle_specific
+    historical_range: archive_specific
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: use actual member/file availability
+    revision_policy: archive immutable cycle files
+    priority: P0
+    tags: [nwp, ensemble, noaa]
+
+  - id: dwd_icon
+    provider: Deutscher Wetterdienst
+    role: operational_global_deterministic_forecast
+    access:
+      method: open_data
+      url: https://opendata.dwd.de/weather/nwp/icon/
+    cadence: cycle_specific
+    historical_range: rolling_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: actual file timestamp and successful retrieval
+    revision_policy: archive each cycle
+    priority: P1
+    tags: [nwp, forecast, dwd]
+
+  - id: dwd_icon_eps
+    provider: Deutscher Wetterdienst
+    role: operational_global_ensemble_forecast
+    access:
+      method: open_data
+      url: https://opendata.dwd.de/weather/nwp/icon-eps/
+    cadence: cycle_specific
+    historical_range: rolling_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: actual file/member timestamp
+    revision_policy: archive each cycle
+    priority: P1
+    tags: [nwp, ensemble, dwd]
+
+  - id: copernicus_era5
+    provider: Copernicus Climate Change Service
+    role: retrospective_synoptic_and_mechanism_analysis
+    access:
+      method: cds_api
+      url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+    cadence: hourly
+    historical_range: 1940_present_with_release_lag
+    point_in_time_status: RETROSPECTIVE_ONLY
+    availability_rule: forbidden operationally unless release lag is explicitly simulated
+    revision_policy: version and retrieval date required
+    priority: P2
+    tags: [reanalysis, retrospective]
+
+  - id: copernicus_era5_land
+    provider: Copernicus Climate Change Service
+    role: retrospective_land_surface_analysis
+    access:
+      method: cds_api
+      url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land
+    cadence: hourly
+    historical_range: 1950_present_with_release_lag
+    point_in_time_status: RETROSPECTIVE_ONLY
+    availability_rule: forbidden operationally unless release lag is explicitly simulated
+    revision_policy: version and retrieval date required
+    priority: P3
+    tags: [reanalysis, land, retrospective]
+
+  - id: noaa_isd
+    provider: NOAA NCEI
+    role: regional_synoptic_station_history
+    access:
+      method: public_archive
+      url: https://www.ncei.noaa.gov/products/land-based-station/integrated-surface-database
+    cadence: hourly_subhourly_station_dependent
+    historical_range: station_specific
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: quality-controlled archive; not automatically real-time vintage
+    revision_policy: preserve archive version
+    priority: P2
+    tags: [observations, regional, noaa]
+
+  - id: hko_tropical_cyclone_realtime
+    provider: Hong Kong Observatory
+    role: point_in_time_tropical_cyclone_advisories_and_tracks
+    access:
+      method: official_api_or_page_discovery
+      url: https://www.hko.gov.hk/en/wxinfo/currwx/tc.htm
+    cadence: advisory_specific
+    historical_range: limited_unless_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive each advisory and forecast track
+    revision_policy: never substitute final best track
+    priority: P1
+    tags: [tropical_cyclone, synoptic, hko]
+
+  - id: hko_tropical_cyclone_best_track
+    provider: Hong Kong Observatory
+    role: retrospective_regime_label
+    access:
+      method: official_download
+      url: https://www.hko.gov.hk/en/informtc/bst2025/bst.htm
+    cadence: annual_or_event_update
+    historical_range: multi_decadal
+    point_in_time_status: RETROSPECTIVE_ONLY
+    availability_rule: never use as if known at forecast cutoff
+    revision_policy: version required
+    priority: P2
+    tags: [tropical_cyclone, retrospective]
+
+  - id: hong_kong_air_quality
+    provider: Hong Kong Environmental Protection Department
+    role: exploratory_aerosol_haze_proxy
+    access:
+      method: open_data_discovery
+      url: https://www.aqhi.gov.hk/en.html
+    cadence: hourly_or_subhourly
+    historical_range: dataset_specific
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: establish exact issue and revision behavior before operational use
+    revision_policy: provider_specific
+    priority: P3
+    tags: [aerosol, air_quality, exploratory]
+
+  - id: terrain_land_cover_coastline
+    provider: multiple_official_or_open_geospatial_sources
+    role: static_station_and_flow_context
+    access:
+      method: source_selection_required
+      url: https://www.geodata.gov.hk/gs/
+    cadence: static_versioned
+    historical_range: version_specific
+    point_in_time_status: STATIC_METADATA
+    availability_rule: record license/version/effective date
+    revision_policy: never silently replace
+    priority: P2
+    tags: [terrain, land_cover, geospatial]
+
+  - id: polymarket_gamma_event_by_slug
+    provider: Polymarket
+    role: event_market_rules_metadata
+    access:
+      method: http_json_template
+      url: https://gamma-api.polymarket.com/events/slug/{slug}
+    cadence: poll_on_change
+    historical_range: event_specific
+    point_in_time_status: MARKET_ONLY
+    availability_rule: archive every changed payload and normalized rules hash
+    revision_policy: never overwrite old metadata
+    priority: P0
+    tags: [market, rules, polymarket]
+
+  - id: polymarket_clob_book
+    provider: Polymarket
+    role: executable_order_book_snapshot
+    access:
+      method: http_json_template
+      url: https://clob.polymarket.com/book?token_id={token_id}
+    cadence: on_demand_or_websocket
+    historical_range: latest_unless_self_archived
+    point_in_time_status: MARKET_ONLY
+    availability_rule: archive server and retrieval timestamps
+    revision_policy: append-only snapshots
+    priority: P0
+    tags: [market, orderbook, polymarket]
+
+  - id: polymarket_market_websocket
+    provider: Polymarket
+    role: live_order_book_deltas_and_trades
+    access:
+      method: websocket
+      url: wss://ws-subscriptions-clob.polymarket.com/ws/market
+    cadence: event_driven
+    historical_range: self_archived_only
+    point_in_time_status: MARKET_ONLY
+    availability_rule: persist sequence, receive time, source time, reconnect state
+    revision_policy: append-only
+    priority: P0
+    tags: [market, websocket, polymarket]
+
+  - id: polymarket_price_history
+    provider: Polymarket
+    role: historical_token_prices
+    access:
+      method: http_json_template
+      url: https://clob.polymarket.com/prices-history?market={token_id}&interval=max&fidelity=1
+    cadence: on_demand
+    historical_range: token_specific
+    point_in_time_status: MARKET_ONLY
+    availability_rule: price history is not full historical depth
+    revision_policy: archive query and response
+    priority: P1
+    tags: [market, price, polymarket]
+
+  - id: polymarket_fee_parameters
+    provider: Polymarket
+    role: cost_model
+    access:
+      method: official_documentation_and_market_endpoint
+      url: https://docs.polymarket.com/trading/fees
+    cadence: market_and_policy_specific
+    historical_range: policy_specific
+    point_in_time_status: MARKET_ONLY
+    availability_rule: query/store fee parameters per token and date
+    revision_policy: never assume one schedule across time
+    priority: P0
+    tags: [market, fees, polymarket]

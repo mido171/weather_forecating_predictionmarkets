@@ -1,0 +1,11 @@
+[Unit]
+Description=Run HKG Tmax archive every ten minutes
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+RandomizedDelaySec=5
+Unit=hkg-tmax-archive.service
+
+[Install]
+WantedBy=timers.target

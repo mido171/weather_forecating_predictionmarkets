@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prediction.schema.json",
+  "title": "Immutable HKG Tmax prediction",
+  "type": "object",
+  "required": [
+    "prediction_id",
+    "target_local_date",
+    "horizon_id",
+    "cutoff_at",
+    "created_at",
+    "model_version",
+    "rules_sha256",
+    "feature_manifest_sha256",
+    "continuous_summary",
+    "bucket_probabilities"
+  ],
+  "properties": {
+    "prediction_id": {
+      "type": "string"
+    },
+    "target_local_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "horizon_id": {
+      "type": "string"
+    },
+    "cutoff_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "rules_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "continuous_summary": {
+      "type": "object",
+      "required": [
+        "mean",
+        "median"
+      ],
+      "properties": {
+        "mean": {
+          "type": "number"
+        },
+        "median": {
+          "type": "number"
+        },
+        "mode": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "quantiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "bucket_probabilities": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "source_vintage_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "no_trade_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

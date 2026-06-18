@@ -1,0 +1,53 @@
+run:
+  experiment_id: "EXP-0001"
+  created_at_utc: "2026-06-18T16:08:31.408079Z"
+  command:
+    - "Copy-Item .env.example .env"
+    - "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap.ps1"
+    - ".\\.venv\\Scripts\\python.exe -m pip install -e \".[dev]\""
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax doctor"
+    - ".\\.venv\\Scripts\\python.exe -m pytest"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax validate all"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax sources fetch --tag bootstrap_now"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax sources fetch --tag bootstrap_now"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax sources report"
+    - "archive verification script: recompute hashes and validate sidecars/HTTP metadata"
+    - ".\\.venv\\Scripts\\python.exe -m pytest tests/test_fetch.py tests/test_hko.py"
+    - ".\\.venv\\Scripts\\python.exe -m ruff check src tests scripts"
+    - ".\\.venv\\Scripts\\python.exe -m mypy src"
+    - ".\\.venv\\Scripts\\python.exe -m hkg_tmax manifest"
+  seed: 20260618
+  additional_seeds: []
+  code_commit: "NO_HEAD before first immutable G0 commit"
+  code_dirty: true
+  dirty_patch_sha256: "not applicable before first commit"
+  python_version: "3.11.9 (MSC v.1938 64 bit AMD64)"
+  platform: "Windows-10-10.0.26200-SP0"
+  dependency_snapshot_sha256: "1620ada7725901e17d4ce0d580f660161aa83954748df84034e40a8b9bf41123"
+
+target:
+  version: "not used in G0"
+  horizon: "not selected; G2 remains open"
+
+split:
+  config: config/evaluation.yaml
+  version: null
+
+candidate:
+  name: "G0 repository and immutable raw archive smoke test"
+  parameters:
+    source_tag: bootstrap_now
+    fetch_passes: 2
+    expected_source_count: 7
+    expected_sidecar_count: 14
+
+baseline:
+  name: "none"
+  prediction_artifact: null
+  sha256: null
+
+outputs:
+  predictions: null
+  metrics: results/metrics.json
+  logs: logs/
+  artifacts: artifacts/

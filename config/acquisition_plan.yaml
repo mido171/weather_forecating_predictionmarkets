@@ -1,0 +1,326 @@
+plan_version: 1
+timezone: Asia/Hong_Kong
+principle: "Acquire maximum lawful history, preserve all vintages, and classify operational eligibility."
+
+storage:
+  raw: immutable_exact_payload
+  bronze: source_native_parsed
+  silver: quality_controlled_point_in_time
+  gold: forecast_examples_targets_predictions
+  all_files_require_sha256: true
+  all_queries_require_manifest: true
+  overwrite: forbidden
+
+historical_tiers:
+  all_history:
+    purpose: climatology_structural_breaks_extremes
+    range: maximum_provider_history
+  modern_climate:
+    purpose: current_station_and_climate_relevance
+    preferred_start: "1991-01-01"
+  recent_model_regime:
+    purpose: operational_model_postprocessing
+    range: maximum_authentic_forecast_vintage_overlap
+  live_shadow:
+    purpose: strongest_point_in_time_evidence
+    start: "2026-06-18"
+
+jobs:
+  - id: A001
+    source_id: hko_daily_extract
+    priority: P0
+    mode: poll_and_archive_every_distinct_payload
+    start: immediate
+    target_dates: all_future_hkg_market_dates
+    cadence: 5_minutes_near_publication_else_30_minutes
+    outputs:
+      - raw_payload
+      - first_publication_timestamp
+      - parsed_absolute_daily_max
+      - revision_diff
+    operational_role: canonical_target_candidate
+    blocking_goal: G1
+
+  - id: A002
+    source_id: hko_clmmaxt_hko
+    priority: P0
+    mode: full_history_then_monthly_snapshot
+    date_range: maximum
+    variables: [daily_maximum_temperature]
+    station_codes: [HKO]
+    outputs: [raw_csv, parsed_daily_series, completeness_flags]
+    operational_role: target_proxy_pending_parity
+    blocking_goal: G1
+
+  - id: A003
+    source_id: polymarket_gamma_event_by_slug
+    priority: P0
+    mode: backfill_all_hong_kong_tmax_events_and_poll_current
+    query_strategy:
+      - discover_events_by_series_slug_or_search
+      - fetch_event_by_slug
+      - archive_every_changed_json
+    outputs:
+      - original_rules
+      - normalized_rules_hash
+      - outcomes
+      - token_ids
+      - timestamps
+      - resolved_winner
+    blocking_goal: G1
+
+  - id: A004
+    source_id: hko_daily_climate_download
+    priority: P1
+    mode: enumerate_elements_and_download_maximum_history
+    station_codes: [HKO]
+    elements:
+      - daily_mean_temperature
+      - daily_minimum_temperature
+      - daily_mean_dew_point
+      - daily_mean_wet_bulb
+      - daily_mean_relative_humidity
+      - daily_mean_pressure
+      - daily_cloud_amount
+      - daily_total_rainfall
+      - daily_sunshine_duration
+      - daily_global_solar_radiation
+      - daily_prevailing_wind_direction
+      - daily_mean_wind_speed
+      - visibility
+      - uv_index
+      - sea_temperature
+    caveat: finalized_daily_covariates_may_not_be_operational_at_pre_event_cutoff
+    blocking_goal: G3
+
+  - id: A005
+    source_group: hko_live_station_network
+    source_ids:
+      - hko_latest_1min_temperature
+      - hko_since_midnight_maxmin
+      - hko_latest_relative_humidity
+      - hko_latest_pressure
+      - hko_latest_wind
+      - hko_latest_solar_radiation
+      - hko_automatic_rainfall
+    priority: P0
+    mode: prospective_append_only_archive
+    cadence: native_provider_cadence
+    stations: all
+    start: immediate
+    retain:
+      - every_distinct_payload
+      - provider_timestamp
+      - retrieval_timestamp
+      - station_metadata_version
+      - provisional_flag
+    blocking_goal: G3
+
+  - id: A006
+    source_group: hko_historical_subdaily
+    priority: P0
+    mode: discover_free_versions_then_quote_official_paid_history
+    desired_range:
+      start: "1991-01-01"
+      end: latest
+    stations: all_relevant_with_target_priority
+    variables:
+      - air_temperature
+      - relative_humidity
+      - dew_point
+      - wet_bulb
+      - pressure
+      - wind_direction
+      - wind_speed
+      - gust
+      - rainfall
+      - solar_radiation
+      - sunshine
+      - cloud
+      - visibility
+    desired_cadence: finest_official_available
+    decision_required: cost_value_and_license_review
+    blocking_goal: G3
+
+  - id: A007
+    source_group: hko_radar_satellite_lightning
+    source_ids:
+      - hko_radar
+      - hko_satellite
+      - hko_lightning
+      - hko_gridded_rainfall_nowcast
+    priority: P1
+    mode: prospective_native_cadence_archive
+    start: immediate
+    retain_native_images: true
+    retain_projection_palette_metadata: true
+    point_in_time_rule: no_post_cutoff_frames
+    blocking_goal: G3
+
+  - id: A008
+    source_group: hko_official_forecasts
+    source_ids:
+      - hko_local_weather_forecast
+      - hko_nine_day_forecast
+      - hko_automatic_regional_forecast
+    priority: P0
+    mode: archive_every_vintage
+    start: immediate
+    historical_backfill: use_data_gov_hk_versions_if_available
+    retain:
+      - issue_time
+      - update_time
+      - valid_date_hour
+      - text
+      - numeric_values
+      - station
+    blocking_goal: G3
+
+  - id: A009
+    source_group: upper_air_marine_synoptic
+    source_ids:
+      - hko_upper_air
+      - hko_tropical_cyclone_realtime
+    priority: P1
+    mode: backfill_authentic_history_and_archive_live
+    variables:
+      - sounding_temperature_humidity_wind_profiles
+      - tc_advisories
+      - forecast_tracks
+      - warning_signals
+      - sea_surface_temperature
+      - coastal_wind
+      - regional_synoptic_observations
+    forbid: final_best_track_as_operational_feature
+    blocking_goal: G3
+
+  - id: A010
+    source_id: ecmwf_open_ifs_aifs
+    priority: P0
+    mode: archive_every_available_cycle_and_backfill_authentic_operational_files
+    domain:
+      bbox_n_w_s_e: [26.0, 109.0, 18.0, 119.0]
+      nested_high_resolution_box: [23.5, 112.5, 20.5, 115.8]
+    forecast_hours:
+      pre_event_core: "0-72 hourly where available"
+      extended: "to 240 at native steps"
+    variables:
+      surface:
+        - 2m_temperature
+        - 2m_dewpoint
+        - 10m_u_wind
+        - 10m_v_wind
+        - mean_sea_level_pressure
+        - total_cloud_cover
+        - low_cloud_cover
+        - medium_cloud_cover
+        - high_cloud_cover
+        - total_precipitation
+        - convective_precipitation
+        - surface_solar_radiation_downwards
+        - boundary_layer_height
+        - skin_temperature
+        - soil_temperature
+        - soil_moisture
+      pressure_levels:
+        levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+        fields: [temperature, relative_humidity, geopotential, u_wind, v_wind, vertical_velocity]
+      diagnostics:
+        - cape
+        - cin
+        - precipitable_water
+    ensemble: all_available_members
+    retain_actual_file_appearance_time: true
+    blocking_goal: G3
+
+  - id: A011
+    source_group: noaa_gfs_gefs
+    source_ids: [noaa_gfs, noaa_gefs]
+    priority: P0
+    mode: backfill_authentic_archive_and_archive_every_live_cycle
+    domain_and_variables: mirror_A010_where_available
+    ensemble_members: all
+    retain_file_inventory_and_completeness: true
+    blocking_goal: G3
+
+  - id: A012
+    source_group: dwd_icon
+    source_ids: [dwd_icon, dwd_icon_eps]
+    priority: P1
+    mode: archive_every_live_cycle_and_backfill_available_operational_history
+    domain_and_variables: mirror_A010_where_available
+    ensemble_members: all_available
+    blocking_goal: G3
+
+  - id: A013
+    source_group: retrospective_reanalysis
+    source_ids: [copernicus_era5, copernicus_era5_land]
+    priority: P2
+    mode: maximum_history_download
+    date_range: maximum
+    domain: southern_china_and_hong_kong
+    variables: broad_surface_pressure_level_land_budget_fields
+    operational_role: RETROSPECTIVE_ONLY
+    use_cases:
+      - mechanism_discovery
+      - regime_definition_exploratory
+      - climatology
+      - station_context
+    blocking_goal: G4
+
+  - id: A014
+    source_group: geospatial_static
+    source_ids: [terrain_land_cover_coastline]
+    priority: P2
+    mode: versioned_static_download
+    layers:
+      - digital_elevation
+      - coastline
+      - land_cover
+      - urban_fraction
+      - water_fraction
+      - station_distance_bearing_elevation
+    blocking_goal: G4
+
+  - id: A015
+    source_group: exploratory_aerosol
+    source_ids: [hong_kong_air_quality]
+    priority: P3
+    mode: assess_and_backfill_after_source_contract
+    variables:
+      - pm2_5
+      - pm10
+      - ozone
+      - visibility_proxy
+      - aerosol_optical_depth_if_available
+    blocking_goal: null
+
+  - id: A016
+    source_group: polymarket_books
+    source_ids:
+      - polymarket_clob_book
+      - polymarket_market_websocket
+      - polymarket_price_history
+      - polymarket_fee_parameters
+    priority: P0
+    mode: backfill_metadata_prices_then_prospective_full_depth
+    start: immediate
+    retain:
+      - full_snapshot
+      - delta_sequence
+      - receive_time
+      - server_time
+      - reconnect_gap
+      - trades
+      - fee_parameters
+    caveat: price_history_is_not_historical_depth
+    blocking_goal: G9
+
+quality_requirements:
+  - every job has a query manifest
+  - every raw file is hashed before parsing
+  - every timestamp is timezone-aware
+  - every station/model/member is explicit
+  - every failure is logged by date and retry state
+  - every historical source is classified by vintage authenticity
+  - coverage reports include missingness and common sample

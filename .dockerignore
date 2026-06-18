@@ -1,0 +1,16 @@
+.git
+.venv
+.env
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+data/raw
+data/bronze
+data/silver
+data/gold
+data/cache
+experiments/**/artifacts
+experiments/**/logs
+experiments/**/results/*.parquet
+*.zip

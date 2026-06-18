@@ -1,0 +1,60 @@
+program: HKG_TMAX_ELITE
+status: BOOTSTRAPPED
+current_goal: G0
+
+goals:
+  - id: G0
+    title: Repository and archival smoke test
+    depends_on: []
+    status: READY
+    blocking: true
+  - id: G1
+    title: Settlement truth and historical-label parity
+    depends_on: [G0]
+    status: BLOCKED
+    blocking: true
+  - id: G2
+    title: Operational cutoff selection
+    depends_on: [G1]
+    status: BLOCKED
+    blocking: true
+  - id: G3
+    title: Complete source inventory and historical acquisition
+    depends_on: [G0, G1, G2]
+    status: BLOCKED
+    blocking: true
+  - id: G4
+    title: Data quality, station history, and temporal integrity
+    depends_on: [G3]
+    status: BLOCKED
+    blocking: true
+  - id: G5
+    title: Leakage-safe baseline suite
+    depends_on: [G1, G2, G4]
+    status: BLOCKED
+    blocking: true
+  - id: G6
+    title: Classical and physical mechanism experiments
+    depends_on: [G5]
+    status: BLOCKED
+    blocking: false
+  - id: G7
+    title: Transparent expert probabilistic stack
+    depends_on: [G6]
+    status: BLOCKED
+    blocking: true
+  - id: G8
+    title: Controlled machine-learning program
+    depends_on: [G7]
+    status: BLOCKED
+    blocking: false
+  - id: G9
+    title: Executable Polymarket evaluation
+    depends_on: [G1, G2, G7]
+    status: BLOCKED
+    blocking: true
+  - id: G10
+    title: Production eligibility and continuous operation
+    depends_on: [G8, G9]
+    status: BLOCKED
+    blocking: true

@@ -1,0 +1,38 @@
+# Regression fixture only. Production must parse each event's actual metadata and rules.
+fixture_id: hkg_integer_celsius_range_template
+source_precision_celsius: 0.1
+interval_convention: left_closed_right_open
+buckets:
+  - label: "25°C or below"
+    lower_inclusive: null
+    upper_exclusive: 26.0
+  - label: "26°C"
+    lower_inclusive: 26.0
+    upper_exclusive: 27.0
+  - label: "27°C"
+    lower_inclusive: 27.0
+    upper_exclusive: 28.0
+  - label: "28°C"
+    lower_inclusive: 28.0
+    upper_exclusive: 29.0
+  - label: "29°C"
+    lower_inclusive: 29.0
+    upper_exclusive: 30.0
+  - label: "30°C"
+    lower_inclusive: 30.0
+    upper_exclusive: 31.0
+  - label: "31°C"
+    lower_inclusive: 31.0
+    upper_exclusive: 32.0
+  - label: "32°C"
+    lower_inclusive: 32.0
+    upper_exclusive: 33.0
+  - label: "33°C"
+    lower_inclusive: 33.0
+    upper_exclusive: 34.0
+  - label: "34°C"
+    lower_inclusive: 34.0
+    upper_exclusive: 35.0
+  - label: "35°C or higher"
+    lower_inclusive: 35.0
+    upper_exclusive: null

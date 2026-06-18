@@ -1,0 +1,194 @@
+manifest_version: 1
+experiment_id: "EXP-0001"
+created_at_utc: "2026-06-18T16:08:31.408079Z"
+updated_at_utc: "2026-06-18T16:10:09Z"
+
+target:
+  target_version: null
+  date_range: null
+  row_count: null
+  manifest_hash: null
+  note: "G0 does not build or inspect target labels."
+
+inputs:
+  - source_id: hko_daily_extract
+    point_in_time_status: TARGET_ONLY
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO Daily Extract page"]
+    variables: ["raw HTML"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No parsing or target parity claims in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:24.060512Z"
+        content_path: data/raw/hko_daily_extract/2026/06/18/20260618T160524.060512Z__347eb605218a9c9d.html
+        sidecar_path: data/raw/hko_daily_extract/2026/06/18/20260618T160524.060512Z__347eb605218a9c9d.metadata.json
+        sha256: 347eb605218a9c9db46eee3aa6b187cb2b557c261d1ba8e6e1527d55f81aa11c
+        content_length: 20758
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:05:48.734464Z"
+        content_path: data/raw/hko_daily_extract/2026/06/18/20260618T160548.734464Z__347eb605218a9c9d.html
+        sidecar_path: data/raw/hko_daily_extract/2026/06/18/20260618T160548.734464Z__347eb605218a9c9d.metadata.json
+        sha256: 347eb605218a9c9db46eee3aa6b187cb2b557c261d1ba8e6e1527d55f81aa11c
+        content_length: 20758
+        http_status: 200
+
+  - source_id: hko_clmmaxt_hko
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO station HKO"]
+    variables: ["CLMMAXT raw CSV"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No canonical target claim until G1 parity work."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:28.452065Z"
+        content_path: data/raw/hko_clmmaxt_hko/2026/06/18/20260618T160528.452065Z__5a0a646b4d125e40.csv
+        sidecar_path: data/raw/hko_clmmaxt_hko/2026/06/18/20260618T160528.452065Z__5a0a646b4d125e40.metadata.json
+        sha256: 5a0a646b4d125e40c25871abbccd5cd24e4f552063a547803ebac820166be4c9
+        content_length: 838832
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:05:52.249124Z"
+        content_path: data/raw/hko_clmmaxt_hko/2026/06/18/20260618T160552.249124Z__5a0a646b4d125e40.csv
+        sidecar_path: data/raw/hko_clmmaxt_hko/2026/06/18/20260618T160552.249124Z__5a0a646b4d125e40.metadata.json
+        sha256: 5a0a646b4d125e40c25871abbccd5cd24e4f552063a547803ebac820166be4c9
+        content_length: 838832
+        http_status: 200
+
+  - source_id: hko_open_data_catalog
+    point_in_time_status: METADATA
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO open data catalog"]
+    variables: ["raw HTML"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No endpoint discovery beyond raw archive in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:31.560643Z"
+        content_path: data/raw/hko_open_data_catalog/2026/06/18/20260618T160531.560643Z__63108144f079be3e.html
+        sidecar_path: data/raw/hko_open_data_catalog/2026/06/18/20260618T160531.560643Z__63108144f079be3e.metadata.json
+        sha256: 63108144f079be3e91b5f398146c13791c442e0bcc677303ccb0576289d1039c
+        content_length: 63849
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:05:54.325140Z"
+        content_path: data/raw/hko_open_data_catalog/2026/06/18/20260618T160554.325140Z__63108144f079be3e.html
+        sidecar_path: data/raw/hko_open_data_catalog/2026/06/18/20260618T160554.325140Z__63108144f079be3e.metadata.json
+        sha256: 63108144f079be3e91b5f398146c13791c442e0bcc677303ccb0576289d1039c
+        content_length: 63849
+        http_status: 200
+
+  - source_id: hko_latest_1min_temperature
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO regional weather stations"]
+    variables: ["latest one-minute temperature raw CSV"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No station parser or feature table in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:34.002387Z"
+        content_path: data/raw/hko_latest_1min_temperature/2026/06/18/20260618T160534.002387Z__db054e2b4ae05b42.csv
+        sidecar_path: data/raw/hko_latest_1min_temperature/2026/06/18/20260618T160534.002387Z__db054e2b4ae05b42.metadata.json
+        sha256: db054e2b4ae05b4252cd80d977f5867185a1af77f595c4e26458176c73e51839
+        content_length: 1256
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:05:56.403536Z"
+        content_path: data/raw/hko_latest_1min_temperature/2026/06/18/20260618T160556.403536Z__db054e2b4ae05b42.csv
+        sidecar_path: data/raw/hko_latest_1min_temperature/2026/06/18/20260618T160556.403536Z__db054e2b4ae05b42.metadata.json
+        sha256: db054e2b4ae05b4252cd80d977f5867185a1af77f595c4e26458176c73e51839
+        content_length: 1256
+        http_status: 200
+
+  - source_id: hko_since_midnight_maxmin
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO regional weather stations"]
+    variables: ["latest since-midnight max/min raw CSV"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No station parser or feature table in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:36.527234Z"
+        content_path: data/raw/hko_since_midnight_maxmin/2026/06/18/20260618T160536.527234Z__400116f13c341c55.csv
+        sidecar_path: data/raw/hko_since_midnight_maxmin/2026/06/18/20260618T160536.527234Z__400116f13c341c55.metadata.json
+        sha256: 400116f13c341c55bec5f34bfd34abe399e3fd1a79e42b17f60da0d821ca459e
+        content_length: 1531
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:05:58.771556Z"
+        content_path: data/raw/hko_since_midnight_maxmin/2026/06/18/20260618T160558.771556Z__400116f13c341c55.csv
+        sidecar_path: data/raw/hko_since_midnight_maxmin/2026/06/18/20260618T160558.771556Z__400116f13c341c55.metadata.json
+        sha256: 400116f13c341c55bec5f34bfd34abe399e3fd1a79e42b17f60da0d821ca459e
+        content_length: 1531
+        http_status: 200
+
+  - source_id: hko_local_weather_forecast
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO local weather forecast"]
+    variables: ["raw JSON forecast payload"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No issue-time parser or benchmark table in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:38.734640Z"
+        content_path: data/raw/hko_local_weather_forecast/2026/06/18/20260618T160538.734640Z__f0a6c0f2630efaf5.json
+        sidecar_path: data/raw/hko_local_weather_forecast/2026/06/18/20260618T160538.734640Z__f0a6c0f2630efaf5.metadata.json
+        sha256: f0a6c0f2630efaf56710d17aca3a56a3842822220a979b4a0d8f4203a0499c99
+        content_length: 1165
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:06:01.776545Z"
+        content_path: data/raw/hko_local_weather_forecast/2026/06/18/20260618T160601.776545Z__f0a6c0f2630efaf5.json
+        sidecar_path: data/raw/hko_local_weather_forecast/2026/06/18/20260618T160601.776545Z__f0a6c0f2630efaf5.metadata.json
+        sha256: f0a6c0f2630efaf56710d17aca3a56a3842822220a979b4a0d8f4203a0499c99
+        content_length: 1165
+        http_status: 200
+
+  - source_id: hko_nine_day_forecast
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    date_range: "retrieved 2026-06-18 UTC"
+    entities: ["HKO nine-day forecast"]
+    variables: ["raw JSON forecast payload"]
+    derived_version: null
+    schema_version: raw_snapshot_schema_v1
+    row_count: null
+    exclusions: "No issue-time parser or benchmark table in G0."
+    license_notes: "Subject to Hong Kong Observatory terms."
+    snapshots:
+      - retrieved_at: "2026-06-18T16:05:40.805101Z"
+        content_path: data/raw/hko_nine_day_forecast/2026/06/18/20260618T160540.805101Z__2a9e41aa16d2d9a8.json
+        sidecar_path: data/raw/hko_nine_day_forecast/2026/06/18/20260618T160540.805101Z__2a9e41aa16d2d9a8.metadata.json
+        sha256: 2a9e41aa16d2d9a809424417364eecd52b0b6698137c401083576062508fb0ea
+        content_length: 4296
+        http_status: 200
+      - retrieved_at: "2026-06-18T16:06:04.168316Z"
+        content_path: data/raw/hko_nine_day_forecast/2026/06/18/20260618T160604.168316Z__2a9e41aa16d2d9a8.json
+        sidecar_path: data/raw/hko_nine_day_forecast/2026/06/18/20260618T160604.168316Z__2a9e41aa16d2d9a8.metadata.json
+        sha256: 2a9e41aa16d2d9a809424417364eecd52b0b6698137c401083576062508fb0ea
+        content_length: 4296
+        http_status: 200
+
+output_examples:
+  dataset_version: null
+  feature_manifest_hash: null
+  row_count: null
+  max_available_at_check: "not applicable; no feature rows built"
+
+verification:
+  bootstrap_now_source_count: 7
+  raw_snapshot_count: 14
+  metadata_sidecar_count: 14
+  source_inventory_sha256: 0feb442378de719d374352e4db7c1b221ee85d59f9c325c7404262e60cec6674
+  data_sources_sha256: e31d9fcd53c092091604f3d2e33026b406b097204da14d0c0bbbbad2c77c8aab
+  asof_config_sha256: 16655fa89c6445b0e1bd66e2249bc28149b5f45fcb5546db6a820a58b08a7174

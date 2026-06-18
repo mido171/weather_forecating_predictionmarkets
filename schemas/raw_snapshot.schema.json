@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "raw_snapshot.schema.json",
+  "title": "Raw snapshot sidecar",
+  "type": "object",
+  "required": [
+    "source_id",
+    "retrieved_at",
+    "content_sha256",
+    "content_length",
+    "content_path",
+    "storage_schema_version"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "content_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "content_length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "storage_schema_version": {
+      "const": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

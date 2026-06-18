@@ -1,0 +1,50 @@
+target_station:
+  code: HKO
+  name: Hong Kong Observatory
+  role: target_candidate_station_pending_g1
+  location_description: Observatory Headquarters, Tsim Sha Tsui
+  latitude: 22.301944
+  longitude: 114.174167
+  elevation_m: 32
+  official_history_note: "1884–present, excluding 1940–1946 per HKO API documentation."
+  metadata_must_be_versioned: true
+
+network_strategy:
+  ingest_all_available_stations: true
+  preserve_official_station_code: true
+  preserve_coordinates_and_elevation: true
+  preserve_element_availability: true
+  station_changes_require_timeline: true
+  no_silent_station_substitution: true
+  station_code_source: official_hko_station_metadata_only
+
+priority_station_names_pending_official_code_resolution:
+  urban_near_target:
+    - King's Park
+    - Hong Kong Park
+    - Kai Tak
+    - Kowloon City
+    - Sham Shui Po
+    - Wong Tai Sin
+    - Happy Valley
+  harbour_and_coastal:
+    - Central Pier
+    - Shau Kei Wan
+    - Waglan Island
+    - Cheung Chau
+  new_territories:
+    - Sha Tin
+    - Tai Po
+    - Lau Fau Shan
+    - Ta Kwu Ling
+    - Sheung Shui
+  eastern:
+    - Sai Kung
+    - Tseung Kwan O
+  airport_context:
+    - Hong Kong International Airport
+
+note: >
+  Priority names are hypotheses for network research, not operational identifiers.
+  Codex must resolve every name to the current official code, coordinates, elevation,
+  element availability, and effective date from HKO metadata before ingestion or modelling.

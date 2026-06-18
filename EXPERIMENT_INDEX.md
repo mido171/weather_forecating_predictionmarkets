@@ -28,6 +28,7 @@ Generated from experiment `STATUS.yaml` files.
 | [EXP-0022](experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 seventeenth continuation | ACCEPTED | Seventeenth continuation poll completed six iterations; 2026-06-18 remained absent through 20:15:05Z. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 | [EXP-0023](experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 eighteenth continuation | ACCEPTED | Eighteenth continuation poll completed six iterations; 2026-06-18 remained absent through 20:24:33Z. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 | [EXP-0024](experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 nineteenth continuation | ACCEPTED | Nineteenth continuation poll completed six iterations; 2026-06-18 remained absent through 20:33:50Z. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
+| [EXP-0025](experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md) | G1 Daily Extract active first-publication watch 2026-06-18 twentieth continuation | ACCEPTED | Twentieth continuation poll completed six iterations; 2026-06-18 remained absent through 20:42:02Z. G1 remains blocked. | None | PASS_TARGET_ONLY_NO_MODEL | PASS |
 
 Regenerate with:
 

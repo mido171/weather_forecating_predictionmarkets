@@ -45,6 +45,9 @@ class DailyExtractPublicationRow:
     first_archive_retrieved_at: str
     first_archive_sha256: str
     first_archive_path: str
+    last_absent_archive_retrieved_at: str
+    last_absent_archive_sha256: str
+    last_absent_archive_path: str
     latest_value: str
     latest_value_precision: str
     latest_completeness: str
@@ -162,11 +165,14 @@ def build_daily_extract_publication_ledger(
     if not snapshots:
         raise PublicationError(f"No raw snapshots available for {source_id}")
 
+    snapshot_rows: list[tuple[SnapshotMetadata, dict[str, DailyExtractRow]]] = []
     observations: dict[str, list[tuple[SnapshotMetadata, DailyExtractRow]]] = {}
     for snapshot in snapshots:
         rows = parse_daily_extract_json(snapshot.content_path.read_bytes(), year=year, month=month)
-        for row in rows:
-            observations.setdefault(row.local_date.isoformat(), []).append((snapshot, row))
+        row_map = {row.local_date.isoformat(): row for row in rows}
+        snapshot_rows.append((snapshot, row_map))
+        for local_date, row in row_map.items():
+            observations.setdefault(local_date, []).append((snapshot, row))
 
     ledger: list[DailyExtractPublicationRow] = []
     for local_date in sorted(observations):
@@ -175,14 +181,31 @@ def build_daily_extract_publication_ledger(
         latest_snapshot, latest_row = entries[-1]
         distinct_values = sorted({_value_key(row) for _, row in entries})
         revision_observed = len(distinct_values) > 1
+        last_absent_snapshot = _last_active_absence_snapshot(
+            snapshot_rows,
+            local_date=local_date,
+            first_present_at=first_snapshot.retrieved_at,
+            active_start=provider_first_candidate_after,
+        )
         evidence_class = _evidence_class(
             local_date,
             first_snapshot.retrieved_at,
             provider_first_candidate_after=provider_first_candidate_after,
             revision_observed=revision_observed,
             watched_candidate_dates=watched,
+            last_absent_snapshot=last_absent_snapshot,
         )
-        notes = _notes_for(evidence_class, revision_observed)
+        watched_without_active_absence = (
+            provider_first_candidate_after is not None
+            and local_date in watched
+            and first_snapshot.retrieved_at >= provider_first_candidate_after.astimezone(UTC)
+            and last_absent_snapshot is None
+        )
+        notes = _notes_for(
+            evidence_class,
+            revision_observed,
+            watched_without_active_absence=watched_without_active_absence,
+        )
         ledger.append(
             DailyExtractPublicationRow(
                 local_date=local_date,
@@ -195,6 +218,15 @@ def build_daily_extract_publication_ledger(
                 first_archive_retrieved_at=_iso_utc(first_snapshot.retrieved_at),
                 first_archive_sha256=first_snapshot.sha256,
                 first_archive_path=str(first_snapshot.content_path),
+                last_absent_archive_retrieved_at=(
+                    "" if last_absent_snapshot is None else _iso_utc(last_absent_snapshot.retrieved_at)
+                ),
+                last_absent_archive_sha256=(
+                    "" if last_absent_snapshot is None else last_absent_snapshot.sha256
+                ),
+                last_absent_archive_path=(
+                    "" if last_absent_snapshot is None else str(last_absent_snapshot.content_path)
+                ),
                 latest_value=_decimal_text(latest_row.absolute_daily_max_c),
                 latest_value_precision=_decimal_text(latest_row.value_precision),
                 latest_completeness=latest_row.completeness,
@@ -222,6 +254,24 @@ def _validated_watched_dates(values: Iterable[str]) -> set[str]:
     return watched
 
 
+def _last_active_absence_snapshot(
+    snapshot_rows: list[tuple[SnapshotMetadata, dict[str, DailyExtractRow]]],
+    *,
+    local_date: str,
+    first_present_at: datetime,
+    active_start: datetime | None,
+) -> SnapshotMetadata | None:
+    if active_start is None:
+        return None
+    start = active_start.astimezone(UTC)
+    active_absences = [
+        snapshot
+        for snapshot, row_map in snapshot_rows
+        if start <= snapshot.retrieved_at < first_present_at and local_date not in row_map
+    ]
+    return active_absences[-1] if active_absences else None
+
+
 def _evidence_class(
     local_date: str,
     first_retrieved_at: datetime,
@@ -229,6 +279,7 @@ def _evidence_class(
     provider_first_candidate_after: datetime | None,
     revision_observed: bool,
     watched_candidate_dates: set[str],
+    last_absent_snapshot: SnapshotMetadata | None,
 ) -> str:
     if revision_observed:
         return REVISION_OBSERVED
@@ -236,16 +287,24 @@ def _evidence_class(
         provider_first_candidate_after is not None
         and local_date in watched_candidate_dates
         and first_retrieved_at >= provider_first_candidate_after.astimezone(UTC)
+        and last_absent_snapshot is not None
     ):
         return PROVIDER_FIRST_CANDIDATE
     return ARCHIVE_FIRST_OBSERVED
 
 
-def _notes_for(evidence_class: str, revision_observed: bool) -> str:
+def _notes_for(
+    evidence_class: str,
+    revision_observed: bool,
+    *,
+    watched_without_active_absence: bool,
+) -> str:
     if revision_observed:
         return "Later archived payload differs from the first archived value for this date."
     if evidence_class == PROVIDER_FIRST_CANDIDATE:
-        return "Candidate provider first publication; requires polling-cadence review before G1 acceptance."
+        return "Candidate provider first publication; active archive observed absence before first presence."
+    if watched_without_active_absence:
+        return "Watched date first observed after active start, but no active absent snapshot preceded it."
     return "First time observed by this archive; not proof of provider first publication."
 
 
@@ -287,6 +346,7 @@ def summarize_publication_rows(rows: Iterable[DailyExtractPublicationRow]) -> di
     return {
         "row_count": len(materialized),
         "evidence_counts": evidence_counts,
+        "provider_first_candidate_count": evidence_counts.get(PROVIDER_FIRST_CANDIDATE, 0),
         "revision_count": revision_count,
         "provider_first_publication_proven": False,
     }

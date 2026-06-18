@@ -106,6 +106,9 @@ def main() -> None:
     report_path = (root / args.report).resolve()
     row_count = write_publication_ledger(output_path, rows)
     summary = summarize_publication_rows(rows)
+    observed_dates = {row.local_date for row in rows}
+    watched_present = [date for date in args.watch_candidate_date if date in observed_dates]
+    watched_missing = [date for date in args.watch_candidate_date if date not in observed_dates]
     metrics = {
         **summary,
         "year": args.year,
@@ -117,6 +120,8 @@ def main() -> None:
             None if active_start is None else active_start.isoformat().replace("+00:00", "Z")
         ),
         "watched_candidate_dates": args.watch_candidate_date,
+        "watched_candidate_dates_present": watched_present,
+        "watched_candidate_dates_missing": watched_missing,
         "catalog_snapshot": {
             "sha256": catalog_snapshot.sha256,
             "retrieved_at": catalog_snapshot.retrieved_at.isoformat().replace("+00:00", "Z"),
@@ -157,6 +162,8 @@ def main() -> None:
         f"- provider first publication proven: `{summary['provider_first_publication_proven']}`",
         f"- active polling start: `{metrics['active_polling_start_at']}`",
         f"- watched candidate dates: `{args.watch_candidate_date}`",
+        f"- watched candidate dates present: `{watched_present}`",
+        f"- watched candidate dates missing: `{watched_missing}`",
         "",
         "## Artifacts",
         "",
@@ -166,7 +173,7 @@ def main() -> None:
         "## Limitations",
         "",
         "- Rows already visible before active polling are only first observed by this archive.",
-        "- Provider first-publication status requires repeated near-publication polling and review.",
+        "- Provider first-publication candidate status requires active absent-before-present evidence.",
         "- No predictive modelling or market backtesting was run.",
         "",
     ]

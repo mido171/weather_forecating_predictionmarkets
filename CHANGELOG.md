@@ -17,6 +17,9 @@
 - Added EXP-0004 bounded Daily Extract polling with explicit metrics output and
   watched-date provider-first candidate gating; G1 remains blocked until actual
   provider first-publication evidence is observed.
+- Added EXP-0005 active Daily Extract watch for `2026-06-18` and tightened
+  provider-first candidate gating to require active absent-before-present raw
+  snapshots before candidate status.
 
 ## G0 smoke test — 2026-06-18
 

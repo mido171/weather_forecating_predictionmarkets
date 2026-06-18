@@ -67,7 +67,7 @@ def test_publication_ledger_tracks_first_latest_and_revisions(tmp_path) -> None:
     assert "not proof of provider first publication" in by_date["2026-06-03"].notes
 
 
-def test_publication_ledger_candidates_require_active_start_and_watched_date(
+def test_publication_ledger_candidates_require_active_absence_and_watched_date(
     tmp_path,
 ) -> None:
     raw_root = tmp_path / "raw"
@@ -78,6 +78,13 @@ def test_publication_ledger_candidates_require_active_start_and_watched_date(
         source_id=source_id,
         content=_payload([("01", "32.0")]),
         retrieved_at=datetime(2026, 6, 18, 10, tzinfo=UTC),
+        extension="xml",
+    )
+    absent_snapshot = store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0")]),
+        retrieved_at=datetime(2026, 6, 18, 10, 45, tzinfo=UTC),
         extension="xml",
     )
     store_raw_bytes(
@@ -100,7 +107,43 @@ def test_publication_ledger_candidates_require_active_start_and_watched_date(
     by_date = {row.local_date: row for row in rows}
     assert by_date["2026-06-01"].evidence_class == ARCHIVE_FIRST_OBSERVED
     assert by_date["2026-06-02"].evidence_class == PROVIDER_FIRST_CANDIDATE
+    assert by_date["2026-06-02"].last_absent_archive_sha256 == absent_snapshot.sha256
+    assert by_date["2026-06-02"].last_absent_archive_retrieved_at == "2026-06-18T10:45:00Z"
     assert by_date["2026-06-03"].evidence_class == ARCHIVE_FIRST_OBSERVED
+
+
+def test_publication_ledger_rejects_candidate_without_active_absence(tmp_path) -> None:
+    raw_root = tmp_path / "raw"
+    source_id = "hko_daily_extract_202606"
+    active_start = datetime(2026, 6, 18, 10, 30, tzinfo=UTC)
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0")]),
+        retrieved_at=datetime(2026, 6, 18, 10, tzinfo=UTC),
+        extension="xml",
+    )
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0"), ("02", "31.0")]),
+        retrieved_at=datetime(2026, 6, 18, 11, tzinfo=UTC),
+        extension="xml",
+    )
+
+    rows = build_daily_extract_publication_ledger(
+        raw_root=raw_root,
+        year=2026,
+        month=6,
+        source_id=source_id,
+        provider_first_candidate_after=active_start,
+        watched_candidate_dates=["2026-06-02"],
+    )
+
+    by_date = {row.local_date: row for row in rows}
+    assert by_date["2026-06-02"].evidence_class == ARCHIVE_FIRST_OBSERVED
+    assert by_date["2026-06-02"].last_absent_archive_retrieved_at == ""
+    assert "no active absent snapshot" in by_date["2026-06-02"].notes
 
 
 def test_publication_ledger_revision_overrides_candidate(tmp_path) -> None:
@@ -110,14 +153,21 @@ def test_publication_ledger_revision_overrides_candidate(tmp_path) -> None:
     store_raw_bytes(
         raw_root,
         source_id=source_id,
-        content=_payload([("02", "31.0")]),
+        content=_payload([("01", "32.0")]),
+        retrieved_at=datetime(2026, 6, 18, 10, 45, tzinfo=UTC),
+        extension="xml",
+    )
+    store_raw_bytes(
+        raw_root,
+        source_id=source_id,
+        content=_payload([("01", "32.0"), ("02", "31.0")]),
         retrieved_at=datetime(2026, 6, 18, 11, tzinfo=UTC),
         extension="xml",
     )
     store_raw_bytes(
         raw_root,
         source_id=source_id,
-        content=_payload([("02", "31.1")]),
+        content=_payload([("01", "32.0"), ("02", "31.1")]),
         retrieved_at=datetime(2026, 6, 18, 12, tzinfo=UTC),
         extension="xml",
     )
@@ -131,7 +181,8 @@ def test_publication_ledger_revision_overrides_candidate(tmp_path) -> None:
         watched_candidate_dates=["2026-06-02"],
     )
 
-    assert rows[0].evidence_class == REVISION_OBSERVED
+    by_date = {row.local_date: row for row in rows}
+    assert by_date["2026-06-02"].evidence_class == REVISION_OBSERVED
 
 
 def test_publication_ledger_rejects_invalid_watched_date(tmp_path) -> None:

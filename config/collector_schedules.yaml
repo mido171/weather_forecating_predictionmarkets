@@ -28,6 +28,46 @@ sources:
     schedule_type: interval
     interval_minutes: 10
     notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_relative_humidity
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_pressure
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_wind
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_solar_radiation
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_visibility
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Latest-only feed; archive all changed payloads prospectively."
+  - source_id: hko_latest_uv_index
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 15
+    notes: "Latest-only UV feed; archive all changed payloads prospectively."
+  - source_id: hko_automatic_rainfall
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 15
+    notes: "Latest-only rainfall feed; archive all changed payloads prospectively."
+  - source_id: hko_current_weather_report
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Current report and regional observations; archive each changed payload."
   - source_id: hko_local_weather_forecast
     enabled: true
     schedule_type: interval
@@ -38,6 +78,51 @@ sources:
     schedule_type: interval
     interval_minutes: 60
     notes: "Official forecast vintage; changed payloads are separate vintages."
+  - source_id: hko_weather_warning_summary
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Warning vintages; archive every changed payload."
+  - source_id: hko_weather_warning_information
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 10
+    notes: "Warning detail vintages; archive every changed payload."
+  - source_id: hko_special_weather_tips
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 15
+    notes: "Special weather tips; archive every changed payload."
+  - source_id: hko_gridded_rainfall_nowcast
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 12
+    notes: "Rainfall nowcast issue feed; archive every changed issue."
+  - source_id: hko_radar_image_manifest
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 6
+    notes: "Current radar manifest only; image frames require the hko-backfill radar-lightning batch."
+  - source_id: hko_lightning_counts_latest
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 15
+    notes: "Lightning count feed; archive all changed payloads prospectively."
+  - source_id: hko_tropical_cyclone_track_realtime
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 15
+    notes: "Advisory-specific realtime TC track list; archive every changed payload."
+  - source_id: hko_south_china_coastal_waters_bulletin
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 60
+    notes: "Marine bulletin; archive every changed payload."
+  - source_id: hko_latest_tidal_information
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 60
+    notes: "Latest tide information; archive changed payloads prospectively."
   - source_id: hko_clmmaxt_hko
     enabled: true
     schedule_type: interval
@@ -48,3 +133,8 @@ sources:
     schedule_type: interval
     interval_minutes: 1440
     notes: "Provider metadata and endpoint discovery."
+  - source_id: hko_station_metadata
+    enabled: true
+    schedule_type: interval
+    interval_minutes: 1440
+    notes: "Provider metadata snapshot; archive station-page changes."

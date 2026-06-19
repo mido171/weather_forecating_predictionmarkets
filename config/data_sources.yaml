@@ -13,7 +13,7 @@ sources:
     provider: Hong Kong Observatory
     role: canonical_target_candidate
     access:
-      method: html_shell_plus_backing_request_discovery
+      method: http_html
       url: https://www.hko.gov.hk/en/cis/dailyExtract.htm
     cadence: daily
     historical_range: interactive
@@ -22,7 +22,7 @@ sources:
     revision_policy: current Polymarket template ignores later revisions
     priority: P0
     tags: [bootstrap_now, target, hko]
-    notes: "HTML shell references root-relative backing endpoints under /cis/dailyExtract/; canonical only after G1 confirms exact product/field/date behavior."
+    notes: "HTML shell archived directly; backing hko.xml and Daily Extract month/year payloads are archived as separate source IDs. Canonical target use remains gated by G1 field/date behavior checks."
 
   - id: hko_daily_extract_catalog
     provider: Hong Kong Observatory
@@ -157,85 +157,127 @@ sources:
     provider: Hong Kong Observatory
     role: live_station_network_humidity
     access:
-      method: dataset_page_then_resolve_resource
-      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-one-minute-mean-relative-humidity
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_humidity.csv
     cadence: every_10_minutes
     historical_range: latest_only_unless_self_archived
     point_in_time_status: OPERATIONAL_POINT_IN_TIME
     availability_rule: record provider timestamp and retrieval timestamp
     revision_policy: provisional
     priority: P0
-    tags: [live, humidity, hko]
+    tags: [bootstrap_now, live, humidity, hko]
 
   - id: hko_latest_pressure
     provider: Hong Kong Observatory
     role: live_station_network_pressure
     access:
-      method: discover_from_open_data_catalog
-      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
-    cadence: every_10_minutes
-    historical_range: latest_only_unless_self_archived
-    point_in_time_status: OPERATIONAL_POINT_IN_TIME
-    availability_rule: no guessed endpoint; resolve and record official resource
-    revision_policy: provisional
-    priority: P1
-    tags: [live, pressure, hko]
-
-  - id: hko_latest_wind
-    provider: Hong Kong Observatory
-    role: live_station_network_wind
-    access:
-      method: dataset_page_then_resolve_resource
-      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-ten-minute-mean-wind-direction-wind-speed-and-maximum-gust
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_pressure.csv
     cadence: every_10_minutes
     historical_range: latest_only_unless_self_archived
     point_in_time_status: OPERATIONAL_POINT_IN_TIME
     availability_rule: record provider timestamp and retrieval timestamp
     revision_policy: provisional
     priority: P0
-    tags: [live, wind, hko]
+    tags: [bootstrap_now, live, pressure, hko]
+
+  - id: hko_latest_wind
+    provider: Hong Kong Observatory
+    role: live_station_network_wind
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_10min_wind.csv
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: record provider timestamp and retrieval timestamp
+    revision_policy: provisional
+    priority: P0
+    tags: [bootstrap_now, live, wind, hko]
 
   - id: hko_latest_solar_radiation
     provider: Hong Kong Observatory
     role: live_solar_radiation
     access:
-      method: dataset_page_then_resolve_resource
-      url: https://data.gov.hk/en-data/dataset/hk-hko-rss-latest-one-minute-mean-global-solar-radiation
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_solar.csv
     cadence: every_10_minutes
     historical_range: latest_only_unless_self_archived
     point_in_time_status: OPERATIONAL_POINT_IN_TIME
     availability_rule: preserve station/product differences
     revision_policy: provisional
+    priority: P0
+    tags: [bootstrap_now, live, radiation, hko]
+
+  - id: hko_latest_uv_index
+    provider: Hong Kong Observatory
+    role: live_uv_index
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_15min_uvindex.csv
+    cadence: every_15_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: retrieved payload becomes available at successful retrieval; track source timestamp
+    revision_policy: provisional
     priority: P1
-    tags: [live, radiation, hko]
+    tags: [bootstrap_now, live, uv, radiation, hko]
 
   - id: hko_automatic_rainfall
     provider: Hong Kong Observatory
     role: live_station_network_rainfall
     access:
-      method: discover_from_open_data_catalog
-      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+      method: http_json
+      url: https://data.weather.gov.hk/weatherAPI/opendata/hourlyRainfall.php?lang=en
     cadence: every_15_minutes
     historical_range: latest_only_unless_self_archived
     point_in_time_status: OPERATIONAL_POINT_IN_TIME
     availability_rule: preserve product-specific station semantics
     revision_policy: provisional; HKO-labelled rainfall may differ from official climatological rainfall
     priority: P0
-    tags: [live, rain, hko]
+    tags: [bootstrap_now, live, rain, hko]
+
+  - id: hko_latest_visibility
+    provider: Hong Kong Observatory
+    role: live_station_network_visibility
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=LTMV&lang=en&rformat=csv
+    cadence: every_10_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: retrieved payload becomes available at successful retrieval; track source timestamp
+    revision_policy: provisional
+    priority: P1
+    tags: [bootstrap_now, live, visibility, hko]
+
+  - id: hko_current_weather_report
+    provider: Hong Kong Observatory
+    role: current_weather_report_and_regional_observations
+    access:
+      method: http_json
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en
+    cadence: provider_updated
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed payload and source timestamp
+    revision_policy: each changed payload is a separate vintage
+    priority: P0
+    tags: [bootstrap_now, live, weather_report, hko]
 
   - id: hko_gridded_rainfall_nowcast
     provider: Hong Kong Observatory
     role: issued_rainfall_nowcast
     access:
-      method: discover_from_open_data_catalog
-      url: https://www.hko.gov.hk/en/abouthko/opendata_intro.htm
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/F3/Gridded_rainfall_nowcast.csv
     cadence: every_12_minutes
     historical_range: latest_only_unless_self_archived
     point_in_time_status: OPERATIONAL_POINT_IN_TIME
     availability_rule: archive every issue with valid times
     revision_policy: new issue supersedes but never overwrites older issue
     priority: P1
-    tags: [nowcast, rain, hko]
+    tags: [bootstrap_now, nowcast, rain, hko]
 
   - id: hko_radar
     provider: Hong Kong Observatory
@@ -251,6 +293,20 @@ sources:
     priority: P1
     tags: [radar, rain, image, hko]
 
+  - id: hko_radar_image_manifest
+    provider: Hong Kong Observatory
+    role: current_radar_image_manifest
+    access:
+      method: http_json
+      url: https://www.hko.gov.hk/wxinfo/radars/temp_json/nradar_img.json
+    cadence: approximately_every_6_minutes
+    historical_range: limited_public_display_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed manifest and only use frames referenced by retrieval-time manifests
+    revision_policy: preserve each manifest/frame vintage
+    priority: P1
+    tags: [bootstrap_now, radar, rain, image, hko]
+
   - id: hko_lightning
     provider: Hong Kong Observatory
     role: lightning_observations
@@ -264,6 +320,20 @@ sources:
     revision_policy: provisional
     priority: P2
     tags: [lightning, convection, hko]
+
+  - id: hko_lightning_counts_latest
+    provider: Hong Kong Observatory
+    role: lightning_counts_latest
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=LHL&lang=en&rformat=csv
+    cadence: every_15_minutes
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive source timestamps and retrieval timestamps
+    revision_policy: provisional
+    priority: P1
+    tags: [bootstrap_now, lightning, convection, hko]
 
   - id: hko_satellite
     provider: Hong Kong Observatory
@@ -306,6 +376,48 @@ sources:
     revision_policy: each issue is a separate vintage
     priority: P0
     tags: [bootstrap_now, forecast, official, hko]
+
+  - id: hko_weather_warning_summary
+    provider: Hong Kong Observatory
+    role: official_warning_vintage_summary
+    access:
+      method: http_json
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=en
+    cadence: warning_update
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed warning payload and issue/update time
+    revision_policy: each issue is a separate vintage
+    priority: P1
+    tags: [bootstrap_now, warning, forecast, official, hko]
+
+  - id: hko_weather_warning_information
+    provider: Hong Kong Observatory
+    role: official_warning_vintage_detail
+    access:
+      method: http_json
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=en
+    cadence: warning_update
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed warning payload and issue/update time
+    revision_policy: each issue is a separate vintage
+    priority: P1
+    tags: [bootstrap_now, warning, forecast, official, hko]
+
+  - id: hko_special_weather_tips
+    provider: Hong Kong Observatory
+    role: official_special_weather_tips
+    access:
+      method: http_json
+      url: https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=swt&lang=en
+    cadence: provider_updated
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed payload and source timestamp
+    revision_policy: each issue is a separate vintage
+    priority: P1
+    tags: [bootstrap_now, warning, tips, official, hko]
 
   - id: hko_automatic_regional_forecast
     provider: Hong Kong Observatory
@@ -362,6 +474,34 @@ sources:
     revision_policy: preserve exact file version
     priority: P0
     tags: [archive, versions, data_gov_hk]
+
+  - id: hko_south_china_coastal_waters_bulletin
+    provider: Hong Kong Observatory
+    role: south_china_coastal_waters_bulletin
+    access:
+      method: http_json
+      url: https://data.weather.gov.hk/openData/json/sccw_json_datagov.json
+    cadence: provider_updated
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed bulletin and source timestamp
+    revision_policy: each issue is a separate vintage
+    priority: P1
+    tags: [bootstrap_now, marine, coastal_waters, hko]
+
+  - id: hko_latest_tidal_information
+    provider: Hong Kong Observatory
+    role: latest_tidal_information
+    access:
+      method: http_csv
+      url: https://data.weather.gov.hk/weatherAPI/hko_data/tide/ALL_en.csv
+    cadence: provider_updated
+    historical_range: latest_only_unless_self_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive every changed payload and source timestamp
+    revision_policy: provisional
+    priority: P1
+    tags: [bootstrap_now, marine, tide, hko]
 
   - id: ecmwf_open_ifs_aifs
     provider: ECMWF
@@ -488,6 +628,20 @@ sources:
     revision_policy: never substitute final best track
     priority: P1
     tags: [tropical_cyclone, synoptic, hko]
+
+  - id: hko_tropical_cyclone_track_realtime
+    provider: Hong Kong Observatory
+    role: realtime_tropical_cyclone_track_list
+    access:
+      method: http_xml
+      url: https://www.weather.gov.hk/wxinfo/currwx/tc_list.xml
+    cadence: advisory_specific
+    historical_range: limited_unless_archived
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: archive each retrieved track-list payload with retrieval timestamp
+    revision_policy: never substitute final best track
+    priority: P1
+    tags: [bootstrap_now, tropical_cyclone, synoptic, hko]
 
   - id: hko_tropical_cyclone_best_track
     provider: Hong Kong Observatory

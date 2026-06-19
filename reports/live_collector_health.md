@@ -1,11 +1,12 @@
 # Live Collector Health
 
 - data root: `C:\hkg_tmax_data`
-- generated_at_utc: `2026-06-18T22:34:30.762915Z`
+- generated_at_utc: `2026-06-19T05:20:05.382539Z`
 
 | Source | Last status | Last attempt UTC | Last success UTC | Last content hash | Consecutive failures |
 |---|---|---|---|---|---:|
 | hko_clmmaxt_hko | success | 2026-06-18T22:30:26.224189Z | 2026-06-18T22:30:24.926164Z | 5a0a646b4d125e40 | 0 |
+| hko_daily_extract | success | 2026-06-19T05:19:24.479366Z | 2026-06-19T05:19:22.930380Z | 347eb605218a9c9d | 0 |
 | hko_latest_1min_temperature | success | 2026-06-18T22:30:27.789517Z | 2026-06-18T22:30:27.743512Z | be489e7eed8928cd | 0 |
 | hko_local_weather_forecast | success | 2026-06-18T22:30:31.368223Z | 2026-06-18T22:30:31.317950Z | 59c71377cf53c464 | 0 |
 | hko_nine_day_forecast | success | 2026-06-18T22:30:33.325092Z | 2026-06-18T22:30:33.279570Z | 4ec7863a04016c74 | 0 |

@@ -20,6 +20,7 @@ from .collector import (
 from .config import SourceCatalog, find_repo_root
 from .doctor import doctor
 from .experiments import create_experiment, generate_index
+from .hko_backfill import run_hko_backfill_batch, summarize_records
 from .manifest import write_manifest
 from .market import snapshot_polymarket_event
 from .milestones import render_milestones
@@ -150,6 +151,25 @@ def build_parser() -> argparse.ArgumentParser:
         "build-bronze", help="Build bronze Parquet for the latest successful raw retrieval"
     )
     bronze_parser.add_argument("--source-id", action="append", required=True)
+    hko_backfill_parser = acquisition_sub.add_parser(
+        "hko-backfill", help="Run source-specific HKO acquisition backfill batches"
+    )
+    hko_backfill_parser.add_argument(
+        "--batch",
+        choices=(
+            "daily-climate",
+            "daily-extract",
+            "live-discovered",
+            "tc-best-track",
+            "upper-air",
+            "radar-lightning",
+            "satellite-current",
+            "all-small",
+        ),
+        required=True,
+    )
+    hko_backfill_parser.add_argument("--continue-on-error", action="store_true")
+    hko_backfill_parser.add_argument("--delay-seconds", type=float, default=0.2)
 
     return parser
 
@@ -369,6 +389,29 @@ def main(argv: Sequence[str] | None = None) -> None:
                             sort_keys=True,
                         )
                     )
+                return
+            if args.acquisition_command == "hko-backfill":
+                hko_outcome = run_hko_backfill_batch(
+                    root,
+                    batch=args.batch,
+                    continue_on_error=args.continue_on_error,
+                    delay_seconds=args.delay_seconds,
+                )
+                print(
+                    json.dumps(
+                        {
+                            "batch": args.batch,
+                            "requested": hko_outcome.requested,
+                            "succeeded": hko_outcome.succeeded,
+                            "failed": hko_outcome.failed,
+                            "records": summarize_records(hko_outcome.records),
+                            "failures": list(hko_outcome.failures),
+                        },
+                        sort_keys=True,
+                    )
+                )
+                if hko_outcome.failed:
+                    raise SystemExit(1)
                 return
 
         parser.error("Unhandled command")

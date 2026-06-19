@@ -413,6 +413,8 @@ def fetch_http_to_acquisition(
     url: str,
     policy: FetchPolicy | None = None,
     request_headers: Mapping[str, str] | None = None,
+    extension_override: str | None = None,
+    extra_metadata: Mapping[str, object] | None = None,
 ) -> AcquisitionRecord:
     policy = policy or FetchPolicy()
     if policy.max_attempts < 1:
@@ -485,7 +487,9 @@ def fetch_http_to_acquisition(
         )
         raise FetchError(error)
 
-    extension = infer_extension(str(response.url), response.headers.get("content-type"))
+    extension = extension_override or infer_extension(
+        str(response.url), response.headers.get("content-type")
+    )
     metadata: dict[str, object] = {
         "requested_url": url,
         "final_url": str(response.url),
@@ -498,6 +502,8 @@ def fetch_http_to_acquisition(
         "etag": response.headers.get("etag", ""),
         "last_modified": response.headers.get("last-modified", ""),
     }
+    if extra_metadata:
+        metadata.update(dict(extra_metadata))
     return store_content_addressed_retrieval(
         data_root,
         source_id=source_id,

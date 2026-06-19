@@ -5,10 +5,15 @@ status_classes:
   - P0_CRITICAL
   - P1_HIGH_VALUE
   - P2_FRONTIER
+  - IMPLEMENTED_BACKFILL_COMPLETE
+  - IMPLEMENTED_INITIAL_FETCH
+  - PARTIAL_IMPLEMENTED_WITH_BLOCKER
+  - BYTE_BUDGET_REQUIRED
   - UNAVAILABLE
   - PAID
   - CREDENTIAL_BLOCKED
   - TERMS_BLOCKED
+  - SOURCE_SELECTION_REQUIRED
   - DEFERRED_WITH_REASON
 
 sources:
@@ -61,14 +66,14 @@ sources:
     point_in_time_class: TARGET_ONLY
     estimated_bytes: small_json_text
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.xml"
-    adapter: planned_daily_extract_operational_collector
-    backfill_status: SUPERSEDED_POLLING_FAMILY_CLOSED
+    adapter: hko_backfill_daily_extract_plus_operational_policy
+    backfill_status: IMPLEMENTED_BACKFILL_COMPLETE
     live_status: scheduled_once_daily_not_rapid
     last_success: null
-    coverage: "EXP-0005 through EXP-0032 captured unchanged June 2026 payload; future routine collection ledger-only"
-    blocker: "template adapter must bind yyyymm from operational date"
-    evidence: reports/polling_loop_postmortem.md
-    next_action: implement template-bound once-daily collector without experiment creation
+    coverage: "Archived Daily Extract HTML shell, hko.xml, annual Daily Extract payloads 1884-2026, and monthly payloads 202601-202606 in C:\\hkg_tmax_data; 2026 payloads are current-year mutable target candidates."
+    blocker: ""
+    evidence: "retrieval_ledger source IDs hko_daily_extract, hko_daily_extract_catalog, hko_daily_extract_year, hko_daily_extract_month"
+    next_action: parse Daily Extract year/month payloads into source-native bronze target candidates with issue/retrieval timestamps
 
   - source_id: hko_daily_climate_elements
     family: A_hko_target_labels_daily_climate
@@ -90,14 +95,14 @@ sources:
     point_in_time_class: PROXY_WITH_LIMITATIONS
     estimated_bytes: small_to_medium_csv
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: DISCOVERY_REQUIRED
-    backfill_status: DISCOVERY_REQUIRED
-    live_status: not_started
+    adapter: hko_backfill_daily_climate_d1_caller
+    backfill_status: IMPLEMENTED_BACKFILL_COMPLETE
+    live_status: finalized_history_periodic_check
     last_success: null
-    coverage: not_started
-    blocker: official element identifiers must be discovered from HKO documentation, not guessed
-    evidence: reset instruction section 5A
-    next_action: archive HKO documentation and enumerate official dataType identifiers
+    coverage: "Archived 21 HKO D1 caller.php full-history daily climate payloads using official station/element codes from hko.xml and the HKO download page JavaScript."
+    blocker: ""
+    evidence: "retrieval_ledger source IDs hko_daily_climate_*_all"
+    next_action: parse each daily element into bronze/silver daily climate tables with station, element, unit, and revision metadata
 
   - source_id: hko_station_metadata
     family: B_hko_station_metadata_history
@@ -235,14 +240,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: small_per_publication
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: DISCOVERY_REQUIRED
-    backfill_status: DISCOVERY_REQUIRED
-    live_status: not_started
+    adapter: hko_backfill_discovered_live_feeds
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_10_to_60_min_by_feed
     last_success: null
-    coverage: not_started
-    blocker: exact official resource URLs and schemas must be resolved
-    evidence: reset instruction section 5C
-    next_action: enumerate DATA.GOV.HK resources and add one adapter per feed
+    coverage: "Initial raw snapshots archived for humidity, pressure, wind, solar radiation, UV index, automatic rainfall, visibility, and current weather report feeds."
+    blocker: historical sub-hourly backfill remains latest-only unless DATA.GOV.HK historical file versions expose older payloads
+    evidence: "retrieval_ledger source IDs hko_latest_relative_humidity, hko_latest_pressure, hko_latest_wind, hko_latest_solar_radiation, hko_latest_uv_index, hko_automatic_rainfall, hko_latest_visibility, hko_current_weather_report"
+    next_action: parse source-native live feeds and evaluate DATA.GOV.HK historical API for versioned backfill without assuming availability
 
   - source_id: hko_local_weather_forecast
     family: D_official_hko_forecast_vintages
@@ -322,14 +327,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.grib2"
-    adapter: NOT_IMPLEMENTED
-    backfill_status: NOT_STARTED
+    adapter: BYTE_BUDGET_REQUIRED_BEFORE_BACKFILL
+    backfill_status: BYTE_BUDGET_REQUIRED
     live_status: not_started
     last_success: null
     coverage: not_started
-    blocker: server-side subset definitions and byte budget must be finalized before large backfill
-    evidence: reset instruction section 5E
-    next_action: implement NOAA GFS subset adapter first with cycle/member/lead manifest
+    blocker: full GRIB cycle/member/lead archives are too large to fetch blindly; server-side Hong Kong/regional subset, variables, pressure levels, forecast leads, cycle policy, and byte budget require explicit approval
+    evidence: "reset instruction section 5E; operational NWP files are multi-variable GRIB cycle archives rather than small latest HKO feeds"
+    next_action: create a byte-budgeted GFS/GEFS/ECMWF/ICON acquisition plan before any NWP download
 
   - source_id: king_park_upper_air_and_regional_soundings
     family: F_upper_air_vertical_profile_observations
@@ -351,14 +356,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: medium
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: DISCOVERY_REQUIRED
-    backfill_status: DISCOVERY_REQUIRED
-    live_status: not_started
+    adapter: noaa_igra_hkm00045004_download
+    backfill_status: IMPLEMENTED_BACKFILL_COMPLETE
+    live_status: y2d_periodic_refresh
     last_success: null
-    coverage: not_started
-    blocker: exact HKO or IGRA station identifiers and access URLs must be confirmed
-    evidence: reset instruction section 5F
-    next_action: resolve station IDs and implement public archive backfill
+    coverage: "Archived NOAA IGRA2 station metadata, documentation, HKM00045004 Kowloon/King's Park period-of-record archive, and HKM00045004 year-to-date archive."
+    blocker: ""
+    evidence: "retrieval_ledger source IDs noaa_igra_station_list, noaa_igra_*_documentation, noaa_igra_hkm00045004_period_of_record, noaa_igra_hkm00045004_year_to_date"
+    next_action: parse IGRA sounding archives into bronze profiles and preserve RETROSPECTIVE/operational distinctions per product
 
   - source_id: radar_nowcast_lightning
     family: G_radar_rainfall_nowcasts_lightning
@@ -380,14 +385,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: medium_to_large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: DISCOVERY_REQUIRED
-    backfill_status: DISCOVERY_REQUIRED
-    live_status: not_started
+    adapter: hko_radar_lightning_current_manifest_downloader
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_6_to_15_min_by_feed
     last_success: null
-    coverage: not_started
-    blocker: product endpoints, color scales and georeferencing must be documented
-    evidence: reset instruction section 5G
-    next_action: archive product pages and implement first radar image collector
+    coverage: "Archived HKO radar page, current radar image manifest, 80 current radar frames, lightning pages, lightning count feed, and gridded rainfall nowcast."
+    blocker: historical radar/lightning imagery backfill is limited unless provider/API exposes historical frames or DATA.GOV.HK file versions
+    evidence: "retrieval_ledger source IDs hko_radar_page_64km, hko_radar_image_manifest, hko_radar_current_frame, hko_lightning_*, hko_gridded_rainfall_nowcast"
+    next_action: parse radar manifest frame times and document image georeferencing/color scale before feature use
 
   - source_id: satellite_cloud_aerosol
     family: H_satellite_cloud_aerosol_observations
@@ -409,14 +414,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: NOT_IMPLEMENTED
-    backfill_status: NOT_STARTED
-    live_status: not_started
+    adapter: hko_satellite_manifest_and_modis_downloader
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
+    live_status: scheduled_product_specific_after_blocker_resolution
     last_success: null
-    coverage: not_started
-    blocker: lawful provider and product subset must be selected
-    evidence: reset instruction section 5H
-    next_action: document terms for Himawari and HKO imagery before acquisition
+    coverage: "Archived HKO satellite page, Himawari/MODIS manifests, and resolvable MODIS true-colour and sea-surface-temperature images."
+    blocker: "HKO MODIS AOD manifest listed an image that returned HTTP 404; current Himawari manifest filenames did not resolve under tested HKO image paths, so unresolved image construction/provider availability must be fixed before marking complete."
+    evidence: "retrieval_ledger source IDs hko_satellite_* plus failed hko_satellite_modis_aod_image HTTP 404"
+    next_action: resolve HKO satellite image path rules or select another lawful official satellite archive before using cloud/aerosol context
 
   - source_id: tropical_cyclone_monsoon_synoptic
     family: I_tropical_cyclone_monsoon_synoptic_information
@@ -438,14 +443,14 @@ sources:
     point_in_time_class: MIXED_POINT_IN_TIME_AND_RETROSPECTIVE_ONLY
     estimated_bytes: medium
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: DISCOVERY_REQUIRED
-    backfill_status: DISCOVERY_REQUIRED
-    live_status: not_started
+    adapter: hko_tc_realtime_and_best_track_downloader
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: advisory_specific_realtime_refresh
     last_success: null
-    coverage: not_started
-    blocker: exact operational track/advisory endpoints must be confirmed
-    evidence: reset instruction section 5I
-    next_action: split operational advisories from retrospective best-track datasets in catalog
+    coverage: "Archived realtime HKO tc_list.xml plus HKO tropical cyclone best-track dictionary and annual best-track CSVs for 1985-2024."
+    blocker: operational advisory vintages before this acquisition run remain unavailable unless provider archive/version source is found; best-track data is RETROSPECTIVE_ONLY
+    evidence: "retrieval_ledger source IDs hko_tropical_cyclone_track_realtime, hko_tropical_cyclone_best_track_dictionary, hko_tropical_cyclone_best_track"
+    next_action: split realtime advisory vintages from retrospective best-track labels in bronze contracts
 
   - source_id: marine_ocean_surface_state
     family: J_marine_ocean_surface_state
@@ -467,14 +472,14 @@ sources:
     point_in_time_class: PROXY_WITH_LIMITATIONS
     estimated_bytes: medium_to_large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: NOT_IMPLEMENTED
-    backfill_status: NOT_STARTED
-    live_status: not_started
+    adapter: hko_marine_current_downloader
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_hourly_or_daily_by_feed
     last_success: null
-    coverage: not_started
-    blocker: source selection and issue-time contracts required
-    evidence: reset instruction section 5J
-    next_action: select HKO local sea temperature and NOAA OISST/OSTIA lawful products
+    coverage: "Archived South China coastal waters bulletin, latest HKO tide information, and daily climate sea-temperature series from North Point/Waglan."
+    blocker: NOAA OISST/OSTIA or other gridded ocean retrospective products require source selection, lawful terms, regional subset, and byte budget before bulk download
+    evidence: "retrieval_ledger source IDs hko_south_china_coastal_waters_bulletin, hko_latest_tidal_information, hko_daily_climate_sea_temp_*"
+    next_action: decide whether a gridded SST/ocean product is worth a byte-budgeted acquisition plan
 
   - source_id: reanalysis_mechanism_datasets
     family: K_reanalysis_retrospective_mechanism_datasets
@@ -501,9 +506,9 @@ sources:
     live_status: not_applicable
     last_success: null
     coverage: not_started
-    blocker: CDS credentials and exact request subsets required
+    blocker: CDS credentials, exact regional/variable/time subsets, and byte budget required; reanalysis is RETROSPECTIVE_ONLY and must never be treated as operationally available without release-lag simulation
     evidence: reset instruction section 5K and .env.example CDS fields
-    next_action: configure CDS credentials and write subset requests; mark RETROSPECTIVE_ONLY forever
+    next_action: configure CDS credentials and write subset requests only after deciding retrospective mechanism use
 
   - source_id: static_geospatial_deterministic_context
     family: L_static_geospatial_deterministic_context
@@ -525,12 +530,12 @@ sources:
     point_in_time_class: STATIC_METADATA
     estimated_bytes: medium
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: NOT_IMPLEMENTED
-    backfill_status: NOT_STARTED
+    adapter: SOURCE_SELECTION_REQUIRED
+    backfill_status: SOURCE_SELECTION_REQUIRED
     live_status: not_applicable
     last_success: null
     coverage: not_started
-    blocker: source selection and licensing review required
+    blocker: official terrain/coastline/land-cover source selection, license/version review, and possible raster byte budget required
     evidence: reset instruction section 5L
     next_action: generate solar geometry locally and select official terrain/coastline sources
 

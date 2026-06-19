@@ -233,21 +233,21 @@ sources:
     stations_domain: all_available_feed_stations
     native_cadence: feed_specific
     forecast_cycles: []
-    historical_start_end: latest_only_unless_self_archived_or_data_gov_history
-    archive_availability: public_feed_discovery_required
+    historical_start_end: "DATA.GOV.HK archives 20200601-20260618 for temperature/max-min/humidity/UV and 20210601-20260618 for pressure/wind/solar; rainfall/visibility/RHR direct API history not found"
+    archive_availability: public_feed_plus_data_gov_historical_archives
     expected_latency: retrieved_at
     revision_behavior: provisional_latest_feeds
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: small_per_publication
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
     adapter: hko_backfill_discovered_live_feeds
-    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
     live_status: scheduled_10_to_60_min_by_feed
     last_success: null
-    coverage: "Initial raw snapshots archived for humidity, pressure, wind, solar radiation, UV index, automatic rainfall, visibility, and current weather report feeds."
-    blocker: historical sub-hourly backfill remains latest-only unless DATA.GOV.HK historical file versions expose older payloads
-    evidence: "retrieval_ledger source IDs hko_latest_relative_humidity, hko_latest_pressure, hko_latest_wind, hko_latest_solar_radiation, hko_latest_uv_index, hko_automatic_rainfall, hko_latest_visibility, hko_current_weather_report"
-    next_action: parse source-native live feeds and evaluate DATA.GOV.HK historical API for versioned backfill without assuming availability
+    coverage: "Initial raw snapshots archived for humidity, pressure, wind, solar radiation, UV index, automatic rainfall, visibility, and current weather report feeds; DATA.GOV.HK historical ZIP archives downloaded for latest_1min_temperature, latest_since_midnight_maxmin, latest_1min_humidity, latest_1min_pressure, latest_10min_wind, latest_1min_solar, and latest_15min_uvindex through 20260618."
+    blocker: rainfall, visibility, and direct RHR JSON historical file versions were not found under tested DATA.GOV.HK historical API URLs; those remain latest/prospective unless another official archive is found
+    evidence: "retrieval_ledger source IDs hko_latest_*, hko_automatic_rainfall, hko_latest_visibility, hko_current_weather_report, and datagov_hko_historical_latest_*"
+    next_action: parse historical ZIP payloads plus source-native live feeds into station-variable bronze coverage tables
 
   - source_id: hko_local_weather_forecast
     family: D_official_hko_forecast_vintages
@@ -262,21 +262,21 @@ sources:
     stations_domain: Hong_Kong
     native_cadence: hourly_and_as_needed
     forecast_cycles: issue_time_in_payload
-    historical_start_end: latest_only_unless_self_archived
-    archive_availability: latest_public_api
+    historical_start_end: "latest JSON API plus DATA.GOV.HK RSS historical archive 20200601-20260618"
+    archive_availability: latest_public_api_and_data_gov_historical_rss
     expected_latency: retrieved_at_plus_payload_update_time
     revision_behavior: each changed payload is a vintage
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: small_json_per_issue
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.json"
     adapter: acquisition_http_content_addressed
-    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
     live_status: scheduled_hourly
     last_success: null
-    coverage: pending_from_retrieval_ledger
-    blocker: ""
-    evidence: official HKO weather API endpoint in config/data_sources.yaml
-    next_action: parse issue/update time and forecast max/min into bronze vintages
+    coverage: "Latest HKO JSON local forecast archived; DATA.GOV.HK historical RSS local forecast archives downloaded for English, Traditional Chinese, and Simplified Chinese, 90 archive ZIPs per language through 20260618."
+    blocker: historical versions of the JSON `flw` API itself were not found; RSS archive is the official available historical vintage source
+    evidence: "retrieval_ledger source IDs hko_local_weather_forecast and datagov_hko_historical_rss_local_forecast_*"
+    next_action: parse JSON latest and RSS historical forecast vintages into bronze with issued/update/retrieved times
 
   - source_id: hko_nine_day_forecast
     family: D_official_hko_forecast_vintages
@@ -291,21 +291,79 @@ sources:
     stations_domain: Hong_Kong
     native_cadence: at_least_twice_daily_and_as_needed
     forecast_cycles: issue_time_in_payload
-    historical_start_end: latest_only_unless_self_archived
-    archive_availability: latest_public_api
+    historical_start_end: "latest JSON API plus DATA.GOV.HK RSS historical archive 20210401-20260618"
+    archive_availability: latest_public_api_and_data_gov_historical_rss
     expected_latency: retrieved_at_plus_payload_update_time
     revision_behavior: each changed payload is a vintage
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: small_json_per_issue
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.json"
     adapter: acquisition_http_content_addressed
-    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
     live_status: scheduled_hourly
     last_success: null
-    coverage: pending_from_retrieval_ledger
-    blocker: ""
-    evidence: official HKO weather API endpoint in config/data_sources.yaml
-    next_action: parse issue/update time and forecast daily values into bronze vintages
+    coverage: "Latest HKO JSON nine-day forecast archived; DATA.GOV.HK historical RSS 9-day forecast archives downloaded for English, Traditional Chinese, and Simplified Chinese, 80 archive ZIPs per language through 20260618."
+    blocker: historical versions of the JSON `fnd` API itself were not found; RSS archive is the official available historical vintage source
+    evidence: "retrieval_ledger source IDs hko_nine_day_forecast and datagov_hko_historical_rss_9day_forecast_*"
+    next_action: parse JSON latest and RSS historical 9-day forecast vintages into bronze with issued/update/retrieved times
+
+  - source_id: hko_arwf_station_forecasts_and_nowcasts
+    family: D_official_hko_forecast_vintages
+    priority: P0_CRITICAL
+    provider: Hong Kong Observatory
+    authoritative_status: official_automatic_regional_weather_forecast_vintages
+    access_url: "https://www.hko.gov.hk/en/wxinfo/awsgis/regional_portal.html"
+    documentation_url: "https://www.hko.gov.hk/en/wxinfo/awsgis/remark_notes.html"
+    license_terms: HKO terms apply
+    authentication: none
+    variables: [station_forecast_tmax_tmin, chance_of_rain, weather_state, regional_observations, rainfall_nowcast, lightning_nowcast]
+    stations_domain: HKO_ARWF_station_and_grid_codes
+    native_cadence: provider_updated
+    forecast_cycles: model_time_and_last_modified_in_payload
+    historical_start_end: latest/current unless DATA.GOV.HK or HKO exposes older ARWF files
+    archive_availability: public_current_portal_assets
+    expected_latency: retrieved_at_plus_payload_last_modified
+    revision_behavior: current portal payloads mutate; every changed retrieval must be retained prospectively
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: small_current_snapshot
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: hko_arwf_current_portal_downloader
+    backfill_status: IMPLEMENTED_INITIAL_FETCH
+    live_status: scheduled_required_not_installed
+    last_success: null
+    coverage: "Archived ARWF portal and remark pages, map/station/parser scripts, latest AWS/RMN/lightning/status text files, rainfall and GeoJSON nowcast tarballs, radar KML overlays, nine animation CSVs, and 53 valid station/grid forecast JSON payloads discovered from official HKO station config/fallback rules."
+    blocker: older ARWF station forecast vintages are unavailable unless HKO or DATA.GOV.HK exposes historical versions; prospective collector still needs installation
+    evidence: "retrieval_ledger source IDs hko_arwf_*; official station config yielded 78 candidate codes, 53 forecast endpoints resolved with non-HTML 200 payloads"
+    next_action: parse ARWF station/grid forecasts and install a prospective collector for changed vintages
+
+  - source_id: hko_historical_rss_forecast_warning_archives
+    family: D_official_hko_forecast_vintages
+    priority: P0_CRITICAL
+    provider: DATA.GOV.HK / Hong Kong Observatory
+    authoritative_status: official_hko_historical_rss_archive
+    access_url: "https://app.data.gov.hk/v1/historical-archive/list-file-versions"
+    documentation_url: "https://data.gov.hk/en/help/api-spec#historicalAPI"
+    license_terms: DATA.GOV.HK/HKO terms apply
+    authentication: none
+    variables: [current_weather_report, local_weather_forecast, nine_day_weather_forecast, weather_warning_bulletin, weather_warning_summary]
+    stations_domain: Hong_Kong
+    native_cadence: feed_specific_versions
+    forecast_cycles: issued_or_published_time_in_rss_payload
+    historical_start_end: "20200601-20260618 for current/local/warnings; 20210401-20260618 for 9-day RSS"
+    archive_availability: public_data_gov_historical_archive
+    expected_latency: DATA_GOV_archive_availability_lag
+    revision_behavior: archive ZIPs preserve historical resource file versions by DATA.GOV.HK timestamp
+    point_in_time_class: POTENTIAL_POINT_IN_TIME_ARCHIVE
+    estimated_bytes: about_539_MB_compressed_for_downloaded_range
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.zip"
+    adapter: datagov_historical_rss_downloader
+    backfill_status: IMPLEMENTED_BACKFILL_COMPLETE
+    live_status: latest_rss_feeds_should_be_scheduled
+    last_success: null
+    coverage: "Downloaded 1,318 DATA.GOV.HK historical RSS listing/archive objects across 15 HKO RSS resources in English, Traditional Chinese, and Simplified Chinese: current weather, local forecast, 9-day forecast, weather warning bulletin, and weather warning summary."
+    blocker: special weather tips and JSON weather API historical versions were not found through the tested historical archive routes
+    evidence: "retrieval_ledger source IDs datagov_hko_historical_rss_* and datagov_historical_rss_api_documentation"
+    next_action: parse RSS archives into immutable forecast/warning vintage bronze tables
 
   - source_id: operational_nwp_gfs_gefs_ecmwf_icon
     family: E_operational_numerical_ai_forecast_archives
@@ -327,14 +385,14 @@ sources:
     point_in_time_class: OPERATIONAL_POINT_IN_TIME
     estimated_bytes: large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.grib2"
-    adapter: BYTE_BUDGET_REQUIRED_BEFORE_BACKFILL
-    backfill_status: BYTE_BUDGET_REQUIRED
-    live_status: not_started
+    adapter: ncep_gfs_gefs_current_regional_subset_downloader
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
+    live_status: prospective_collector_not_installed
     last_success: null
-    coverage: not_started
-    blocker: full GRIB cycle/member/lead archives are too large to fetch blindly; server-side Hong Kong/regional subset, variables, pressure levels, forecast leads, cycle policy, and byte budget require explicit approval
-    evidence: "reset instruction section 5E; operational NWP files are multi-variable GRIB cycle archives rather than small latest HKO feeds"
-    next_action: create a byte-budgeted GFS/GEFS/ECMWF/ICON acquisition plan before any NWP download
+    coverage: "Downloaded NOAA NOMADS server-side Hong Kong regional GRIB2 subsets for latest complete 20260619 00Z cycle: GFS deterministic f006-f120 every 6h (20 files) and GEFS c00, p01-p30, geavg, gespr f006-f120 every 6h (660 files), plus NOMADS filter metadata pages."
+    blocker: "Full historical and continuous operational NWP archives remain large. ECMWF open data and DWD ICON/ICON-EPS still need provider-specific subset/byte policy; DWD ICON current T_2M global variable files are about 3.3 MB per lead with no tested server-side spatial subset."
+    evidence: "retrieval_ledger source IDs ncep_gfs_hk_subset_grib2, ncep_gefs_hk_subset_grib2; NOMADS filter URLs preserve cycle, lead, member, variables, pressure levels, and Hong Kong regional bounding box."
+    next_action: install prospective NCEP collector and write byte-budgeted ECMWF/DWD/AI model acquisition plans before any bulk historical model download
 
   - source_id: king_park_upper_air_and_regional_soundings
     family: F_upper_air_vertical_profile_observations
@@ -422,6 +480,35 @@ sources:
     blocker: "HKO MODIS AOD manifest listed an image that returned HTTP 404; current Himawari manifest filenames did not resolve under tested HKO image paths, so unresolved image construction/provider availability must be fixed before marking complete."
     evidence: "retrieval_ledger source IDs hko_satellite_* plus failed hko_satellite_modis_aod_image HTTP 404"
     next_action: resolve HKO satellite image path rules or select another lawful official satellite archive before using cloud/aerosol context
+
+  - source_id: noaa_isd_nearby_surface_observations
+    family: I_tropical_cyclone_monsoon_synoptic_information
+    priority: P1_HIGH_VALUE
+    provider: NOAA NCEI
+    authoritative_status: official_integrated_surface_database_archive
+    access_url: "https://www.ncei.noaa.gov/pub/data/noaa/"
+    documentation_url: "https://www.ncei.noaa.gov/pub/data/noaa/isd-format-document.pdf"
+    license_terms: NOAA/NCEI public data terms apply
+    authentication: none
+    variables: [surface_synoptic_observations, temperature, dew_point, wind, pressure, cloud, visibility, precipitation_codes]
+    stations_domain: "36 stations in 21.0<=lat<=24.5 and 112.0<=lon<=116.0 from isd-history.csv"
+    native_cadence: station_and_period_specific_hourly_or_synoptic
+    forecast_cycles: []
+    historical_start_end: "station-specific 1945/1946 through 2025 where annual files exist"
+    archive_availability: public_annual_gzip_files
+    expected_latency: archive_release_lag
+    revision_behavior: NOAA annual files can revise; raw hash/retrieval time preserves version
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: about_130_MB_downloaded_including_metadata
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.gz"
+    adapter: noaa_isd_nearby_station_year_downloader
+    backfill_status: IMPLEMENTED_BACKFILL_COMPLETE
+    live_status: periodic_archive_refresh_required
+    last_success: null
+    coverage: "Downloaded NOAA ISD history, inventory, readme, format document, and 951 annual station gzip files for all official station-history rows in the Hong Kong/Pearl River Delta bounding box with available annual files."
+    blocker: "2026 annual ISD files were not exposed in the tested NOAA annual archive; data is historical/proxy and not a real-time collector."
+    evidence: "retrieval_ledger source IDs noaa_isd_history, noaa_isd_inventory, noaa_isd_readme, noaa_isd_format_document, noaa_isd_nearby_station_year"
+    next_action: parse annual ISD gzip records into bronze station observations and compare station identities against HKO registry
 
   - source_id: tropical_cyclone_monsoon_synoptic
     family: I_tropical_cyclone_monsoon_synoptic_information

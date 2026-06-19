@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import csv
+import io
 import re
 import time
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
@@ -48,6 +50,31 @@ class DailyClimateElement:
     point_in_time_class: str
 
 
+@dataclass(frozen=True)
+class DataGovHistoricalFeed:
+    source_suffix: str
+    resource_url: str
+    description: str
+    start_date: str
+    extension: str = "zip"
+    family: str = "C_high_frequency_hko_regional_observations"
+    point_in_time_class: str = "POTENTIAL_POINT_IN_TIME_ARCHIVE"
+
+
+@dataclass(frozen=True)
+class NoaaIsdStation:
+    usaf: str
+    wban: str
+    name: str
+    country: str
+    icao: str
+    latitude: str
+    longitude: str
+    elevation_m: str
+    begin_year: int
+    end_year: int
+
+
 DAILY_CLIMATE_ELEMENTS: tuple[DailyClimateElement, ...] = (
     DailyClimateElement("mslp", "MSLP", "HKO", "MSLP", "Daily mean pressure", 1884, "PROXY_WITH_LIMITATIONS"),
     DailyClimateElement("mean_temperature", "TEMP", "HKO", "TEMP", "Daily mean temperature", 1884, "PROXY_WITH_LIMITATIONS"),
@@ -70,6 +97,593 @@ DAILY_CLIMATE_ELEMENTS: tuple[DailyClimateElement, ...] = (
     DailyClimateElement("sea_temp_np_pm", "SEATEMP_NP_PM", "NPF", "SSTP", "Daily North Point sea temperature PM", 1974, "PROXY_WITH_LIMITATIONS"),
     DailyClimateElement("sea_temp_waglan", "SEATEMP_WGL", "WGL", "SST", "Daily Waglan sea temperature", 1990, "PROXY_WITH_LIMITATIONS"),
     DailyClimateElement("reduced_visibility_hka", "VIS_HKA", "HKA", "RVIS", "Daily reduced visibility hours", 1997, "PROXY_WITH_LIMITATIONS"),
+)
+
+
+DATAGOV_HISTORICAL_LIVE_FEEDS: tuple[DataGovHistoricalFeed, ...] = (
+    DataGovHistoricalFeed(
+        "latest_1min_temperature",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_temperature.csv",
+        "DATA.GOV.HK historical archives for HKO latest one-minute mean temperature",
+        "20200601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_since_midnight_maxmin",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_since_midnight_maxmin.csv",
+        "DATA.GOV.HK historical archives for HKO latest since-midnight max/min temperature",
+        "20200601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_1min_humidity",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_humidity.csv",
+        "DATA.GOV.HK historical archives for HKO latest one-minute mean relative humidity",
+        "20200601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_1min_pressure",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_pressure.csv",
+        "DATA.GOV.HK historical archives for HKO latest one-minute mean sea-level pressure",
+        "20210601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_10min_wind",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_10min_wind.csv",
+        "DATA.GOV.HK historical archives for HKO latest ten-minute wind",
+        "20210601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_1min_solar",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_solar.csv",
+        "DATA.GOV.HK historical archives for HKO latest one-minute solar radiation",
+        "20210601",
+    ),
+    DataGovHistoricalFeed(
+        "latest_15min_uvindex",
+        "https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_15min_uvindex.csv",
+        "DATA.GOV.HK historical archives for HKO latest fifteen-minute UV index",
+        "20200601",
+    ),
+)
+
+
+DATAGOV_HISTORICAL_RSS_FEEDS: tuple[DataGovHistoricalFeed, ...] = (
+    DataGovHistoricalFeed(
+        "rss_current_weather_en",
+        "https://rss.weather.gov.hk/rss/CurrentWeather.xml",
+        "DATA.GOV.HK historical RSS archives for HKO current weather report English",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_current_weather_tc",
+        "https://rss.weather.gov.hk/rss/CurrentWeather_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO current weather report Traditional Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_current_weather_sc",
+        "https://rss.weather.gov.hk/sc/rss/CurrentWeather_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO current weather report Simplified Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_local_forecast_en",
+        "https://rss.weather.gov.hk/rss/LocalWeatherForecast.xml",
+        "DATA.GOV.HK historical RSS archives for HKO local weather forecast English",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_local_forecast_tc",
+        "https://rss.weather.gov.hk/rss/LocalWeatherForecast_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO local weather forecast Traditional Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_local_forecast_sc",
+        "https://rss.weather.gov.hk/sc/rss/LocalWeatherForecast_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO local weather forecast Simplified Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_9day_forecast_en",
+        "https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_v2.xml",
+        "DATA.GOV.HK historical RSS archives for HKO 9-day weather forecast English",
+        "20210401",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_9day_forecast_tc",
+        "https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_v2_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO 9-day weather forecast Traditional Chinese",
+        "20210401",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_9day_forecast_sc",
+        "https://rss.weather.gov.hk/sc/rss/SeveralDaysWeatherForecast_v2_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO 9-day weather forecast Simplified Chinese",
+        "20210401",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_bulletin_en",
+        "https://rss.weather.gov.hk/rss/WeatherWarningBulletin.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning bulletin English",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_bulletin_tc",
+        "https://rss.weather.gov.hk/rss/WeatherWarningBulletin_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning bulletin Traditional Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_bulletin_sc",
+        "https://rss.weather.gov.hk/sc/rss/WeatherWarningBulletin_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning bulletin Simplified Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_summary_en",
+        "https://rss.weather.gov.hk/rss/WeatherWarningSummaryv2.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning summary English",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_summary_tc",
+        "https://rss.weather.gov.hk/rss/WeatherWarningSummaryv2_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning summary Traditional Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+    DataGovHistoricalFeed(
+        "rss_warning_summary_sc",
+        "https://rss.weather.gov.hk/sc/rss/WeatherWarningSummaryv2_uc.xml",
+        "DATA.GOV.HK historical RSS archives for HKO weather warning summary Simplified Chinese",
+        "20200601",
+        family="D_official_hko_forecast_vintages",
+    ),
+)
+
+
+ARWF_METADATA_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "hko_arwf_regional_portal_page",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/regional_portal.html",
+        "html",
+        "HKO Automatic Regional Weather Forecast portal page",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_remark_notes_page",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/remark_notes.html",
+        "html",
+        "HKO Automatic Regional Weather Forecast remark notes",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_map_config_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-map-config.js?v=",
+        "js",
+        "HKO ARWF map configuration script with data endpoint constants",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_station_config_aws_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-station-config-aws.js?v=",
+        "js",
+        "HKO ARWF AWS station configuration script",
+        {"family": "B_hko_station_metadata_history", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_station_config_rmn_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/station-config-rmn.js?v=",
+        "js",
+        "HKO radiation monitoring network station configuration script",
+        {"family": "B_hko_station_metadata_history", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_station_config_api_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-station-config-api.js?v=",
+        "js",
+        "HKO ARWF station configuration helper script",
+        {"family": "B_hko_station_metadata_history", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_data_parser_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-data-parser.js?v=",
+        "js",
+        "HKO ARWF source data parser script",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_gis_common_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-gis-common.js?v=",
+        "js",
+        "HKO ARWF GIS common script with forecast XML fallback rules",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_portal_js",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip.js?v=",
+        "js",
+        "HKO ARWF portal script with current data and nowcast bundle references",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+)
+
+
+ARWF_CURRENT_DATA_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "hko_arwf_latest_aws_readings",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/latestReadings_AWS1_v2.txt",
+        "txt",
+        "HKO ARWF latest AWS readings used by the regional forecast portal",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_rmn_hourly_mean",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/rmn_hourly_mean_used.txt",
+        "txt",
+        "HKO radiation monitoring network hourly mean readings used by the regional forecast portal",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_lightning_gis_latest",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/gislatest_portal.txt",
+        "txt",
+        "HKO ARWF latest GIS lightning stroke data used by the regional forecast portal",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_server_timestamp",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/timestamp.txt",
+        "txt",
+        "HKO ARWF server timestamp",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_alive_internet_portal_6h",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/alive_internet_portal_6h.txt",
+        "txt",
+        "HKO ARWF six-hour portal alive/status series",
+        {"family": "D_official_hko_forecast_vintages", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "hko_arwf_rainfall_nowcast_bundle",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/forecast/rainfall.tar.gz",
+        "tgz",
+        "HKO ARWF rainfall and lightning nowcast tarball with index files and images",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_nowcast_geojson_bundle",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/forecast/geojson.tar.gz",
+        "tgz",
+        "HKO ARWF rainfall and lightning nowcast GeoJSON tarball",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_radar_kml_64km",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/radars/R4_GIS_rad_064/R4_GIS_server_Radar_064.kml",
+        "kml",
+        "HKO ARWF 64 km radar KML overlay metadata",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_radar_kml_128km",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/radars/R4_GIS_rad_128/R4_GIS_server_Radar_128.kml",
+        "kml",
+        "HKO ARWF 128 km radar KML overlay metadata",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_radar_kml_256km",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/radars/R4_GIS_rad_256/R4_GIS_server_Radar_256.kml",
+        "kml",
+        "HKO ARWF 256 km radar KML overlay metadata",
+        {
+            "family": "G_radar_rainfall_nowcasts_lightning",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+)
+
+
+ARWF_ANIMATION_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "hko_arwf_yesterday_max_temperature_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_J1+MAXIMID_yesterday.csv",
+        "csv",
+        "HKO ARWF yesterday maximum temperature animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_yesterday_min_temperature_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_J1+MINUMID_yesterday.csv",
+        "csv",
+        "HKO ARWF yesterday minimum temperature animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_wind_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_hrwind.csv",
+        "csv",
+        "HKO ARWF past hourly wind animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_relative_humidity_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_rh.csv",
+        "csv",
+        "HKO ARWF past relative humidity animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_visibility_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_m1.csv",
+        "csv",
+        "HKO ARWF past visibility animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_mslp_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_S1.csv",
+        "csv",
+        "HKO ARWF past mean sea-level pressure animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_heat_index_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_hi2.csv",
+        "csv",
+        "HKO ARWF past Hong Kong heat index animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_temperature_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_J1.csv",
+        "csv",
+        "HKO ARWF past temperature animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+    HkoDownload(
+        "hko_arwf_past_wind_gust_animation",
+        HKO_PROVIDER,
+        "https://www.hko.gov.hk/wxinfo/awsgis/animate_F1.csv",
+        "csv",
+        "HKO ARWF past wind gust animation source",
+        {
+            "family": "C_high_frequency_hko_regional_observations",
+            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+        },
+    ),
+)
+
+
+NOAA_ISD_METADATA_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "noaa_isd_history",
+        "NOAA NCEI",
+        "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv",
+        "csv",
+        "NOAA ISD station history catalog",
+        {
+            "family": "I_tropical_cyclone_monsoon_synoptic_information",
+            "point_in_time_class": "METADATA",
+        },
+    ),
+    HkoDownload(
+        "noaa_isd_inventory",
+        "NOAA NCEI",
+        "https://www.ncei.noaa.gov/pub/data/noaa/isd-inventory.csv",
+        "csv",
+        "NOAA ISD station-year/month inventory",
+        {
+            "family": "I_tropical_cyclone_monsoon_synoptic_information",
+            "point_in_time_class": "METADATA",
+        },
+    ),
+    HkoDownload(
+        "noaa_isd_readme",
+        "NOAA NCEI",
+        "https://www.ncei.noaa.gov/pub/data/noaa/readme.txt",
+        "txt",
+        "NOAA ISD readme",
+        {
+            "family": "I_tropical_cyclone_monsoon_synoptic_information",
+            "point_in_time_class": "METADATA",
+        },
+    ),
+    HkoDownload(
+        "noaa_isd_format_document",
+        "NOAA NCEI",
+        "https://www.ncei.noaa.gov/pub/data/noaa/isd-format-document.pdf",
+        "pdf",
+        "NOAA ISD format document",
+        {
+            "family": "I_tropical_cyclone_monsoon_synoptic_information",
+            "point_in_time_class": "METADATA",
+        },
+    ),
+)
+
+
+NCEP_GFS_LEVEL_PARAMS: tuple[str, ...] = (
+    "lev_2_m_above_ground",
+    "lev_10_m_above_ground",
+    "lev_mean_sea_level",
+    "lev_surface",
+    "lev_1000_mb",
+    "lev_975_mb",
+    "lev_950_mb",
+    "lev_925_mb",
+    "lev_900_mb",
+    "lev_850_mb",
+    "lev_700_mb",
+    "lev_500_mb",
+)
+
+NCEP_GFS_VARIABLE_PARAMS: tuple[str, ...] = (
+    "var_TMP",
+    "var_DPT",
+    "var_RH",
+    "var_UGRD",
+    "var_VGRD",
+    "var_GUST",
+    "var_PRMSL",
+    "var_APCP",
+    "var_TCDC",
+    "var_DSWRF",
+    "var_DLWRF",
+    "var_CAPE",
+    "var_HPBL",
+    "var_HGT",
+    "var_VVEL",
+)
+
+NCEP_GEFS_LEVEL_PARAMS: tuple[str, ...] = (
+    "lev_2_m_above_ground",
+    "lev_10_m_above_ground",
+    "lev_mean_sea_level",
+    "lev_surface",
+    "lev_1000_mb",
+    "lev_925_mb",
+    "lev_850_mb",
+    "lev_700_mb",
+    "lev_500_mb",
+)
+
+NCEP_GEFS_VARIABLE_PARAMS: tuple[str, ...] = (
+    "var_TMP",
+    "var_RH",
+    "var_UGRD",
+    "var_VGRD",
+    "var_PRMSL",
+    "var_APCP",
+    "var_TCDC",
+    "var_HGT",
+)
+
+NCEP_FORECAST_HOURS_6H_TO_120H: tuple[int, ...] = tuple(range(6, 121, 6))
+NCEP_HK_REGIONAL_DOMAIN: Mapping[str, str] = {
+    "subregion": "",
+    "leftlon": "112",
+    "rightlon": "116",
+    "toplat": "25",
+    "bottomlat": "21",
+}
+NCEP_GEFS_MEMBERS: tuple[str, ...] = (
+    "gec00",
+    *(f"gep{member:02d}" for member in range(1, 31)),
+    "geavg",
+    "gespr",
+)
+
+NCEP_METADATA_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "ncep_gfs_nomads_filter_page",
+        "NOAA NCEP NOMADS",
+        "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl",
+        "html",
+        "NOAA NOMADS GFS 0.25 degree filter page",
+        {
+            "family": "E_operational_numerical_ai_forecast_archives",
+            "point_in_time_class": "METADATA",
+        },
+    ),
+    HkoDownload(
+        "ncep_gefs_nomads_filter_page",
+        "NOAA NCEP NOMADS",
+        "https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl",
+        "html",
+        "NOAA NOMADS GEFS 0.50 degree atmospheric filter page",
+        {
+            "family": "E_operational_numerical_ai_forecast_archives",
+            "point_in_time_class": "METADATA",
+        },
+    ),
 )
 
 
@@ -381,6 +995,27 @@ def _d1_url(station: str, element: str, year: str) -> str:
     )
 
 
+def _yyyymmdd(dt: datetime) -> str:
+    return dt.astimezone(HKT).strftime("%Y%m%d")
+
+
+def _default_datagov_history_end(now: datetime | None = None) -> str:
+    local_now = (now or datetime.now(UTC)).astimezone(HKT)
+    return _yyyymmdd(local_now - timedelta(days=1))
+
+
+def _datagov_list_file_versions_url(resource_url: str, start: str, end: str) -> str:
+    return "https://app.data.gov.hk/v1/historical-archive/list-file-versions?" + urlencode(
+        {"url": resource_url, "start": start, "end": end}
+    )
+
+
+def _datagov_get_file_url(resource_url: str, timestamp: str) -> str:
+    return "https://app.data.gov.hk/v1/historical-archive/get-file?" + urlencode(
+        {"url": resource_url, "time": timestamp}
+    )
+
+
 def build_daily_climate_downloads() -> tuple[HkoDownload, ...]:
     downloads: list[HkoDownload] = []
     for element in DAILY_CLIMATE_ELEMENTS:
@@ -402,6 +1037,403 @@ def build_daily_climate_downloads() -> tuple[HkoDownload, ...]:
                 },
             )
         )
+    return tuple(downloads)
+
+
+def build_datagov_historical_downloads_from_listing(
+    feed: DataGovHistoricalFeed,
+    listing: Mapping[str, object],
+) -> tuple[HkoDownload, ...]:
+    downloads: list[HkoDownload] = []
+    data_files = listing.get("data-files", [])
+    if not isinstance(data_files, list):
+        return ()
+    for item in data_files:
+        if not isinstance(item, Mapping):
+            continue
+        timestamp = str(item.get("timestamp", ""))
+        if not timestamp:
+            continue
+        downloads.append(
+            HkoDownload(
+                source_id=f"datagov_hko_historical_{feed.source_suffix}_archive",
+                provider="DATA.GOV.HK / Hong Kong Observatory",
+                url=_datagov_get_file_url(feed.resource_url, timestamp),
+                extension=feed.extension,
+                description=f"{feed.description} ({timestamp})",
+                metadata={
+                    "family": feed.family,
+                    "point_in_time_class": feed.point_in_time_class,
+                    "data_gov_historical_resource_url": feed.resource_url,
+                    "data_gov_archive_timestamp": timestamp,
+                    "data_gov_archive_period": str(item.get("period", "")),
+                    "data_gov_archive_filename": str(item.get("filename", "")),
+                    "data_gov_archive_resource_file_count": item.get("resource_file_count", ""),
+                    "data_gov_archive_expected_size": item.get("size", ""),
+                },
+            )
+        )
+    return tuple(downloads)
+
+
+def build_datagov_historical_live_downloads(
+    now: datetime | None = None,
+) -> tuple[HkoDownload, ...]:
+    end = _default_datagov_history_end(now)
+    downloads: list[HkoDownload] = [
+        HkoDownload(
+            "datagov_historical_api_documentation",
+            "DATA.GOV.HK",
+            "https://data.gov.hk/en/help/api-spec#historicalAPI",
+            "html",
+            "DATA.GOV.HK historical archive API documentation",
+            {
+                "family": "C_high_frequency_hko_regional_observations",
+                "point_in_time_class": "METADATA",
+            },
+        )
+    ]
+    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+        for feed in DATAGOV_HISTORICAL_LIVE_FEEDS:
+            listing_url = _datagov_list_file_versions_url(feed.resource_url, feed.start_date, end)
+            listing = client.get(listing_url).json()
+            downloads.append(
+                HkoDownload(
+                    source_id=f"datagov_hko_historical_{feed.source_suffix}_listing",
+                    provider="DATA.GOV.HK / Hong Kong Observatory",
+                    url=listing_url,
+                    extension="json",
+                    description=f"{feed.description} listing {feed.start_date}-{end}",
+                    metadata={
+                        "family": "C_high_frequency_hko_regional_observations",
+                        "point_in_time_class": "METADATA",
+                        "data_gov_historical_resource_url": feed.resource_url,
+                        "start_date": feed.start_date,
+                        "end_date": end,
+                    },
+                )
+            )
+            downloads.extend(build_datagov_historical_downloads_from_listing(feed, listing))
+    return tuple(downloads)
+
+
+def build_datagov_historical_rss_downloads(
+    now: datetime | None = None,
+) -> tuple[HkoDownload, ...]:
+    end = _default_datagov_history_end(now)
+    downloads: list[HkoDownload] = [
+        HkoDownload(
+            "datagov_historical_rss_api_documentation",
+            "DATA.GOV.HK",
+            "https://data.gov.hk/en/help/api-spec#historicalAPI",
+            "html",
+            "DATA.GOV.HK historical archive API documentation for HKO RSS archives",
+            {
+                "family": "D_official_hko_forecast_vintages",
+                "point_in_time_class": "METADATA",
+            },
+        )
+    ]
+    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+        for feed in DATAGOV_HISTORICAL_RSS_FEEDS:
+            listing_url = _datagov_list_file_versions_url(feed.resource_url, feed.start_date, end)
+            listing = client.get(listing_url).json()
+            downloads.append(
+                HkoDownload(
+                    source_id=f"datagov_hko_historical_{feed.source_suffix}_listing",
+                    provider="DATA.GOV.HK / Hong Kong Observatory",
+                    url=listing_url,
+                    extension="json",
+                    description=f"{feed.description} listing {feed.start_date}-{end}",
+                    metadata={
+                        "family": feed.family,
+                        "point_in_time_class": "METADATA",
+                        "data_gov_historical_resource_url": feed.resource_url,
+                        "start_date": feed.start_date,
+                        "end_date": end,
+                    },
+                )
+            )
+            downloads.extend(build_datagov_historical_downloads_from_listing(feed, listing))
+    return tuple(downloads)
+
+
+def extract_arwf_forecast_codes(station_config_text: str, common_js_text: str) -> tuple[str, ...]:
+    station_codes = {
+        code.upper()
+        for code in re.findall(r'stationConfigAWS\["([^"]+)"\]', station_config_text)
+    }
+    arwf_codes = {
+        code.upper()
+        for code in re.findall(r'ARWF_code\s*:\s*"([^"]+)"', station_config_text)
+    }
+    grid_codes = {
+        code.upper()
+        for code in re.findall(r'gridXML\s*:\s*"([^"]+)"', station_config_text)
+    }
+    fallback_codes = {
+        code.upper()
+        for code in re.findall(r'matchXML\["[^"]+"\]\s*=\s*"([^"]+)"', common_js_text)
+    }
+    return tuple(sorted(station_codes | arwf_codes | grid_codes | fallback_codes))
+
+
+def build_arwf_current_downloads() -> tuple[HkoDownload, ...]:
+    station_config_url = "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-station-config-aws.js?v="
+    common_js_url = "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-gis-common.js?v="
+    forecast_base_url = "https://www.hko.gov.hk/wxinfo/awsgis/forecast/"
+    downloads = list(ARWF_METADATA_DOWNLOADS + ARWF_CURRENT_DATA_DOWNLOADS + ARWF_ANIMATION_DOWNLOADS)
+    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+        station_config_text = client.get(station_config_url).text
+        common_js_text = client.get(common_js_url).text
+        for code in extract_arwf_forecast_codes(station_config_text, common_js_text):
+            url = f"{forecast_base_url}{code}.xml"
+            response = client.get(url)
+            if response.status_code < 200 or response.status_code >= 300:
+                continue
+            if not response.content or response.text.lstrip().startswith("<html"):
+                continue
+            downloads.append(
+                HkoDownload(
+                    "hko_arwf_station_forecast",
+                    HKO_PROVIDER,
+                    url,
+                    "json",
+                    "HKO ARWF station/grid forecast JSON served from forecast XML endpoint",
+                    {
+                        "family": "D_official_hko_forecast_vintages",
+                        "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+                        "forecast_code": code,
+                        "station_config_url": station_config_url,
+                        "common_js_url": common_js_url,
+                    },
+                )
+            )
+    return tuple(downloads)
+
+
+def extract_noaa_isd_nearby_stations(
+    history_text: str,
+    *,
+    min_latitude: float = 21.0,
+    max_latitude: float = 24.5,
+    min_longitude: float = 112.0,
+    max_longitude: float = 116.0,
+) -> tuple[NoaaIsdStation, ...]:
+    stations: list[NoaaIsdStation] = []
+    for row in csv.DictReader(io.StringIO(history_text)):
+        try:
+            latitude = float(row.get("LAT", ""))
+            longitude = float(row.get("LON", ""))
+            begin_year = int(str(row.get("BEGIN", ""))[:4])
+            end_year = int(str(row.get("END", ""))[:4])
+        except ValueError:
+            continue
+        if not (min_latitude <= latitude <= max_latitude):
+            continue
+        if not (min_longitude <= longitude <= max_longitude):
+            continue
+        stations.append(
+            NoaaIsdStation(
+                usaf=str(row.get("USAF", "")),
+                wban=str(row.get("WBAN", "")),
+                name=str(row.get("STATION NAME", "")),
+                country=str(row.get("CTRY", "")),
+                icao=str(row.get("ICAO", "")),
+                latitude=str(row.get("LAT", "")),
+                longitude=str(row.get("LON", "")),
+                elevation_m=str(row.get("ELEV(M)", "")),
+                begin_year=begin_year,
+                end_year=end_year,
+            )
+        )
+    return tuple(sorted(stations, key=lambda station: (station.usaf, station.wban)))
+
+
+def build_noaa_isd_nearby_downloads(now: datetime | None = None) -> tuple[HkoDownload, ...]:
+    history_url = "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv"
+    current_year = (now or datetime.now(UTC)).astimezone(UTC).year
+    downloads = list(NOAA_ISD_METADATA_DOWNLOADS)
+    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+        history_text = client.get(history_url).text
+        for station in extract_noaa_isd_nearby_stations(history_text):
+            for year in range(station.begin_year, min(station.end_year, current_year) + 1):
+                url = (
+                    f"https://www.ncei.noaa.gov/pub/data/noaa/{year}/"
+                    f"{station.usaf}-{station.wban}-{year}.gz"
+                )
+                response = client.head(url)
+                if response.status_code < 200 or response.status_code >= 300:
+                    continue
+                downloads.append(
+                    HkoDownload(
+                        "noaa_isd_nearby_station_year",
+                        "NOAA NCEI",
+                        url,
+                        "gz",
+                        "NOAA ISD annual station archive for Hong Kong/Pearl River Delta bounding box",
+                        {
+                            "family": "I_tropical_cyclone_monsoon_synoptic_information",
+                            "point_in_time_class": "PROXY_WITH_LIMITATIONS",
+                            "station_usaf": station.usaf,
+                            "station_wban": station.wban,
+                            "station_name": station.name,
+                            "station_country": station.country,
+                            "station_icao": station.icao,
+                            "station_latitude": station.latitude,
+                            "station_longitude": station.longitude,
+                            "station_elevation_m": station.elevation_m,
+                            "year": year,
+                            "source_catalog_url": history_url,
+                            "spatial_filter": "21.0<=lat<=24.5 and 112.0<=lon<=116.0",
+                        },
+                    )
+                )
+    return tuple(downloads)
+
+
+def build_ncep_filter_url(
+    script_url: str,
+    *,
+    directory: str,
+    filename: str,
+    level_params: Iterable[str],
+    variable_params: Iterable[str],
+) -> str:
+    params: dict[str, str] = {"dir": directory, "file": filename}
+    params.update({level: "on" for level in level_params})
+    params.update({variable: "on" for variable in variable_params})
+    params.update(NCEP_HK_REGIONAL_DOMAIN)
+    return script_url + "?" + urlencode(params)
+
+
+def _ncep_cycle_candidates(now: datetime | None = None) -> tuple[tuple[str, str], ...]:
+    utc_now = (now or datetime.now(UTC)).astimezone(UTC)
+    cycles: list[tuple[str, str]] = []
+    for day_offset in range(0, 4):
+        date = (utc_now - timedelta(days=day_offset)).strftime("%Y%m%d")
+        for cycle in ("18", "12", "06", "00"):
+            cycles.append((date, cycle))
+    return tuple(cycles)
+
+
+def _latest_available_ncep_cycle(
+    client: httpx.Client,
+    *,
+    script_url: str,
+    directory_template: str,
+    filename_template: str,
+    level_param: str,
+    variable_param: str,
+    now: datetime | None = None,
+) -> tuple[str, str] | None:
+    for date, cycle in _ncep_cycle_candidates(now):
+        url = build_ncep_filter_url(
+            script_url,
+            directory=directory_template.format(date=date, cycle=cycle),
+            filename=filename_template.format(cycle=cycle, forecast_hour=120),
+            level_params=(level_param,),
+            variable_params=(variable_param,),
+        )
+        response = client.head(url)
+        if response.status_code >= 200 and response.status_code < 300:
+            return date, cycle
+    return None
+
+
+def build_ncep_operational_current_downloads(
+    now: datetime | None = None,
+) -> tuple[HkoDownload, ...]:
+    gfs_script_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl"
+    gefs_script_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl"
+    downloads = list(NCEP_METADATA_DOWNLOADS)
+    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+        gfs_cycle = _latest_available_ncep_cycle(
+            client,
+            script_url=gfs_script_url,
+            directory_template="/gfs.{date}/{cycle}/atmos",
+            filename_template="gfs.t{cycle}z.pgrb2.0p25.f{forecast_hour:03d}",
+            level_param="lev_2_m_above_ground",
+            variable_param="var_TMP",
+            now=now,
+        )
+        if gfs_cycle is not None:
+            date, cycle = gfs_cycle
+            for forecast_hour in NCEP_FORECAST_HOURS_6H_TO_120H:
+                filename = f"gfs.t{cycle}z.pgrb2.0p25.f{forecast_hour:03d}"
+                downloads.append(
+                    HkoDownload(
+                        "ncep_gfs_hk_subset_grib2",
+                        "NOAA NCEP NOMADS",
+                        build_ncep_filter_url(
+                            gfs_script_url,
+                            directory=f"/gfs.{date}/{cycle}/atmos",
+                            filename=filename,
+                            level_params=NCEP_GFS_LEVEL_PARAMS,
+                            variable_params=NCEP_GFS_VARIABLE_PARAMS,
+                        ),
+                        "grib2",
+                        "NOAA GFS 0.25 degree Hong Kong regional operational GRIB2 subset",
+                        {
+                            "family": "E_operational_numerical_ai_forecast_archives",
+                            "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+                            "model": "GFS",
+                            "grid": "0p25",
+                            "cycle_date": date,
+                            "cycle": cycle,
+                            "forecast_hour": forecast_hour,
+                            "member": "deterministic",
+                            "domain": dict(NCEP_HK_REGIONAL_DOMAIN),
+                            "levels": list(NCEP_GFS_LEVEL_PARAMS),
+                            "variables": list(NCEP_GFS_VARIABLE_PARAMS),
+                            "original_filename": filename,
+                        },
+                    )
+                )
+
+        gefs_cycle = _latest_available_ncep_cycle(
+            client,
+            script_url=gefs_script_url,
+            directory_template="/gefs.{date}/{cycle}/atmos/pgrb2ap5",
+            filename_template="gep01.t{cycle}z.pgrb2a.0p50.f{forecast_hour:03d}",
+            level_param="lev_2_m_above_ground",
+            variable_param="var_TMP",
+            now=now,
+        )
+        if gefs_cycle is not None:
+            date, cycle = gefs_cycle
+            for member in NCEP_GEFS_MEMBERS:
+                for forecast_hour in NCEP_FORECAST_HOURS_6H_TO_120H:
+                    filename = f"{member}.t{cycle}z.pgrb2a.0p50.f{forecast_hour:03d}"
+                    downloads.append(
+                        HkoDownload(
+                            "ncep_gefs_hk_subset_grib2",
+                            "NOAA NCEP NOMADS",
+                            build_ncep_filter_url(
+                                gefs_script_url,
+                                directory=f"/gefs.{date}/{cycle}/atmos/pgrb2ap5",
+                                filename=filename,
+                                level_params=NCEP_GEFS_LEVEL_PARAMS,
+                                variable_params=NCEP_GEFS_VARIABLE_PARAMS,
+                            ),
+                            "grib2",
+                            "NOAA GEFS 0.50 degree Hong Kong regional operational GRIB2 subset",
+                            {
+                                "family": "E_operational_numerical_ai_forecast_archives",
+                                "point_in_time_class": "OPERATIONAL_POINT_IN_TIME",
+                                "model": "GEFS",
+                                "grid": "0p50",
+                                "cycle_date": date,
+                                "cycle": cycle,
+                                "forecast_hour": forecast_hour,
+                                "member": member,
+                                "domain": dict(NCEP_HK_REGIONAL_DOMAIN),
+                                "levels": list(NCEP_GEFS_LEVEL_PARAMS),
+                                "variables": list(NCEP_GEFS_VARIABLE_PARAMS),
+                                "original_filename": filename,
+                            },
+                        )
+                    )
     return tuple(downloads)
 
 
@@ -597,6 +1629,16 @@ def iter_batch_downloads(batch: str) -> tuple[HkoDownload, ...]:
         return build_radar_lightning_downloads()
     if batch == "satellite-current":
         return build_satellite_downloads()
+    if batch == "datagov-historical-live":
+        return build_datagov_historical_live_downloads()
+    if batch == "datagov-historical-rss":
+        return build_datagov_historical_rss_downloads()
+    if batch == "arwf-current":
+        return build_arwf_current_downloads()
+    if batch == "noaa-isd-nearby":
+        return build_noaa_isd_nearby_downloads()
+    if batch == "ncep-operational-current":
+        return build_ncep_operational_current_downloads()
     if batch == "all-small":
         return (
             build_daily_climate_downloads()
@@ -606,6 +1648,7 @@ def iter_batch_downloads(batch: str) -> tuple[HkoDownload, ...]:
             + UPPER_AIR_DOWNLOADS
             + build_radar_lightning_downloads()
             + build_satellite_downloads()
+            + build_arwf_current_downloads()
         )
     raise ValueError(f"Unknown HKO backfill batch: {batch}")
 

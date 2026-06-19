@@ -1,7 +1,7 @@
 # Live Collector Health
 
 - data root: `C:\hkg_tmax_data`
-- generated_at_utc: `2026-06-19T05:20:05.382539Z`
+- generated_at_utc: `2026-06-19T08:40:45.656001Z`
 
 | Source | Last status | Last attempt UTC | Last success UTC | Last content hash | Consecutive failures |
 |---|---|---|---|---|---:|

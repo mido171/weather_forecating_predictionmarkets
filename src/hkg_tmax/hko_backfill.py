@@ -14,10 +14,14 @@ from zoneinfo import ZoneInfo
 import httpx
 
 from .acquisition import AcquisitionRecord, ensure_data_root, fetch_http_to_acquisition
-from .fetch import FetchPolicy
+from .fetch import FetchPolicy, httpx_verify_context
 
 HKT = ZoneInfo("Asia/Hong_Kong")
 HKO_PROVIDER = "Hong Kong Observatory"
+LANDSD_PROVIDER = "Lands Department"
+PLAND_PROVIDER = "Planning Department"
+CSDI_PROVIDER = "Common Spatial Data Infrastructure Portal"
+DATA_GOV_PROVIDER = "DATA.GOV.HK"
 
 
 @dataclass(frozen=True)
@@ -985,6 +989,373 @@ SATELLITE_MANIFEST_DOWNLOADS: tuple[HkoDownload, ...] = (
 )
 
 
+STATIC_CONTEXT_BASE_DOWNLOADS: tuple[HkoDownload, ...] = (
+    HkoDownload(
+        "landsd_open_data_geospatial_page",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/en/spatial-data/open-data.html",
+        "html",
+        "Lands Department geospatial open-data source page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "data_gov_hk_landsd_dtm_dataset_page",
+        DATA_GOV_PROVIDER,
+        "https://data.gov.hk/en-data/dataset/hk-landsd-openmap-5m-grid-dtm",
+        "html",
+        "DATA.GOV.HK Digital Terrain Model dataset page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_geospatial_services_documentation",
+        CSDI_PROVIDER,
+        "https://portal.csdi.gov.hk/csdi-webpage/doc/GeoSpatialServices",
+        "html",
+        "CSDI geospatial service documentation",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_dataset_page",
+        CSDI_PROVIDER,
+        "https://portal.csdi.gov.hk/csdi-webpage/dataset/landsd_rcd_1638158088368_93806",
+        "html",
+        "CSDI LandsD Digital Terrain Model dataset page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_metadata_xml",
+        CSDI_PROVIDER,
+        "https://portal.csdi.gov.hk/csdi-webpage/metadata/landsd_rcd_1638158088368_93806",
+        "xml",
+        "CSDI ISO metadata for LandsD Digital Terrain Model",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_geotiff_zip",
+        CSDI_PROVIDER,
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/e9a836d098a3a9ccf55a7f61f69a93e71923c722fb94ddf7b36be83a67b99140",
+        "zip",
+        "CSDI GeoTIFF package for LandsD Digital Terrain Model",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "variable": "terrain_elevation",
+            "grid": "Hong Kong 5 m DTM",
+        },
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_supporting_document_pdf_1",
+        CSDI_PROVIDER,
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/fb780f95f32ee58f2d58dd41152e9fb833d35b2f73a3ae5000145092fafd26ce",
+        "pdf",
+        "CSDI supporting document for LandsD Digital Terrain Model",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_supporting_document_pdf_2",
+        CSDI_PROVIDER,
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/9d38d3b5ab4a73a8abdf42918cd71b38a9bea54c14c17b1234bb444d9b70445d",
+        "pdf",
+        "CSDI supporting document for LandsD Digital Terrain Model",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "csdi_landsd_dtm_supporting_document_pdf_3",
+        CSDI_PROVIDER,
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/61f8e4893aa81043a8b3e2e3c56eb7782da6dd6aec1e37d33f4bca54955a2067",
+        "pdf",
+        "CSDI supporting document for LandsD Digital Terrain Model",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_whole_hk_dtm_5m_asc_zip",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/Whole_HK_DTM_5m.zip",
+        "zip",
+        "LandsD Whole Hong Kong 5 m Digital Terrain Model ASC package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "variable": "terrain_elevation",
+            "grid": "Hong Kong 5 m DTM",
+        },
+    ),
+    HkoDownload(
+        "landsd_3d_spatial_data_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/3d_update.csv",
+        "csv",
+        "LandsD 3D spatial data revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_topographic_ib1000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ib1_update.csv",
+        "csv",
+        "LandsD iB1000 digital topographic map revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_topographic_ib5000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ib5_update.csv",
+        "csv",
+        "LandsD iB5000 digital topographic map revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_topographic_ib10000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ib10_update.csv",
+        "csv",
+        "LandsD iB10000 digital topographic map revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_topographic_ib20000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ib20_update.csv",
+        "csv",
+        "LandsD iB20000 digital topographic map revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_land_boundary_ic1000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ic1_update.csv",
+        "csv",
+        "LandsD iC1000 digital land boundary map revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_georeference_ig1000_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/ig1_update.csv",
+        "csv",
+        "LandsD iG1000 geo-reference database revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_igeocom_revision_csv",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/doc/en/mapping/digital-map/common/update/igeocom_update.csv",
+        "csv",
+        "LandsD iGeoCommunity database revision-date table",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "landsd_topographic_ib50000_gml_zip",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/iB50000GML.zip",
+        "zip",
+        "LandsD 1:50 000 digital topographic map GML package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:50000",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_ib100000_gml_zip",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/iB100000GML.zip",
+        "zip",
+        "LandsD 1:100 000 digital topographic map GML package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:100000",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_ib200000_gml_zip",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/iB200000GML.zip",
+        "zip",
+        "LandsD 1:200 000 digital topographic map GML package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:200000",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_b50000_geotiff",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/image/B50K_R200index-geo.tif",
+        "tif",
+        "LandsD 1:50 000 georeferenced topographic map GeoTIFF",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:50000",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_b100000_2017_geotiff",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/image/B100K_R200index-geo_Ed2017.tif",
+        "tif",
+        "LandsD 1:100 000 georeferenced topographic map GeoTIFF 2017 edition",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:100000",
+            "edition": "2017",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_b100000_2018_geotiff",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/image/B100K_R200index-geo_Ed2018.tif",
+        "tif",
+        "LandsD 1:100 000 georeferenced topographic map GeoTIFF 2018 edition",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:100000",
+            "edition": "2018",
+        },
+    ),
+    HkoDownload(
+        "landsd_topographic_b200000_geotiff",
+        LANDSD_PROVIDER,
+        "https://www.landsd.gov.hk/landsd_psi_data/SMO/image/B200K_R500index-geo.tif",
+        "tif",
+        "LandsD 1:200 000 georeferenced topographic map GeoTIFF",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "scale": "1:200000",
+        },
+    ),
+    HkoDownload(
+        "landsd_igeocom_csv_zip",
+        LANDSD_PROVIDER,
+        "https://open.hkmapservice.gov.hk/OpenData/directDownload?productName=iGeoCom&sheetName=iGeoCom&productFormat=CSV",
+        "zip",
+        "LandsD iGeoCommunity database CSV package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "product": "iGeoCom",
+        },
+    ),
+    HkoDownload(
+        "landsd_igeocom_geojson_zip",
+        LANDSD_PROVIDER,
+        "https://open.hkmapservice.gov.hk/OpenData/directDownload?productName=iGeoCom&sheetName=iGeoCom&productFormat=GEOJSON",
+        "zip",
+        "LandsD iGeoCommunity database GeoJSON package",
+        {
+            "family": "L_static_geospatial_deterministic_context",
+            "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+            "product": "iGeoCom",
+        },
+    ),
+    HkoDownload(
+        "pland_open_data_page",
+        PLAND_PROVIDER,
+        "https://www.pland.gov.hk/pland_en/resources/info_serv/open_data/index.html",
+        "html",
+        "Planning Department open-data source page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "pland_land_utilization_page",
+        PLAND_PROVIDER,
+        "https://www.pland.gov.hk/pland_en/info_serv/open_data/landu/",
+        "html",
+        "Planning Department Land Utilization in Hong Kong source page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "data_gov_hk_pland_luhk_raster_grid_page",
+        DATA_GOV_PROVIDER,
+        "https://data.gov.hk/en-data/dataset/hk-pland-pland1-land-utilization-in-hong-kong-raster-grid",
+        "html",
+        "DATA.GOV.HK LUHK raster-grid dataset page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "data_gov_hk_pland_luhk_statistics_page",
+        DATA_GOV_PROVIDER,
+        "https://data.gov.hk/en-data/dataset/hk-pland-pland1-land-utilization-in-hong-kong-statistics",
+        "html",
+        "DATA.GOV.HK LUHK statistics dataset page",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "pland_3d_photo_realistic_grid_index_cesium_csv",
+        PLAND_PROVIDER,
+        "https://pdmap.pland.gov.hk/PLANDWEB/public/3d_photo_realistic_models/Metadata/GridIdx_CESIUM.csv",
+        "csv",
+        "Planning Department 3D photo-realistic model Cesium tile grid index",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "pland_3d_photo_realistic_grid_index_obj_csv",
+        PLAND_PROVIDER,
+        "https://pdmap.pland.gov.hk/PLANDWEB/public/3d_photo_realistic_models/Metadata/GridIdx_OBJ.csv",
+        "csv",
+        "Planning Department 3D photo-realistic model OBJ tile grid index",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+    HkoDownload(
+        "pland_3d_photo_realistic_grid_index_osgb_csv",
+        PLAND_PROVIDER,
+        "https://pdmap.pland.gov.hk/PLANDWEB/public/3d_photo_realistic_models/Metadata/GridIdx_OSGB.csv",
+        "csv",
+        "Planning Department 3D photo-realistic model OSGB tile grid index",
+        {"family": "L_static_geospatial_deterministic_context", "point_in_time_class": "METADATA"},
+    ),
+)
+
+
+PLAND_LUHK_RASTER_SOURCES: tuple[tuple[int, str, str], ...] = (
+    (
+        2018,
+        "pland_rcd_1634281791890_21963",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/0044b949d744ed5ffa8ed21ac21a033cdf14ac6f1e576f1e9443d8ab0f8991c4",
+    ),
+    (
+        2019,
+        "pland_rcd_1634282086807_94936",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/3003f406d1da89bc8ccc6c2478fd33aaa7b9de2d1fda272aef552f91af69158f",
+    ),
+    (
+        2020,
+        "pland_rcd_1634282545137_98227",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/0f7706f12b120946ce2a4bafcedcb4dd6f004f4b63dde337410f09214262ffd2",
+    ),
+    (
+        2021,
+        "pland_rcd_1634024370851_27769",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/33c4bb4d4a0cac30c5afa16512ae0c474d16ab295bc3a0d48a145bd0d8ed95de",
+    ),
+    (
+        2022,
+        "pland_rcd_1665742315124_26227",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/4993f93e28e19fb4dc0dca9a672dfc4254bc0a88a094a5a0464d30e637587d5c",
+    ),
+    (
+        2023,
+        "pland_rcd_1696577406166_85973",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/8c59922e3882395ba69a87af722119534d6e6723202476e84d99c56c394a7224",
+    ),
+    (
+        2024,
+        "pland_rcd_1725865972233_20687",
+        "https://static.csdi.gov.hk/csdi-webpage/download/common/ca6cfc600335247dcf833e558efc09962f1243c2f33e8b32438256cc1eea1388",
+    ),
+)
+
+
+PLAND_LUHK_STATISTICS_YEARS: tuple[int, ...] = (2022, 2023, 2024)
+PLAND_LUHK_STATISTICS_DESCRIPTION_YEARS: tuple[int, ...] = (2023, 2024)
+
+
 def _default_policy(max_bytes: int = 512 * 1024 * 1024) -> FetchPolicy:
     return FetchPolicy(max_attempts=2, retry_sleep_seconds=1.0, timeout_seconds=60.0, max_bytes=max_bytes)
 
@@ -1093,7 +1464,7 @@ def build_datagov_historical_live_downloads(
             },
         )
     ]
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         for feed in DATAGOV_HISTORICAL_LIVE_FEEDS:
             listing_url = _datagov_list_file_versions_url(feed.resource_url, feed.start_date, end)
             listing = client.get(listing_url).json()
@@ -1134,7 +1505,7 @@ def build_datagov_historical_rss_downloads(
             },
         )
     ]
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         for feed in DATAGOV_HISTORICAL_RSS_FEEDS:
             listing_url = _datagov_list_file_versions_url(feed.resource_url, feed.start_date, end)
             listing = client.get(listing_url).json()
@@ -1183,7 +1554,7 @@ def build_arwf_current_downloads() -> tuple[HkoDownload, ...]:
     common_js_url = "https://www.hko.gov.hk/en/wxinfo/awsgis/files/irwip-gis-common.js?v="
     forecast_base_url = "https://www.hko.gov.hk/wxinfo/awsgis/forecast/"
     downloads = list(ARWF_METADATA_DOWNLOADS + ARWF_CURRENT_DATA_DOWNLOADS + ARWF_ANIMATION_DOWNLOADS)
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         station_config_text = client.get(station_config_url).text
         common_js_text = client.get(common_js_url).text
         for code in extract_arwf_forecast_codes(station_config_text, common_js_text):
@@ -1254,7 +1625,7 @@ def build_noaa_isd_nearby_downloads(now: datetime | None = None) -> tuple[HkoDow
     history_url = "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv"
     current_year = (now or datetime.now(UTC)).astimezone(UTC).year
     downloads = list(NOAA_ISD_METADATA_DOWNLOADS)
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         history_text = client.get(history_url).text
         for station in extract_noaa_isd_nearby_stations(history_text):
             for year in range(station.begin_year, min(station.end_year, current_year) + 1):
@@ -1347,7 +1718,7 @@ def build_ncep_operational_current_downloads(
     gfs_script_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl"
     gefs_script_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl"
     downloads = list(NCEP_METADATA_DOWNLOADS)
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         gfs_cycle = _latest_available_ncep_cycle(
             client,
             script_url=gfs_script_url,
@@ -1518,7 +1889,7 @@ def build_tc_best_track_downloads(start_year: int = 1985, end_year: int = 2024) 
 def build_radar_lightning_downloads() -> tuple[HkoDownload, ...]:
     downloads = list(RADAR_LIGHTNING_BASE_DOWNLOADS)
     manifest_url = "https://www.hko.gov.hk/wxinfo/radars/temp_json/nradar_img.json"
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         data = client.get(manifest_url).json()
     image_scripts: list[str] = []
     radar = data.get("radar", {})
@@ -1588,7 +1959,7 @@ def build_satellite_downloads() -> tuple[HkoDownload, ...]:
             "HKO MODIS Hong Kong sea-surface-temperature image",
         ),
     )
-    with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=60.0, follow_redirects=True, verify=httpx_verify_context()) as client:
         for source_id, manifest_url, base_url, extension, description in manifest_specs:
             js_text = client.get(manifest_url).text
             for filename in _extract_satellite_filenames(js_text):
@@ -1611,6 +1982,88 @@ def build_satellite_downloads() -> tuple[HkoDownload, ...]:
                         },
                     )
                 )
+    return tuple(downloads)
+
+
+def build_static_context_downloads() -> tuple[HkoDownload, ...]:
+    downloads = list(STATIC_CONTEXT_BASE_DOWNLOADS)
+    for year, dataset_id, package_url in PLAND_LUHK_RASTER_SOURCES:
+        downloads.extend(
+            (
+                HkoDownload(
+                    f"csdi_pland_luhk_{year}_raster_dataset_page",
+                    CSDI_PROVIDER,
+                    f"https://portal.csdi.gov.hk/csdi-webpage/dataset/{dataset_id}",
+                    "html",
+                    f"CSDI LUHK {year} raster-grid dataset page",
+                    {
+                        "family": "L_static_geospatial_deterministic_context",
+                        "point_in_time_class": "METADATA",
+                        "year": year,
+                        "dataset_id": dataset_id,
+                    },
+                ),
+                HkoDownload(
+                    f"csdi_pland_luhk_{year}_raster_metadata_xml",
+                    CSDI_PROVIDER,
+                    f"https://portal.csdi.gov.hk/csdi-webpage/metadata/{dataset_id}",
+                    "xml",
+                    f"CSDI ISO metadata for LUHK {year} raster grid",
+                    {
+                        "family": "L_static_geospatial_deterministic_context",
+                        "point_in_time_class": "METADATA",
+                        "year": year,
+                        "dataset_id": dataset_id,
+                    },
+                ),
+                HkoDownload(
+                    f"csdi_pland_luhk_{year}_raster_geotiff_zip",
+                    CSDI_PROVIDER,
+                    package_url,
+                    "zip",
+                    f"CSDI LUHK {year} 10 m land-utilization raster GeoTIFF package",
+                    {
+                        "family": "L_static_geospatial_deterministic_context",
+                        "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+                        "year": year,
+                        "dataset_id": dataset_id,
+                        "variable": "land_utilization",
+                        "grid": "Hong Kong 10 m raster",
+                    },
+                ),
+            )
+        )
+    for year in PLAND_LUHK_STATISTICS_YEARS:
+        downloads.append(
+            HkoDownload(
+                f"pland_luhk_{year}_statistics_english_csv",
+                PLAND_PROVIDER,
+                f"https://www.pland.gov.hk/pland_en/info_serv/statistic/landu/csv/LUHK{year}_English.csv",
+                "csv",
+                f"Planning Department LUHK {year} English land-use statistics",
+                {
+                    "family": "L_static_geospatial_deterministic_context",
+                    "point_in_time_class": "STATIC_CONTEXT_VERSIONED",
+                    "year": year,
+                    "variable": "land_utilization_statistics",
+                },
+            )
+        )
+    for year in PLAND_LUHK_STATISTICS_DESCRIPTION_YEARS:
+        downloads.append(
+            HkoDownload(
+                f"pland_luhk_{year}_statistics_description_english_csv",
+                PLAND_PROVIDER,
+                f"https://www.pland.gov.hk/pland_en/info_serv/statistic/landu/csv/LUHK{year}_English_description.csv",
+                "csv",
+                f"Planning Department LUHK {year} English data-description file",
+                {
+                    "family": "L_static_geospatial_deterministic_context",
+                    "point_in_time_class": "METADATA",
+                    "year": year,
+                },
+            )
+        )
     return tuple(downloads)
 
 
@@ -1639,6 +2092,8 @@ def iter_batch_downloads(batch: str) -> tuple[HkoDownload, ...]:
         return build_noaa_isd_nearby_downloads()
     if batch == "ncep-operational-current":
         return build_ncep_operational_current_downloads()
+    if batch == "static-context-current":
+        return build_static_context_downloads()
     if batch == "all-small":
         return (
             build_daily_climate_downloads()
@@ -1649,6 +2104,7 @@ def iter_batch_downloads(batch: str) -> tuple[HkoDownload, ...]:
             + build_radar_lightning_downloads()
             + build_satellite_downloads()
             + build_arwf_current_downloads()
+            + build_static_context_downloads()
         )
     raise ValueError(f"Unknown HKO backfill batch: {batch}")
 

@@ -600,31 +600,31 @@ sources:
   - source_id: static_geospatial_deterministic_context
     family: L_static_geospatial_deterministic_context
     priority: P1_HIGH_VALUE
-    provider: official_open_geospatial_sources
-    authoritative_status: versioned_static_context
-    access_url: "https://www.geodata.gov.hk/gs/"
-    documentation_url: "https://www.geodata.gov.hk/gs/"
-    license_terms: source-specific
-    authentication: none_or_provider_specific
-    variables: [terrain, coastline, land_water_fraction, land_cover, urban_morphology, station_distance_bearing, solar_geometry]
+    provider: Lands Department, Planning Department, CSDI Portal, DATA.GOV.HK
+    authoritative_status: official_versioned_static_context
+    access_url: "https://www.landsd.gov.hk/en/spatial-data/open-data.html"
+    documentation_url: "https://portal.csdi.gov.hk/csdi-webpage/doc/GeoSpatialServices"
+    license_terms: LandsD/PlanD/CSDI/DATA.GOV.HK source terms apply
+    authentication: none
+    variables: [terrain, topographic_context, land_boundary_revision_metadata, geocommunity_context, land_utilization_raster, land_utilization_statistics, urban_morphology_tile_indexes, station_distance_bearing, solar_geometry]
     stations_domain: Hong_Kong_and_station_network
     native_cadence: static_versioned
     forecast_cycles: []
     historical_start_end: version_specific
-    archive_availability: public_or_terms_specific
+    archive_availability: public_static_downloads
     expected_latency: not_applicable
     revision_behavior: version_static_files
-    point_in_time_class: STATIC_METADATA
+    point_in_time_class: STATIC_CONTEXT_VERSIONED
     estimated_bytes: medium
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
-    adapter: SOURCE_SELECTION_REQUIRED
-    backfill_status: SOURCE_SELECTION_REQUIRED
-    live_status: not_applicable
+    adapter: hko_backfill_static_context_current
+    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
+    live_status: periodic_static_refresh_required
     last_success: null
-    coverage: not_started
-    blocker: official terrain/coastline/land-cover source selection, license/version review, and possible raster byte budget required
-    evidence: reset instruction section 5L
-    next_action: generate solar geometry locally and select official terrain/coastline sources
+    coverage: "Downloaded 60 official static-context raw objects totaling 215,229,122 bytes: LandsD 5 m DTM direct ASC zip and CSDI GeoTIFF package/docs; LandsD topographic GML/GeoTIFF packages and i-Series revision CSVs; LandsD iGeoCom CSV/GeoJSON packages; PlanD/CSDI LUHK 10 m land-utilization raster packages and metadata for 2018-2024; PlanD LUHK 2022-2024 English statistics; PlanD 3D photo-realistic model tile index CSVs."
+    blocker: deterministic derived station distance/bearing matrices, solar geometry tables, and parsed slope/aspect/land-water/station-context products are not generated yet; full PlanD 3D model tile payloads remain byte-budget/source-use dependent
+    evidence: "retrieval_ledger source IDs landsd_*, csdi_landsd_*, csdi_pland_luhk_*, pland_*, data_gov_hk_landsd_dtm_dataset_page, data_gov_hk_pland_luhk_*; reports/static_context_inventory.md"
+    next_action: parse static rasters/vector packages and generate versioned station-distance, terrain, coastline/land-water, and solar-geometry metadata without model features
 
   - source_id: frontier_context_inventory
     family: M_frontier_context

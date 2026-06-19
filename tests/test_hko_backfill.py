@@ -11,6 +11,7 @@ from hkg_tmax.hko_backfill import (
     build_daily_extract_downloads,
     build_datagov_historical_downloads_from_listing,
     build_ncep_filter_url,
+    build_static_context_downloads,
     build_tc_best_track_downloads,
     extract_arwf_forecast_codes,
     extract_noaa_isd_nearby_stations,
@@ -151,3 +152,18 @@ def test_ncep_filter_url_includes_point_in_time_subset_parameters() -> None:
     assert "rightlon=116" in url
     assert "toplat=25" in url
     assert "bottomlat=21" in url
+
+
+def test_static_context_batch_includes_official_terrain_and_land_use_sources() -> None:
+    downloads = build_static_context_downloads()
+    urls = {item.url for item in downloads}
+    source_ids = {item.source_id for item in downloads}
+
+    assert "landsd_whole_hk_dtm_5m_asc_zip" in source_ids
+    assert "landsd_igeocom_geojson_zip" in source_ids
+    assert "csdi_landsd_dtm_geotiff_zip" in source_ids
+    assert "pland_luhk_2024_statistics_english_csv" in source_ids
+    assert any(item.source_id == "csdi_pland_luhk_2018_raster_geotiff_zip" for item in downloads)
+    assert any(item.source_id == "csdi_pland_luhk_2024_raster_geotiff_zip" for item in downloads)
+    assert len([item for item in downloads if item.source_id.endswith("_raster_geotiff_zip")]) == 7
+    assert "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/Whole_HK_DTM_5m.zip" in urls

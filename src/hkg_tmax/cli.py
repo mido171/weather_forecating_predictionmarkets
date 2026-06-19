@@ -169,6 +169,7 @@ def build_parser() -> argparse.ArgumentParser:
             "arwf-current",
             "noaa-isd-nearby",
             "ncep-operational-current",
+            "static-context-current",
             "all-small",
         ),
         required=True,

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import mimetypes
+import ssl
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from importlib import import_module
 from pathlib import Path
+from typing import Any, cast
 from urllib.parse import urlparse
 
 import httpx
@@ -25,6 +28,16 @@ class FetchPolicy:
     max_bytes: int = 512 * 1024 * 1024
     max_attempts: int = 1
     retry_sleep_seconds: float = 0.0
+
+
+def httpx_verify_context() -> bool | ssl.SSLContext:
+    """Use OS trust roots when truststore is installed, while keeping TLS verification on."""
+
+    try:
+        truststore: Any = import_module("truststore")
+    except ModuleNotFoundError:
+        return True
+    return cast(ssl.SSLContext, truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT))
 
 
 _SCRIPT_SUFFIXES = {"php", "aspx", "asp", "jsp", "cgi", "do", "action", "html", "htm"}
@@ -90,6 +103,7 @@ def fetch_and_archive(
                 timeout=policy.timeout_seconds,
                 follow_redirects=policy.follow_redirects,
                 headers=headers,
+                verify=httpx_verify_context(),
             ) as client:
                 response = client.get(url)
             break

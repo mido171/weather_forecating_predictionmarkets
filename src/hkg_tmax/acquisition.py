@@ -15,7 +15,7 @@ from typing import Any
 
 import httpx
 
-from .fetch import FetchError, FetchPolicy, infer_extension
+from .fetch import FetchError, FetchPolicy, httpx_verify_context, infer_extension
 from .hashing import sha256_bytes
 from .timeutils import require_aware
 
@@ -428,6 +428,7 @@ def fetch_http_to_acquisition(
                 timeout=policy.timeout_seconds,
                 follow_redirects=policy.follow_redirects,
                 headers=headers,
+                verify=httpx_verify_context(),
             ) as client:
                 response = client.get(url)
             break

@@ -112,6 +112,23 @@ code/src/hkg_t24/artifacts/      Candidate freeze and artifact manifest helpers
 code/src/hkg_t24/utils/          Narrow shared helpers with no domain-policy ownership
 ```
 
+HKG-T24-001 foundation implementation entry points:
+
+```text
+code/src/hkg_t24/cli.py                         Jira 001 CLI commands
+code/src/hkg_t24/constants.py                   Binding constants, source rows, schema versions
+code/src/hkg_t24/timeutils.py                   H24N cutoff/freeze/calendar helpers
+code/src/hkg_t24/db/connection.py               Contract DSN policy and psycopg boundary
+code/src/hkg_t24/db/ddl.py                      Foundation DDL and compatibility views
+code/src/hkg_t24/db/migrations.py               Idempotent schema/run-manifest orchestration
+code/src/hkg_t24/audit/source_registry.py       Final source registry rows and CSV export
+code/src/hkg_t24/audit/schema_contracts.py      Source-table discovery primitives
+code/src/hkg_t24/audit/leakage_events.py        Leakage audit event writes/counts
+code/src/hkg_t24/features/source_contracts.py   Phase0 source-contract checks
+code/src/hkg_t24/features/snapshot_builder.py   H24N calendar, target labels, snapshots, target memory
+code/src/hkg_t24/features/gribstream_safe_rows.py GribStream safe-row ledger and reports
+```
+
 `code/src/hkg_tmax_db/` contains the database-ingestion package:
 
 ```text
@@ -379,6 +396,20 @@ schemas/hkg_t24/             machine-readable schemas
 reports/hkg_t24/             report indexes and non-canonical reports
 reports/hkg_t24/jira_coverage/
 artifacts/hkg_t24/           artifact indexes and small durable metadata
+```
+
+HKG-T24-001 supporting files:
+
+```text
+config/hkg_t24/hkg_t24_001_foundation.yaml
+sql/hkg_t24/hkg_t24_001_foundation_schema.sql
+sql/hkg_t24/hkg_t24_001_gribstream_safe_rows.sql
+schemas/hkg_t24/hkg_t24_001_schema_versions.json
+code/tests/hkg_t24/test_database_url_priority.py
+code/tests/hkg_t24/test_h24n_contract_policy.py
+code/tests/hkg_t24/test_snapshot_builder_synthetic.py
+code/tests/hkg_t24/test_schema_sql_contract.py
+code/tests/hkg_t24/test_real_db_contracts.py
 ```
 
 The project-root secondary reference docs and metadata files that previously lived as loose root files now live under:

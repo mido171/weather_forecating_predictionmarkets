@@ -1,0 +1,16 @@
+{
+  "jira": "HKG-T24-001",
+  "cutoff_id": "H24N",
+  "strict_schema_version": "hkg_t24_h24n_strict_v1_20260626_patch1",
+  "proxy_schema_version": "hkg_t24_h24n_proxy_v1_20260626_patch1",
+  "shadow_schema_version": "hkg_t24_h24n_shadow_v1_20260626_patch1",
+  "physical_feature_matrix": "model_features.feature_matrix",
+  "compatibility_views": [
+    "model_features.snapshot_feature_matrix_strict",
+    "model_features.snapshot_feature_matrix_proxy"
+  ],
+  "forbidden_finalized_target_memory_terms": [
+    "target__lag1",
+    "lag1_tmax"
+  ]
+}

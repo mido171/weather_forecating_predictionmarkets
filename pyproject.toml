@@ -12,6 +12,8 @@ license = {text = "Private research use; third-party data remains subject to sou
 authors = [{name = "HKG Tmax Research"}]
 dependencies = [
   "httpx>=0.27,<1",
+  "mysql-connector-python>=9,<10",
+  "psycopg[binary]>=3.2,<4",
   "PyYAML>=6.0,<7",
   "truststore>=0.10,<1",
 ]
@@ -23,6 +25,7 @@ research = [
   "pyarrow>=17,<30",
   "scipy>=1.13,<2",
   "scikit-learn>=1.5,<2",
+  "lightgbm>=4.5,<5",
   "statsmodels>=0.14,<1",
   "xarray>=2024.6",
   "zarr>=2.18,<4",
@@ -40,16 +43,18 @@ dev = [
 
 [project.scripts]
 hkg-tmax = "hkg_tmax.cli:main"
+hkg-tmax-db = "hkg_tmax_db.cli:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "code/src"}
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["code/src"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers"
-testpaths = ["tests"]
+pythonpath = ["code/src", "."]
+testpaths = ["code/tests"]
 
 [tool.ruff]
 line-length = 100

@@ -1,0 +1,58 @@
+# Canonical acquisition-normalization map for the KLGA Tmax strategy layer.
+# This file is intentionally simple and declarative; the loader validates the
+# listed source/target tables and columns before writing normalized rows.
+# Missing mapped columns fail with exit 30 through the CLI acquisition contract path.
+
+wunderground_daily_actuals:
+  source_table: silver.wu_daily_actuals
+  target_tables:
+    - silver.target_daily_actuals
+    - silver.station_daily_actuals
+  required_columns:
+    - station_id
+    - local_date
+    - daily_high_f
+    - settlement_high_f_whole
+    - provider_available_at_utc
+    - source_request_id
+    - source_record_id
+
+wunderground_intraday_observations:
+  source_table: silver.wu_intraday_observations
+  target_table: silver.station_observations
+  required_columns:
+    - station_id
+    - observation_time_utc
+    - local_date
+    - temp_f
+    - provider_available_at_utc
+    - source_request_id
+    - source_record_id
+
+iem_mos_forecast_rows:
+  source_table: silver.iem_mos_forecast_rows
+  target_table: silver.mos_guidance
+  required_columns:
+    - station_id
+    - mos_station_id
+    - source_product
+    - endpoint_model
+    - cutoff_id
+    - run_time_utc
+    - forecast_valid_time_utc
+    - raw_values_jsonb
+    - provider_available_at_utc
+    - effective_available_at_utc
+    - raw_row_hash
+
+gribstream_forecast_values:
+  source_table: silver.grib_forecast_values
+  target_table: silver.grib_forecast_values
+  required_columns:
+    - model_id
+    - target_date
+    - cutoff_id
+    - forecasted_time_utc
+    - variable_name
+    - value_canonical
+    - effective_available_at_utc

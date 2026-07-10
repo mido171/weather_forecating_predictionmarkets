@@ -2,17 +2,17 @@
 
 ## Orientation after context compaction
 
-Read in this order:
+Restart the single mandatory sequence in `AGENTS.md` section 2. It includes the
+bounded Git proof; root constitution/start/map/safe-command documents; closest
+applicable agent contracts; project `START_HERE.md`, `README.md`, code map,
+current state, and docs index; then only task-relevant contracts, code, tests,
+config, and evidence. A compaction summary does not replace any step.
 
-1. `MILESTONES.md`
-2. `EXPERIMENT_INDEX.md`
-3. `FIRST_GOALS.md`
-4. `AGENTS.md`
-5. active experiment `README.md`, `STATUS.yaml`, and machine evidence map
-6. linked prior experiments
-7. relevant docs/config.
-
-This provides state without rereading every raw artifact.
+For research, the task-relevant evidence normally begins at
+`EXPERIMENT_INDEX.md`, the selected campaign README, and the experiment
+`README.md`, `STATUS.yaml`, and evidence map. Follow linked prior decisions and
+`MILESTONES.md` only when an accepted result is relevant; do not reread the raw
+campaign corpus.
 
 ## Delegation pattern
 
@@ -23,7 +23,8 @@ Use subagents explicitly for independent work:
 - `meteorology_researcher` — physical experiments;
 - `leakage_auditor` — independent read-only audit;
 - `reproducibility_reviewer` — independent rerun;
-- `market_microstructure_researcher` — execution.
+- `market_microstructure_researcher` — market evidence and replay; never order
+  execution.
 
 Never ask the same agent that built a result to be its only auditor.
 
@@ -113,4 +114,6 @@ Read logs/artifacts only when needed.
 - current champion;
 - blockers and rejected high-level ideas.
 
-All raw exploration belongs in experiment folders.
+The governed experiment README records the research decision and evidence map.
+Raw payloads, predictions, plots, logs, models, and mutable run outputs stay
+under the configured external data/run roots.

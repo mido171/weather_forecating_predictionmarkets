@@ -20,7 +20,11 @@ from .collector import (
 )
 from .config import SourceCatalog, find_repo_root
 from .doctor import doctor
-from .experiments import create_experiment, generate_index
+from .experiments import (
+    CANONICAL_CAMPAIGNS,
+    create_experiment,
+    generate_index,
+)
 from .hko_backfill import run_hko_backfill_batch, summarize_records
 from .manifest import write_manifest
 from .market import snapshot_polymarket_event
@@ -33,6 +37,7 @@ from .validation import (
     ValidationError,
     validate_bucket_fixture,
     validate_configs,
+    validate_experiment_registry,
     validate_experiment_template,
     validate_repository,
     validate_yaml_tree,
@@ -88,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     validate_parser = subparsers.add_parser("validate", help="Validate contracts/configuration")
     validate_parser.add_argument(
         "scope",
-        choices=("all", "configs", "buckets", "templates", "yaml"),
+        choices=("all", "configs", "buckets", "templates", "registry", "yaml"),
         default="all",
         nargs="?",
     )
@@ -106,25 +111,25 @@ def build_parser() -> argparse.ArgumentParser:
     sources_sub.add_parser("report", help="Render reports/source_inventory.md")
 
     experiments_parser = subparsers.add_parser("experiments", help="Manage experiment ledger")
-    experiments_sub = experiments_parser.add_subparsers(
-        dest="experiments_command", required=True
-    )
+    experiments_sub = experiments_parser.add_subparsers(dest="experiments_command", required=True)
     create_parser = experiments_sub.add_parser("create", help="Create immutable experiment folder")
     create_parser.add_argument("--title", required=True)
+    create_parser.add_argument(
+        "--campaign",
+        choices=CANONICAL_CAMPAIGNS,
+        required=True,
+        help="required governed campaign destination",
+    )
     experiments_sub.add_parser("index", help="Regenerate EXPERIMENT_INDEX.md")
 
     milestones_parser = subparsers.add_parser("milestones", help="Manage milestone dashboard")
-    milestones_sub = milestones_parser.add_subparsers(
-        dest="milestones_command", required=True
-    )
+    milestones_sub = milestones_parser.add_subparsers(dest="milestones_command", required=True)
     milestones_sub.add_parser("render", help="Regenerate MILESTONES.md from accepted statuses")
 
     subparsers.add_parser("manifest", help="Write repository MANIFEST.json")
 
     settlement_parser = subparsers.add_parser("settlement", help="Test bucket mapping")
-    settlement_sub = settlement_parser.add_subparsers(
-        dest="settlement_command", required=True
-    )
+    settlement_sub = settlement_parser.add_subparsers(dest="settlement_command", required=True)
     map_parser = settlement_sub.add_parser("map", help="Map a decimal Tmax to a bucket")
     map_parser.add_argument("--temperature", required=True)
     map_parser.add_argument(
@@ -147,9 +152,7 @@ def build_parser() -> argparse.ArgumentParser:
     acquisition_parser = subparsers.add_parser(
         "acquisition", help="Manage weather-only data acquisition infrastructure"
     )
-    acquisition_sub = acquisition_parser.add_subparsers(
-        dest="acquisition_command", required=True
-    )
+    acquisition_sub = acquisition_parser.add_subparsers(dest="acquisition_command", required=True)
     acquisition_sub.add_parser("init", help="Create/verify HKG_TMAX_DATA_ROOT layout")
     collect_parser = acquisition_sub.add_parser(
         "collect", help="Collect selected non-market sources into the acquisition data root"
@@ -248,6 +251,8 @@ def main(argv: Sequence[str] | None = None) -> None:
                 _print_checks(validate_bucket_fixture(root))
             elif args.scope == "templates":
                 _print_checks(validate_experiment_template(root))
+            elif args.scope == "registry":
+                _print_checks(validate_experiment_registry(root))
             elif args.scope == "yaml":
                 _print_checks(validate_yaml_tree(root))
             return
@@ -271,9 +276,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                     parser.error("sources fetch requires --id or --tag")
                 _require_execute(args.execute, "sources fetch")
                 requested_count = (
-                    len(args.source_ids)
-                    if args.source_ids
-                    else len(catalog.select(tag=args.tag))
+                    len(args.source_ids) if args.source_ids else len(catalog.select(tag=args.tag))
                 )
                 if args.max_sources < 1 or requested_count > args.max_sources:
                     raise ValidationError(
@@ -308,8 +311,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
         if args.command == "experiments":
             if args.experiments_command == "create":
-                destination = create_experiment(root, args.title)
-                generate_index(root)
+                destination = create_experiment(root, args.title, campaign=args.campaign)
                 print(destination)
                 return
             if args.experiments_command == "index":
@@ -336,14 +338,10 @@ def main(argv: Sequence[str] | None = None) -> None:
                         "temperature": str(Decimal(args.temperature)),
                         "winner": winner.label,
                         "lower_inclusive": (
-                            None
-                            if winner.lower_inclusive is None
-                            else str(winner.lower_inclusive)
+                            None if winner.lower_inclusive is None else str(winner.lower_inclusive)
                         ),
                         "upper_exclusive": (
-                            None
-                            if winner.upper_exclusive is None
-                            else str(winner.upper_exclusive)
+                            None if winner.upper_exclusive is None else str(winner.upper_exclusive)
                         ),
                     },
                     ensure_ascii=False,

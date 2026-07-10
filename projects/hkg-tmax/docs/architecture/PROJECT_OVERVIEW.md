@@ -15,10 +15,10 @@ The project order is intentionally conservative:
 Authoritative starting points:
 
 - `AGENTS.md` defines the operating constitution.
-- `FIRST_GOALS.md` defines the ordered G0-G10 program.
-- `docs/01_RESEARCH_CHARTER.md` defines the research hierarchy and scope.
-- `docs/03_ASOF_AND_LEAKAGE.md` defines timestamp and leakage rules.
-- `docs/07_PRODUCTION_GATE.md` defines conditions for any production use.
+- `docs/status/NEXT_ACTIONS.md` defines the verified next-action queue.
+- `docs/research/RESEARCH_CHARTER.md` defines the research hierarchy and scope.
+- `docs/contracts/ASOF_AND_LEAKAGE.md` defines timestamp and leakage rules.
+- `docs/operations/PRODUCTION_GATE.md` defines conditions for any production use.
 
 Predictive modelling and machine learning are blocked until the upstream target,
 archive, as-of, source, and baseline gates pass.

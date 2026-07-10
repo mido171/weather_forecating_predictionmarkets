@@ -1,5 +1,37 @@
 # Changelog
 
+## Autonomous principal-engineer and campaign-routing contract - 2026-07-10
+
+- Rebuilt the project `AGENTS.md` around principal-engineer ownership, exact
+  code/test/config/document placement, anti-clutter file gates, bounded
+  resource behavior, risk-based verification, and Windows-safe Git operation.
+- Made allowlisted `--campaign` selection mandatory for
+  `hkg-tmax experiments create`, eliminating the implicit `general` dumping
+  ground while still reserving that campaign for explicitly cross-cutting work.
+- Made experiment allocation failure-atomic: crash-released OS locking,
+  canonical ledger validation before allocation, format-safe template
+  rendering, parsed scaffold checks, atomic registry/index replacement, and
+  rollback of only task-created state on failure. An ignored transaction
+  journal now recovers hard interruptions by rolling back an original registry
+  or completing index repair for a committed registry. Token-bound ownership,
+  same-directory proof restoration, hostile-journal validation, promotion-race
+  preservation, and bounded no-follow template traversal prevent recovery from
+  claiming unowned or linked trees.
+- Split registry contracts, creation transactions, and generated index/read
+  models into dedicated modules while retaining `hkg_tmax.experiments` as the
+  backward-compatible public façade.
+- Added strict validation for registry version, canonical IDs and directories,
+  required fields/files, campaign consistency, title parity, duplicates,
+  orphan governed folders, symlink escapes, and next-ID monotonicity.
+- Replaced both bootstrap scripts' nested `git init` behavior with fail-closed
+  root/`.git`/`core.fsmonitor=false` checks, serial thread limits, bounded test
+  gates, current documentation routes, and regression tests for that contract.
+- Removed divergent `requirements.txt` and `requirements-dev.txt`; Docker and
+  local setup now share `pyproject.toml` as the only dependency authority.
+- Integrated the campaign documentation layout guard into `make validate` and
+  removed stale broad-staging, startup, compaction, and architecture links that
+  contradicted the root Git safety and canonical documentation contracts.
+
 ## Campaign documentation consolidation - 2026-07-10
 
 - Replaced 813 scattered campaign Markdown files with 26 canonical root,

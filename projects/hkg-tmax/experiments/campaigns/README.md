@@ -2,15 +2,17 @@
 
 This is the human entry point for the HKG Tmax experiment archive. The
 2026-07-10 consolidation reduced the campaign tree from 813 Markdown files to
-26 canonical READMEs without deleting machine evidence.
+26 canonical READMEs without deleting machine evidence. The governed `general`
+campaign adds one current canonical README, for 27 total.
 
 | Campaign | Scope |
 |---|---|
 | [HKG Tmax](hkg-tmax/README.md) | Point forecasts, public-weather acquisition, persistence, and capacity |
-| [HKG T-24](hkg-t24/README.md) | Historical T-24 acquisition and point-forecast work |
+| [HKG T-24](hkg-t24/README.md) | Historical H24N/T-24 strategy evidence |
 | [Probability](probability/README.md) | Weather-only bucket and distribution calibration |
 | [Residual modeling](residual-modeling/README.md) | Residual-model evidence and compatibility copies |
 | [Market edges](market-edges/README.md) | Model-versus-market snapshots; never order execution |
+| [General](general/README.md) | Explicitly cross-cutting hypotheses that fit no narrower campaign |
 
 ## Reading contract
 

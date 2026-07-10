@@ -8,6 +8,7 @@ from hkg_tmax.validation import (
     assert_records_asof,
     assert_split_disjoint,
     validate_repository,
+    validate_yaml_tree,
 )
 
 
@@ -36,3 +37,24 @@ def test_missing_available_at_is_rejected() -> None:
 def test_split_overlap_is_rejected() -> None:
     with pytest.raises(LeakageError, match="overlap"):
         assert_split_disjoint([1, 2], [3], [2, 4])
+
+
+def test_yaml_validation_is_bounded_and_skips_directory_links(tmp_path) -> None:
+    root = tmp_path / "repo"
+    config = root / "config"
+    config.mkdir(parents=True)
+    (root / "compose.yaml").write_text("services: {}\n", encoding="utf-8")
+    (config / "valid.yaml").write_text("enabled: true\n", encoding="utf-8")
+
+    external = tmp_path / "external"
+    external.mkdir()
+    (external / "invalid.yaml").write_text("invalid: [\n", encoding="utf-8")
+    linked = root / "experiments"
+    try:
+        linked.symlink_to(external, target_is_directory=True)
+    except OSError:
+        pytest.skip("Directory symlinks are unavailable in this Windows environment")
+
+    assert validate_yaml_tree(root) == [
+        "YAML tree: 2 bounded non-reparse files valid; 1 reparse/unavailable paths skipped"
+    ]

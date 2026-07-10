@@ -38,23 +38,27 @@ The same inputs must yield the same output hash where deterministic formats perm
 
 ## Git
 
-Before accepted experiments:
+This project already lives inside the standalone `weather_data_extraction`
+repository. Never initialize a nested repository and never stage with
+`git add .` or `git add -A`. Stage only reviewed, explicit experiment/code/test
+paths after inspecting the scoped diff and untracked files.
 
-```bash
-git init
-git add .
-git commit -m "Bootstrap HKG Tmax research system"
-```
+Before accepting an experiment, verify root, branch, remote, tracked-only
+status, staged names, staged statistics, and the complete staged diff according
+to `AGENTS.md`.
 
 For every run capture:
 
 ```bash
 git rev-parse HEAD
-git status --porcelain
-git diff --binary
+git -c core.fsmonitor=false status --porcelain --untracked-files=no
 python --version
 python -m pip freeze
 ```
+
+If the run starts from a dirty tree, archive a binary diff limited to the
+declared source/config/test inputs. Record that exact path list and patch hash
+in the run manifest; do not trigger a root-wide untracked scan.
 
 ## Randomness
 

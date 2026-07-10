@@ -126,7 +126,7 @@ def test_atlas_writes_one_idempotent_readme_and_machine_evidence(
     }
 
     atlas.write_static_protocol_artifacts(
-        "postgresql://research_user:unusual-secret@127.0.0.1:5432/hkg_tmax_research"
+        "postgresql://research_user:placeholder-password@127.0.0.1:5432/hkg_tmax_research"
     )
     atlas.write_experiment_readme(
         summary=summary,
@@ -164,7 +164,7 @@ def test_atlas_writes_one_idempotent_readme_and_machine_evidence(
     assert (tmp_path / "RUN_CONFIG.yaml").is_file()
     manifest_text = (tmp_path / "DATA_MANIFEST.yaml").read_text(encoding="utf-8")
     assert "research_user:***@" in manifest_text
-    assert "unusual-secret" not in manifest_text
+    assert "placeholder-password" not in manifest_text
 
 
 def test_probability_v1_writes_json_selection_summary_and_manifest(

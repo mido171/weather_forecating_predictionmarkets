@@ -7,12 +7,22 @@ distributions.
 
 ## Safe orientation
 
-1. Read `../../AGENTS.md` and `AGENTS.md` completely.
-2. Read `docs/status/CURRENT_STATE.md` and `docs/INDEX.md`.
-3. Confirm Git root, branch, remote, and tracked-only status.
-4. Confirm `.env` points `HKG_TMAX_DATA_ROOT` and `HKG_TMAX_RUN_ROOT` outside
-   the repository. Never print credential values.
-5. Run `make doctor-fast` and only the focused tests required by the task.
+`AGENTS.md` section 2 is the single mandatory startup sequence. Follow it from
+the bounded Git identity proof through the root safety documents, applicable
+agent contracts, this file, `README.md`, the code map, current state, and only
+then the task-specific contracts/code/tests/config. Do not replace it with a
+shortened order from another document.
+
+After that read sequence, confirm `.env` resolves `HKG_TMAX_DATA_ROOT` and
+`HKG_TMAX_RUN_ROOT` outside the repository without printing credential values.
+The bounded project health command is:
+
+```powershell
+.\.venv\Scripts\python.exe -m hkg_tmax doctor
+```
+
+`make doctor-fast` is an optional alias on systems where `make` is installed.
+Run only the focused tests warranted by the task.
 
 Orientation is offline. It must not start collectors, backfills, schedulers,
 servers, databases, containers, training, or market calls.

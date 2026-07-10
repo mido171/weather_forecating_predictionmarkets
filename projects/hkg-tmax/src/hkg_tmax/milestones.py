@@ -48,7 +48,7 @@ def render_milestones(root: Path) -> Path:
         "",
         f"**Last generated:** {timestamp}  ",
         "**Primary horizon:** read from `config/project/asof.yaml`  ",
-        "**Production status:** disabled until `docs/07_PRODUCTION_GATE.md` passes",
+        "**Production status:** disabled until `docs/operations/PRODUCTION_GATE.md` passes",
         "",
         "## Current champion",
         "",

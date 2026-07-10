@@ -10,13 +10,14 @@ doctor-fast:
 	$(PYTHON) -m hkg_tmax doctor
 
 test-fast:
-	$(PYTHON) -m pytest tests/test_config_and_sources.py tests/test_experiments.py tests/test_hko_backfill.py tests/hkg_t24/test_h24n_contract_policy.py tests/hkg_t24/test_schema_sql_contract.py tests/test_demo_trading_migration.py
+	$(PYTHON) -m pytest tests/test_bootstrap_safety_contract.py tests/test_config_and_sources.py tests/test_experiments.py tests/test_validation.py tests/test_hko_backfill.py tests/hkg_t24/test_h24n_contract_policy.py tests/hkg_t24/test_schema_sql_contract.py tests/test_demo_trading_migration.py
 
 test-full:
 	$(PYTHON) -m pytest tests
 
 validate:
 	$(PYTHON) -m hkg_tmax validate all
+	$(PYTHON) scripts/manage_campaign_documentation.py check
 
 lint:
 	$(PYTHON) -m ruff check src tests scripts
@@ -34,8 +35,9 @@ archive-live:
 	bash scripts/archive_live_loop.sh
 
 experiment:
-	@test -n "$(TITLE)" || (echo 'Usage: make experiment TITLE="Hypothesis title"' && exit 2)
-	$(PYTHON) -m hkg_tmax experiments create --title "$(TITLE)"
+	@test -n "$(CAMPAIGN)" || (echo 'Usage: make experiment CAMPAIGN="hkg-tmax" TITLE="Hypothesis title"' && exit 2)
+	@test -n "$(TITLE)" || (echo 'Usage: make experiment CAMPAIGN="hkg-tmax" TITLE="Hypothesis title"' && exit 2)
+	$(PYTHON) -m hkg_tmax experiments create --campaign "$(CAMPAIGN)" --title "$(TITLE)"
 
 index:
 	$(PYTHON) -m hkg_tmax experiments index

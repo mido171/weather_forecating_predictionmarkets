@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import stat
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,7 +14,12 @@ from .acquisition_contracts import (
     validate_historical_live_pairs,
 )
 from .config import ConfigError, SourceCatalog, load_yaml
-from .experiments import EXPERIMENT_CONTROL_DIR, EXPERIMENT_TEMPLATE_DIR
+from .experiments import (
+    EXPERIMENT_TEMPLATE_DIR,
+    REQUIRED_EXPERIMENT_FILES,
+    ExperimentError,
+    validate_registry_state,
+)
 from .settlement import load_bucket_set
 from .timeutils import asof_eligible, require_aware
 
@@ -30,14 +37,6 @@ class ValidationReport:
     checks: tuple[str, ...]
     warnings: tuple[str, ...]
 
-
-REQUIRED_EXPERIMENT_FILES = (
-    "README.md",
-    "DATA_MANIFEST.yaml",
-    "RUN_CONFIG.yaml",
-    "STATUS.yaml",
-    "results/metrics.json",
-)
 
 REQUIRED_EXPERIMENT_README_HEADINGS = (
     "## Status",
@@ -120,7 +119,6 @@ def validate_configs(root: Path) -> tuple[list[str], list[str]]:
 
 
 def validate_experiment_template(root: Path) -> list[str]:
-    control_root = root / "experiments" / EXPERIMENT_CONTROL_DIR
     template = root / "experiments" / EXPERIMENT_TEMPLATE_DIR
     missing = [name for name in REQUIRED_EXPERIMENT_FILES if not (template / name).exists()]
     if missing:
@@ -130,14 +128,7 @@ def validate_experiment_template(root: Path) -> list[str]:
         heading for heading in REQUIRED_EXPERIMENT_README_HEADINGS if heading not in readme
     ]
     if missing_headings:
-        raise ValidationError(
-            f"Experiment template README missing headings: {missing_headings}"
-        )
-    registry = load_yaml(control_root / "registry.yaml")
-    if not isinstance(registry.get("next_id"), int) or registry["next_id"] < 1:
-        raise ValidationError(
-            f"experiments/{EXPERIMENT_CONTROL_DIR}/registry.yaml next_id must be a positive integer"
-        )
+        raise ValidationError(f"Experiment template README missing headings: {missing_headings}")
     return [
         "experiment template: "
         f"{len(REQUIRED_EXPERIMENT_FILES)} required files and "
@@ -145,16 +136,23 @@ def validate_experiment_template(root: Path) -> list[str]:
     ]
 
 
+def validate_experiment_registry(root: Path) -> list[str]:
+    try:
+        count = validate_registry_state(root)
+    except ExperimentError as exc:
+        raise ValidationError(str(exc)) from exc
+    return [f"experiment registry: {count} governed entries valid"]
+
+
 def validate_bucket_fixture(root: Path) -> list[str]:
-    bucket_set = load_bucket_set(
-        root / "config" / "project" / "example_market_buckets.yaml"
-    )
+    bucket_set = load_bucket_set(root / "config" / "project" / "example_market_buckets.yaml")
     return [f"bucket fixture: {len(bucket_set.buckets)} non-overlapping full-coverage buckets"]
 
 
 def validate_repository(root: Path) -> ValidationReport:
     checks, warnings = validate_configs(root)
     checks.extend(validate_experiment_template(root))
+    checks.extend(validate_experiment_registry(root))
     checks.extend(validate_bucket_fixture(root))
     return ValidationReport(tuple(checks), tuple(warnings))
 
@@ -171,9 +169,7 @@ def assert_records_asof(
         record_id = record.get(id_field) if id_field else index
         value = record.get(available_field)
         if not isinstance(value, datetime):
-            raise LeakageError(
-                f"Record {record_id!r} has missing/non-datetime {available_field}"
-            )
+            raise LeakageError(f"Record {record_id!r} has missing/non-datetime {available_field}")
         require_aware(value, f"{available_field} for record {record_id!r}")
         if not asof_eligible(value, cutoff_at):
             raise LeakageError(
@@ -201,14 +197,68 @@ def assert_split_disjoint(
         raise LeakageError(f"Temporal split overlap detected: {preview}")
 
 
-def validate_yaml_tree(root: Path) -> list[str]:
-    checks: list[str] = []
-    for path in sorted(root.rglob("*.yaml")):
-        if any(part in {".venv", "data"} for part in path.parts):
+def _bounded_yaml_paths(root: Path) -> tuple[list[Path], int]:
+    paths = [path for path in root.glob("*.yaml") if path.is_file()]
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    pending: list[Path] = []
+    skipped_paths = 0
+    for relative in (".agents", "config", "db", "docs", "experiments", "planning"):
+        path = root / relative
+        if not path.exists():
             continue
+        attributes = getattr(path.stat(follow_symlinks=False), "st_file_attributes", 0)
+        if path.is_symlink() or bool(attributes & reparse_flag):
+            skipped_paths += 1
+            continue
+        if path.is_dir():
+            pending.append(path)
+    excluded_names = {".venv", "__pycache__", "data", "var"}
+    while pending:
+        directory = pending.pop()
         try:
-            load_yaml(path)
+            with os.scandir(directory) as scan:
+                entries = sorted(scan, key=lambda entry: entry.name.casefold(), reverse=True)
+        except FileNotFoundError:
+            skipped_paths += 1
+            continue
+        for entry in entries:
+            try:
+                attributes = getattr(
+                    entry.stat(follow_symlinks=False),
+                    "st_file_attributes",
+                    0,
+                )
+                is_reparse = entry.is_symlink() or bool(attributes & reparse_flag)
+                if is_reparse:
+                    skipped_paths += 1
+                    continue
+                if entry.is_dir(follow_symlinks=False):
+                    if entry.name not in excluded_names:
+                        pending.append(Path(entry.path))
+                elif entry.is_file(follow_symlinks=False) and entry.name.endswith(".yaml"):
+                    paths.append(Path(entry.path))
+            except FileNotFoundError:
+                skipped_paths += 1
+    return sorted(set(paths)), skipped_paths
+
+
+def _yaml_io_path(path: Path) -> Path:
+    raw = str(path.absolute())
+    if os.name != "nt" or raw.startswith("\\\\?\\") or len(raw) < 248:
+        return path
+    if raw.startswith("\\\\"):
+        return Path("\\\\?\\UNC\\" + raw.lstrip("\\"))
+    return Path("\\\\?\\" + raw)
+
+
+def validate_yaml_tree(root: Path) -> list[str]:
+    paths, skipped_paths = _bounded_yaml_paths(root)
+    for path in paths:
+        try:
+            load_yaml(_yaml_io_path(path))
         except ConfigError as exc:
             raise ValidationError(str(exc)) from exc
-        checks.append(f"{path.relative_to(root)}: valid YAML")
-    return checks
+    return [
+        f"YAML tree: {len(paths)} bounded non-reparse files valid; "
+        f"{skipped_paths} reparse/unavailable paths skipped"
+    ]

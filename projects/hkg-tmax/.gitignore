@@ -25,6 +25,12 @@ apps/**/node_modules/
 # legacy script from polluting the project if it writes to an old local path.
 /data/
 /var/
+/.EXPERIMENT_INDEX.md.*.tmp
+/experiments/registry/.registry.yaml.*.tmp
+/experiments/campaigns/**/.experiment-transaction.json
+/experiments/campaigns/**/.experiment-transaction.json.*.pending
+/experiments/campaigns/**/.experiment-campaign-transaction.json
+/experiments/campaigns/**/.experiment-campaign-transaction.json.*.pending
 /analysis/
 /reports/
 /research/

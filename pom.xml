@@ -16,10 +16,10 @@
   <name>Weather Forecasting Prediction Markets</name>
 
   <modules>
-    <module>models</module>
-    <module>common</module>
-    <module>ingestion-service</module>
-    <module>kalshi-api-service</module>
+    <module>packages/java/weather-models</module>
+    <module>packages/java/weather-common</module>
+    <module>apps/ingestion-service</module>
+    <module>apps/kalshi-market-service</module>
   </modules>
 
   <properties>

@@ -31,30 +31,28 @@ cache/
 asof_model_cache/
 tmax_cache/
 catboost_info/
-ingestion-service/artifacts/
-ml/artifacts/
+apps/ingestion-service/artifacts/
+packages/python/weather-ml/artifacts/
 
 # Large generated datasets (do not commit)
-ml/dataset/
+packages/python/weather-ml/dataset/
 dataset/
-ml/data/gribstream/
+packages/python/weather-ml/data/gribstream/
 weather_predictionmarkets_experiments/
 
 # Local datasets (do not commit)
 data/**
-!data/iem_minute_data/
-!data/iem_minute_data/*.ps1
 
 # Generated model artifacts living next to Java module code
-models/kmia/
-models/knyc/
-models/kphl/
+packages/java/weather-models/kmia/
+packages/java/weather-models/knyc/
+packages/java/weather-models/kphl/
 
 # Generated reports / scratch
 reports/
 noaa_sanity/
 backtests/
-backtesting/out/
+legacy/backtesting/out/
 rap/
 rap_*.csv
 tmp_*.py

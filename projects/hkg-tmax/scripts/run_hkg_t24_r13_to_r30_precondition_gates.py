@@ -10,9 +10,12 @@ from pathlib import Path
 
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
-EXPERIMENT_ROOT = REPO_ROOT / "analysis" / "hkg_tmax_t24" / "experiments"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
+EXPERIMENT_ROOT = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24"
 
 
 @dataclass(frozen=True)
@@ -675,7 +678,7 @@ blocked_inputs:
 """ + "\n".join(f"  - {item}" for item in spec.blockers) + "\n")
     if spec.research_id == "HKG-T24-R30":
         write_text(folder / "PREDECLARATION_BLOCKED.md", "# Predeclaration Blocked\n\nNo final challenger exists. Validation 2024 is not authorized and was not accessed.\n")
-    write_text(REPO_ROOT / "reports" / "hkg_t24" / spec.report_name, report)
+    write_text(PROJECT_PATHS.run_root / "reports" / "hkg_t24" / spec.report_name, report)
     return {
         "research_id": spec.research_id,
         "experiment_id": spec.exp_id,

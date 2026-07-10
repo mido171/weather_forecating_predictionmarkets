@@ -59,15 +59,15 @@ hkg-tmax-db = "hkg_tmax_db.cli:main"
 hkg-tmax-demo-trading = "hkg_tmax_demo_trading.server:main"
 
 [tool.setuptools]
-package-dir = {"" = "code/src"}
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["code/src"]
+where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers"
-pythonpath = ["code/src", "."]
-testpaths = ["code/tests"]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100

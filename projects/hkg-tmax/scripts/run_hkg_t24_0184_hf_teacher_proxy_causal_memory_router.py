@@ -16,15 +16,17 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPERIMENTS_ROOT = REPO_ROOT / "experiments"
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+EXPERIMENTS_ROOT = PROJECT_PATHS.run_root / "experiments" / "legacy"
 EXPERIMENT_ID = "0184"
 SLUG = "hf_teacher_proxy_causal_memory_router"
 TITLE = "HF Teacher Proxy Causal Memory Router"
 EXP_DIR = EXPERIMENTS_ROOT / f"{EXPERIMENT_ID}_{SLUG}"
 
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 OFFICIAL_PATH = (
     DATASETS_ROOT
     / "05_hko_historical_rss_forecasts"

@@ -42,7 +42,7 @@ TARGET_STATION = {
     "latitude": 22.301944,
     "longitude": 114.174167,
     "elevation_m": 32,
-    "metadata_source": "config/stations_hko.yaml target_station",
+    "metadata_source": "config/sources/stations_hko.yaml target_station",
 }
 
 SOURCE_FILES = {

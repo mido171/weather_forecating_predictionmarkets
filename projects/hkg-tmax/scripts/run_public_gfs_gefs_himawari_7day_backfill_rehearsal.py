@@ -1461,17 +1461,24 @@ the availability proxy, raw path, URL, byte count, and SHA256.
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a 7-day public GFS/GEFS/Himawari backfill rehearsal.")
-    parser.add_argument("--days", type=int, default=7)
+    parser.add_argument("--days", type=int, default=1)
     parser.add_argument("--end-date", type=parse_date, default=completed_utc_yesterday())
     parser.add_argument("--lead-hours", type=parse_leads, default=DEFAULT_MODEL_LEADS)
     parser.add_argument("--himawari-bands", default="B13")
     parser.add_argument("--himawari-segment", default="S0510")
-    parser.add_argument("--download-workers", type=int, default=16)
-    parser.add_argument("--idx-workers", type=int, default=16)
-    parser.add_argument("--model-normalize-workers", type=int, default=2)
-    parser.add_argument("--himawari-normalize-workers", type=int, default=8)
+    parser.add_argument("--download-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--idx-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--model-normalize-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--himawari-normalize-workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--skip-normalize", action="store_true")
+    parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
+
+    if not args.execute:
+        print("DRY RUN: no requests made; pass --execute with a reviewed 1..7 day scope.")
+        return 2
+    if args.days < 1 or args.days > 7:
+        parser.error("--days must be between 1 and 7")
 
     total_started = time.perf_counter()
     days = date_span(args.end_date, args.days)

@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class LiveTradingProperties {
 
-  private boolean enabled = true;
+  private boolean enabled;
 
   @Min(5)
   private int marketResolveIntervalSeconds = 60;
@@ -38,7 +38,7 @@ public class LiveTradingProperties {
   @Min(5)
   private int inferenceRefreshIntervalSeconds = 15;
 
-  private boolean inferenceInvokeEnabled = true;
+  private boolean inferenceInvokeEnabled;
 
   @NotBlank
   private String inferenceInvokePythonExecutable = "python";

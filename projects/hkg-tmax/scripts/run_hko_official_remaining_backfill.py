@@ -26,15 +26,19 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 DEFAULT_DATA_ROOT = Path(r"C:\hko_press_2000_2026")
 DEFAULT_TYPES = ("local", "5day", "7day", "9day")
 DEFAULT_START = "2013-11-15"
 DEFAULT_END = "2026-06-20"
-DEFAULT_DATASET_DIR = REPO_ROOT / "data" / "datasets"
+DEFAULT_DATASET_DIR = PROJECT_PATHS.data_root / "datasets"
 DEFAULT_MONITOR_DIR = (
-    REPO_ROOT
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
     / "0000_research_state_and_data_contract"
     / "hko_official_backfill_monitor"
     / "artifacts"

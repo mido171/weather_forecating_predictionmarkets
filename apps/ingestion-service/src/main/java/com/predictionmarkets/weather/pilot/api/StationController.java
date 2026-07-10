@@ -4,12 +4,14 @@ import com.predictionmarkets.weather.pilot.catalog.SqliteCatalogService;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/internal/ingest/stations")
+@ConditionalOnProperty(prefix = "ingestion.admin-api", name = "enabled", havingValue = "true")
 public class StationController {
   private final SqliteCatalogService catalogService;
 

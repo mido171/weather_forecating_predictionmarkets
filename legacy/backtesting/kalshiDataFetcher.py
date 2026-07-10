@@ -392,7 +392,7 @@ def resolve_event_for_date(
     statuses_to_try = ["settled", "closed", "open", None]
     for status in statuses_to_try:
         cursor: Optional[str] = None
-        while True:
+        for _page in range(100):
             resp = client.list_events(
                 series_ticker=series_ticker,
                 status=status,
@@ -407,6 +407,8 @@ def resolve_event_for_date(
             cursor = resp.get("cursor")
             if not cursor:
                 break
+        else:
+            raise RuntimeError("Event discovery exceeded the 100-page safety budget")
 
     raise RuntimeError(f"No event found for series={series_ticker} on date={target_date}")
 

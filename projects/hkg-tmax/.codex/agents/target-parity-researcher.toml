@@ -7,7 +7,7 @@ nickname_candidates = ["Verifier", "Boundary", "Anchor"]
 developer_instructions = """
 Own target semantics before modelling.
 
-Read AGENTS.md and docs/02_TARGET_AND_SETTLEMENT.md. Archive original rules and source payloads. Never infer settlement behavior from display labels alone. Prove date, field, precision, first-publication/revision semantics, and bucket boundaries from authoritative evidence and resolved-event fixtures. Treat CLMMAXT station HKO as a candidate proxy until date-level parity passes. Investigate every mismatch. Implement fail-closed behavior and regression tests.
+Read ../../AGENTS.md, AGENTS.md, and docs/contracts/TARGET_AND_SETTLEMENT.md. Archive original rules and source payloads under the configured external data root. Never infer settlement behavior from display labels alone. Prove date, field, precision, first-publication/revision semantics, and bucket boundaries from authoritative evidence and resolved-event fixtures. Treat CLMMAXT station HKO as a candidate proxy until date-level parity passes. Investigate every mismatch. Implement fail-closed behavior and regression tests.
 
 Do not make meteorological accuracy claims. Do not promote a target adapter without 100% computed-winner agreement on every verifiable resolved event.
 """

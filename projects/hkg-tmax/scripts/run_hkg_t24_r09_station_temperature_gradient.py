@@ -25,12 +25,14 @@ from hkg_tmax.hkg_t24.governance import (
     check_four_year_oof_feasibility,
 )
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R09"
 EXPERIMENT_ID = "EXP-0041"
-EXPERIMENT_DIR = REPO_ROOT / "analysis" / "hkg_tmax_t24" / "experiments" / "EXP-0041-HKG-T24-R09"
+EXPERIMENT_DIR = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24" / "EXP-0041-HKG-T24-R09"
 SOURCE_ID = "datagov_hko_historical_latest_1min_temperature_archive"
 ENTRY_TIME_RE = re.compile(r"(?P<date>\d{8})-(?P<hhmm>\d{4})")
 SNAPSHOT_TARGET_MINUTES = (2 * 60 + 40, 8 * 60 + 40, 11 * 60 + 40, 13 * 60 + 40, 14 * 60 + 40)
@@ -736,7 +738,7 @@ blocked_inputs: [station_coordinates, station_elevations, robust_planar_gradient
 
 def write_report(scoreboard: pd.DataFrame, fold_scores: pd.DataFrame, diagnostics: pd.DataFrame, payload: dict[str, object]) -> None:
     write_text(
-        REPO_ROOT / "reports" / "hkg_t24" / "R09_STATION_TEMPERATURE_GRADIENT.md",
+        PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R09_STATION_TEMPERATURE_GRADIENT.md",
         long_report(payload)
         + "\n# R09 Machine-Readable Summary Tables\n\n"
         f"Generated: `{now_utc()}`\n\n"

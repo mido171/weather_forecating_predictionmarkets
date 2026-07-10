@@ -18,8 +18,10 @@ from sklearn.preprocessing import StandardScaler
 
 from hkg_tmax.hkg_t24.governance import check_four_year_oof_feasibility
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 _R04_SPEC = importlib.util.spec_from_file_location(
     "run_hkg_t24_r04_thermal_trajectory",
     REPO_ROOT / "scripts" / "run_hkg_t24_r04_thermal_trajectory.py",
@@ -35,10 +37,10 @@ git_state = _R04_MODULE.git_state
 r04_feature_sets = _R04_MODULE.model_feature_sets
 normal_crps = _R04_MODULE.normal_crps
 
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R12"
 EXPERIMENT_ID = "EXP-0044"
-EXPERIMENT_DIR = REPO_ROOT / "analysis" / "hkg_tmax_t24" / "experiments" / "EXP-0044-HKG-T24-R12"
+EXPERIMENT_DIR = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24" / "EXP-0044-HKG-T24-R12"
 ANALYSIS_END = pd.Timestamp("2023-12-31")
 
 
@@ -485,7 +487,7 @@ four_year_oof: BLOCKED
 production_eligible: false
 """)
     write_text(
-        REPO_ROOT / "reports" / "hkg_t24" / "R12_SOLAR_RADIATION.md",
+        PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R12_SOLAR_RADIATION.md",
         report
         + "\n# R12 Machine-Readable Summary Tables\n\n"
         f"Generated: `{now_utc()}`\n\n"

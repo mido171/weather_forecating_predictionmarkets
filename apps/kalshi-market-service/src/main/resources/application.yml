@@ -2,10 +2,14 @@ spring:
   application:
     name: kalshi-api-service
 
+server:
+  address: ${KALSHI_SERVER_ADDRESS:127.0.0.1}
+
 kalshi:
-  environment: PROD
-  auth-enabled: true
-  trading-enabled: true
+  environment: ${KALSHI_ENVIRONMENT:DEMO}
+  production-acknowledged: ${KALSHI_PRODUCTION_ACKNOWLEDGED:false}
+  auth-enabled: ${KALSHI_AUTH_ENABLED:false}
+  trading-enabled: ${KALSHI_TRADING_ENABLED:false}
   auth-debug: false
   credentials-path: ${KALSHI_CREDENTIALS_PATH:}
   api-key-id: ${KALSHI_API_KEY_ID:}
@@ -16,26 +20,26 @@ kalshi:
     request-timeout-ms: 10000
 
   retry:
-    max-retries: 3
+    max-retries: 1
     base-backoff-ms: 250
     max-backoff-ms: 3000
 
   rate-limiting:
-    max-read-requests-per-second: 30
-    max-write-requests-per-second: 10
+    max-read-requests-per-second: 1
+    max-write-requests-per-second: 1
 
   web-socket:
-    enabled: true
-    max-reconnect-attempts: 0
+    enabled: ${KALSHI_WEBSOCKET_ENABLED:false}
+    max-reconnect-attempts: 1
     reconnect-base-backoff-ms: 500
     watchdog-timeout-seconds: 30
 
   live-trading:
-    enabled: true
+    enabled: ${KALSHI_LIVE_TRADING_ENABLED:false}
     market-resolve-interval-seconds: 60
     publish-interval-millis: 750
     inference-refresh-interval-seconds: 15
-    inference-invoke-enabled: true
+    inference-invoke-enabled: ${KALSHI_INFERENCE_INVOKE_ENABLED:false}
     inference-invoke-python-executable: python
     inference-invoke-script-path: tools/live/mos_quantile_live_inference.py
     inference-invoke-timeout-seconds: 180
@@ -73,12 +77,17 @@ kalshi:
         series-ticker: KXHIGHLAX
         zone-id: America/Los_Angeles
 
+  backtest-grid:
+    enabled: ${KALSHI_BACKTEST_GRID_ENABLED:false}
+    thread-count: 1
+    overwrite-sqlite: false
+
   guardrails:
     enabled: true
     default-max-buy-contracts: 1
     fail-closed-on-unknown-order-state: true
     cancel-resting-on-cap-breach: true
-    startup-reconcile: true
+    startup-reconcile: false
     market-overrides: {}
 
   smoke:
@@ -89,6 +98,9 @@ kalshi:
     buy-max-cost-cents: 100
     orderbook-depth: 20
     orderbook-warmup-seconds: 5
+
+  local-control:
+    token: ${KALSHI_LOCAL_CONTROL_TOKEN:}
 
 logging:
   level:

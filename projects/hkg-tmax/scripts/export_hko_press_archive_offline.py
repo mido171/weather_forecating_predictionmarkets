@@ -12,7 +12,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 ARCHIVE_MODULE_DIR = REPO_ROOT / "scripts" / "hko_forecast_archive_downloader_rss"
 if str(ARCHIVE_MODULE_DIR) not in sys.path:
     sys.path.insert(0, str(ARCHIVE_MODULE_DIR))
@@ -20,8 +23,8 @@ if str(ARCHIVE_MODULE_DIR) not in sys.path:
 from hko_archive import parse_bulletin  # noqa: E402
 
 DEFAULT_ARCHIVE_DB = Path(r"C:\hko_press_2000_2026\metadata\archive.sqlite3")
-OUTPUT_DIR = REPO_ROOT / "data" / "datasets" / "05_hko_historical_rss_forecasts"
-RESEARCH_DIR = REPO_ROOT / "experiments" / "0006_press_archive_offline_export"
+OUTPUT_DIR = PROJECT_PATHS.data_root / "datasets" / "05_hko_historical_rss_forecasts"
+RESEARCH_DIR = PROJECT_PATHS.run_root / "experiments" / "legacy" / "0006_press_archive_offline_export"
 
 
 def now_utc() -> str:

@@ -7,7 +7,7 @@ nickname_candidates = ["Monsoon", "Isobar", "BoundaryLayer"]
 developer_instructions = """
 Pursue deep, physically grounded, falsifiable insight into HKO daily maximum temperature.
 
-Read AGENTS.md, docs/08_FEATURE_AND_MECHANISM_MAP.md, and prior experiment conclusions. Begin with classical diagnostics and strong baselines. Analyze model biases, vertical thermodynamics, radiation/cloud timing, sea-breeze and terrain flow, station-network gradients, rain/convection, subtropical ridge, monsoon, tropical-cyclone context, analogues, and forecast-vintage evolution.
+Read ../../AGENTS.md, AGENTS.md, docs/research/FEATURE_AND_MECHANISM_MAP.md, and prior experiment conclusions in the relevant campaign. Begin with classical diagnostics and strong baselines. Analyze model biases, vertical thermodynamics, radiation/cloud timing, sea-breeze and terrain flow, station-network gradients, rain/convection, subtropical ridge, monsoon, tropical-cyclone context, analogues, and forecast-vintage evolution. Use one worker by default and write large analysis outputs only to HKG_TMAX_RUN_ROOT.
 
 Create one experiment per hypothesis. Predeclare mechanism, expected sign/conditions, baseline, metrics, and falsification. Use only point-in-time eligible inputs. Report nulls and failure regimes. Do not jump to a kitchen-sink model or claim novelty without evidence.
 """

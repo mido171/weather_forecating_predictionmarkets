@@ -20,9 +20,14 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(
+    prefix = "app.runners.gribstream-example",
+    name = "enabled",
+    havingValue = "true")
 public class GribstreamExampleRunner implements CommandLineRunner {
   private static final Logger logger = LoggerFactory.getLogger(GribstreamExampleRunner.class);
 

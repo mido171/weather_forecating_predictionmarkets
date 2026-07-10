@@ -24,8 +24,10 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from hkg_tmax.paths import ProjectPaths, configured_input_path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 EXPERIMENTS_ROOT = REPO_ROOT / "experiments"
 EXPERIMENT_ID = "0215"
 SLUG = "gpt_pro_point_forecast_strategy"
@@ -33,6 +35,11 @@ TITLE = "GPT-Pro HKO Lead-1 Point Forecast Strategy"
 EXP_DIR = EXPERIMENTS_ROOT / f"{EXPERIMENT_ID}_{SLUG}"
 PRIMARY_CANDIDATE_ID = "0215_selected_point_forecast_strategy"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
+DEFAULT_PASTED_SPEC_PATH = configured_input_path(
+    PROJECT_PATHS,
+    "HKG_T24_GPT_PRO_POINT_FORECAST_SPEC_PATH",
+    "HKG_T24_GPT_PRO_POINT_FORECAST_STRATEGY.md",
+)
 
 START_DATE = pd.Timestamp("2000-01-02")
 END_DATE = pd.Timestamp("2023-12-31")
@@ -3344,8 +3351,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--pasted-spec-path",
-        default=r"C:\Users\ahmad\.codex\attachments\2f15d411-f901-46b6-9fb4-5bae7b3c26ef\pasted-text.txt",
-        help="Path to the GPT-Pro pasted strategy response.",
+        default=str(DEFAULT_PASTED_SPEC_PATH),
+        help=(
+            "Path to the GPT-Pro strategy response. Defaults to "
+            "HKG_T24_GPT_PRO_POINT_FORECAST_SPEC_PATH or HKG_TMAX_INPUT_ROOT."
+        ),
     )
     return parser.parse_args()
 

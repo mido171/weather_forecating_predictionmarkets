@@ -11,15 +11,17 @@ import pandas as pd
 
 from hkg_tmax.hkg_t24.governance import check_four_year_oof_feasibility
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R05"
 EXPERIMENT_DIR = (
-    REPO_ROOT
-    / "analysis"
-    / "hkg_tmax_t24"
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
+    / "hkg_tmax_t24"
     / "EXP-0037-HKG-T24-R05"
 )
 HALF_LIVES = (1, 2, 3, 5)
@@ -418,7 +420,7 @@ publication_blocked_inputs: lagged_official_daily_tmax
 
 def write_report(scoreboard: pd.DataFrame, fold_scores: pd.DataFrame, decay: pd.DataFrame, payload: dict[str, object]) -> None:
     write_text(
-        REPO_ROOT / "reports" / "hkg_t24" / "R05_THERMAL_MEMORY.md",
+        PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R05_THERMAL_MEMORY.md",
         long_report(payload)
         + "\n# R05 Machine-Readable Summary Tables\n\n"
         f"Generated: `{now_utc()}`\n\n"

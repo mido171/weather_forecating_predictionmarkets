@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,10 @@ from urllib.request import urlopen
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RUN_ROOT = Path(
+    os.getenv("WEATHER_MARKETS_RUN_ROOT", str(REPO_ROOT / "var"))
+).expanduser().resolve()
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,6 +25,7 @@ def parse_args() -> argparse.Namespace:
         "--app-config",
         default=str(
             REPO_ROOT
+            / "apps"
             / "ingestion-service"
             / "src"
             / "main"
@@ -49,7 +54,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default=str(REPO_ROOT / "artifacts" / "discovery"),
+        default=str(RUN_ROOT / "discovery"),
         help="Output directory.",
     )
     return parser.parse_args()

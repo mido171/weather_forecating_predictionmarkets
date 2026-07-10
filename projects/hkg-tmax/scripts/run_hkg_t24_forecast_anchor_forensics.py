@@ -10,7 +10,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -511,8 +514,7 @@ def run() -> dict[str, object]:
     write_blend_sensitivity(blend_grid, blend_predictions, bias_scores)
     write_coverage_update(
         official,
-        REPO_ROOT
-        / "data"
+        PROJECT_PATHS.data_root
         / "datasets"
         / "05_hko_historical_rss_forecasts"
         / "hko_press_archive_offline_export_manifest.json",

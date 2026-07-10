@@ -19,6 +19,7 @@ from app.extract.point_extract import (
     parse_cycle_time_utc,
     response_template,
     valid_time_for_index,
+    worker_cache_dir,
 )
 
 
@@ -52,7 +53,11 @@ def run(request: dict) -> dict:
     members = request.get("members") or ["c00", "p01", "p02", "p03"]
     cycle_time = parse_cycle_time_utc(str(request["cycle_time_utc"]))
     cycle_time_iso = isoformat_utc(cycle_time)
-    cache_root = ensure_dir(request.get("cache_dir") or "ingestion-service/data/tmp/gefs_reforecast")
+    cache_root = (
+        ensure_dir(request["cache_dir"])
+        if request.get("cache_dir")
+        else worker_cache_dir("gefs-reforecast")
+    )
     lat = float(request["lat"])
     lon = float(request["lon"])
     max_forecast_hours = int(request["max_forecast_hours"])

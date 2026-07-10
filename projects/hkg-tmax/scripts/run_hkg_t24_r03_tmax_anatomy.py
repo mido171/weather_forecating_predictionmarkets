@@ -22,15 +22,17 @@ from hkg_tmax.hkg_t24.peak_anatomy import (
     count_peak_episodes,
     maximum_heating_in_window,
 )
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R03"
 EXPERIMENT_DIR = (
-    REPO_ROOT
-    / "analysis"
-    / "hkg_tmax_t24"
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
+    / "hkg_tmax_t24"
     / "EXP-0035-HKG-T24-R03"
 )
 ANALYSIS_START = pd.Timestamp("2020-07-01")
@@ -767,7 +769,7 @@ source_semantics_investigated: true
 
 
 def write_report(metrics: dict[str, object], stratified: pd.DataFrame, peak_summary: pd.DataFrame) -> None:
-    report_path = REPO_ROOT / "reports" / "hkg_t24" / "R03_TMAX_RECONSTRUCTION_AND_PEAK_ANATOMY.md"
+    report_path = PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R03_TMAX_RECONSTRUCTION_AND_PEAK_ANATOMY.md"
     write_text(
         report_path,
         long_report(metrics)

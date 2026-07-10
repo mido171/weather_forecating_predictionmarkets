@@ -1,5 +1,20 @@
 # Changelog
 
+## Script runtime-path consolidation - 2026-07-10
+
+- Routed the 36-script migration census through `ProjectPaths`, replacing repository-local
+  `data`, `reports`, `artifacts`, `models`, `predictions`, and `tmp` defaults with the
+  configured external data/run roots.
+- Closed equivalent slash-form and multiline paths found by the structural audit, including
+  tactical GribStream raw storage and two additional research readers missed by the original
+  text scan.
+- Classified the census as 26 retained reproduction scripts, 9 active operator utilities,
+  and 1 active research entry point in the generated script registry. Retained scripts stay
+  flat only because tests and historical manifests import them by filename; they are not
+  current research authority.
+- Added an AST-based regression test that rejects any top-level script anchored at a mutable
+  `REPO_ROOT` child and verifies the classified census continues to use the path layer.
+
 ## Public weather optimized DB pipeline validation - 2026-07-09
 
 - Added opt-in optimized execution to `scripts/backfill_public_weather_to_postgres.py` with safe `gap=0` GRIB range coalescing, bounded model fetch workers, model normalization process workers, Himawari workers, serialized DB writes, per-phase metrics, CPU/staging telemetry hooks, and short transient staging roots.

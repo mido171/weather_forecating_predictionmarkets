@@ -1,30 +1,34 @@
-PYTHON ?= python3
-export PYTHONPATH := $(CURDIR)/code/src:$(CURDIR)
+PYTHON ?= python
+export PYTHONPATH := $(CURDIR)/src:$(CURDIR)
 
-.PHONY: bootstrap doctor test validate lint format fetch-bootstrap archive-live experiment index milestones manifest clean
+.PHONY: bootstrap doctor-fast test-fast test-full validate lint format fetch-bootstrap archive-live experiment index milestones manifest clean
 
 bootstrap:
-	bash scripts/bootstrap.sh
+	$(PYTHON) -m pip install -e ".[research,dev]"
 
-doctor:
+doctor-fast:
 	$(PYTHON) -m hkg_tmax doctor
 
-test:
-	$(PYTHON) -m pytest
+test-fast:
+	$(PYTHON) -m pytest tests/test_config_and_sources.py tests/test_experiments.py tests/test_hko_backfill.py tests/hkg_t24/test_h24n_contract_policy.py tests/hkg_t24/test_schema_sql_contract.py tests/test_demo_trading_migration.py
+
+test-full:
+	$(PYTHON) -m pytest tests
 
 validate:
 	$(PYTHON) -m hkg_tmax validate all
 
 lint:
-	$(PYTHON) -m ruff check code/src code/tests scripts
-	$(PYTHON) -m mypy code/src
+	$(PYTHON) -m ruff check src tests scripts
+	$(PYTHON) -m mypy src
 
 format:
-	$(PYTHON) -m ruff format code/src code/tests scripts
-	$(PYTHON) -m ruff check --fix code/src code/tests scripts
+	$(PYTHON) -m ruff format src tests scripts
+	$(PYTHON) -m ruff check --fix src tests scripts
 
 fetch-bootstrap:
-	$(PYTHON) -m hkg_tmax sources fetch --tag bootstrap_now
+	@test "$(EXECUTE)" = "1" || (echo 'Network disabled. Re-run with EXECUTE=1 after reviewing the source budget.' && exit 2)
+	$(PYTHON) -m hkg_tmax sources fetch --tag bootstrap_now --max-sources 2 --execute
 
 archive-live:
 	bash scripts/archive_live_loop.sh
@@ -43,5 +47,5 @@ manifest:
 	$(PYTHON) -m hkg_tmax manifest
 
 clean:
-	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov build dist
-	find code/src code/tests -type d -name __pycache__ -prune -exec rm -rf {} +
+	@echo "Refusing an unbounded Makefile clean. Use the root repository cleaner in dry-run mode."
+	@exit 2

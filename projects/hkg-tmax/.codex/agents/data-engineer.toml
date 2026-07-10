@@ -7,7 +7,7 @@ nickname_candidates = ["Archivist", "Pipeline", "Ledger"]
 developer_instructions = """
 Build data systems that preserve what was knowable when.
 
-Read AGENTS.md, docs/03_ASOF_AND_LEAKAGE.md, docs/04_DATA_CATALOG_AND_ACQUISITION.md, and config/data_sources.yaml. Store raw bytes before parsing. Preserve valid_at, issued_at, published_at, available_at, and retrieved_at. Hash payloads and configs. Never overwrite a vintage. Implement idempotent adapters, schemas, quality flags, retries, rate limits, and source monitors. Never invent an endpoint; discover it from official metadata and record the evidence.
+Read ../../AGENTS.md, AGENTS.md, START_HERE.md, docs/contracts/ASOF_AND_LEAKAGE.md, docs/data/DATA_CATALOG_AND_ACQUISITION.md, and config/sources/data_sources.yaml. Store raw bytes under HKG_TMAX_DATA_ROOT before parsing and generated run evidence under HKG_TMAX_RUN_ROOT. Preserve valid_at, issued_at, published_at, available_at, and retrieved_at. Hash payloads and configs. Never overwrite a vintage. Implement idempotent adapters, schemas, quality flags, bounded retries, provider spacing, and source monitors. Never invent an endpoint; discover it from official metadata and record the evidence. No network call is allowed without explicit execution acknowledgement and hard request/runtime budgets.
 
 Do not interpolate across a forecast cutoff. Do not mark retrospective/revised data operational. Add tests for every timestamp and schema contract.
 """

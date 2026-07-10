@@ -48,7 +48,7 @@ def write_json(path: Path, value: Any) -> None:
 def sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        while True:
+        while True:  # repo-doctor: allow-unsafe-default - exits at file EOF
             chunk = handle.read(chunk_size)
             if not chunk:
                 break
@@ -108,7 +108,7 @@ class DirectoryLock:
 
     def __enter__(self) -> "DirectoryLock":
         deadline = time.monotonic() + self.timeout_seconds
-        while True:
+        while True:  # repo-doctor: allow-unsafe-default - monotonic deadline enforced
             try:
                 self.lock_dir.mkdir(parents=False, exist_ok=False)
                 owner = {

@@ -13,7 +13,7 @@ public class PilotIngestionProperties {
   private String dataDir;
   private String parserVersion;
   private String defaultStationKey;
-  private int maxHttpRetries = 4;
+  private int maxHttpRetries = 1;
   private int connectTimeoutMs = 10000;
   private int readTimeoutMs = 60000;
   private Jobs jobs = new Jobs();
@@ -107,10 +107,10 @@ public class PilotIngestionProperties {
   }
 
   public static class Jobs {
-    private boolean bootstrapEnabled = true;
-    private boolean lightweightEnabled = true;
+    private boolean bootstrapEnabled;
+    private boolean lightweightEnabled;
     private boolean heavyEnabled;
-    private boolean snapshotEnabled = true;
+    private boolean snapshotEnabled;
     private boolean smokeEnabled;
     private String smokeTargetDateLocal;
     private String smokeNdfdHistoricalDateLocal;

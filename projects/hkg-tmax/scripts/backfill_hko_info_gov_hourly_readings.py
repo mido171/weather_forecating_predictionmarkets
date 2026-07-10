@@ -31,8 +31,11 @@ from zoneinfo import ZoneInfo
 import httpx
 from bs4 import BeautifulSoup
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATASET_ROOT = REPO_ROOT / "data" / "datasets" / "13_hko_info_gov_hourly_readings"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATASET_ROOT = PROJECT_PATHS.data_root / "datasets" / "13_hko_info_gov_hourly_readings"
 DEFAULT_TABLE = "public.hko_info_gov_hourly_readings_1998_2026"
 INFO_GOV_INDEX = "https://www.info.gov.hk/gia/wr/{year_month}/{day}.htm"
 HKT = ZoneInfo("Asia/Hong_Kong")
@@ -1410,7 +1413,7 @@ def load_postgres(args: argparse.Namespace, csv_path: Path) -> None:
                     f"COPY {fq_stage} ({', '.join(quote_ident(col) for col in COPY_COLUMNS)}) "
                     "FROM STDIN WITH (FORMAT csv, HEADER true, NULL '')"
                 ) as copy:
-                    while True:
+                    while True:  # repo-doctor: allow-unsafe-default - exits at CSV EOF
                         chunk = handle.read(1024 * 1024)
                         if not chunk:
                             break
@@ -1533,16 +1536,18 @@ def build_parser() -> argparse.ArgumentParser:
     default_db_url = (
         os.environ.get("HKG_TMAX_DATABASE_URL")
         or os.environ.get("DATABASE_URL")
-        or "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
+        or ""
     )
     parser = argparse.ArgumentParser(description="Backfill Info.gov HKO hourly reading dispatches")
     parser.add_argument("--dataset-root", default=str(DEFAULT_DATASET_ROOT))
     parser.add_argument("--start", default="1997-01-01")
     parser.add_argument("--end", default=default_end_hkt().isoformat())
-    parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--timeout-seconds", type=float, default=30.0)
-    parser.add_argument("--retries", type=int, default=3)
-    parser.add_argument("--delay-seconds", type=float, default=0.05)
+    parser.add_argument("--retries", type=int, choices=(0, 1, 2, 3), default=2)
+    parser.add_argument("--delay-seconds", type=float, default=1.0)
+    parser.add_argument("--max-days", type=int, default=31)
+    parser.add_argument("--execute", action="store_true")
     parser.add_argument("--progress-interval-days", type=int, default=250)
     parser.add_argument("--progress-interval-details", type=int, default=1000)
     parser.add_argument("--user-agent", default="HKG-Tmax-Research/0.1 hourly-readings backfill")
@@ -1558,8 +1563,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    if args.workers < 1:
-        raise ValueError("--workers must be >= 1")
+    if not args.execute:
+        print("DRY RUN: no requests made; pass --execute with a <=31-day range.")
+        return 2
+    start = date.fromisoformat(args.start)
+    end = date.fromisoformat(args.end)
+    if end < start or (end - start).days + 1 > args.max_days or args.max_days > 31:
+        raise ValueError("Backfill range must be ordered and no more than 31 days")
+    if args.load_db and not args.database_url:
+        raise ValueError("--database-url or HKG_TMAX_DATABASE_URL is required with --load-db")
     return run(args)
 
 

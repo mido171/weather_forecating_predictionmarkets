@@ -2,7 +2,7 @@ spring:
   application:
     name: ingestion-service
   profiles:
-    default: mysql
+    default: local
   jpa:
     hibernate:
       ddl-auto: none
@@ -10,20 +10,27 @@ spring:
   flyway:
     locations:
       - classpath:db/migration
-      - filesystem:../models/src/main/resources/db/migration
-    fail-on-missing-locations: false
+    fail-on-missing-locations: true
 
 logging:
   level:
     root: INFO
-    org.springframework.boot.context.config: DEBUG
-    com.predictionmarkets.weather.gribstream: DEBUG
+    org.springframework.boot.context.config: INFO
+    com.predictionmarkets.weather.gribstream: INFO
     com.predictionmarkets.weather.pilot: INFO
+
+server:
+  address: ${INGESTION_SERVER_ADDRESS:127.0.0.1}
+
+ingestion:
+  admin-api:
+    enabled: ${INGESTION_ADMIN_API_ENABLED:false}
+    control-token: ${INGESTION_LOCAL_CONTROL_TOKEN:}
 
 evomi:
   proxy:
-    enabled: false
-    credential: "http://core-residential.evomi.com:1000:ahmedac9712:b5biMPfsSTLPsLOOxOrN"
+    enabled: ${EVOMI_PROXY_ENABLED:false}
+    credential: ${EVOMI_PROXY_CREDENTIAL:}
 
 kalshi:
   base-url: https://api.elections.kalshi.com/trade-api/v2
@@ -32,8 +39,8 @@ iem:
   base-url: https://mesonet.agron.iastate.edu
 
 cli-settlement:
-  ingest-enabled: true
-  source-fetch-threads: 8
+  ingest-enabled: false
+  source-fetch-threads: 1
   station-ids:
     - KMIA
     - KPHL
@@ -49,15 +56,16 @@ cli-settlement:
 
 gribstream:
   baseUrl: "https://gribstream.com"
+  apiToken: "${GRIBSTREAM_API_TOKEN:}"
   authScheme: "${GRIBSTREAM_AUTH_SCHEME:Bearer}"
   connectTimeoutMillis: 5000
   readTimeoutMillis: 120000
   defaultAccept: "application/ndjson"
   gzip: true
-  logHttp: true
-  logBodyLimit: 4000
+  logHttp: false
+  logBodyLimit: 0
   executor:
-    thread-count: 4
+    thread-count: 1
   models:
     defaultMinHorizonHours: 0
     gfs:
@@ -102,20 +110,20 @@ gribstream:
       name: Los Angeles
   transfer:
     export:
-      output-path: ingestion-service/src/main/resources/gribstream_daily_feature.csv
+      output-path: ${GRIBSTREAM_TRANSFER_OUTPUT_PATH:var/ingestion/exports/gribstream_daily_feature.csv}
       page-size: 5000
       include-header: true
     import:
-      input-path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\gribstream_daily_feature.csv
-      batch-size: 1000
+      input-path: ${GRIBSTREAM_TRANSFER_INPUT_PATH:var/ingestion/exports/gribstream_daily_feature.csv}
+      batch-size: 100
       has-header: true
   training-data:
-    output-path: C:\Users\ahmad\Desktop\generalFiles\git\weather-forecasting-predictionmarkets\weather_forecating_predictionmarkets\ingestion-service\src\main\resources\trainingdata_output\gribstream_training_data.csv
+    output-path: ${GRIBSTREAM_TRAINING_OUTPUT_PATH:var/ingestion/training/gribstream_training_data.csv}
     page-size: 5000
-    append: true
+    append: false
     mos-asof-policy-id: 2
   variable-ingest:
-    enabled: true
+    enabled: false
     catalog-resource: classpath:gribstream_data
     whitelist-resource: classpath:gribstream_variable_whitelist.csv
     whitelist-required: true
@@ -123,8 +131,8 @@ gribstream:
     store-summary: true
     collapse-ensemble-members: true
     min-coverage-ratio: 0.5
-    batch-size: 20
-    max-variables-per-model: 0
+    batch-size: 1
+    max-variables-per-model: 1
     models:
       - hrrr
       - rap
@@ -147,8 +155,9 @@ gribstream:
 
 mos:
   training-data:
+    output-path: ${MOS_TRAINING_OUTPUT_PATH:var/ingestion/training/mos_training_data.csv}
     station-id: KMIA
-    append: true
+    append: false
 
 app:
   runners:
@@ -173,17 +182,18 @@ pipeline:
   date-start-local: 2007-01-01
   date-end-local: 2025-12-31
   mos-window-days: 1
-  thread-count: 60
-  default-range-days: 30
+  thread-count: 1
+  default-range-days: 1
   asof-policy-name: utc-12
   asof-local-time: "12:00"
   asof-time-zone: UTC
-  reset-checkpoints: true
+  reset-checkpoints: false
 
 backfill:
+  enabled: false
   concurrency:
-    mos-window-threads: 6
-    mos-asof-threads: 6
+    mos-window-threads: 1
+    mos-asof-threads: 1
 
 experiments:
   ingest:
@@ -215,36 +225,41 @@ weathercom:
     user-agent: weather-forecasting-predictionmarkets/1.0
   ingestion:
     enabled: false
-    thread-pool-size: 15
-    queue-capacity: 200
+    thread-pool-size: 1
+    queue-capacity: 10
     chunk-days: 1
-    max-retries: 4
+    max-retries: 1
     retry-backoff-ms: 500
     max-backoff-ms: 10000
     retry-jitter-ms: 250
-    upsert-batch-size: 500
-    store-response-body: true
-    max-response-body-chars: 50000
+    upsert-batch-size: 100
+    store-response-body: false
+    max-response-body-chars: 0
+    max-locations-per-run: 5
+    max-days-per-run: 31
+    max-tasks-per-run: 200
     rate-limit:
-      permits-per-second: 2.0
+      permits-per-second: 1.0
+  backfill-runner:
+    enabled: false
 
 pilot:
   knyc:
     enabled: false
-    sqlite-root: D:/Ahmed/data/sqlite/MOS_aggregate_V2.0
+    sqlite-root: ${PILOT_SQLITE_ROOT:var/ingestion/knyc}
     sqlite-file-name: knyc_central_park_ingestion.sqlite
-    config-dir: ingestion-service/config
-    data-dir: ingestion-service/data
+    config-dir: ${PILOT_CONFIG_DIR:apps/ingestion-service/config}
+    data-dir: ${PILOT_DATA_DIR:var/ingestion/knyc/data}
     parser-version: knyc-pilot-v1
     default-station-key: knyc_central_park
-    max-http-retries: 4
+    max-http-retries: 1
     connect-timeout-ms: 10000
     read-timeout-ms: 60000
     jobs:
-      bootstrap-enabled: true
-      lightweight-enabled: true
+      bootstrap-enabled: false
+      lightweight-enabled: false
       heavy-enabled: false
-      snapshot-enabled: true
+      snapshot-enabled: false
       smoke-enabled: false
       smoke-target-date-local: 2026-03-16
       smoke-ndfd-historical-date-local: 2026-03-15

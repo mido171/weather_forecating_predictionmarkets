@@ -5,6 +5,7 @@ import com.predictionmarkets.weather.kalshiapi.trading.KalshiAccountBalance;
 import com.predictionmarkets.weather.kalshiapi.trading.KalshiAccountSnapshot;
 import com.predictionmarkets.weather.kalshiapi.trading.KalshiPositionExposure;
 import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +14,11 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = {"http://127.0.0.1:5173", "http://localhost:5173"},
+    allowedHeaders = {"Content-Type", "X-Local-Control-Token"})
 @RequestMapping("/api/live-trading/account")
+@ConditionalOnProperty(prefix = "kalshi.live-trading", name = "enabled", havingValue = "true")
 public class LiveAccountController {
 
   private final KalshiTradingService tradingService;

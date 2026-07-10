@@ -19,10 +19,17 @@ from urllib.parse import urlparse
 
 import httpx
 
-from hkg_tmax_db.connection import DatabaseUnavailable, apply_migration, import_psycopg, redact_database_url
+from hkg_tmax.paths import ProjectPaths
+from hkg_tmax_db.connection import (
+    DatabaseUnavailable,
+    apply_migration,
+    import_psycopg,
+    redact_database_url,
+)
 from hkg_tmax_db.hashing import sha256_file
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 TASK_ROOT = REPO_ROOT / "tasks/HKG_T24_A_TO_Z_CODEX_IMPLEMENTATION"
 TASKS_NOT_COMPLETED = TASK_ROOT / "tasks/not-completed"
 TASKS_COMPLETED = TASK_ROOT / "tasks/completed"
@@ -38,23 +45,23 @@ T05_SPEC = TASK_ROOT / "specs/t05_canonical_location_station_geospatial_registry
 
 STATION_REGISTRY = REPO_ROOT / "config/hkg_t24/station_registry.csv"
 ISD_DOSSIER = TASK_ROOT / "evidence/HKG_TMAX_ISD_STATION_DOSSIER_36.csv"
-ARWF_PARQUET = REPO_ROOT / "data/datasets/09_hko_arwf_station_forecasts/hko_arwf_station_daily_forecasts.parquet"
+ARWF_PARQUET = PROJECT_PATHS.data_root / "datasets/09_hko_arwf_station_forecasts/hko_arwf_station_daily_forecasts.parquet"
 STATIC_GEOSPATIAL_INVENTORY = (
-    REPO_ROOT / "data/datasets/11_static_geospatial_inventory/static_geospatial_package_inventory.parquet"
+    PROJECT_PATHS.data_root / "datasets/11_static_geospatial_inventory/static_geospatial_package_inventory.parquet"
 )
 
 T03_EXP = REPO_ROOT / "experiments/0210_gribstream_catalog_coverage_licence_quota_audit"
 T04_EXP = REPO_ROOT / "experiments/0211_nwp_database_object_storage_migrations"
 T05_EXP = REPO_ROOT / "experiments/0212_canonical_location_station_geospatial_registry"
 
-MIGRATION_T03 = REPO_ROOT / "migrations/postgres/20260624_0004_t03_gribstream_catalog_registry.sql"
-MIGRATION_T04 = REPO_ROOT / "migrations/postgres/20260624_0005_t04_nwp_storage_lineage.sql"
-MIGRATION_T05 = REPO_ROOT / "migrations/postgres/20260624_0006_t05_location_station_geospatial_registry.sql"
-MIGRATION_T00 = REPO_ROOT / "migrations/postgres/20260623_0001_audit_driven_ingestion.sql"
-MIGRATION_T01 = REPO_ROOT / "migrations/postgres/20260624_0002_t24_time_availability_contract.sql"
-MIGRATION_T02 = REPO_ROOT / "migrations/postgres/20260624_0003_t02_census_registry_compatibility.sql"
+MIGRATION_T03 = REPO_ROOT / "db/migrations/postgres/20260624_0004_t03_gribstream_catalog_registry.sql"
+MIGRATION_T04 = REPO_ROOT / "db/migrations/postgres/20260624_0005_t04_nwp_storage_lineage.sql"
+MIGRATION_T05 = REPO_ROOT / "db/migrations/postgres/20260624_0006_t05_location_station_geospatial_registry.sql"
+MIGRATION_T00 = REPO_ROOT / "db/migrations/postgres/20260623_0001_audit_driven_ingestion.sql"
+MIGRATION_T01 = REPO_ROOT / "db/migrations/postgres/20260624_0002_t24_time_availability_contract.sql"
+MIGRATION_T02 = REPO_ROOT / "db/migrations/postgres/20260624_0003_t02_census_registry_compatibility.sql"
 
-TEST_PATH = REPO_ROOT / "code/tests/test_t03_t05_foundation_tasks.py"
+TEST_PATH = REPO_ROOT / "tests/test_t03_t05_foundation_tasks.py"
 SCRIPT_PATH = REPO_ROOT / "scripts/run_t03_t05_foundation_tasks.py"
 SECRET_FILE = REPO_ROOT / "secrets/local/gribstream.env"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
@@ -1259,7 +1266,7 @@ No automated destructive rollback is run against the main database.
         T04_EXP / "migration_test_log.md",
         """# T04 Migration Test Log
 
-- Main migration file: `migrations/postgres/20260624_0005_t04_nwp_storage_lineage.sql`
+- Main migration file: `db/migrations/postgres/20260624_0005_t04_nwp_storage_lineage.sql`
 - Idempotency expectation: applying the migration twice must not duplicate objects or fail.
 - Partition routing expectation: `nwp_core.point_value_default` must exist.
 - Permission expectation: `hkg_tmax_live_inference` has no rights on `research` or `quarantine`; research roles have governed write access.

@@ -47,7 +47,7 @@ def write_csv(path: Path, rows: list[dict], fields: list[str] | None = None) -> 
 def sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        while True:
+        while True:  # repo-doctor: allow-unsafe-default - exits at file EOF
             chunk = handle.read(chunk_size)
             if not chunk:
                 break

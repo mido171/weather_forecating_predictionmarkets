@@ -8,17 +8,18 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from hkg_tmax.paths import ProjectPaths
 from hkg_tmax_db.connection import apply_migration, import_psycopg, redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
-TACTICAL_MIGRATION = REPO_ROOT / "migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
+TACTICAL_MIGRATION = REPO_ROOT / "db/migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
 EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
 SUMMARY_PATH = EXPERIMENT_ROOT / "legacy_purge_summary.json"
 RAW_DIRS = (
-    REPO_ROOT / "data/_pipeline_internal/raw/gribstream",
-    REPO_ROOT / "data/raw/gribstream",
+    PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / "gribstream",
+    PROJECT_PATHS.data_root / "raw" / "gribstream",
 )
 
 
@@ -222,7 +223,7 @@ def purge_database(database_url: str, *, execute: bool) -> dict[str, Any]:
 def purge_raw_dirs(*, execute: bool) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for path in RAW_DIRS:
-        if not is_under(path, REPO_ROOT / "data"):
+        if not is_under(path, PROJECT_PATHS.data_root):
             raise RuntimeError(f"Refusing to purge outside data directory: {path}")
         exists = path.exists()
         file_count = 0

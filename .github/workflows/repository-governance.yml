@@ -1,0 +1,36 @@
+name: Repository governance (offline)
+
+on:
+  pull_request:
+  push:
+    branches: [master, main, "migration/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-governance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test repository doctor
+        run: python -m unittest discover -s tools/repo/tests -p "test_*.py"
+      - name: Enforce repository policy
+        run: python tools/repo/doctor.py --strict

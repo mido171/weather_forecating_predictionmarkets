@@ -65,16 +65,19 @@ public class WeatherComProperties {
 
   public static class Ingestion {
     private boolean enabled;
-    private int threadPoolSize = 4;
-    private int queueCapacity = 200;
+    private int threadPoolSize = 1;
+    private int queueCapacity = 10;
     private int chunkDays = 1;
-    private int maxRetries = 4;
+    private int maxRetries = 1;
     private long retryBackoffMs = 500L;
     private long maxBackoffMs = 10000L;
     private long retryJitterMs = 250L;
-    private int upsertBatchSize = 500;
-    private boolean storeResponseBody = true;
-    private int maxResponseBodyChars = 50000;
+    private int upsertBatchSize = 100;
+    private boolean storeResponseBody;
+    private int maxResponseBodyChars;
+    private int maxLocationsPerRun = 5;
+    private int maxDaysPerRun = 31;
+    private int maxTasksPerRun = 200;
     private final RateLimit rateLimit = new RateLimit();
 
     public boolean isEnabled() {
@@ -165,13 +168,37 @@ public class WeatherComProperties {
       this.maxResponseBodyChars = maxResponseBodyChars;
     }
 
+    public int getMaxLocationsPerRun() {
+      return maxLocationsPerRun;
+    }
+
+    public void setMaxLocationsPerRun(int maxLocationsPerRun) {
+      this.maxLocationsPerRun = maxLocationsPerRun;
+    }
+
+    public int getMaxDaysPerRun() {
+      return maxDaysPerRun;
+    }
+
+    public void setMaxDaysPerRun(int maxDaysPerRun) {
+      this.maxDaysPerRun = maxDaysPerRun;
+    }
+
+    public int getMaxTasksPerRun() {
+      return maxTasksPerRun;
+    }
+
+    public void setMaxTasksPerRun(int maxTasksPerRun) {
+      this.maxTasksPerRun = maxTasksPerRun;
+    }
+
     public RateLimit getRateLimit() {
       return rateLimit;
     }
   }
 
   public static class RateLimit {
-    private double permitsPerSecond = 2.0d;
+    private double permitsPerSecond = 1.0d;
 
     public double getPermitsPerSecond() {
       return permitsPerSecond;

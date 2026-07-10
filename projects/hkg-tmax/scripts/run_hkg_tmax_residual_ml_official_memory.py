@@ -33,7 +33,7 @@ from hkg_tmax.features.pruned_feature_policy import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "configs" / "hkg_tmax" / "residual_ml_official_memory.yaml"
+DEFAULT_CONFIG = REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_official_memory.yaml"
 DEFAULT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax" / "0003_official_residual_memory_20260706" / "results"
 DEFAULT_COMPAT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax_residual_ml_official_memory" / "results"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"

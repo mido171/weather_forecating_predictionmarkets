@@ -19,16 +19,24 @@ from hkg_tmax.hkg_t24.guard import (
     assert_no_locked_dates,
     write_locked_test_guard_report,
 )
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
-DEFAULT_ARCHIVE = REPO_ROOT / "analysis" / "hkg_tmax_t24.rar"
-REPORT_DIR = REPO_ROOT / "reports" / "hkg_t24"
-ANALYSIS_EXPERIMENT_DIR = (
-    REPO_ROOT
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
+DEFAULT_ARCHIVE = (
+    PROJECT_PATHS.data_root
+    / "imports"
+    / "repo-20260710"
     / "analysis"
-    / "hkg_tmax_t24"
+    / "hkg_tmax_t24.rar"
+)
+REPORT_DIR = PROJECT_PATHS.run_root / "reports" / "hkg_t24"
+ANALYSIS_EXPERIMENT_DIR = (
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
+    / "hkg_tmax_t24"
     / "EXP-0033-HKG-T24-R01"
 )
 
@@ -45,8 +53,8 @@ EXPECTED_CHAMPION_VALIDATION = {
     "coverage_90": 0.9093406593406593,
 }
 
-PREDICTION_PATH = REPO_ROOT / "predictions" / "baselines" / "hkg_tmax_baseline_predictions.parquet"
-SCOREBOARD_PATH = REPO_ROOT / "predictions" / "baselines" / "hkg_tmax_baseline_scoreboard.parquet"
+PREDICTION_PATH = PROJECT_PATHS.run_root / "predictions" / "baselines" / "hkg_tmax_baseline_predictions.parquet"
+SCOREBOARD_PATH = PROJECT_PATHS.run_root / "predictions" / "baselines" / "hkg_tmax_baseline_scoreboard.parquet"
 
 
 def sha256_file(path: Path) -> str:
@@ -609,7 +617,7 @@ expected_champion: station_state_analogue
         encoding="utf-8",
     )
     (exp / "REPRODUCE.md").write_text(
-        "# Reproduce\n\n```powershell\n.\\.venv\\Scripts\\python.exe scripts\\audit_hkg_t24_baseline_reproduction.py --data-root C:\\hkg_tmax_data --archive analysis\\hkg_tmax_t24.rar\n```\n",
+        "# Reproduce\n\n```powershell\n.\\.venv\\Scripts\\python.exe scripts\\audit_hkg_t24_baseline_reproduction.py\n```\n",
         encoding="utf-8",
     )
     (exp / "STATUS.yaml").write_text(

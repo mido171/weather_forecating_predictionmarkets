@@ -28,10 +28,11 @@ from hkg_tmax.gribstream.store import (
     mark_request_failed,
     register_request_started,
 )
+from hkg_tmax.paths import ProjectPaths
 from hkg_tmax_db.connection import DatabaseUnavailable, import_psycopg, redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 TASK_ROOT = REPO_ROOT / "tasks/HKG_T24_A_TO_Z_CODEX_IMPLEMENTATION"
 TASKS_NOT_COMPLETED = TASK_ROOT / "tasks/not-completed"
 TASKS_COMPLETED = TASK_ROOT / "tasks/completed"
@@ -39,7 +40,7 @@ STATUS_INDEX = TASK_ROOT / "TASK_STATUS_INDEX.csv"
 TASK_ID = "T06"
 TASK_NAME = "T06_gribstream_resumable_runs_client"
 EXPERIMENT_DIR = REPO_ROOT / "experiments/0213_gribstream_resumable_runs_client"
-RAW_ROOT = REPO_ROOT / "data/raw/gribstream"
+RAW_ROOT = PROJECT_PATHS.data_root / "raw" / "gribstream"
 RUN_STATUS_PATH = EXPERIMENT_DIR / "logs/t06_status.json"
 LEDGER_PATH = EXPERIMENT_DIR / "resume_ledger.jsonl"
 API_EVENT_LOG = EXPERIMENT_DIR / "logs/gribstream_api_events.jsonl"
@@ -330,7 +331,7 @@ def write_task_artifacts(
         "database_migration_version": "20260624_0005_t04_nwp_storage_lineage",
         "input_manifest_sha256": file_manifest_sha(
             [
-                REPO_ROOT / "config/acquisition_policy.yaml",
+                REPO_ROOT / "config/acquisition/acquisition_policy.yaml",
                 TASK_ROOT / "tasks/completed/T03_gribstream_catalog_coverage_licence_quota_audit/COMPLETION_RECORD.md",
                 TASK_ROOT / "tasks/completed/T04_nwp_database_object_storage_migrations/COMPLETION_RECORD.md",
                 TASK_ROOT / "tasks/completed/T05_canonical_location_station_geospatial_registry/COMPLETION_RECORD.md",
@@ -410,7 +411,7 @@ def write_completion_record(task_dir: Path, open_blockers: list[str]) -> None:
 def validate_inputs(database_url: str) -> list[str]:
     blockers: list[str] = []
     required_paths = [
-        REPO_ROOT / "config/acquisition_policy.yaml",
+        REPO_ROOT / "config/acquisition/acquisition_policy.yaml",
         TASK_ROOT / "tasks/completed/T03_gribstream_catalog_coverage_licence_quota_audit",
         TASK_ROOT / "tasks/completed/T04_nwp_database_object_storage_migrations",
         TASK_ROOT / "tasks/completed/T05_canonical_location_station_geospatial_registry",

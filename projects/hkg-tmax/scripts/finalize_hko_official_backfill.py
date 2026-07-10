@@ -14,7 +14,10 @@ from typing import Any
 
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -33,10 +36,11 @@ from scripts.run_hkg_t24_forecast_archive_continuous_scored_export import (  # n
 DEFAULT_DATA_ROOT = Path(r"C:\hko_press_2000_2026")
 DEFAULT_ARCHIVE_DB = DEFAULT_DATA_ROOT / "metadata" / "archive.sqlite3"
 DEFAULT_DETAILS_LOG = DEFAULT_DATA_ROOT / "run_logs" / "official_details_20000101_20260620.out.log"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "datasets"
+DEFAULT_OUTPUT_DIR = PROJECT_PATHS.data_root / "datasets"
 DEFAULT_MONITOR_OUTPUT_DIR = (
-    REPO_ROOT
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
     / "0000_research_state_and_data_contract"
     / "hko_official_backfill_monitor"
     / "artifacts"
@@ -111,7 +115,7 @@ def stream_table_exports(
     with csv_path.open("w", newline="", encoding="utf-8-sig") as csv_handle, jsonl_path.open("w", encoding="utf-8") as jsonl_handle:
         writer = csv.DictWriter(csv_handle, fieldnames=columns)
         writer.writeheader()
-        while True:
+        while True:  # repo-doctor: allow-unsafe-default - exits when fetchmany is empty
             rows = cursor.fetchmany(5000)
             if not rows:
                 break

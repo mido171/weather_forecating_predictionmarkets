@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,14 +10,16 @@ import numpy as np
 import pandas as pd
 
 from hkg_tmax.hkg_t24.guard import LOCKED_TEST_START, assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATA_ROOT = Path(os.environ.get("HKG_TMAX_DATA_ROOT", r"C:\hkg_tmax_data"))
-REPORTS_ROOT = REPO_ROOT / "reports"
-ANALYSIS_ROOT = REPO_ROOT / "analysis" / "hkg_tmax_t24"
-EXPERIMENT_ROOT = ANALYSIS_ROOT / "experiments" / "EXP-0002-baseline-suite"
-MODELS_ROOT = REPO_ROOT / "models" / "baselines"
-PREDICTIONS_ROOT = REPO_ROOT / "predictions" / "baselines"
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DATA_ROOT = PROJECT_PATHS.data_root
+REPORTS_ROOT = PROJECT_PATHS.run_root / "reports"
+ANALYSIS_ROOT = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24"
+EXPERIMENT_ROOT = ANALYSIS_ROOT / "EXP-0002-baseline-suite"
+MODELS_ROOT = PROJECT_PATHS.run_root / "models" / "baselines"
+PREDICTIONS_ROOT = PROJECT_PATHS.run_root / "predictions" / "baselines"
 
 TARGET_PATH = DATA_ROOT / "silver" / "targets" / "hko_daily_tmax.parquet"
 FEATURE_PATH = DATA_ROOT / "silver" / "features" / "t24_cutoff_feature_candidates.parquet"

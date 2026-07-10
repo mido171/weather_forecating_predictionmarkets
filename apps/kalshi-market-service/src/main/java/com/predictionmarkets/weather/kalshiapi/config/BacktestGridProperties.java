@@ -123,7 +123,7 @@ public class BacktestGridProperties {
   private String dcaAddSchedulesCsv = "equal,front_loaded,back_loaded,geometric";
 
   @Min(1)
-  private int threadCount = 40;
+  private int threadCount = 1;
 
   @NotBlank
   private String sqlitePath = "D:\\Ahmed\\data\\sqlite\\mos_live_script_4station_grid_2024_2025_spring.sqlite";
@@ -146,7 +146,7 @@ public class BacktestGridProperties {
   @NotBlank
   private String liveScriptLogLevel = "ERROR";
 
-  private boolean overwriteSqlite = true;
+  private boolean overwriteSqlite;
 
   @Valid
   @NotEmpty

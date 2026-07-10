@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -110,6 +111,25 @@ class DefaultExposureGuardServiceTest {
 
     assertThat(service.isTradingHalted("MKT1", Side.YES)).isTrue();
     verify(ordersApi, atLeastOnce()).batchCancelOrders(any());
+  }
+
+  @Test
+  void startupReconcileFailureActivatesGlobalFailClosedHalt() {
+    KalshiPortfolioApi portfolioApi = mock(KalshiPortfolioApi.class);
+    KalshiOrdersApi ordersApi = mock(KalshiOrdersApi.class);
+    KalshiExecutionProperties properties = props(1, true);
+    when(ordersApi.getOrders(any())).thenThrow(new IllegalStateException("provider unavailable"));
+
+    DefaultExposureGuardService service = new DefaultExposureGuardService(portfolioApi, ordersApi, properties);
+    service.startupReconcile();
+
+    TradeOrderRequest request = new TradeOrderRequest("ANY-MARKET", Side.YES, 1, OrderType.MARKET, null, 100, "i1");
+    var decision = service.preflightBuy(request);
+    assertThat(service.isTradingHalted("ANY-MARKET", Side.YES)).isTrue();
+    assertThat(decision.blocked()).isTrue();
+    assertThat(decision.halted()).isTrue();
+    assertThat(decision.reason()).contains("startup_reconcile_failed");
+    verifyNoInteractions(portfolioApi);
   }
 
   private static KalshiExecutionProperties props(int defaultCap, boolean startupReconcile) {

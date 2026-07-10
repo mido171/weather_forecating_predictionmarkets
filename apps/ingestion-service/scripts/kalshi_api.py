@@ -15,7 +15,7 @@ import requests
 
 DEFAULT_BASE_URL = "https://api.elections.kalshi.com/trade-api/v2"
 DEFAULT_TIMEOUT = (10, 60)
-DEFAULT_MAX_RETRIES = 6
+DEFAULT_MAX_RETRIES = 1
 DEFAULT_USER_AGENT = "weather-forecasting-predictionmarkets (kalshi minute downloader)"
 
 
@@ -107,7 +107,7 @@ class KalshiClient:
     def get_historical_markets(self, event_ticker: str) -> List[Dict[str, Any]]:
         markets: List[Dict[str, Any]] = []
         cursor: Optional[str] = None
-        while True:
+        for _page in range(100):
             params: Dict[str, Any] = {"event_ticker": event_ticker}
             if cursor:
                 params["cursor"] = cursor
@@ -117,8 +117,8 @@ class KalshiClient:
                 markets.extend(batch)
             cursor = resp.get("cursor")
             if not cursor:
-                break
-        return markets
+                return markets
+        raise RuntimeError("Historical markets exceeded the 100-page safety budget")
 
     def get_batch_candlesticks(
         self,

@@ -1,0 +1,33 @@
+policy_id: hkg_t24_nwp_acquisition_policy_v1
+created_at_utc: "2026-06-24T00:00:00Z"
+purpose: "Canonical policy entrypoint for T06+ NWP acquisition runners."
+source_policy_files:
+  - config/acquisition/gridded_acquisition_policy.yaml
+  - config/acquisition/acquisition_plan.yaml
+runtime_limits:
+  gribstream:
+    threads: 1
+    min_interval_seconds: 12
+    retry_transient_http_statuses: [429, 500, 502, 503, 504]
+    no_auto_retry_http_statuses: [400, 401, 403, 404]
+    default_429_pause_seconds: 300
+    honor_retry_after: true
+t06_smoke_request:
+  provider: GribStream
+  dataset: gfs
+  endpoint: runs
+  semantic_variable: temperature_2m
+  selector:
+    name: TMP
+    level: "2 m above ground"
+    info: ""
+    alias: temperature_2m
+  coordinate_source: catalog.location
+  run_time_utc: "2026-06-23T00:00:00Z"
+  min_lead_time: 0h
+  max_lead_time: 48h
+  raw_landing_root_base: HKG_TMAX_DATA_ROOT
+  raw_landing_root: raw/gribstream
+notes:
+  - "T06 proves the reusable client and bounded raw/normalized landing path."
+  - "Full historical GFS acquisition remains T07 and must chunk by date, variable, and quota budget."

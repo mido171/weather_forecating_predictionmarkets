@@ -16,13 +16,14 @@ import org.springframework.validation.annotation.Validated;
 public class KalshiExecutionProperties {
 
   @NotNull
-  private KalshiEnvironment environment = KalshiEnvironment.PROD;
+  private KalshiEnvironment environment = KalshiEnvironment.DEMO;
 
   private String restBaseUrl;
   private String wsUrl;
 
-  private boolean authEnabled = true;
-  private boolean tradingEnabled = true;
+  private boolean productionAcknowledged;
+  private boolean authEnabled;
+  private boolean tradingEnabled;
   private boolean authDebug = false;
 
   private String credentialsPath;
@@ -49,8 +50,23 @@ public class KalshiExecutionProperties {
 
   @PostConstruct
   void validateConfiguration() {
+    if (environment == KalshiEnvironment.PROD
+        && (authEnabled || tradingEnabled || webSocket.enabled)
+        && !productionAcknowledged) {
+      throw new IllegalStateException(
+          "KALSHI_PRODUCTION_ACKNOWLEDGED=true is required before enabling authenticated PROD access");
+    }
     if (tradingEnabled && !authEnabled) {
       throw new IllegalStateException("kalshi.trading-enabled requires kalshi.auth-enabled=true");
+    }
+    if (webSocket.enabled && !authEnabled) {
+      throw new IllegalStateException("kalshi.web-socket.enabled requires kalshi.auth-enabled=true");
+    }
+    if (tradingEnabled && !guardrails.enabled) {
+      throw new IllegalStateException("kalshi.trading-enabled requires kalshi.guardrails.enabled=true");
+    }
+    if (smoke.enabled && !tradingEnabled) {
+      throw new IllegalStateException("kalshi.smoke.enabled requires kalshi.trading-enabled=true");
     }
 
     if (authEnabled) {
@@ -86,6 +102,14 @@ public class KalshiExecutionProperties {
 
   public void setEnvironment(KalshiEnvironment environment) {
     this.environment = environment;
+  }
+
+  public boolean isProductionAcknowledged() {
+    return productionAcknowledged;
+  }
+
+  public void setProductionAcknowledged(boolean productionAcknowledged) {
+    this.productionAcknowledged = productionAcknowledged;
   }
 
   public String getRestBaseUrl() {
@@ -206,7 +230,7 @@ public class KalshiExecutionProperties {
 
   public static class Retry {
     @Min(0)
-    private int maxRetries = 3;
+    private int maxRetries = 1;
 
     @Min(1)
     private long baseBackoffMs = 250;
@@ -241,10 +265,10 @@ public class KalshiExecutionProperties {
 
   public static class RateLimiting {
     @Min(1)
-    private int maxReadRequestsPerSecond = 30;
+    private int maxReadRequestsPerSecond = 1;
 
     @Min(1)
-    private int maxWriteRequestsPerSecond = 10;
+    private int maxWriteRequestsPerSecond = 1;
 
     public int getMaxReadRequestsPerSecond() {
       return maxReadRequestsPerSecond;
@@ -264,10 +288,10 @@ public class KalshiExecutionProperties {
   }
 
   public static class WebSocket {
-    private boolean enabled = true;
+    private boolean enabled;
 
     @Min(0)
-    private int maxReconnectAttempts = 0;
+    private int maxReconnectAttempts = 1;
 
     @Min(1)
     private long reconnectBaseBackoffMs = 500;
@@ -314,7 +338,7 @@ public class KalshiExecutionProperties {
     private final Map<String, Integer> marketOverrides = new HashMap<>();
     private boolean failClosedOnUnknownOrderState = true;
     private boolean cancelRestingOnCapBreach = true;
-    private boolean startupReconcile = true;
+    private boolean startupReconcile;
 
     public boolean isEnabled() {
       return enabled;

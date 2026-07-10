@@ -12,7 +12,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -36,7 +39,7 @@ from scripts.run_hkg_t24_long_history_cross_family_interaction_atlas import (  #
     update_markdown_section,
 )
 
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 TARGET_PATH = DATASETS_ROOT / "01_hko_daily_tmax_target" / "hko_daily_tmax_target_labels.parquet"
 ISD_DAY_PATH = (
     DATASETS_ROOT

@@ -370,7 +370,7 @@ def _write_manifest(output_dir: Path, config_path: Path, artifact_names: list[st
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, default=REPO_ROOT / "configs" / "hkg_tmax" / "probability_distribution_methods_v2.yaml")
+    parser.add_argument("--config", type=Path, default=REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "probability_distribution_methods_v2.yaml")
     parser.add_argument(
         "--output-dir",
         type=Path,

@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -55,6 +56,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Service
+@ConditionalOnProperty(prefix = "kalshi.live-trading", name = "enabled", havingValue = "true")
 public class LiveOrderbookStreamService implements DisposableBean {
 
   private static final Logger log = LoggerFactory.getLogger(LiveOrderbookStreamService.class);

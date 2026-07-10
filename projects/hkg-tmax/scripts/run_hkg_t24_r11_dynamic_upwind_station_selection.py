@@ -10,12 +10,14 @@ from typing import Any
 import pandas as pd
 
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R11"
 EXPERIMENT_ID = "EXP-0043"
-EXPERIMENT_DIR = REPO_ROOT / "analysis" / "hkg_tmax_t24" / "experiments" / "EXP-0043-HKG-T24-R11"
+EXPERIMENT_DIR = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24" / "EXP-0043-HKG-T24-R11"
 
 
 def now_utc() -> str:
@@ -335,7 +337,7 @@ leakage_guard: PASS
 production_eligible: false
 blocked_inputs: [hko_station_coordinates, hko_station_elevations, hko_named_station_distance_bearing_matrix, igra_eligible_upper_air_wind_parser]
 """)
-    write_text(REPO_ROOT / "reports" / "hkg_t24" / "R11_DYNAMIC_UPWIND_STATION_SELECTION.md", report)
+    write_text(PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R11_DYNAMIC_UPWIND_STATION_SELECTION.md", report)
 
 
 def parse_args() -> argparse.Namespace:

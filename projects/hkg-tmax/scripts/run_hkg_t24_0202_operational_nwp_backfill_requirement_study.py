@@ -8,11 +8,10 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-
 import run_hkg_t24_0184_hf_teacher_proxy_causal_memory_router as base
 
-
 REPO_ROOT = base.REPO_ROOT
+PROJECT_PATHS = base.PROJECT_PATHS
 EXPERIMENTS_ROOT = base.EXPERIMENTS_ROOT
 EXPERIMENT_ID = "0202"
 SLUG = "operational_nwp_backfill_requirement_study"
@@ -23,49 +22,49 @@ SRC_COPY_NAME = "run_0202.py"
 DATASETS = [
     {
         "source_id": "ncep_operational_grib2_inventory",
-        "path": REPO_ROOT / "data/datasets/10_ncep_operational_grib_inventory/ncep_operational_grib2_inventory.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/10_ncep_operational_grib_inventory/ncep_operational_grib2_inventory.parquet",
         "family": "external_nwp",
         "timestamp_columns": ["cycle_date", "cycle_hour_utc", "forecast_hour", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "decoded meteorological fields with cycle issue timestamp and valid time covering 2000-2023",
     },
     {
         "source_id": "hko_arwf_station_daily_forecasts",
-        "path": REPO_ROOT / "data/datasets/09_hko_arwf_station_forecasts/hko_arwf_station_daily_forecasts.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/09_hko_arwf_station_forecasts/hko_arwf_station_daily_forecasts.parquet",
         "family": "hko_operational_model",
         "timestamp_columns": ["model_time", "last_modified", "forecast_date", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "historical ARWF station forecast archive with model issue time <= T-24",
     },
     {
         "source_id": "hko_gridded_rainfall_nowcast_summary",
-        "path": REPO_ROOT / "data/datasets/07_hko_radar_satellite_lightning_nowcast/hko_gridded_rainfall_nowcast_summary.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/07_hko_radar_satellite_lightning_nowcast/hko_gridded_rainfall_nowcast_summary.parquet",
         "family": "nowcast",
         "timestamp_columns": ["issue_time_hkt", "ending_time_hkt", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "historical nowcast archive available before T-24 and converted to daily covariates",
     },
     {
         "source_id": "hko_radar_manifest_frames",
-        "path": REPO_ROOT / "data/datasets/07_hko_radar_satellite_lightning_nowcast/hko_radar_manifest_frames.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/07_hko_radar_satellite_lightning_nowcast/hko_radar_manifest_frames.parquet",
         "family": "radar",
         "timestamp_columns": ["frame_time_hkt", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "historical radar frames and pixel parser with T-24 availability proof",
     },
     {
         "source_id": "hko_satellite_image_inventory",
-        "path": REPO_ROOT / "data/datasets/07_hko_radar_satellite_lightning_nowcast/hko_satellite_image_inventory.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/07_hko_radar_satellite_lightning_nowcast/hko_satellite_image_inventory.parquet",
         "family": "satellite",
         "timestamp_columns": ["image_time_hkt", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "historical image archive and georeferenced image feature extractor",
     },
     {
         "source_id": "hko_lightning_counts_latest",
-        "path": REPO_ROOT / "data/datasets/07_hko_radar_satellite_lightning_nowcast/hko_lightning_counts_latest.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/07_hko_radar_satellite_lightning_nowcast/hko_lightning_counts_latest.parquet",
         "family": "lightning",
         "timestamp_columns": ["period", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "historical lightning counts prior to T-24 rather than latest-only snapshot",
     },
     {
         "source_id": "hko_historical_rss_temperature_forecasts",
-        "path": REPO_ROOT / "data/datasets/05_hko_historical_rss_forecasts/hko_historical_rss_temperature_forecasts.parquet",
+        "path": PROJECT_PATHS.data_root / "datasets/05_hko_historical_rss_forecasts/hko_historical_rss_temperature_forecasts.parquet",
         "family": "existing_official_forecast_archive",
         "timestamp_columns": ["target_date", "issue_date", "forecast_date", "retrieved_at_utc", "raw_retrieved_at_utc"],
         "required_for_deployable_score": "already consumed as official forecast archive baseline source",
@@ -153,7 +152,6 @@ def summarize_dataset(item: dict[str, Any]) -> tuple[dict[str, Any], list[dict[s
     df = load_table(path)
     source_row["row_count"] = int(len(df))
     source_row["column_count"] = int(len(df.columns))
-    cols_lower = {c.lower(): c for c in df.columns}
     met_keywords = ("temperature", "humidity", "wind", "pressure", "rainfall", "tmax", "tmin", "geopotential", "dew")
     source_row["has_decoded_meteorological_fields"] = any(any(key in c.lower() for key in met_keywords) for c in df.columns)
     if "operational_input_allowed" in df.columns:

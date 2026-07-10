@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Create a GPT-Pro friendly attribute/value profile for data/datasets.
+"""Create a GPT-Pro friendly profile for the configured external datasets.
 
 The output is a structured text file. It profiles every Parquet/CSV table under
-``data/datasets`` and registers ZIP payloads as non-row payloads.
+``HKG_TMAX_DATA_ROOT/datasets`` and registers ZIP payloads as non-row payloads.
 """
 
 from __future__ import annotations
@@ -21,8 +21,11 @@ from typing import Any
 import pandas as pd
 import pyarrow.parquet as pq
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 DEFAULT_OUTPUT = DEFAULT_DATASETS_ROOT / "DATASET_ATTRIBUTE_VALUE_PROFILE_FOR_GPT_PRO.txt"
 DEFAULT_JSON_OUTPUT = DEFAULT_DATASETS_ROOT / "DATASET_ATTRIBUTE_VALUE_PROFILE_FOR_GPT_PRO.json"
 

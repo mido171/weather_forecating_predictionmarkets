@@ -24,16 +24,17 @@ from hkg_tmax.gribstream.client import (
     sanitize_text,
     sha256_file,
 )
+from hkg_tmax.paths import ProjectPaths
 from hkg_tmax_db.connection import apply_migration, import_psycopg, redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 SMOKE_SCRIPT = REPO_ROOT / "scripts/run_tactical_gribstream_h24n_smoke.py"
-TACTICAL_MIGRATION = REPO_ROOT / "migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
+TACTICAL_MIGRATION = REPO_ROOT / "db/migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
 EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
 FIRST_WEEK_ROOT = EXPERIMENT_ROOT / "first_week_pull"
 REQUEST_ROOT = FIRST_WEEK_ROOT / "request_payloads"
-RAW_ROOT = REPO_ROOT / "data/_pipeline_internal/raw/gribstream_tactical_first_week"
+RAW_ROOT = PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / "gribstream_tactical_first_week"
 SECRET_FILE = REPO_ROOT / "secrets/local/gribstream.env"
 API_EVENT_LOG = EXPERIMENT_ROOT / "logs/gribstream_first_week_api_events.jsonl"
 RESULTS_CSV = FIRST_WEEK_ROOT / "first_week_results.csv"

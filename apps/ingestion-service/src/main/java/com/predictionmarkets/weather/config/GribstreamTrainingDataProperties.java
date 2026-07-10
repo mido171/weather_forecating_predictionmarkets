@@ -4,12 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "gribstream.training-data")
 public class GribstreamTrainingDataProperties {
-  private String outputPath =
-      "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets"
-          + "\\weather_forecating_predictionmarkets\\ingestion-service\\src\\main\\resources"
-          + "\\trainingdata_output\\gribstream_training_data.csv";
+  private String outputPath = "var/ingestion/training/gribstream_training_data.csv";
   private int pageSize = 5000;
-  private boolean append = true;
+  private boolean append;
   private Long mosAsofPolicyId = 2L;
 
   public String getOutputPath() {

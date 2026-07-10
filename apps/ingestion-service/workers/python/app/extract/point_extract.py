@@ -75,6 +75,18 @@ def ensure_dir(path: str | Path) -> Path:
     return out
 
 
+def worker_cache_dir(name: str) -> Path:
+    """Resolve worker caches outside the source tree unless explicitly overridden."""
+
+    configured = os.getenv("WEATHER_MARKETS_CACHE_ROOT", "").strip()
+    root = (
+        Path(configured).expanduser()
+        if configured
+        else Path.home() / ".cache" / "weather-markets" / "ingestion-service"
+    )
+    return ensure_dir(root / name)
+
+
 def sha256_file(path: str | Path) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:

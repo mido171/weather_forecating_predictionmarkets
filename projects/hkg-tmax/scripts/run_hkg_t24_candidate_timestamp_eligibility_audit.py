@@ -11,7 +11,10 @@ from typing import Any
 
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -32,7 +35,7 @@ from scripts.run_hkg_t24_long_history_cross_family_interaction_atlas import (  #
 )
 
 FOLDER_NAME = "0053_candidate_timestamp_eligibility_audit"
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 INPUT_CANDIDATES_PATH = (
     RESEARCH_ROOT
     / "0052_candidate_residual_feature_design_notes"

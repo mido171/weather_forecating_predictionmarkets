@@ -22,13 +22,14 @@ from hkg_tmax.gribstream.client import (
     sanitize_text,
     sha256_file,
 )
+from hkg_tmax.paths import ProjectPaths
 from hkg_tmax_db.connection import import_psycopg, redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
 REQUEST_ROOT = EXPERIMENT_ROOT / "request_payloads"
-RAW_ROOT = REPO_ROOT / "data/_pipeline_internal/raw/gribstream_tactical_smoke"
+RAW_ROOT = PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / "gribstream_tactical_smoke"
 SECRET_FILE = REPO_ROOT / "secrets/local/gribstream.env"
 API_EVENT_LOG = EXPERIMENT_ROOT / "logs/gribstream_api_events.jsonl"
 SMOKE_RESULTS_CSV = EXPERIMENT_ROOT / "smoke_api_results.csv"

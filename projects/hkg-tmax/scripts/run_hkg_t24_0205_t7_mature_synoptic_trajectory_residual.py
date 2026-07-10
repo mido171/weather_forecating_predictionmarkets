@@ -10,16 +10,15 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import run_hkg_t24_0184_hf_teacher_proxy_causal_memory_router as base
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import HuberRegressor, Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-import run_hkg_t24_0184_hf_teacher_proxy_causal_memory_router as base
-
-
 REPO_ROOT = base.REPO_ROOT
+PROJECT_PATHS = base.PROJECT_PATHS
 EXPERIMENTS_ROOT = base.EXPERIMENTS_ROOT
 EXPERIMENT_ID = "0205"
 SLUG = "t7_mature_synoptic_trajectory_residual"
@@ -28,7 +27,7 @@ EXP_DIR = EXPERIMENTS_ROOT / f"{EXPERIMENT_ID}_{SLUG}"
 PRIMARY_CANDIDATE_ID = "0205_t7_mature_synoptic_trajectory_residual_over_0196"
 SRC_COPY_NAME = "run_0205.py"
 P0196 = EXPERIMENTS_ROOT / "0196_station_network_tail_conditioned_residual_expert" / "predictions.parquet"
-ROBUST_MATRIX = REPO_ROOT / "data/datasets/12_hkg_t24_robust_experiment_outputs/hkg_t24_r17_feature_matrix.parquet"
+ROBUST_MATRIX = PROJECT_PATHS.data_root / "datasets/12_hkg_t24_robust_experiment_outputs/hkg_t24_r17_feature_matrix.parquet"
 MODEL_FOLDS = base.MODEL_FOLDS
 LAGS = [7, 14, 21, 30]
 INNER_MIN_LIFT_C = 0.00075

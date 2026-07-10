@@ -14,7 +14,7 @@ public class WeatherComBackfillRunnerProperties {
   private String units = "e";
   private String requestedBy = "system";
   private int pollIntervalSeconds = 15;
-  private boolean failOnNonSucceeded = false;
+  private boolean failOnNonSucceeded = true;
 
   public boolean isEnabled() {
     return enabled;

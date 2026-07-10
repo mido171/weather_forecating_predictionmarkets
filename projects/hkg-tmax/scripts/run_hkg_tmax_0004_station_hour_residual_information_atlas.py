@@ -796,8 +796,8 @@ walk_forward_folds:
     write_text(EXPERIMENT_DIR / "REPRODUCE.md", """# Reproduce
 
 ```powershell
-cd C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex
-.\\.venv\\Scripts\\python.exe experiments\\hkg_tmax\\0004_station_hour_residual_information_atlas_20260708\\run_station_hour_residual_atlas.py
+Set-Location <weather-markets-repo>\\projects\\hkg-tmax
+.\\.venv\\Scripts\\python.exe scripts\\run_hkg_tmax_0004_station_hour_residual_information_atlas.py
 ```
 
 The runner creates temporary Postgres tables and writes local experiment artifacts. It does not mutate persistent database tables.

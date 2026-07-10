@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,8 @@ public class DefaultExposureGuardService implements ExposureGuardService {
 
   private final Set<String> haltedKeys = ConcurrentHashMap.newKeySet();
   private final Map<String, String> haltReasonsByKey = new ConcurrentHashMap<>();
+  private final AtomicBoolean globallyHalted = new AtomicBoolean(false);
+  private final AtomicReference<String> globalHaltReason = new AtomicReference<>();
 
   public DefaultExposureGuardService(KalshiPortfolioApi portfolioApi,
                                      KalshiOrdersApi ordersApi,
@@ -87,6 +91,8 @@ public class DefaultExposureGuardService implements ExposureGuardService {
       }
     } catch (Exception ex) {
       if (properties.getGuardrails().isFailClosedOnUnknownOrderState()) {
+        globallyHalted.set(true);
+        globalHaltReason.set("startup_reconcile_failed");
         log.error("Kalshi guardrail startup reconcile failed; fail-closed behavior enabled", ex);
       } else {
         log.warn("Kalshi guardrail startup reconcile failed: {}", ex.toString());
@@ -101,6 +107,21 @@ public class DefaultExposureGuardService implements ExposureGuardService {
     int configuredCap = configuredCapForMarket(marketTicker);
     int effectiveCap = Math.min(request.contractsRequested(), configuredCap);
     String key = marketSideKey(marketTicker, side);
+
+    if (globallyHalted.get()) {
+      ExposureSnapshot snapshot = new ExposureSnapshot(0, 0, effectiveCap, 0);
+      return new TradePreflightDecision(
+          true,
+          true,
+          "trading_halted: " + globalHaltReason.get(),
+          configuredCap,
+          effectiveCap,
+          request.contractsRequested(),
+          0,
+          deterministicClientOrderId(request.intentId(), marketTicker, side, effectiveCap),
+          snapshot,
+          key);
+    }
 
     if (isTradingHalted(marketTicker, side)) {
       String reason = "trading_halted: " + haltReasonsByKey.getOrDefault(key, "manual_or_guardrail");
@@ -184,7 +205,7 @@ public class DefaultExposureGuardService implements ExposureGuardService {
 
   @Override
   public boolean isTradingHalted(String marketTicker, Side side) {
-    return haltedKeys.contains(marketSideKey(marketTicker, side));
+    return globallyHalted.get() || haltedKeys.contains(marketSideKey(marketTicker, side));
   }
 
   @Override

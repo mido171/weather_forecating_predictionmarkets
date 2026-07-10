@@ -14,13 +14,13 @@ public class PipelineProperties {
   private LocalDate dateStartLocal;
   private LocalDate dateEndLocal;
   private List<MosModel> models;
-  private int mosWindowDays;
-  private int threadCount;
+  private int mosWindowDays = 1;
+  private int threadCount = 1;
   private Long asofPolicyId;
   private String asofPolicyName;
   private LocalTime asofLocalTime;
   private AsofTimeZone asofTimeZone;
-  private int defaultRangeDays;
+  private int defaultRangeDays = 1;
   private boolean resetCheckpoints;
   private boolean allowNonstandardRange;
 

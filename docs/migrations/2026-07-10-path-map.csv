@@ -1,0 +1,35 @@
+source_path,destination_path,disposition
+ingestion-service,apps/ingestion-service,active deployable service
+kalshi-api,apps/kalshi-market-service,active deployable service
+weather-common,packages/java/weather-common,shared Java package
+weather-models,packages/java/weather-models,shared Java package
+ml,packages/python/weather-ml,shared Python package
+ml_live,packages/python/weather-live/src/ml_live,installable shared Python live-adapter package
+backtesting,legacy/backtesting,retained non-authoritative history
+incomplete KMIA live runners,legacy/incomplete-live-tools,retained non-runnable provenance
+discovery scripts,tools/discovery,bounded discovery tools
+backfill scripts,tools/backfills,bounded provider-specific backfills
+bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex,projects/hkg-tmax,history-preserved active HKG project
+bootstrap/klga_tmax,projects/klga-tmax,active KLGA project
+projects/hkg-tmax/code/src,projects/hkg-tmax/src,canonical Python source
+projects/hkg-tmax/code/tests,projects/hkg-tmax/tests,canonical tests
+projects/hkg-tmax/configs/hkg_tmax,projects/hkg-tmax/config/experiments/hkg_tmax,experiment configuration
+projects/hkg-tmax/config/*.yaml,projects/hkg-tmax/config/project|sources|acquisition,configuration grouped by ownership
+projects/hkg-tmax/migrations,projects/hkg-tmax/db/migrations,database migrations
+projects/hkg-tmax/schemas,projects/hkg-tmax/db/schemas,database and artifact schemas
+projects/hkg-tmax/sql,projects/hkg-tmax/db/sql,canonical SQL
+projects/hkg-tmax/tasks,projects/hkg-tmax/planning/tasks,task packages
+projects/hkg-tmax/work_packages,projects/hkg-tmax/planning/work-packages,work packages
+projects/hkg-tmax/documentation,projects/hkg-tmax/docs,canonical documentation tree
+projects/hkg-tmax/reports,projects/hkg-tmax/docs/evidence/reports,compact checked-in historical evidence
+projects/hkg-tmax/analysis,projects/hkg-tmax/docs/evidence/analysis,compact checked-in historical evidence
+projects/hkg-tmax/data,C:/hkg_tmax_data,external canonical HKG data root
+projects/hkg-tmax/experiments generated payloads,C:/hkg_tmax_data/imports/repo-20260710/experiments,external preservation snapshot
+projects/hkg-tmax artifacts/models/predictions/logs,C:/hkg_tmax_data/imports/repo-20260710/runs,external preservation snapshot
+projects/klga-tmax/implementation/src,projects/klga-tmax/src,canonical Python source
+projects/klga-tmax/implementation/tests,projects/klga-tmax/tests,canonical tests
+projects/klga-tmax/implementation/alembic,projects/klga-tmax/alembic,database migrations
+projects/klga-tmax/strategy_spec,projects/klga-tmax/docs/specifications|context,canonical specifications and context
+projects/klga-tmax generated runtime,C:/klga_tmax_data/imports/repo-20260710,external preservation snapshot
+original linked worktree,.migration-archive/weather_data_extraction-pre-restructure-20260710,locked rollback worktree after cutover
+nested HKG .git,repository history under projects/hkg-tmax,merged ancestry; no nested Git boundary

@@ -4,11 +4,11 @@ spring:
   datasource:
     url: ${KLGA_IEM_MOS_JDBC_URL:jdbc:postgresql://127.0.0.1:5432/klga_tmax_research}
     driver-class-name: org.postgresql.Driver
-    username: ${KLGA_IEM_MOS_DB_USER:postgres}
-    password: ${KLGA_IEM_MOS_DB_PASSWORD:root}
+    username: ${KLGA_IEM_MOS_DB_USER:}
+    password: ${KLGA_IEM_MOS_DB_PASSWORD:}
     hikari:
-      maximum-pool-size: 12
-      minimum-idle: 2
+      maximum-pool-size: 2
+      minimum-idle: 0
       transaction-isolation: TRANSACTION_READ_COMMITTED
   flyway:
     enabled: false
@@ -16,11 +16,13 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 iem-mos:
-  enabled: true
+  enabled: false
   job-id: klga_iem_mos_full_backfill_v1
   cutoff-id: T_1245UTC
   through: 2026-06-28
-  threads: 10
+  threads: 1
   request-spacing-ms: 1100
   resume: true
-  raw-output-root: bootstrap/klga_tmax/implementation/artifacts/klga_tmax/iem_mos/raw
+  max-attempts: 1
+  build-daily-features: false
+  raw-output-root: var/ingestion/klga-iem-mos/raw

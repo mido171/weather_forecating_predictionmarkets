@@ -1,45 +1,63 @@
 services:
   research:
+    profiles: ["manual"]
     build: .
     working_dir: /workspace
     env_file:
       - .env
+    environment:
+      HKG_TMAX_DATA_ROOT: /data
+      HKG_TMAX_RUN_ROOT: /data/runs
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
     volumes:
-      - .:/workspace
-    command: bash
+      - type: bind
+        source: ${HKG_TMAX_DATA_ROOT:?Set HKG_TMAX_DATA_ROOT in .env}
+        target: /data
+    cpus: 1.0
+    mem_limit: 4g
     stdin_open: true
     tty: true
+
   mysql:
+    profiles: ["manual"]
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: hkg_tmax_research
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hkg_tmax_research}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 30s
+    cpus: 1.0
+    mem_limit: 2g
+
   postgres:
+    profiles: ["manual"]
     image: postgres:15
     environment:
-      POSTGRES_USER: hkg_tmax_ingest
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: hkg_tmax_research
+      POSTGRES_USER: ${POSTGRES_USER:-hkg_tmax_ingest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-hkg_tmax_research}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hkg_tmax_ingest -d hkg_tmax_research"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 30s
+    cpus: 1.0
+    mem_limit: 2g
 
 volumes:
   mysql_data:

@@ -1,9 +1,9 @@
 jobs:
   - jobId: bootstrapKnycStationJob
-    enabled: true
+    enabled: false
     description: Seed KNYC station registry and validate metadata sources.
   - jobId: backfillLightweightSourcesJob
-    enabled: true
+    enabled: false
     description: Ingest lightweight KNYC sources into the canonical SQLite store.
   - jobId: backfillHeavyModelSourcesJob
     enabled: false
@@ -12,5 +12,5 @@ jobs:
     enabled: false
     description: Poll KNYC live obs and forecast sources on a recurring cadence.
   - jobId: buildDecisionSnapshotsJob
-    enabled: true
+    enabled: false
     description: Materialize leakage-safe as-of feature snapshots for KNYC.

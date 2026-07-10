@@ -28,12 +28,14 @@ from hkg_tmax.hkg_t24.moisture import (
     saturation_vapor_pressure_hpa,
     stull_wet_bulb_c,
 )
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 RESEARCH_ID = "HKG-T24-R06"
 EXPERIMENT_ID = "EXP-0038"
-EXPERIMENT_DIR = REPO_ROOT / "analysis" / "hkg_tmax_t24" / "experiments" / "EXP-0038-HKG-T24-R06"
+EXPERIMENT_DIR = PROJECT_PATHS.run_root / "experiments" / "legacy" / "hkg_tmax_t24" / "EXP-0038-HKG-T24-R06"
 HKT = timezone(timedelta(hours=8), name="Asia/Hong_Kong")
 ENTRY_TIME_RE = re.compile(r"(?P<date>\d{8})-(?P<hhmm>\d{4})")
 SNAPSHOT_TARGET_MINUTES = (2 * 60 + 40, 8 * 60 + 40, 11 * 60 + 40, 13 * 60 + 40, 14 * 60 + 40)
@@ -879,7 +881,7 @@ def write_report(
     payload: dict[str, object],
 ) -> None:
     write_text(
-        REPO_ROOT / "reports" / "hkg_t24" / "R06_MOISTURE_STATE.md",
+        PROJECT_PATHS.run_root / "reports" / "hkg_t24" / "R06_MOISTURE_STATE.md",
         long_report(payload)
         + "\n# R06 Machine-Readable Summary Tables\n\n"
         f"Generated: `{now_utc()}`\n\n"

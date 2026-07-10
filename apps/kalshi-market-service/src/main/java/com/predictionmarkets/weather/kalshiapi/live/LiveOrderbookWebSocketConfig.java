@@ -4,12 +4,14 @@ import com.predictionmarkets.weather.kalshiapi.config.LiveTradingProperties;
 import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 
 @Configuration
+@ConditionalOnProperty(prefix = "kalshi.live-trading", name = "enabled", havingValue = "true")
 public class LiveOrderbookWebSocketConfig {
 
   @Bean

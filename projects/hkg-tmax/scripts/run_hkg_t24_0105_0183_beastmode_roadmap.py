@@ -19,13 +19,22 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPERIMENT_ROOT = REPO_ROOT / "experiments"
+from hkg_tmax.paths import ProjectPaths, configured_input_path
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+EXPERIMENT_ROOT = PROJECT_PATHS.run_root / "experiments" / "roadmap-0105-0183"
 ROADMAP_GLOBAL_ARTIFACT_DIR = (
     EXPERIMENT_ROOT / "0000_research_state_and_data_contract" / "r0105_0183"
 )
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
-ROADMAP_PATH = Path(r"C:\Users\ahmad\Downloads\HKG_T24_BEASTMODE_INFORMATION_GAIN_EXPERIMENT_ROADMAP.md")
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
+ROADMAP_FILENAME = "HKG_T24_BEASTMODE_INFORMATION_GAIN_EXPERIMENT_ROADMAP.md"
+ROADMAP_PATH = configured_input_path(
+    PROJECT_PATHS,
+    "HKG_T24_BEASTMODE_ROADMAP_PATH",
+    ROADMAP_FILENAME,
+    legacy_home_relative=Path("Downloads") / ROADMAP_FILENAME,
+)
 
 CONFIRMATION_START = pd.Timestamp("2024-01-01")
 DEFAULT_CORRECTION_CAP_C = 0.35
@@ -50,7 +59,7 @@ TIDE_PATH = DATASETS_ROOT / "08_hko_marine_tide_coastal_waters" / "hko_latest_ti
 CYCLONE_PATH = DATASETS_ROOT / "06_hko_tropical_cyclone_best_track" / "hko_tropical_cyclone_best_track.parquet"
 STATIC_INVENTORY_PATH = DATASETS_ROOT / "11_static_geospatial_inventory" / "static_geospatial_package_inventory.parquet"
 RSS_ITEMS_PATH = DATASETS_ROOT / "05_hko_historical_rss_forecasts" / "hko_historical_rss_items.parquet"
-EXTERNAL_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+EXTERNAL_DATA_ROOT = PROJECT_PATHS.data_root
 HF_HQ_FULL_DAY_PATH = EXTERNAL_DATA_ROOT / "bronze" / "hkg_t24" / "r03_hko_hq_full_day_high_frequency.parquet"
 HF_SELECTED_STATION_PATH = (
     EXTERNAL_DATA_ROOT / "bronze" / "analysis_phase_a" / "hko_high_frequency_selected_station_observations.parquet"

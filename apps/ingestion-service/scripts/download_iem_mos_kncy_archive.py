@@ -18,7 +18,6 @@ import gzip
 import hashlib
 import json
 import logging
-import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -391,9 +390,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--models", nargs="+", default=["GFS", "NAM"], help="Models to fetch (default: GFS NAM)")
     parser.add_argument("--start-year", type=int, default=2000)
     parser.add_argument("--end-year", type=int, default=2025)
-    parser.add_argument("--threads", type=int, default=max(8, (os.cpu_count() or 8)))
+    parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--timeout-sec", type=int, default=120)
-    parser.add_argument("--max-retries", type=int, default=6)
+    parser.add_argument("--max-retries", type=int, default=1)
     parser.add_argument("--backoff-base-sec", type=float, default=1.0)
     parser.add_argument(
         "--output-dir",

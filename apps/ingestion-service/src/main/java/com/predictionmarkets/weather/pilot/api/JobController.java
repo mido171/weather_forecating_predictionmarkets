@@ -6,6 +6,7 @@ import com.predictionmarkets.weather.pilot.jobs.BootstrapKnycStationJob;
 import com.predictionmarkets.weather.pilot.jobs.BuildDecisionSnapshotsJob;
 import com.predictionmarkets.weather.pilot.metrics.MetricsService;
 import java.util.Map;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/internal/ingest/jobs")
+@ConditionalOnProperty(prefix = "ingestion.admin-api", name = "enabled", havingValue = "true")
 public class JobController {
   private final MetricsService metricsService;
   private final BootstrapKnycStationJob bootstrapJob;

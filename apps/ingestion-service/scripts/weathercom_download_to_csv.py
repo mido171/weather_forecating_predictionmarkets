@@ -87,8 +87,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--base-url", default=DEFAULT_BASE_URL)
     p.add_argument("--api-key", default=os.environ.get("WEATHERCOM_API_KEY", ""))
     p.add_argument("--chunk-days", type=int, default=31)
-    p.add_argument("--max-workers", type=int, default=8)
-    p.add_argument("--max-retries", type=int, default=6)
+    p.add_argument("--max-workers", type=int, default=1)
+    p.add_argument("--max-retries", type=int, default=1)
     p.add_argument("--timeout-seconds", type=int, default=60)
     p.add_argument("--out-root", default=r"D:\Ahmed\data\kalshi\weathercom_knyc")
     p.add_argument(
@@ -154,7 +154,7 @@ def setup_logger(log_path: Path) -> logging.Logger:
 
 
 def response_error_message(resp: requests.Response) -> str:
-    body = resp.text.strip()
+    body = redact_api_key_in_url(resp.text.strip())
     if len(body) > 600:
         body = body[:600] + "..."
     return f"HTTP {resp.status_code} body={body}"
@@ -422,7 +422,7 @@ def fetch_window(
             break
         except Exception as exc:
             elapsed = time.time() - t0
-            err = f"exception: {exc}"
+            err = f"exception: {redact_api_key_in_url(str(exc))}"
             logger.warning(
                 "REQUEST_EXCEPTION window=%s attempt=%d elapsed_s=%.3f error=%s",
                 task.key,
@@ -607,7 +607,13 @@ def main() -> int:
             try:
                 res = fut.result()
             except Exception as exc:
-                logger.exception("FUTURE_FAIL window=%s error=%s", task.key, exc)
+                safe_error = redact_api_key_in_url(str(exc))
+                logger.error(
+                    "FUTURE_FAIL window=%s type=%s error=%s",
+                    task.key,
+                    type(exc).__name__,
+                    safe_error,
+                )
                 res = WindowResult(
                     task=task,
                     status_code=0,
@@ -618,8 +624,16 @@ def main() -> int:
                     observations_count=0,
                     window_csv_path=None,
                     raw_dir=run_root / "raw" / safe_location_id(args.location_id) / task.key,
-                    request_url=build_request_url(args.base_url, args.location_id, args.api_key, args.units, task),
-                    error=f"future_exception: {exc}",
+                    request_url=redact_api_key_in_url(
+                        build_request_url(
+                            args.base_url,
+                            args.location_id,
+                            args.api_key,
+                            args.units,
+                            task,
+                        )
+                    ),
+                    error=f"future_exception: {safe_error}",
                     skipped_existing=False,
                 )
             with lock:

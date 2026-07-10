@@ -18,10 +18,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
+@ConditionalOnProperty(prefix = "kalshi.smoke", name = "enabled", havingValue = "true")
 public class KalshiExecutionSmokeRunner implements CommandLineRunner {
 
   private static final Logger log = LoggerFactory.getLogger(KalshiExecutionSmokeRunner.class);

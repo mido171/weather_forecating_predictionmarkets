@@ -11,25 +11,32 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from hkg_tmax_db.connection import DatabaseUnavailable, apply_migration, import_psycopg, redact_database_url
+from hkg_tmax.paths import ProjectPaths
+from hkg_tmax_db.connection import (
+    DatabaseUnavailable,
+    apply_migration,
+    import_psycopg,
+    redact_database_url,
+)
 from hkg_tmax_db.contracts import EXPECTED_COUNTS, load_contract_tables, validate_audit_bundle
 from hkg_tmax_db.hashing import sha256_file
 from hkg_tmax_db.reconciliation import attribute_reconciliation_rows, reconcile_sources
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 TASK_ROOT = REPO_ROOT / "tasks/HKG_T24_A_TO_Z_CODEX_IMPLEMENTATION"
 T02_TASK_CANDIDATES = (
     TASK_ROOT / "tasks/not-completed/T02_full_current_data_census_reconciliation",
     TASK_ROOT / "tasks/completed/T02_full_current_data_census_reconciliation",
 )
 T02_SPEC = TASK_ROOT / "specs/t02_full_current_data_census_reconciliation.json"
-AUDIT_ROOT = REPO_ROOT / "data/catalog/audit_snapshots/2026-06-23/HKG_TMAX_DATASET_AUDIT"
-DATASETS_ROOT = REPO_ROOT / "data/datasets"
-PROFILE_JSON = REPO_ROOT / "data/catalog/audit_snapshots/2026-06-23/profile_full_inventory.json"
+AUDIT_ROOT = PROJECT_PATHS.data_root / "catalog/audit_snapshots/2026-06-23/HKG_TMAX_DATASET_AUDIT"
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
+PROFILE_JSON = PROJECT_PATHS.data_root / "catalog/audit_snapshots/2026-06-23/profile_full_inventory.json"
 T00_DB_INVENTORY = REPO_ROOT / "experiments/0207_repository_database_preflight/database_inventory.csv"
 EVIDENCE_REGISTRY = REPO_ROOT / ".hkg_t24_research/experiment_evidence_registry.csv"
-MIGRATION_PATH = REPO_ROOT / "migrations/postgres/20260624_0003_t02_census_registry_compatibility.sql"
-TEST_PATH = REPO_ROOT / "code/tests/test_t02_full_current_data_census_reconciliation.py"
+MIGRATION_PATH = REPO_ROOT / "db/migrations/postgres/20260624_0003_t02_census_registry_compatibility.sql"
+TEST_PATH = REPO_ROOT / "tests/test_t02_full_current_data_census_reconciliation.py"
 SCRIPT_PATH = REPO_ROOT / "scripts/run_t02_full_current_data_census_reconciliation.py"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
 AUDIT_CONTRACT_VERSION = "audit_bundle_2026_06_23_v1"
@@ -1061,7 +1068,7 @@ def main() -> int:
     if args.apply_migration:
         apply_migration(args.database_url, MIGRATION_PATH)
 
-    task_dir = find_task_dir()
+    find_task_dir()
     task_spec = json.loads(T02_SPEC.read_text(encoding="utf-8"))
     bundle = validate_audit_bundle(AUDIT_ROOT)
     contracts = load_contract_tables(bundle)
@@ -1250,7 +1257,7 @@ def main() -> int:
                 "- `db_object_verification.csv`: all required task DB objects exist with expected counts.",
                 "",
                 "Focused pytest:",
-                "- `code/tests/test_t02_full_current_data_census_reconciliation.py` verifies the migration declares the required registry aliases and the generated output schema preserves the mandatory artifacts.",
+                "- `tests/test_t02_full_current_data_census_reconciliation.py` verifies the migration declares the required registry aliases and the generated output schema preserves the mandatory artifacts.",
             ],
         )
         + "\n",

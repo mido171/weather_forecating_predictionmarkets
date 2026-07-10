@@ -5,7 +5,6 @@ import csv
 import gzip
 import importlib.util
 import json
-import math
 import os
 import sys
 import time
@@ -23,12 +22,13 @@ from hkg_tmax.gribstream.client import (
     sanitize_text,
     sha256_file,
 )
+from hkg_tmax.paths import ProjectPaths
 from hkg_tmax_db.connection import apply_migration, import_psycopg, redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 FIRST_WEEK_SCRIPT = REPO_ROOT / "scripts/run_tactical_gribstream_first_week.py"
-TACTICAL_MIGRATION = REPO_ROOT / "migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
+TACTICAL_MIGRATION = REPO_ROOT / "db/migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
 EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
 ACQUISITION_VERSION = "tactical_h24n_v1"
@@ -340,7 +340,7 @@ def run(args: argparse.Namespace) -> int:
     token = FW.load_gribstream_token()
     output_root = EXPERIMENT_ROOT / args.output_name
     request_root = output_root / "req"
-    raw_root = REPO_ROOT / f"data/_pipeline_internal/raw/gribstream_tactical_{args.output_name}"
+    raw_root = PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / f"gribstream_tactical_{args.output_name}"
     event_log = EXPERIMENT_ROOT / "logs" / f"gribstream_{args.output_name}_api_events.jsonl"
     results_csv = output_root / "batch_results.csv"
     summary_json = output_root / "batch_summary.json"

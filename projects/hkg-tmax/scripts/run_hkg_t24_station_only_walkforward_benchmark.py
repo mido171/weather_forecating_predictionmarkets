@@ -19,7 +19,10 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -48,8 +51,7 @@ MATRIX_DIR = RESEARCH_ROOT / "0054_station_only_walkforward_matrix_audit" / "art
 FEATURE_MATRIX_PATH = MATRIX_DIR / "features.parquet"
 COMPONENT_CATALOG_PATH = MATRIX_DIR / "components.csv"
 OFFICIAL_SCORED_PATH = (
-    REPO_ROOT
-    / "data"
+    PROJECT_PATHS.data_root
     / "datasets"
     / "05_hko_historical_rss_forecasts"
     / "hko_official_t15_scored_pre2024.parquet"

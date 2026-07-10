@@ -3,7 +3,7 @@ name: run-experiment
 description: Create, predeclare, execute, document, and close one immutable HKG Tmax research experiment. Use for every new predictive or validation hypothesis; do not use for untracked ad hoc analysis.
 ---
 
-1. Read `AGENTS.md`, `FIRST_GOALS.md`, `MILESTONES.md`, `EXPERIMENT_INDEX.md`, and related prior experiments.
+1. Read `../../AGENTS.md`, `AGENTS.md`, `START_HERE.md`, `docs/status/CURRENT_STATE.md`, `EXPERIMENT_INDEX.md`, and related prior experiment conclusions.
 2. Reserve an ID:
    ```bash
    python -m hkg_tmax experiments create --title "<title>"
@@ -22,8 +22,8 @@ description: Create, predeclare, execute, document, and close one immutable HKG 
    - primary and secondary metrics;
    - multiplicity family;
    - acceptance and falsification criteria.
-5. Run `make validate` and save output in `logs/`.
-6. Execute deterministic code and save row-level predictions.
+5. Run `make validate` and save output under `${HKG_TMAX_RUN_ROOT}/logs/<experiment-id>/`.
+6. Execute deterministic code with one worker by default and save row-level predictions under the external run root.
 7. Populate all metrics and diagnostics, including negative and null findings.
 8. Request independent leakage and reproducibility review.
 9. Complete `CONCLUSION.md` and `STATUS.yaml`.

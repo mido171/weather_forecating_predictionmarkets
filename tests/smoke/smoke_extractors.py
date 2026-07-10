@@ -9,12 +9,10 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "ingestion-service" / "scripts"))
-sys.path.insert(0, str(ROOT / "ml_live"))
-sys.path.insert(0, str(ROOT / "ml" / "src"))
-sys.path.insert(0, str(ROOT / "tools" / "ncei_truth"))
+sys.path.insert(0, str(ROOT / "packages" / "python" / "weather-live" / "src"))
+sys.path.insert(0, str(ROOT / "packages" / "python" / "weather-ml" / "src"))
 
 
 def load_module(name: str, relative_path: str):
@@ -34,7 +32,10 @@ def require(condition: bool, message: str) -> None:
 
 
 def smoke_weathercom() -> None:
-    mod = load_module("weathercom_download_to_csv", "ingestion-service/scripts/weathercom_download_to_csv.py")
+    mod = load_module(
+        "weathercom_download_to_csv",
+        "apps/ingestion-service/scripts/weathercom_download_to_csv.py",
+    )
     task = mod.WindowTask(datetime(2026, 1, 2), datetime(2026, 1, 2))
     url = mod.build_request_url("https://api.weather.com", "KNYC:9:US", "secret", "e", task)
     require("/v1/location/KNYC:9:US/observations/historical.json" in url, "Weather.com URL path changed")
@@ -60,8 +61,8 @@ def smoke_weathercom() -> None:
 
 
 def smoke_ncei() -> None:
-    download = load_module("download", "tools/ncei_truth/download.py")
-    normalize = load_module("ncei_normalize", "tools/ncei_truth/normalize.py")
+    download = load_module("download", "tools/backfills/ncei_truth/download.py")
+    normalize = load_module("ncei_normalize", "tools/backfills/ncei_truth/normalize.py")
     with tempfile.TemporaryDirectory() as tmp:
         response_path = Path(tmp) / "response.json"
         response_path.write_text(
@@ -112,7 +113,10 @@ def smoke_gribstream() -> None:
     df = gribstream._parse_payload_df(csv_text, "text/csv", "text/csv")
     require(len(df) == 1 and float(df.iloc[0]["tmpk"]) == 280.0, "Gribstream CSV parse failed")
 
-    v1 = load_module("backtesting.gribstream.V1.gribstream_client", "backtesting/gribstream/V1/gribstream_client.py")
+    v1 = load_module(
+        "legacy.backtesting.gribstream.V1.gribstream_client",
+        "legacy/backtesting/gribstream/V1/gribstream_client.py",
+    )
     rows = v1._parse_csv_body(
         "forecasted_at,forecasted_time,lat,lon,name,member,TMP|2 m above ground|\n"
         "2026-01-01T00:00:00Z,2026-01-01T03:00:00Z,40.7,-73.9,KNYC,,280.0\n"
@@ -121,8 +125,11 @@ def smoke_gribstream() -> None:
 
 
 def smoke_kalshi() -> None:
-    api = load_module("kalshi_api", "ingestion-service/scripts/kalshi_api.py")
-    generic = load_module("kalshi_download_temperature_minute", "ingestion-service/scripts/kalshi_download_temperature_minute.py")
+    api = load_module("kalshi_api", "apps/ingestion-service/scripts/kalshi_api.py")
+    generic = load_module(
+        "kalshi_download_temperature_minute",
+        "apps/ingestion-service/scripts/kalshi_download_temperature_minute.py",
+    )
     client = api.KalshiClient(base_url="https://api.elections.kalshi.com/trade-api/v2")
     require(client.base_url.endswith("/trade-api/v2"), "Kalshi base URL normalization failed")
     primary, alternate = generic._event_tickers("KXHIGHMIA", date(2026, 1, 2))
@@ -130,7 +137,10 @@ def smoke_kalshi() -> None:
 
 
 def smoke_polymarket() -> None:
-    poly = load_module("polymarket_download_nyc_daily_wide", "ingestion-service/scripts/polymarket_download_nyc_daily_wide.py")
+    poly = load_module(
+        "polymarket_download_nyc_daily_wide",
+        "apps/ingestion-service/scripts/polymarket_download_nyc_daily_wide.py",
+    )
     lo, hi = poly.parse_bucket_bounds("80-81")
     require((lo, hi) == (80.0, 81.0), "Polymarket bucket parse failed")
     points = poly.parse_history_points({"history": [{"t": 1767357000, "p": 0.42}]}, start_ts=1767350000, end_ts=1767360000)

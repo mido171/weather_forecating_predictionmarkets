@@ -369,27 +369,33 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sources", default="gfs,gefs_control,himawari_b13_s0510,radar")
     parser.add_argument("--cycles", default="0,6,12,18")
     parser.add_argument("--leads", default="0:48:3")
-    parser.add_argument("--max-workers", type=int, default=4)
+    parser.add_argument("--max-workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--execution-mode", choices=["serial", "optimized"], default="serial")
-    parser.add_argument("--model-fetch-workers", type=int, default=8)
-    parser.add_argument("--model-range-workers", type=int, default=4)
-    parser.add_argument("--model-normalize-workers", type=int, default=2)
-    parser.add_argument("--himawari-workers", type=int, default=8)
+    parser.add_argument("--model-fetch-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--model-range-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--model-normalize-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--himawari-workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--model-range-coalesce-gap-bytes", type=int, default=0)
     parser.add_argument("--cpu-telemetry", action="store_true", default=False)
     parser.add_argument("--staging-root", type=Path, default=REPO_ROOT / "_weather_backfill_staging" / "day_shards")
     parser.add_argument("--progress-every", type=int, default=25)
-    parser.add_argument("--max-attempts", type=int, default=5)
+    parser.add_argument("--max-attempts", type=int, choices=(1, 2, 3), default=2)
     parser.add_argument("--max-staging-gb", type=float, default=4.0)
     parser.add_argument("--stop-free-gb", type=float, default=50.0)
     parser.add_argument("--monitor-interval-seconds", type=int, default=30)
     parser.add_argument("--no-skip-existing-complete", action="store_true", default=False)
+    parser.add_argument("--execute", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    if not args.execute:
+        print("DRY RUN: no child processes or provider calls made; pass --execute after review.")
+        return 2
+    if args.end_date < args.start_date or (args.end_date - args.start_date).days + 1 > 31:
+        parser.error("execution date range must be ordered and no more than 31 days")
     return run(args)
 
 

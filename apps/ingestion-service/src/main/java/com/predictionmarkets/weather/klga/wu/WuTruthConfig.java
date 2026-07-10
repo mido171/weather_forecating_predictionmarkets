@@ -41,7 +41,9 @@ record WuTruthConfig(
     command = command.trim().toLowerCase(Locale.ROOT);
 
     LocalDate latestSettled = LocalDate.now(ZoneId.of("America/New_York")).minusDays(1);
-    LocalDate startDate = parseDate(value(parsed, "start-date", "1973-01-01"), "start-date");
+    LocalDate startDate = parseDate(
+        value(parsed, "start-date", latestSettled.toString()),
+        "start-date");
     LocalDate endDate = parseDate(value(parsed, "end-date", "latest"), "end-date", latestSettled);
     LocalDate auditDate = parseDate(value(parsed, "date", latestSettled.toString()), "date");
 
@@ -65,15 +67,15 @@ record WuTruthConfig(
         value(parsed, "stations", "all"),
         value(parsed, "station", "KLGA").toUpperCase(Locale.ROOT),
         auditDate,
-        parseInt(value(parsed, "workers", env("WUNDERGROUND_MAX_WORKERS", "20")), "workers", 1),
-        parseInt(value(parsed, "chunk-days", env("WUNDERGROUND_CHUNK_DAYS", "31")), "chunk-days", 1),
+        parseInt(value(parsed, "workers", env("WUNDERGROUND_MAX_WORKERS", "1")), "workers", 1),
+        parseInt(value(parsed, "chunk-days", env("WUNDERGROUND_CHUNK_DAYS", "1")), "chunk-days", 1),
         parseInt(value(parsed, "sample-size", "500"), "sample-size", 1),
         parseLong(value(parsed, "seed", "1729"), "seed"),
         apiKey,
         stripTrailingSlash(baseUrl),
         parseInt(value(parsed, "timeout-millis", env("WUNDERGROUND_API_TIMEOUT_MILLIS", "30000")), "timeout-millis", 1),
-        parseInt(value(parsed, "max-retries", env("WUNDERGROUND_API_MAX_RETRIES", "5")), "max-retries", 0),
-        parseInt(value(parsed, "rate-limit-per-minute", env("WUNDERGROUND_API_RATE_LIMIT_PER_MINUTE", "120")), "rate-limit-per-minute", 1),
+        parseInt(value(parsed, "max-retries", env("WUNDERGROUND_API_MAX_RETRIES", "1")), "max-retries", 0),
+        parseInt(value(parsed, "rate-limit-per-minute", env("WUNDERGROUND_API_RATE_LIMIT_PER_MINUTE", "60")), "rate-limit-per-minute", 1),
         parseBoolean(value(parsed, "resume", "false"), "resume")
             || parseBoolean(value(parsed, "missing-only", "false"), "missing-only"),
         jdbcUrl,

@@ -7,7 +7,6 @@ import json
 import math
 import os
 import subprocess
-import time
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -15,30 +14,30 @@ from typing import Any
 
 import httpx
 
-from hkg_tmax.gribstream.catalog import ResolvedSelector, stable_json_sha
+from hkg_tmax.gribstream.catalog import ResolvedSelector
 from hkg_tmax.gribstream.client import (
     GribStreamClient,
     GribStreamRequestError,
     RetryConfig,
-    canonical_request_json,
     request_sha256,
     sanitize_text,
     sha256_file,
 )
 from hkg_tmax.gribstream.normalizer import normalize_runs_ndjson_gzip
+from hkg_tmax.gribstream.planner import load_canonical_locations
 from hkg_tmax.gribstream.store import (
     ingest_response,
     load_location_ids,
     mark_request_failed,
     register_request_started,
 )
-from hkg_tmax.gribstream.planner import load_canonical_locations
-from hkg_tmax_db.connection import import_psycopg, redact_database_url
+from hkg_tmax.paths import ProjectPaths
+from hkg_tmax_db.connection import redact_database_url
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_t07_t13_gribstream_backfill"
-RAW_ROOT = REPO_ROOT / "data/raw/gribstream"
+RAW_ROOT = PROJECT_PATHS.data_root / "raw" / "gribstream"
 STATUS_PATH = EXPERIMENT_ROOT / "logs/t07_t13_status.json"
 API_EVENT_LOG = EXPERIMENT_ROOT / "logs/gribstream_api_events.jsonl"
 LEDGER_PATH = EXPERIMENT_ROOT / "resume_ledger.jsonl"

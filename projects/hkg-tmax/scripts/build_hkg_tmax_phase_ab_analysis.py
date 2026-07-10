@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import csv
 import math
-import os
 import re
 import zipfile
 from collections.abc import Iterable
@@ -19,14 +18,16 @@ from hkg_tmax.analysis_contracts import (
     validate_point_in_time_rows,
 )
 from hkg_tmax.hko import parse_daily_climate_csv
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATA_ROOT = Path(os.environ.get("HKG_TMAX_DATA_ROOT", r"C:\hkg_tmax_data"))
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DATA_ROOT = PROJECT_PATHS.data_root
 LEDGER_PATH = DATA_ROOT / "manifests" / "retrieval_ledger.csv"
 
-ANALYSIS_ROOT = REPO_ROOT / "analysis" / "hkg_tmax_t24"
+ANALYSIS_ROOT = PROJECT_PATHS.run_root / "experiments" / "legacy" / "phase_ab_analysis"
 FINDINGS_ROOT = ANALYSIS_ROOT / "findings"
-REPORTS_ROOT = REPO_ROOT / "reports"
+REPORTS_ROOT = PROJECT_PATHS.run_root / "reports"
 
 BRONZE_ROOT = DATA_ROOT / "bronze" / "analysis_phase_a"
 SILVER_ROOT = DATA_ROOT / "silver"

@@ -2,19 +2,24 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/workspace/src \
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    NUMEXPR_NUM_THREADS=1
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends git ca-certificates curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --uid 10001 hkg
 
 WORKDIR /workspace
-COPY pyproject.toml README.md ./
-COPY code ./code
-RUN python -m pip install --upgrade pip \
-    && python -m pip install ".[research,dev]"
+COPY pyproject.toml README.md requirements.txt requirements-dev.txt ./
+COPY src ./src
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir ".[research]"
 
-COPY . .
-ENV PYTHONPATH=/workspace/code/src:/workspace
+COPY config ./config
+COPY db ./db
+COPY scripts ./scripts
 
-CMD ["bash"]
+USER hkg
+CMD ["python", "-m", "hkg_tmax", "doctor"]

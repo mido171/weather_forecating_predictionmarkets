@@ -26,15 +26,23 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import SplineTransformer, StandardScaler
 
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths, configured_input_path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 EXPERIMENT_ROOT = REPO_ROOT / "experiments"
-REPORT_ROOT = REPO_ROOT / "reports" / "long_history_50_experiments"
-OUTPUT_ROOT = REPO_ROOT / "data" / "datasets" / "12_hkg_t24_robust_experiment_outputs"
-BUNDLE_ZIP_PATH = REPO_ROOT / "hkg_tmax_datasets_and_experiments_20260620_162157.zip"
+REPORT_ROOT = PROJECT_PATHS.run_root / "reports" / "long_history_50_experiments"
+OUTPUT_ROOT = PROJECT_PATHS.data_root / "datasets" / "12_hkg_t24_robust_experiment_outputs"
+BUNDLE_ZIP_PATH = PROJECT_PATHS.run_root / "inputs" / "hkg_tmax_datasets_and_experiments_20260620_162157.zip"
 
-DEFAULT_SPEC_PATH = Path(r"C:\Users\ahmad\Downloads\HKG_TMAX_50_NEW_LONG_HISTORY_EXPERIMENTS.md")
+SPEC_FILENAME = "HKG_TMAX_50_NEW_LONG_HISTORY_EXPERIMENTS.md"
+DEFAULT_SPEC_PATH = configured_input_path(
+    PROJECT_PATHS,
+    "HKG_T24_LONG_HISTORY_SPEC_PATH",
+    SPEC_FILENAME,
+    legacy_home_relative=Path("Downloads") / SPEC_FILENAME,
+)
 
 TRAIN_END = pd.Timestamp("2019-12-31")
 HEADLINE_START = pd.Timestamp("2020-01-01")
@@ -2920,7 +2928,7 @@ implementation_note: {spec.implementation_note}
     write_text(
         folder / "REPRODUCE.md",
         common_header
-        + "```powershell\n.\\.venv\\Scripts\\python.exe scripts\\run_hkg_t24_50_long_history_experiments.py --spec-path \"C:\\Users\\ahmad\\Downloads\\HKG_TMAX_50_NEW_LONG_HISTORY_EXPERIMENTS.md\"\n```\n",
+        + "```powershell\n.\\.venv\\Scripts\\python.exe scripts\\run_hkg_t24_50_long_history_experiments.py --spec-path \"$env:HKG_T24_LONG_HISTORY_SPEC_PATH\"\n```\n",
     )
     write_text(
         folder / "DATE_RANGES.md",

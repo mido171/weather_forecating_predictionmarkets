@@ -1,4 +1,10 @@
+# Local environment and credentials
 .env
+.env.local
+secrets/local/*
+!secrets/local/README.md
+
+# Python/tool state
 .venv/
 __pycache__/
 *.py[cod]
@@ -9,50 +15,43 @@ __pycache__/
 htmlcov/
 dist/
 build/
-apps/**/dist/
-apps/**/node_modules/
 *.egg-info/
 
-# Raw and derived data are deliberately excluded from Git.
-data/raw/**
-data/bronze/**
-data/silver/**
-data/gold/**
-data/cache/**
-!data/raw/.gitkeep
-!data/bronze/.gitkeep
-!data/silver/.gitkeep
-!data/gold/.gitkeep
-!data/cache/.gitkeep
-!data/raw/**/
-!data/bronze/**/
-!data/silver/**/
-!data/gold/**/
-!data/cache/**/
-!data/**/README.md
+# UI dependencies/builds
+apps/**/dist/
+apps/**/node_modules/
 
-# Large Info.gov hourly-reading backfill payloads.
-data/datasets/13_hko_info_gov_hourly_readings/raw_html/**
-data/datasets/13_hko_info_gov_hourly_readings/metadata/**
-data/datasets/13_hko_info_gov_hourly_readings/normalized/**
-data/datasets/13_hko_info_gov_hourly_readings/reports/**
-!data/datasets/13_hko_info_gov_hourly_readings/
-!data/datasets/13_hko_info_gov_hourly_readings/README.md
+# Runtime roots. Canonical data/runs are external; these patterns prevent a
+# legacy script from polluting the project if it writes to an old local path.
+/data/
+/var/
+/analysis/
+/reports/
+/research/
+/artifacts/
+/models/
+/predictions/
+/run_logs/
+/handoffs/
+/tmp/
 
-# Experiment payloads may be large; documentation and small metrics stay versioned.
-experiments/**/artifacts/*
-experiments/**/logs/*
-experiments/**/results/*.parquet
-experiments/**/results/*.feather
-experiments/**/results/*.nc
-experiments/**/results/*.zarr/
-!experiments/**/artifacts/.gitkeep
-!experiments/**/logs/.gitkeep
+# Large experiment payloads. Compact manifests, protocols, metrics, and
+# conclusions remain trackable.
+experiments/**/artifacts/
+experiments/**/logs/
+experiments/**/*.parquet
+experiments/**/*.feather
+experiments/**/*.arrow
+experiments/**/*.nc
+experiments/**/*.zarr/
+experiments/**/*.joblib
+experiments/**/*.pkl
+experiments/**/*.onnx
 
-reports/generated/
-tmp/
+# Local/editor/packaging debris
 .DS_Store
-
-# Local credentials. Keep token values out of Git, docs, logs, and artifacts.
-secrets/local/*
-!secrets/local/README.md
+Thumbs.db
+*.zip
+*.rar
+*.7z
+*.log

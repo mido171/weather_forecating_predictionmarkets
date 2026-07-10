@@ -27,7 +27,7 @@ from typing import Dict, List, Tuple
 VAR = "tmpf"
 TZ = "UTC"
 ENDPOINT = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py"
-MAX_ATTEMPTS = 6
+MAX_ATTEMPTS = 1
 BASE_SLEEP = 3
 INTER_TASK_SLEEP = 0.2
 
@@ -120,7 +120,7 @@ def _download_with_retry(url: str, out_path: Path, log) -> None:
                 tmp_path.unlink()
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
             with urllib.request.urlopen(req, timeout=600) as resp, tmp_path.open("wb") as f:
-                while True:
+                while True:  # repo-doctor: allow-unsafe-default - exits at response EOF
                     chunk = resp.read(1024 * 1024)
                     if not chunk:
                         break
@@ -315,7 +315,7 @@ def main() -> int:
     parser.add_argument("--stations", default=None, help="Comma-separated station list. Default: directories under data-root.")
     parser.add_argument("--year-start", type=int, default=DEFAULT_YEAR_START)
     parser.add_argument("--year-end", type=int, default=DEFAULT_YEAR_END)
-    parser.add_argument("--threads", type=int, default=6)
+    parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 

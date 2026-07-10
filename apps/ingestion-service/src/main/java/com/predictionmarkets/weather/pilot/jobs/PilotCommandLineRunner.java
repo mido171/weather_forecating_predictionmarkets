@@ -2,9 +2,11 @@ package com.predictionmarkets.weather.pilot.jobs;
 
 import com.predictionmarkets.weather.pilot.config.PilotIngestionProperties;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "pilot.knyc", name = "enabled", havingValue = "true")
 public class PilotCommandLineRunner implements CommandLineRunner {
   private final PilotIngestionProperties properties;
   private final BootstrapKnycStationJob bootstrapJob;

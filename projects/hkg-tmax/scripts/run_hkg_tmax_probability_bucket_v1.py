@@ -178,7 +178,7 @@ def _first_publication_scoreboard(output_dir: Path, predictions: pd.DataFrame, l
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, default=REPO_ROOT / "configs" / "hkg_tmax" / "probability_bucket_v1.yaml")
+    parser.add_argument("--config", type=Path, default=REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "probability_bucket_v1.yaml")
     parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "experiments" / "hkg_tmax_probability_buckets_v1" / "results")
     parser.add_argument("--database-url", type=str, default=None)
     args = parser.parse_args()

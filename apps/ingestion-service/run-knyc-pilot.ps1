@@ -1,5 +1,5 @@
 param(
-  [string]$SqliteRoot = "D:\Ahmed\data\sqlite\MOS_aggregate_V2.0",
+  [string]$SqliteRoot,
   [switch]$NoWeb,
   [string[]]$ExtraArgs = @()
 )
@@ -7,7 +7,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot = Split-Path -Parent $scriptDir
+$repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
+if ([string]::IsNullOrWhiteSpace($SqliteRoot)) {
+  $SqliteRoot = Join-Path $repoRoot "var\ingestion\knyc"
+}
 $timestamp = Get-Date -Format "yyyyMMddTHHmmssZ"
 $logDir = Join-Path $SqliteRoot "logs"
 $logFile = Join-Path $logDir ("knyc-pilot-" + $timestamp + ".log")
@@ -15,7 +18,7 @@ $logFile = Join-Path $logDir ("knyc-pilot-" + $timestamp + ".log")
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
 $argsList = @(
-  "-pl", "ingestion-service",
+  "-pl", "apps/ingestion-service",
   "-DskipTests",
   "package",
   "dependency:build-classpath",

@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Test;
 
 class WuTruthConfigTest {
   @Test
-  void defaultRateLimitIsOneHundredTwentyPerMinute() {
+  void defaultsToOneDayOneWorkerAndBoundedRetries() {
     WuTruthConfig config = WuTruthConfig.fromArgs(new String[] {
         "--command", "rebuild",
         "--jdbc-url", "jdbc:postgresql://127.0.0.1:5432/klga_tmax_research"
     });
 
-    assertThat(config.rateLimitPerMinute()).isEqualTo(120);
+    assertThat(config.startDate()).isEqualTo(config.endDate());
+    assertThat(config.workers()).isOne();
+    assertThat(config.chunkDays()).isOne();
+    assertThat(config.maxRetries()).isOne();
+    assertThat(config.rateLimitPerMinute()).isEqualTo(60);
     assertThat(config.resume()).isFalse();
   }
 

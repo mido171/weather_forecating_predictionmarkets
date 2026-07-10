@@ -9,8 +9,8 @@ public class CliSettlementIngestionProperties {
   private List<String> stationIds;
   private LocalDate startDateLocal;
   private LocalDate endDateLocal;
-  private boolean ingestEnabled = true;
-  private int sourceFetchThreads = 8;
+  private boolean ingestEnabled = false;
+  private int sourceFetchThreads = 1;
   private Export export = new Export();
 
   public List<String> getStationIds() {

@@ -1,0 +1,49 @@
+name: KLGA offline gate
+
+on:
+  pull_request:
+    paths:
+      - "projects/klga-tmax/**"
+      - "tools/repo/**"
+      - "AGENTS.md"
+      - ".github/workflows/klga-offline.yml"
+  push:
+    branches: [master, main, "migration/**"]
+    paths:
+      - "projects/klga-tmax/**"
+      - "tools/repo/**"
+      - "AGENTS.md"
+      - ".github/workflows/klga-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: klga-offline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile KLGA package syntax without installing dependencies
+        run: python -m compileall -q projects/klga-tmax/src projects/klga-tmax/tests
+      - name: Check KLGA repository boundary
+        run: >-
+          python tools/repo/doctor.py
+          --scope projects/klga-tmax
+          --checks filesystem,tracked-runtime,large-files,secrets,stale-paths,unsafe-defaults

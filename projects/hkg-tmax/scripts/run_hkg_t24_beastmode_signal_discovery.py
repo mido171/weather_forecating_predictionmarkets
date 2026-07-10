@@ -12,9 +12,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
-RESEARCH_ROOT = REPO_ROOT / "experiments"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
+RESEARCH_ROOT = PROJECT_PATHS.run_root / "experiments" / "legacy"
 
 FEATURE_MATRIX_PATH = (
     DATASETS_ROOT
@@ -22,7 +25,7 @@ FEATURE_MATRIX_PATH = (
     / "hkg_t24_exp0050_0099_feature_matrix.parquet"
 )
 CHAMPION_PREDICTIONS_PATH = (
-    REPO_ROOT / "experiments" / "EXP-0050" / "results" / "headline_oof_2020_2023_predictions.parquet"
+    RESEARCH_ROOT / "EXP-0050" / "results" / "headline_oof_2020_2023_predictions.parquet"
 )
 RSS_FORECAST_PATH = (
     DATASETS_ROOT

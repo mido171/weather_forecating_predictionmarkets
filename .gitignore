@@ -1,85 +1,119 @@
-# Maven/Java build artifacts
-/target/
-/**/target/
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+/.secrets/*
+!/.secrets/README.md
+!/.secrets/*.example
+**/secrets/local/
+/config/live_env.yaml
+/config/live_secrets.yaml
+
+# Editors and operating-system files
+**/.idea/
+**/.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python environments, caches, coverage, and packaging
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.hypothesis/
+**/.coverage
+**/.coverage.*
+**/htmlcov/
+**/*.egg-info/
+**/build/
+**/dist/
+
+# Java and Maven build output
+**/target/
 *.class
 *.jar
 *.war
 *.ear
 *.nar
 
-# Local secrets
-.env
-/.secrets/
-/config/live_env.yaml
-/config/live_secrets.yaml
+# JavaScript dependencies and builds
+**/node_modules/
+**/.vite/
+**/.next/
+**/coverage/
 
-# IDE / editor
-**/.idea/
-**/.vscode/
-*.iml
+# Repository-local runtime state
+/var/*
+!/var/README.md
+**/run_logs/
+**/catboost_info/
+**/*.pid
+**/*.log
+**/*.tmp
+**/*.lock.tmp
 
-# Python bytecode
-__pycache__/
-*.py[cod]
+# Root data store: keep only documentation, catalogs, manifests, and tiny fixtures
+/data/*
+!/data/README.md
+!/data/catalog/
+!/data/catalog/**
+!/data/manifests/
+!/data/manifests/**
+!/data/fixtures/
+!/data/fixtures/**
 
-# Local Python environments
-.venv/
-venv/
+# Project-local generated data and run products
+**/data/datasets/
+**/data/_pipeline_internal/
+**/data/work/
+**/data/cache/
+**/data/raw/
+**/data/bronze/
+**/data/silver/
+**/data/gold/
+**/artifacts/
+**/predictions/
+**/exports/
+**/run-output/
+**/run_outputs/
+**/outputs/
 
-# Local caches / run outputs
-cache/
-asof_model_cache/
-tmax_cache/
-catboost_info/
-apps/ingestion-service/artifacts/
-packages/python/weather-ml/artifacts/
-
-# Large generated datasets (do not commit)
-packages/python/weather-ml/dataset/
-dataset/
-packages/python/weather-ml/data/gribstream/
-weather_predictionmarkets_experiments/
-
-# Local datasets (do not commit)
-data/**
-
-# Generated model artifacts living next to Java module code
-packages/java/weather-models/kmia/
-packages/java/weather-models/knyc/
-packages/java/weather-models/kphl/
-
-# Generated reports / scratch
-reports/
-noaa_sanity/
-backtests/
-legacy/backtesting/out/
-rap/
-rap_*.csv
+# Generated reports and scratch areas
+/reports/
+**/noaa_sanity/
+**/backtests/out/
+**/tmp/
+**/temp/
 tmp_*.py
-
-# Artifacts: ignore everything by default; allow only curated experiment outputs
-artifacts/**
-!artifacts/experiments/
-!artifacts/experiments/classic/
-!artifacts/experiments/classic/winners/
-!artifacts/experiments/classic/winners/**
-!artifacts/experiments/early_maxout_strategy/
-!artifacts/experiments/early_maxout_strategy/**
-
-# Local export bundles
-exports/**
 _tmp_*.py
+rap_*.csv
 
-# Accidental root-level JS bundle artifacts
+# Accidental browser bundles and local servers
 chunk-*.js
 main-*.js
 scripts-*.js
-
-# UI local/dev artifacts
-ui/result_viewer/node_modules/
-ui/result_viewer/dist/
-ui/result_viewer/public/data/
-ui/result_viewer/devserver.log
-ui/result_viewer/started.txt
-ui/result_viewer/result_viewer.txt
 devserver.log
+started.txt
+
+# Local databases and bulk scientific data
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.feather
+*.arrow
+*.grib
+*.grib2
+*.nc
+*.npy
+*.npz
+
+# Curated, small metadata parquet files require an explicit force-add and review.

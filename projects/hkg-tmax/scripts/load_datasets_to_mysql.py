@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Load normalized repo datasets into the repo-default MySQL database.
+"""Load normalized external datasets into the configured MySQL database.
 
-The loader treats ``data/datasets`` as the source of truth for v1:
+The loader treats ``HKG_TMAX_DATA_ROOT/datasets`` as the source of truth for v1:
 
 * every ``.parquet`` file is loaded as a MySQL table;
 * every ``.csv`` file is loaded as a MySQL table;
@@ -31,8 +31,11 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 DEFAULT_DATABASE = "hkg_tmax_research"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 3306

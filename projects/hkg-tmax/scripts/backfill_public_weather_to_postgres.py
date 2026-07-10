@@ -3379,14 +3379,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cycles", type=parse_csv_ints, default=[0, 6, 12, 18])
     parser.add_argument("--leads", type=parse_leads, default=list(range(0, 49, 3)))
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--execute", action="store_true")
     parser.add_argument("--database-url", default=None)
     parser.add_argument("--experiment-id", default=EXPERIMENT_ID)
     parser.add_argument("--experiment-dir", type=Path, default=DEFAULT_EXPERIMENT_DIR)
     parser.add_argument("--execution-mode", choices=["serial", "optimized"], default="serial")
-    parser.add_argument("--model-fetch-workers", type=int, default=8)
-    parser.add_argument("--model-range-workers", type=int, default=4)
-    parser.add_argument("--model-normalize-workers", type=int, default=2)
-    parser.add_argument("--himawari-workers", type=int, default=8)
+    parser.add_argument("--model-fetch-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--model-range-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--model-normalize-workers", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--himawari-workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--model-range-coalesce-gap-bytes", type=int, default=0)
     parser.add_argument("--cpu-telemetry", action="store_true", default=False)
     parser.add_argument("--staging-root", type=Path, default=None)
@@ -3395,16 +3396,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--retain-failed-raw", action="store_true", default=False)
     parser.add_argument("--skip-existing-complete", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--download-timeout-seconds", type=int, default=180)
-    parser.add_argument("--max-attempts", type=int, default=5)
+    parser.add_argument("--max-attempts", type=int, choices=(1, 2, 3), default=2)
     parser.add_argument("--progress-every", type=int, default=25)
-    parser.add_argument("--max-static-tasks", type=int, default=0)
-    parser.add_argument("--max-radar-frames", type=int, default=0)
+    parser.add_argument("--max-static-tasks", type=int, default=100)
+    parser.add_argument("--max-radar-frames", type=int, default=24)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    if not args.execute:
+        print("DRY RUN: no provider or database calls made; pass --execute after reviewing budgets.")
+        return 2
+    if args.end_date < args.start_date or (args.end_date - args.start_date).days + 1 > 31:
+        parser.error("execution date range must be ordered and no more than 31 days")
+    if args.max_static_tasks < 1 or args.max_radar_frames < 1:
+        parser.error("request budgets must be positive")
     summary = run_backfill(args)
     print(json.dumps(summary, indent=2, sort_keys=True), flush=True)
     return 0

@@ -1,9 +1,11 @@
 package com.predictionmarkets.weather.klga.iemmos;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "iem-mos", name = "enabled", havingValue = "true")
 public class IemMosBackfillCommandLineRunner implements CommandLineRunner {
   private final IemMosBackfillProperties properties;
   private final IemMosBackfillService service;

@@ -1,0 +1,49 @@
+name: HKG offline gate
+
+on:
+  pull_request:
+    paths:
+      - "projects/hkg-tmax/**"
+      - "tools/repo/**"
+      - "AGENTS.md"
+      - ".github/workflows/hkg-offline.yml"
+  push:
+    branches: [master, main, "migration/**"]
+    paths:
+      - "projects/hkg-tmax/**"
+      - "tools/repo/**"
+      - "AGENTS.md"
+      - ".github/workflows/hkg-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hkg-offline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile HKG package syntax without installing dependencies
+        run: python -m compileall -q projects/hkg-tmax/src
+      - name: Check HKG repository boundary
+        run: >-
+          python tools/repo/doctor.py
+          --scope projects/hkg-tmax
+          --checks filesystem,tracked-runtime,large-files,secrets,stale-paths,unsafe-defaults

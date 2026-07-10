@@ -1,6 +1,7 @@
 package com.predictionmarkets.weather.weathercom;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.predictionmarkets.weather.models.WeatherComIngestionRun;
 import com.predictionmarkets.weather.models.WeatherComIngestionStatus;
@@ -13,6 +14,7 @@ import com.predictionmarkets.weather.weathercom.service.WeatherComIngestionServi
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -115,6 +117,30 @@ class WeatherComIngestionConcurrencyTest {
         .getTotalElements();
     assertThat(apiCallCount).isEqualTo(taskCount);
     assertThat(SERVER.getRequestCount()).isEqualTo(baselineRequestCount + taskCount);
+  }
+
+  @Test
+  void rejectsDateRangesBeyondConfiguredBudgetBeforeSchedulingWork() {
+    assertThatThrownBy(() -> ingestionService.triggerIngestion(
+        List.of("KNYC:9:US"),
+        LocalDate.of(2026, 1, 1),
+        LocalDate.of(2026, 2, 1),
+        "e",
+        "budget-test"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("max-days-per-run");
+  }
+
+  @Test
+  void rejectsLocationFanoutBeyondConfiguredBudgetBeforeSchedulingWork() {
+    assertThatThrownBy(() -> ingestionService.triggerIngestion(
+        List.of("KNYC:9:US", "KPHL:9:US", "KMIA:9:US", "KMDW:9:US", "KLAX:9:US", "KBOS:9:US"),
+        LocalDate.of(2026, 1, 1),
+        LocalDate.of(2026, 1, 1),
+        "e",
+        "budget-test"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("max-locations-per-run");
   }
 
   private WeatherComIngestionRun awaitCompletion(Long runId) throws InterruptedException {

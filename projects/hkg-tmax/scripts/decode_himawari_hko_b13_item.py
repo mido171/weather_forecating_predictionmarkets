@@ -32,7 +32,7 @@ HKO = {
     "station_name": "Hong Kong Observatory",
     "latitude": 22.301944,
     "longitude": 114.174167,
-    "metadata_source": "config/stations_hko.yaml target_station",
+    "metadata_source": "config/sources/stations_hko.yaml target_station",
 }
 
 

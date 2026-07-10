@@ -24,9 +24,7 @@ public class GribstreamTransferProperties {
   }
 
   public static class Export {
-    private String outputPath =
-        "D:\\Ahmed\\git\\weather\\weather_forecating_predictionmarkets"
-            + "\\ingestion-service\\src\\main\\resources\\gribstream_daily_feature.csv";
+    private String outputPath = "var/ingestion/exports/gribstream_daily_feature.csv";
     private int pageSize = 5000;
     private boolean includeHeader = true;
 
@@ -56,11 +54,8 @@ public class GribstreamTransferProperties {
   }
 
   public static class Import {
-    private String inputPath =
-        "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather-forecasting-predictionmarkets"
-            + "\\weather_forecating_predictionmarkets\\ingestion-service\\src\\main\\resources"
-            + "\\gribstream_daily_feature.csv";
-    private int batchSize = 1000;
+    private String inputPath = "var/ingestion/exports/gribstream_daily_feature.csv";
+    private int batchSize = 100;
     private boolean hasHeader = true;
 
     public String getInputPath() {

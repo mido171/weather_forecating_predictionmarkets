@@ -15,10 +15,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
+@ConditionalOnProperty(prefix = "kalshi.live-trading", name = "enabled", havingValue = "true")
 public class LiveInferenceInvokeService {
 
   private static final Logger log = LoggerFactory.getLogger(LiveInferenceInvokeService.class);

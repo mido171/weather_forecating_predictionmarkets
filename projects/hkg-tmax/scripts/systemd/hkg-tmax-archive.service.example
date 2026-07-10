@@ -5,12 +5,13 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/ABSOLUTE/PATH/hkg_tmax_elite_codex
-EnvironmentFile=/ABSOLUTE/PATH/hkg_tmax_elite_codex/.env
-ExecStart=/ABSOLUTE/PATH/hkg_tmax_elite_codex/.venv/bin/python -m hkg_tmax sources fetch --tag bootstrap_now --continue-on-error
+WorkingDirectory=/ABSOLUTE/PATH/weather_data_extraction/projects/hkg-tmax
+EnvironmentFile=/ABSOLUTE/PATH/weather_data_extraction/projects/hkg-tmax/.env
+# Intentionally remains dry-run until an operator adds --execute after approving a bounded budget.
+ExecStart=/ABSOLUTE/PATH/weather_data_extraction/projects/hkg-tmax/.venv/bin/python -m hkg_tmax sources fetch --tag scheduled_archive --max-sources 1 --continue-on-error
 User=REPLACE_ME
 Group=REPLACE_ME
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/ABSOLUTE/PATH/hkg_tmax_elite_codex/data/raw
+ReadWritePaths=/ABSOLUTE/PATH/TO/HKG_TMAX_DATA_ROOT/raw /ABSOLUTE/PATH/TO/HKG_TMAX_RUN_ROOT

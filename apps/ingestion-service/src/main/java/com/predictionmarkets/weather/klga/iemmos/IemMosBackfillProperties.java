@@ -12,18 +12,18 @@ public class IemMosBackfillProperties {
   private String cutoffId = "T_1245UTC";
   private LocalDate start;
   private LocalDate through = LocalDate.of(2026, 6, 28);
-  private int threads = 10;
+  private int threads = 1;
   private long requestSpacingMs = 1100L;
   private boolean resume = true;
-  private int maxAttempts = 5;
+  private int maxAttempts = 1;
   private long retryBackoffMs = 2000L;
   private String mode = "full";
-  private boolean buildDailyFeatures = true;
+  private boolean buildDailyFeatures = false;
   private boolean buildFeatureMatrix = false;
   private List<String> stationIds = List.of();
   private List<String> products = List.of();
   private Path rawOutputRoot = Path.of(
-      "bootstrap/klga_tmax/implementation/artifacts/klga_tmax/iem_mos/raw");
+      "var/ingestion/klga-iem-mos/raw");
 
   public boolean isEnabled() {
     return enabled;

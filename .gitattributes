@@ -1,0 +1,44 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.py text eol=lf
+*.java text eol=lf
+*.xml text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.7z binary
+*.parquet binary
+*.feather binary
+*.arrow binary
+*.grib binary
+*.grib2 binary
+*.nc binary
+*.npy binary
+*.npz binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Frozen audit bundles are byte-verified against their embedded SHA-256 manifests.
+projects/hkg-tmax/docs/archive/legacy-data-scaffold/catalog/audit_snapshots/** -text
+
+# Preserve intentional Markdown hard breaks in frozen historical/evidence corpora.
+projects/hkg-tmax/docs/archive/** whitespace=-trailing-space,-blank-at-eof
+projects/hkg-tmax/experiments/** whitespace=-trailing-space,-blank-at-eof
+projects/klga-tmax/docs/specifications/** whitespace=-trailing-space,-blank-at-eof

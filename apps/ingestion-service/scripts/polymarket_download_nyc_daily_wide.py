@@ -39,10 +39,10 @@ DEFAULT_TIMEZONE = "America/New_York"
 DEFAULT_INTERVAL = "1m"
 DEFAULT_FIDELITY_MINUTES = 1
 DEFAULT_PRICE_SOURCE = "auto"
-DEFAULT_MAX_CONCURRENCY = 4
+DEFAULT_MAX_CONCURRENCY = 1
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_TIMEOUT = (10, 60)
-DEFAULT_MAX_RETRIES = 7
+DEFAULT_MAX_RETRIES = 1
 DEFAULT_RETRY_BACKOFF_SECONDS = 0.6
 DEFAULT_TRADES_PAGE_LIMIT = 10000
 DEFAULT_SUFFICIENCY_MIN_POINTS = 60
@@ -727,7 +727,7 @@ def fetch_all_trades_for_condition(
 ) -> List[Dict[str, Any]]:
     all_trades: List[Dict[str, Any]] = []
     offset = 0
-    while True:
+    for _page in range(100):
         params = {
             "market": condition_id,
             "limit": DEFAULT_TRADES_PAGE_LIMIT,
@@ -742,13 +742,13 @@ def fetch_all_trades_for_condition(
         else:
             batch = []
         if not batch:
-            break
+            return all_trades
         typed_batch = [x for x in batch if isinstance(x, dict)]
         all_trades.extend(typed_batch)
         if len(batch) < DEFAULT_TRADES_PAGE_LIMIT:
-            break
+            return all_trades
         offset += DEFAULT_TRADES_PAGE_LIMIT
-    return all_trades
+    raise RuntimeError("Trade history exceeded the 100-page safety budget")
 
 
 def map_trade_to_token(

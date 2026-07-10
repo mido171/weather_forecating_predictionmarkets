@@ -22,6 +22,7 @@ import com.predictionmarkets.weather.weathercom.config.WeatherComProperties;
 import com.predictionmarkets.weather.weathercom.web.dto.WeatherComApiCallStatusFilter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -110,9 +111,20 @@ public class WeatherComIngestionService {
     if (normalizedEndDate.isBefore(normalizedStartDate)) {
       throw new IllegalArgumentException("endDate must be >= startDate");
     }
+    int maxDaysPerRun = Math.max(1, properties.getIngestion().getMaxDaysPerRun());
+    long requestedDays = ChronoUnit.DAYS.between(normalizedStartDate, normalizedEndDate) + 1L;
+    if (requestedDays > maxDaysPerRun) {
+      throw new IllegalArgumentException(
+          "Weather.com ingestion date range exceeds max-days-per-run=" + maxDaysPerRun);
+    }
 
     String normalizedUnits = normalizeUnits(units);
     List<String> normalizedLocationIds = resolveLocationIds(locationIds);
+    int maxLocationsPerRun = Math.max(1, properties.getIngestion().getMaxLocationsPerRun());
+    if (normalizedLocationIds.size() > maxLocationsPerRun) {
+      throw new IllegalArgumentException(
+          "Weather.com ingestion location count exceeds max-locations-per-run=" + maxLocationsPerRun);
+    }
     int chunkDays = Math.max(1, properties.getIngestion().getChunkDays());
     List<IngestionTask> tasks = buildTasks(
         normalizedLocationIds,
@@ -122,6 +134,11 @@ public class WeatherComIngestionService {
         chunkDays);
     if (tasks.isEmpty()) {
       throw new IllegalArgumentException("No ingestion tasks were produced for the request");
+    }
+    int maxTasksPerRun = Math.max(1, properties.getIngestion().getMaxTasksPerRun());
+    if (tasks.size() > maxTasksPerRun) {
+      throw new IllegalArgumentException(
+          "Weather.com ingestion task count exceeds max-tasks-per-run=" + maxTasksPerRun);
     }
 
     WeatherComIngestionRun run = new WeatherComIngestionRun();

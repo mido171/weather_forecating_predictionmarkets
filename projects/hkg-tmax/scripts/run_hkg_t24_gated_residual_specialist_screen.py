@@ -14,7 +14,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -41,7 +44,7 @@ from scripts.run_hkg_t24_station_contribution_atlas import (  # noqa: E402
     load_target,
 )
 
-DATASETS_ROOT = REPO_ROOT / "data" / "datasets"
+DATASETS_ROOT = PROJECT_PATHS.data_root / "datasets"
 OFFICIAL_SCORED_PATH = (
     DATASETS_ROOT
     / "05_hko_historical_rss_forecasts"

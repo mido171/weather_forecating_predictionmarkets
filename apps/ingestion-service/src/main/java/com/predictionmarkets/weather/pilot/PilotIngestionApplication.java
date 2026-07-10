@@ -1,5 +1,8 @@
 package com.predictionmarkets.weather.pilot;
 
+import com.predictionmarkets.weather.pilot.config.PilotIngestionProperties;
+import com.predictionmarkets.weather.security.AdminApiControlTokenFilter;
+import com.predictionmarkets.weather.security.AdminApiProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
@@ -9,14 +12,20 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication(
-    scanBasePackages = "com.predictionmarkets.weather.pilot",
+    scanBasePackageClasses = {
+      PilotIngestionApplication.class,
+      AdminApiControlTokenFilter.class
+    },
     exclude = {
       DataSourceAutoConfiguration.class,
       HibernateJpaAutoConfiguration.class,
       JpaRepositoriesAutoConfiguration.class,
       FlywayAutoConfiguration.class
     })
-@ConfigurationPropertiesScan(basePackages = "com.predictionmarkets.weather.pilot")
+@ConfigurationPropertiesScan(basePackageClasses = {
+  PilotIngestionProperties.class,
+  AdminApiProperties.class
+})
 public class PilotIngestionApplication {
   public static void main(String[] args) {
     SpringApplication.run(PilotIngestionApplication.class, args);

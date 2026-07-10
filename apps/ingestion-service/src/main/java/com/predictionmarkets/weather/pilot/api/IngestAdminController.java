@@ -5,11 +5,13 @@ import com.predictionmarkets.weather.pilot.metrics.MetricsService;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/internal/ingest")
+@ConditionalOnProperty(prefix = "ingestion.admin-api", name = "enabled", havingValue = "true")
 public class IngestAdminController {
   private final MetricsService metricsService;
   private final SqliteCatalogService catalogService;

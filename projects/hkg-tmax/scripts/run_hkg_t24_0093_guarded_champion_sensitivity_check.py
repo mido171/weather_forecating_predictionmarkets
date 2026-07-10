@@ -16,7 +16,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -278,7 +281,7 @@ def score_sensitivity_specs_in_chunks(
 ) -> list[dict[str, object]]:
     if chunk_size <= 0:
         raise ValueError(f"chunk_size must be positive, got {chunk_size}")
-    worker_dir = REPO_ROOT / "data" / "_pipeline_internal" / "0093_worker_chunks"
+    worker_dir = PROJECT_PATHS.run_root / "tmp" / "0093_worker_chunks"
     rows: list[dict[str, object]] = []
     for start in range(0, len(specs), chunk_size):
         stop = min(start + chunk_size, len(specs))

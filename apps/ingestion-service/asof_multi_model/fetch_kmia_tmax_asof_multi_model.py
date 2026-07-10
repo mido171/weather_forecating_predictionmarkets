@@ -497,7 +497,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--cache-dir", type=str, default="./asof_model_cache", help="Directory for Herbie downloads/cache")
     p.add_argument("--out", type=str, default="./kmia_asof_tmax_20170301_20170310.csv", help="Output CSV path")
 
-    p.add_argument("--max-workers", type=int, default=6, help="Threads used per model/day")
+    p.add_argument("--max-workers", type=int, default=1, help="Threads used per model/day")
     p.add_argument("--remove-grib", action="store_true", help="Remove subset GRIB after reading into xarray")
 
     p.add_argument("--min-required-points", type=int, default=6, help="Minimum valid times required to accept Tmax")

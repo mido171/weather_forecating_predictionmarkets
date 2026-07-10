@@ -6,9 +6,11 @@ import com.predictionmarkets.weather.weathercom.config.WeatherComBackfillRunnerP
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "weathercom.backfill-runner", name = "enabled", havingValue = "true")
 public class WeatherComBackfillCommandLineRunner implements CommandLineRunner {
   private static final Logger logger = LoggerFactory.getLogger(WeatherComBackfillCommandLineRunner.class);
 

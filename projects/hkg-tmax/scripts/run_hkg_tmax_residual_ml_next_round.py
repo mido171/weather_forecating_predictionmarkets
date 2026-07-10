@@ -70,7 +70,7 @@ from hkg_tmax.modeling.tail_specialist import apply_tail_overlay, fit_tail_model
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "configs" / "hkg_tmax" / "residual_ml_next_round.yaml"
+DEFAULT_CONFIG = REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_next_round.yaml"
 DEFAULT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax" / "0002_selective_no_harm_router_20260705" / "results"
 DEFAULT_COMPAT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax_residual_ml_next_round" / "results"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"

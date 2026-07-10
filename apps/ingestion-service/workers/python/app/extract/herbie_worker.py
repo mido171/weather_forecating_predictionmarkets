@@ -20,6 +20,7 @@ from app.extract.point_extract import (
     parse_cycle_time_utc,
     response_template,
     valid_time_for_index,
+    worker_cache_dir,
 )
 
 
@@ -73,7 +74,11 @@ def extract_with_herbie(
     cycle_time_iso = isoformat_utc(cycle_time)
     forecast_hours = _forecast_hours(request, config)
     members = _members(request, config)
-    cache_dir = ensure_dir(request.get("cache_dir") or "ingestion-service/data/tmp/herbie_worker_cache")
+    cache_dir = (
+        ensure_dir(request["cache_dir"])
+        if request.get("cache_dir")
+        else worker_cache_dir("herbie")
+    )
     lat = float(request["lat"])
     lon = float(request["lon"])
 

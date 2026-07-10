@@ -12,8 +12,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = REPO_ROOT / "data" / "work" / "hko_press_2000_2026_resume"
+from hkg_tmax.paths import ProjectPaths
+
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.run_root / "work" / "hko_press_2000_2026_resume"
 DEFAULT_SOURCE_DB = Path(r"C:\hko_press_2000_2026\metadata\archive.sqlite3")
 DEFAULT_ARCHIVE_DB = DEFAULT_DATA_ROOT / "metadata" / "archive.sqlite3"
 DEFAULT_START = "2013-11-15"
@@ -266,19 +269,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bundle-stem", default=DEFAULT_BUNDLE_STEM)
     parser.add_argument("--watch", action="store_true", help="Keep retrying until the preflight succeeds and the crawl can run.")
     parser.add_argument("--watch-interval-seconds", type=float, default=300.0)
-    parser.add_argument("--watch-max-probes", type=int, default=0, help="Maximum failed probes before exiting; 0 means unlimited.")
+    parser.add_argument("--watch-max-probes", type=int, default=3, help="Maximum failed probes before exiting (default: 3).")
     return parser.parse_args()
 
 
 def attempt_resume(args: argparse.Namespace, data_root: Path, archive_db: Path, probe_attempt: int) -> str:
     monitor_output_dir = (
-        REPO_ROOT
+        PROJECT_PATHS.run_root
         / "experiments"
+        / "legacy"
         / "0000_research_state_and_data_contract"
         / "hko_official_backfill_monitor"
         / "artifacts"
     )
-    output_dir = REPO_ROOT / "data" / "datasets"
+    output_dir = PROJECT_PATHS.data_root / "datasets"
     stdout_log = data_root / "run_logs" / f"official_details_resume_{args.start.replace('-', '')}_{args.end.replace('-', '')}.out.log"
     stderr_log = data_root / "run_logs" / f"official_details_resume_{args.start.replace('-', '')}_{args.end.replace('-', '')}.err.log"
 
@@ -377,10 +381,12 @@ def main() -> None:
         (data_root / child).mkdir(parents=True, exist_ok=True)
 
     probe_attempt = 1
-    while True:
+    if args.watch_max_probes < 1:
+        raise ValueError("--watch-max-probes must be at least 1")
+    while True:  # repo-doctor: allow-unsafe-default - watch_max_probes is mandatory and finite
         outcome = attempt_resume(args, data_root, archive_db, probe_attempt)
         if outcome == "network_unavailable" and args.watch:
-            if args.watch_max_probes and probe_attempt >= args.watch_max_probes:
+            if probe_attempt >= args.watch_max_probes:
                 raise SystemExit(100)
             probe_attempt += 1
             time.sleep(args.watch_interval_seconds)

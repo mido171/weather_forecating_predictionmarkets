@@ -357,7 +357,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="./nbm_kmia_tmax_asof_20260701_20260710.csv",
         help="Output CSV path",
     )
-    p.add_argument("--max-workers", type=int, default=4, help="Threads per target day")
+    p.add_argument("--max-workers", type=int, default=1, help="Threads per target day")
     p.add_argument("--remove-grib", action="store_true", help="Remove subset GRIB files after reading into xarray")
     p.add_argument("--log-level", type=str, default="INFO", help="DEBUG, INFO, WARNING, ERROR")
     return p

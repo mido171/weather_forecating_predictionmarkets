@@ -15,14 +15,16 @@ import pandas as pd
 
 from hkg_tmax.hkg_t24.governance import check_four_year_oof_feasibility
 from hkg_tmax.hkg_t24.guard import assert_no_locked_dates
+from hkg_tmax.paths import ProjectPaths
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DATA_ROOT = Path(r"C:\hkg_tmax_data")
+PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
+REPO_ROOT = PROJECT_PATHS.project_root
+DEFAULT_DATA_ROOT = PROJECT_PATHS.data_root
 EXPERIMENT_DIR = (
-    REPO_ROOT
-    / "analysis"
-    / "hkg_tmax_t24"
+    PROJECT_PATHS.run_root
     / "experiments"
+    / "legacy"
+    / "hkg_tmax_t24"
     / "EXP-0034-HKG-T24-R02"
 )
 RESEARCH_ID = "HKG-T24-R02"
@@ -588,7 +590,7 @@ def write_reports(
     monthly: pd.DataFrame,
     payload: dict[str, object],
 ) -> None:
-    report_dir = REPO_ROOT / "reports" / "hkg_t24"
+    report_dir = PROJECT_PATHS.run_root / "reports" / "hkg_t24"
     champion = payload["champion"]
     assert isinstance(champion, dict)
     write_text(

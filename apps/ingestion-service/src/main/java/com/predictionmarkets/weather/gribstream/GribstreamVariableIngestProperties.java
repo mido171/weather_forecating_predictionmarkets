@@ -14,8 +14,8 @@ public class GribstreamVariableIngestProperties {
   private boolean storeSummary = true;
   private boolean collapseEnsembleMembers = true;
   private double minCoverageRatio = 0.5;
-  private int batchSize = 20;
-  private int maxVariablesPerModel = 0;
+  private int batchSize = 1;
+  private int maxVariablesPerModel = 1;
   private List<String> models = new ArrayList<>();
 
   public boolean isEnabled() {

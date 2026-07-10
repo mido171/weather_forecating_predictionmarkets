@@ -38,7 +38,7 @@ from hkg_tmax.features.leakage_guards import leakage_audit_payload
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "configs" / "hkg_tmax" / "residual_ml_strategy.yaml"
+DEFAULT_CONFIG = REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_strategy.yaml"
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
 
 

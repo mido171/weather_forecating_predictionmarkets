@@ -17,6 +17,7 @@ from app.extract.point_extract import (
     parse_cycle_time_utc,
     response_template,
     valid_time_for_index,
+    worker_cache_dir,
 )
 
 
@@ -35,7 +36,11 @@ def run(request: dict) -> dict:
     request.setdefault("model_name", "ndfd_historical")
     cycle_time = parse_cycle_time_utc(str(request["cycle_time_utc"]))
     cycle_time_iso = isoformat_utc(cycle_time)
-    cache_root = ensure_dir(request.get("cache_dir") or "ingestion-service/data/tmp/ndfd_historical")
+    cache_root = (
+        ensure_dir(request["cache_dir"])
+        if request.get("cache_dir")
+        else worker_cache_dir("ndfd-historical")
+    )
     lat = float(request["lat"])
     lon = float(request["lon"])
     files = request.get("files") or []

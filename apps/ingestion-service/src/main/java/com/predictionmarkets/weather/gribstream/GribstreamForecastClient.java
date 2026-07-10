@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.GZIPInputStream;
@@ -27,9 +26,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringBootVersion;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,15 +43,13 @@ public class GribstreamForecastClient {
   private static final Logger logger = LoggerFactory.getLogger(GribstreamForecastClient.class);
   private static final MediaType JSON_MEDIA = MediaType.parse("application/json");
   private static final int SNIPPET_LIMIT = 500;
-  private static final int MAX_ATTEMPTS = 5;
+  private static final int MAX_ATTEMPTS = 2;
   private static final Set<Integer> RETRYABLE_STATUS = Set.of(408, 429, 500, 502, 503, 504);
 
   private final OkHttpClient httpClient;
   private final HttpUrl baseUrl;
-  private final String apiToken;
   private final String authHeader;
-  private final int tokenLength;
-  private final String tokenShaPrefix;
+  private final boolean credentialsConfigured;
   private final boolean gzipEnabled;
   private final boolean logHttp;
   private final int logBodyLimit;
@@ -70,12 +65,10 @@ public class GribstreamForecastClient {
                                   ObjectMapper objectMapper) {
     Objects.requireNonNull(properties, "properties is required");
     this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper is required");
-    this.apiToken = normalizeToken(resolveApiToken(properties));
+    String apiToken = normalizeOptionalToken(properties.getApiToken());
     String authScheme = normalizeAuthScheme(properties.getAuthScheme());
-    this.authHeader = buildAuthorizationHeader(this.apiToken, authScheme);
-    this.tokenLength = this.apiToken.length();
-    String tokenFingerprint = Hashing.sha256Hex(this.apiToken);
-    this.tokenShaPrefix = tokenFingerprint.substring(0, 12);
+    this.authHeader = buildAuthorizationHeader(apiToken, authScheme);
+    this.credentialsConfigured = !apiToken.isBlank();
     // Forecasts endpoint always requests gzip per spec.
     this.gzipEnabled = true;
     this.logHttp = properties.isLogHttp();
@@ -95,17 +88,13 @@ public class GribstreamForecastClient {
         ;
     EvomiProxySupport.applyIfEnabled(builder, evomiProxyProperties, logger);
     this.httpClient = builder.build();
-    logger.info("[GRIBSTREAM] Forecast auth token loaded OK. tokenLen={} tokenSha256Prefix={}",
-        tokenLength,
-        tokenShaPrefix);
-    logger.debug("Gribstream forecast client configured baseUrl={} tokenSha256Prefix={} tokenLength={}",
-        properties.getBaseUrl(),
-        tokenShaPrefix,
-        tokenLength);
+    logger.info("[GRIBSTREAM] Forecast client credentials configured={}", credentialsConfigured);
+    logger.debug("Gribstream forecast client configured baseUrl={}", properties.getBaseUrl());
   }
 
   public GribstreamForecastRawResponse fetchForecastsRaw(String modelCode,
                                                          GribstreamForecastRequest request) {
+    requireCredentials();
     if (modelCode == null || modelCode.isBlank()) {
       throw new IllegalArgumentException("modelCode is required");
     }
@@ -238,13 +227,13 @@ public class GribstreamForecastClient {
     }
   }
 
-  private static String normalizeToken(String apiToken) {
+  private static String normalizeOptionalToken(String apiToken) {
     if (apiToken == null) {
-      throw new IllegalArgumentException("gribstream.apiToken is required");
+      return "";
     }
     String trimmed = apiToken.trim();
     if (trimmed.isEmpty()) {
-      throw new IllegalArgumentException("gribstream.apiToken is required");
+      return "";
     }
     if (trimmed.equalsIgnoreCase("<PUT_TOKEN_HERE>")) {
       throw new IllegalArgumentException("gribstream.apiToken must be set (placeholder found)");
@@ -252,41 +241,10 @@ public class GribstreamForecastClient {
     return trimmed;
   }
 
-  private static String resolveApiToken(GribstreamProperties properties) {
-    String configured = properties == null ? null : properties.getApiToken();
-    String classpathToken = loadClasspathToken("application.yml");
-    if (classpathToken != null && !classpathToken.isBlank()) {
-      if (configured != null && !configured.isBlank() && !configured.equals(classpathToken)) {
-        logger.warn("Overriding gribstream.apiToken with classpath application.yml value.");
-      }
-      return classpathToken.trim();
-    }
-    return configured;
-  }
-
-  private static String loadClasspathToken(String resourceName) {
-    ClassPathResource resource = new ClassPathResource(resourceName);
-    if (!resource.exists()) {
-      return null;
-    }
-    YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-    factory.setResources(resource);
-    Properties props = factory.getObject();
-    if (props == null || props.isEmpty()) {
-      return null;
-    }
-    String token = props.getProperty("gribstream.apiToken");
-    if (token == null) {
-      return null;
-    }
-    String trimmed = token.trim();
-    return trimmed.isEmpty() ? null : trimmed;
-  }
-
   private static String buildAuthorizationHeader(String apiToken, String authScheme) {
     String token = apiToken.trim();
     if (token.isEmpty()) {
-      throw new IllegalArgumentException("gribstream.apiToken is required");
+      return "";
     }
     if (hasAuthScheme(token)) {
       return token;
@@ -309,26 +267,26 @@ public class GribstreamForecastClient {
 
   private void logUnauthorized(String modelCode, String requestSha256) {
     logger.error(
-        "[GRIBSTREAM] Unauthorized response model={} requestSha256={} tokenLen={} tokenSha256Prefix={} "
-            + "apiToken={} authHeader={} evomiProxyEnabled={}",
+        "[GRIBSTREAM] Unauthorized response model={} requestSha256={} evomiProxyEnabled={}",
         modelCode,
         requestSha256,
-        tokenLength,
-        tokenShaPrefix,
-        apiToken,
-        maskAuthHeader(authHeader),
         evomiProxyEnabled);
   }
 
   private void logFailure(String modelCode, String requestSha256, int statusCode) {
     logger.error(
-        "[GRIBSTREAM] Forecast request failed model={} status={} requestSha256={} apiToken={} "
-            + "evomiProxyEnabled={}",
+        "[GRIBSTREAM] Forecast request failed model={} status={} requestSha256={} evomiProxyEnabled={}",
         modelCode,
         statusCode,
         requestSha256,
-        apiToken,
         evomiProxyEnabled);
+  }
+
+  private void requireCredentials() {
+    if (!credentialsConfigured) {
+      throw new IllegalStateException(
+          "GRIBSTREAM_API_TOKEN is required before a GribStream network request");
+    }
   }
 
   private void logRequestException(String modelCode,

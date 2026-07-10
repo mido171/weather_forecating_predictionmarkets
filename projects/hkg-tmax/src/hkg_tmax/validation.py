@@ -33,16 +33,21 @@ class ValidationReport:
 
 REQUIRED_EXPERIMENT_FILES = (
     "README.md",
-    "HYPOTHESIS.md",
-    "PROTOCOL.md",
-    "ASOF_CONTRACT.md",
     "DATA_MANIFEST.yaml",
     "RUN_CONFIG.yaml",
-    "RESULTS.md",
-    "CONCLUSION.md",
-    "REPRODUCE.md",
     "STATUS.yaml",
     "results/metrics.json",
+)
+
+REQUIRED_EXPERIMENT_README_HEADINGS = (
+    "## Status",
+    "## Question and hypothesis",
+    "## As-of contract",
+    "## Method",
+    "## Results",
+    "## Decision",
+    "## Reproduce",
+    "## Evidence map",
 )
 
 
@@ -120,12 +125,24 @@ def validate_experiment_template(root: Path) -> list[str]:
     missing = [name for name in REQUIRED_EXPERIMENT_FILES if not (template / name).exists()]
     if missing:
         raise ValidationError(f"Experiment template missing files: {missing}")
+    readme = (template / "README.md").read_text(encoding="utf-8")
+    missing_headings = [
+        heading for heading in REQUIRED_EXPERIMENT_README_HEADINGS if heading not in readme
+    ]
+    if missing_headings:
+        raise ValidationError(
+            f"Experiment template README missing headings: {missing_headings}"
+        )
     registry = load_yaml(control_root / "registry.yaml")
     if not isinstance(registry.get("next_id"), int) or registry["next_id"] < 1:
         raise ValidationError(
             f"experiments/{EXPERIMENT_CONTROL_DIR}/registry.yaml next_id must be a positive integer"
         )
-    return [f"experiment template: {len(REQUIRED_EXPERIMENT_FILES)} required files present"]
+    return [
+        "experiment template: "
+        f"{len(REQUIRED_EXPERIMENT_FILES)} required files and "
+        f"{len(REQUIRED_EXPERIMENT_README_HEADINGS)} README sections present"
+    ]
 
 
 def validate_bucket_fixture(root: Path) -> list[str]:

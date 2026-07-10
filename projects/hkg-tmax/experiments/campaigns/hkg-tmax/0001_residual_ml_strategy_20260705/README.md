@@ -1,38 +1,39 @@
-# 0001 Residual ML Strategy
+# 0001 Broad residual-ML strategy
 
-Status: completed.
+Status: `complete_no_promote_cosmetic`.
 
-This is the prior broad residual-ML experiment that built leakage-safe HKG Tmax features and scored A0-A8:
+## Question and method
 
-- A0 raw official anchor
-- A1 grouped residual
-- A2 forecast revision residual LGBM
-- A3 HKO hourly-state residual LGBM
-- A4 station-network residual LGBM
-- A5 text/warning residual LGBM
-- A6 target-memory residual LGBM
-- A7 final residual ensemble
-- A8 direct absolute LGBM diagnostic
+Test leakage-safe residual correction around the latest eligible Info.gov
+local forecast maximum. The A0-A8 ladder added grouped calibration, forecast
+revision, HKO hourly state, station network, text/warnings, lag-safe target
+memory, a constrained ensemble, and a direct-absolute diagnostic.
 
-Canonical artifacts remain in the original compatibility folder:
+Primary target: HKO Daily Extract absolute daily maximum. Primary historical
+cutoff: T-1 23:59 HKT. Sealed 2024+ rows were confirmation-only and target
+history used a lag-2 floor.
 
-`experiments/hkg_tmax_residual_ml_strategy/results/`
+## Result
 
-Key files there:
+| Model | Rows | MAE | RMSE | p90 AE | Bias |
+|---|---:|---:|---:|---:|---:|
+| A0 raw official | 5,629 | 0.930858 | 1.195757 | 2.000000 | -0.122935 |
+| A7 final residual ensemble | 5,629 | 0.898665 | 1.154088 | 1.904225 | -0.000486 |
 
-- `summary.json`
-- `final_model_card.md`
-- `scoreboard.csv`
-- `scoreboard_by_split.csv`
-- `scoreboard_by_month.csv`
-- `scoreboard_by_regime.csv`
-- `prediction_rows.csv`
-- `prediction_rows.parquet`
-- `feature_matrix_trainval.parquet`
-- `feature_matrix_presealed_holdout.parquet`
-- `feature_matrix_sealed_confirmation.parquet`
-- `feature_lineage.json`
-- `leakage_audit.json`
-- `artifact_manifest.csv`
+MAE improved by 0.032193 C. Leakage passed with zero violations, but the gain
+missed the predeclared 0.035 C meaningful-edge gate.
 
-Outcome: no promote. The best primary A7 result improved MAE by about `0.0322 C` versus raw official at T-1 23:59 HKT, which was useful calibration but not a trading-grade edge.
+## Decision
+
+No promotion. A7 is a historical research reference, not a production/trading
+release. The signal mostly removed bias and supported narrower no-harm
+follow-ups rather than another broad model sweep.
+
+## Reproduce and evidence
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_hkg_tmax_residual_ml_strategy.py --config config\experiments\hkg_tmax\residual_ml_strategy.yaml --output-dir experiments\campaigns\residual-modeling\strategy\results
+```
+
+The detailed machine evidence and frozen source specification are indexed by
+[the residual-strategy dossier](../../residual-modeling/strategy/README.md).

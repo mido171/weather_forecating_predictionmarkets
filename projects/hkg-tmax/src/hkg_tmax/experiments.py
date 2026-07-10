@@ -145,15 +145,19 @@ def generate_index(root: Path) -> Path:
         status = load_yaml(status_path)
         decision = status.get("decision") or {}
         gates = status.get("gates") or {}
+        reproducibility = gates.get("reproducibility")
+        if reproducibility in (None, ""):
+            reproducibility = status.get("reproducible", "")
         rows.append(
             {
-                "id": status.get("experiment_id", directory.name.split("-", 2)[0]),
+                "id": status.get("experiment_id") or status.get("id") or directory.name,
                 "title": status.get("title", directory.name),
-                "status": status.get("status", "UNKNOWN"),
-                "conclusion": decision.get("primary_conclusion", ""),
+                "status": status.get("status") or status.get("state") or "UNKNOWN",
+                "conclusion": decision.get("primary_conclusion")
+                or status.get("primary_conclusion", ""),
                 "delta": decision.get("oos_delta", ""),
-                "leakage": gates.get("asof_leakage", ""),
-                "reproducibility": gates.get("reproducibility", ""),
+                "leakage": gates.get("asof_leakage") or status.get("leakage", ""),
+                "reproducibility": reproducibility,
                 "directory": relative_directory.as_posix(),
             }
         )

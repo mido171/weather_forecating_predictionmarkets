@@ -1,7 +1,7 @@
-config_path: configs/hkg_tmax/probability_distribution_methods_v2.yaml
+config_path: config/experiments/hkg_tmax/probability_distribution_methods_v2.yaml
 runner: scripts/run_hkg_tmax_probability_distribution_methods_v2.py
-output_dir: experiments/hkg_tmax_probability_distribution_methods_v2/results
-database_url: postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research
+output_dir: experiments/campaigns/probability/distribution-methods-v2/results
+database_url_env: HKG_TMAX_DATABASE_URL
 primary_cutoff: t_minus_1_2359_hkt
 sensitivity_cutoffs:
   - t_minus_1_1800_hkt

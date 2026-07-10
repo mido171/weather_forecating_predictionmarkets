@@ -12,12 +12,77 @@ import pandas as pd
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=False, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=False, default=str) + "\n", encoding="utf-8"
+    )
 
 
 def write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def write_bounded_readme_section(
+    path: Path,
+    *,
+    start_marker: str,
+    end_marker: str,
+    section: str,
+    default_title: str,
+) -> None:
+    """Replace one generated README section without disturbing curated prose."""
+    if path.name.casefold() != "readme.md":
+        raise ValueError("generated human documentation must target README.md")
+    if not start_marker or not end_marker or start_marker == end_marker:
+        raise ValueError("generated README markers must be distinct and non-empty")
+    if "\n" in start_marker or "\n" in end_marker:
+        raise ValueError("generated README markers must each fit on one line")
+    if start_marker in section or end_marker in section:
+        raise ValueError("generated README section must not contain its boundary markers")
+
+    existing = path.read_text(encoding="utf-8") if path.exists() else f"# {default_title}\n"
+    start_count = existing.count(start_marker)
+    end_count = existing.count(end_marker)
+    marker_order_is_valid = (
+        start_count == 0
+        or existing.find(start_marker) < existing.find(end_marker)
+    )
+    if start_count != end_count or start_count > 1 or not marker_order_is_valid:
+        raise RuntimeError("Malformed generated README markers: expected zero or one matched pair")
+
+    block = f"{start_marker}\n{section.strip()}\n{end_marker}"
+    if start_count == 1:
+        before, remainder = existing.split(start_marker, maxsplit=1)
+        _retired, after = remainder.split(end_marker, maxsplit=1)
+    else:
+        before, after = existing, ""
+    parts = [part for part in (before.rstrip(), block, after.lstrip()) if part]
+    write_text(path, "\n\n".join(parts).rstrip() + "\n")
+
+
+def demote_markdown_headings(markdown: str, *, levels: int = 1) -> str:
+    """Demote headings in a Markdown fragment while leaving fenced code untouched."""
+    if not 0 <= levels <= 5:
+        raise ValueError("heading demotion must be between zero and five levels")
+    if levels == 0:
+        return markdown
+
+    output: list[str] = []
+    fence: str | None = None
+    for line in markdown.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            marker = stripped[:3]
+            fence = None if fence == marker else marker if fence is None else fence
+            output.append(line)
+            continue
+        if fence is None:
+            prefix_length = len(line) - len(line.lstrip("#"))
+            if 1 <= prefix_length <= 6 and line[prefix_length : prefix_length + 1] == " ":
+                new_length = min(6, prefix_length + levels)
+                line = "#" * new_length + line[prefix_length:]
+        output.append(line)
+    return "\n".join(output)
 
 
 def write_csv(path: Path, frame: pd.DataFrame) -> None:
@@ -67,18 +132,32 @@ def row_count_audit(
         "target_rows_total": int(len(targets)),
         "target_rows_by_source": targets["label_source"].value_counts(dropna=False).to_dict(),
         "forecast_rows_strict_eligible_total": int(len(forecasts)),
-        "forecast_target_dates_with_strict_rows": int(forecasts["target_date"].nunique()) if not forecasts.empty else 0,
+        "forecast_target_dates_with_strict_rows": int(forecasts["target_date"].nunique())
+        if not forecasts.empty
+        else 0,
         "hourly_rows_loaded_total": int(len(hourly)),
         "joined_rows_total": int(len(matrix)),
         "joined_rows_with_anchor": int(matrix["forecast_selector_status"].eq("selected").sum()),
-        "joined_rows_without_anchor": int((~matrix["forecast_selector_status"].eq("selected")).sum()),
+        "joined_rows_without_anchor": int(
+            (~matrix["forecast_selector_status"].eq("selected")).sum()
+        ),
         "scored_prediction_rows": int(len(predictions)),
     }
     audit["joined_rows_by_cutoff"] = matrix.groupby("cutoff_profile").size().astype(int).to_dict()
-    audit["anchor_rows_by_cutoff"] = matrix[matrix["forecast_selector_status"].eq("selected")].groupby("cutoff_profile").size().astype(int).to_dict()
+    audit["anchor_rows_by_cutoff"] = (
+        matrix[matrix["forecast_selector_status"].eq("selected")]
+        .groupby("cutoff_profile")
+        .size()
+        .astype(int)
+        .to_dict()
+    )
     if not predictions.empty:
-        audit["prediction_rows_by_model"] = predictions.groupby("model_id").size().astype(int).to_dict()
-        audit["prediction_rows_by_stage"] = predictions.groupby("stage").size().astype(int).to_dict()
+        audit["prediction_rows_by_model"] = (
+            predictions.groupby("model_id").size().astype(int).to_dict()
+        )
+        audit["prediction_rows_by_stage"] = (
+            predictions.groupby("stage").size().astype(int).to_dict()
+        )
     return audit
 
 
@@ -201,20 +280,28 @@ def next_round_model_card(
     router_thresholds: dict[str, Any],
     feature_count: int,
 ) -> str:
-    primary = scoreboard[
-        scoreboard.get("cutoff_profile", pd.Series(dtype=str)).astype(str).eq("tminus1_2359")
-    ].copy() if not scoreboard.empty else pd.DataFrame()
-    key_rows = primary[
-        primary.get("model_id", pd.Series(dtype=str)).isin(
-            [
-                "A0_raw_official",
-                "A7_final_residual_ensemble",
-                "C1_pruned_residual_ensemble",
-                "C2_selective_router",
-                "C3_tail_overlay_router",
-            ]
-        )
-    ] if not primary.empty else pd.DataFrame()
+    primary = (
+        scoreboard[
+            scoreboard.get("cutoff_profile", pd.Series(dtype=str)).astype(str).eq("tminus1_2359")
+        ].copy()
+        if not scoreboard.empty
+        else pd.DataFrame()
+    )
+    key_rows = (
+        primary[
+            primary.get("model_id", pd.Series(dtype=str)).isin(
+                [
+                    "A0_raw_official",
+                    "A7_final_residual_ensemble",
+                    "C1_pruned_residual_ensemble",
+                    "C2_selective_router",
+                    "C3_tail_overlay_router",
+                ]
+            )
+        ]
+        if not primary.empty
+        else pd.DataFrame()
+    )
     promotion = summary.get("promotion", {})
     return f"""# HKG Tmax Residual ML Next Round Model Card
 
@@ -265,7 +352,11 @@ def next_round_summary_payload(
     router_thresholds: dict[str, Any],
     output_dir: Path,
 ) -> dict[str, Any]:
-    primary = scoreboard[scoreboard["cutoff_profile"].eq("tminus1_2359")] if not scoreboard.empty else pd.DataFrame()
+    primary = (
+        scoreboard[scoreboard["cutoff_profile"].eq("tminus1_2359")]
+        if not scoreboard.empty
+        else pd.DataFrame()
+    )
 
     def _mae(model_id: str) -> float | None:
         row = primary[primary["model_id"].eq(model_id)]

@@ -29,7 +29,13 @@ PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
 REPO_ROOT = PROJECT_PATHS.project_root
 FIRST_WEEK_SCRIPT = REPO_ROOT / "scripts/run_tactical_gribstream_first_week.py"
 TACTICAL_MIGRATION = REPO_ROOT / "db/migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
-EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
+EXPERIMENT_ROOT = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-t24"
+    / "0214_tactical_h24n_gribstream_backfill"
+)
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
 ACQUISITION_VERSION = "tactical_h24n_v1"
 

@@ -14,7 +14,9 @@ from typing import Any, TextIO
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EXPERIMENT_ID = "0010_public_weather_backfill_jun10_jul8_lean_db_test_20260709"
-DEFAULT_EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / DEFAULT_EXPERIMENT_ID
+DEFAULT_EXPERIMENT_DIR = (
+    REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / DEFAULT_EXPERIMENT_ID
+)
 
 
 def utc_now() -> datetime:
@@ -135,7 +137,11 @@ def build_worker_command(args: argparse.Namespace, day: date, shard_dir: Path) -
     ]
     if args.cpu_telemetry:
         command.append("--cpu-telemetry")
-    command.append("--no-skip-existing-complete" if args.no_skip_existing_complete else "--skip-existing-complete")
+    command.append(
+        "--no-skip-existing-complete"
+        if args.no_skip_existing_complete
+        else "--skip-existing-complete"
+    )
     return command
 
 
@@ -236,49 +242,10 @@ def aggregate_metrics(
                 elif isinstance(value, int):
                     source_out[key] = int(source_out.get(key, 0)) + value
     aggregate["by_source"] = by_source
-    aggregate["status"] = "complete" if not aggregate["failed_days"] else "complete_with_failed_shards"
+    aggregate["status"] = (
+        "complete" if not aggregate["failed_days"] else "complete_with_failed_shards"
+    )
     return aggregate
-
-
-def write_markdown_report(experiment_dir: Path, aggregate: dict[str, Any]) -> None:
-    lines = [
-        "# Parallel Day-Sharded Backfill Results",
-        "",
-        f"Status: `{aggregate.get('status')}`",
-        f"Date range: `{aggregate.get('start_date')}` to `{aggregate.get('end_date')}`",
-        f"Elapsed seconds: `{aggregate.get('elapsed_seconds')}`",
-        f"Max workers: `{aggregate.get('max_workers')}`",
-        "",
-        "## Counts",
-        "",
-        f"- Source issues touched: `{aggregate.get('source_issues_touched', 0)}`",
-        f"- Fetch ok: `{aggregate.get('fetch_ok', 0)}`",
-        f"- Fetch failed: `{aggregate.get('fetch_failed', 0)}`",
-        f"- Normalize ok: `{aggregate.get('normalize_ok', 0)}`",
-        f"- Normalize failed: `{aggregate.get('normalize_failed', 0)}`",
-        f"- Task errors: `{aggregate.get('task_errors', 0)}`",
-        f"- Station features upserted: `{aggregate.get('station_features_upserted', 0)}`",
-        f"- Area features upserted: `{aggregate.get('area_features_upserted', 0)}`",
-        f"- Raw files deleted: `{aggregate.get('raw_files_deleted', 0)}`",
-        f"- Raw bytes deleted: `{aggregate.get('raw_bytes_deleted', 0)}`",
-        "",
-        "## Disk",
-        "",
-        f"- Max aggregate staging bytes: `{aggregate.get('max_aggregate_staging_bytes')}`",
-        f"- Max single-worker staging bytes: `{aggregate.get('max_worker_staging_bytes')}`",
-        f"- Max raw object bytes: `{aggregate.get('max_raw_object_bytes')}`",
-        f"- Minimum free disk bytes observed: `{aggregate.get('min_free_disk_bytes')}`",
-        "",
-        "## By Source",
-        "",
-    ]
-    for source, row in sorted((aggregate.get("by_source") or {}).items()):
-        lines.append(f"- `{source}`: {row}")
-    if aggregate.get("failed_days"):
-        lines.extend(["", "## Failed Days", ""])
-        for day in aggregate["failed_days"]:
-            lines.append(f"- `{day}` exit code `{aggregate['exit_codes'].get(day)}`")
-    Path(wp(experiment_dir / "RESULTS_PARALLEL.md")).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def run(args: argparse.Namespace) -> int:
@@ -291,7 +258,10 @@ def run(args: argparse.Namespace) -> int:
     exit_codes: dict[str, int] = {}
     monitor_path = args.experiment_dir / "logs" / "parallel_monitor.jsonl"
     started_at = utc_now()
-    monitor_summary: dict[str, Any] = {"max_aggregate_staging_bytes": 0, "min_free_disk_bytes": None}
+    monitor_summary: dict[str, Any] = {
+        "max_aggregate_staging_bytes": 0,
+        "min_free_disk_bytes": None,
+    }
     print(f"[parallel-start] days={len(days)} max_workers={args.max_workers}", flush=True)
 
     while pending or running:
@@ -315,8 +285,7 @@ def run(args: argparse.Namespace) -> int:
             print(f"[complete] {day_key} exit={code}", flush=True)
 
         aggregate_staging = sum(
-            file_size(args.staging_root / args.experiment_id / day.isoformat())
-            for day in days
+            file_size(args.staging_root / args.experiment_id / day.isoformat()) for day in days
         )
         free_bytes = drive_free_bytes(args.experiment_dir)
         monitor_summary["max_aggregate_staging_bytes"] = max(
@@ -354,7 +323,6 @@ def run(args: argparse.Namespace) -> int:
         monitor_summary=monitor_summary,
     )
     write_json(args.experiment_dir / "results" / "parallel_aggregate_metrics.json", aggregate)
-    write_markdown_report(args.experiment_dir, aggregate)
     print(json.dumps(aggregate, indent=2, sort_keys=True), flush=True)
     return 0 if aggregate["status"] == "complete" else 1
 
@@ -377,7 +345,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--himawari-workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--model-range-coalesce-gap-bytes", type=int, default=0)
     parser.add_argument("--cpu-telemetry", action="store_true", default=False)
-    parser.add_argument("--staging-root", type=Path, default=REPO_ROOT / "_weather_backfill_staging" / "day_shards")
+    parser.add_argument(
+        "--staging-root", type=Path, default=REPO_ROOT / "_weather_backfill_staging" / "day_shards"
+    )
     parser.add_argument("--progress-every", type=int, default=25)
     parser.add_argument("--max-attempts", type=int, choices=(1, 2, 3), default=2)
     parser.add_argument("--max-staging-gb", type=float, default=4.0)

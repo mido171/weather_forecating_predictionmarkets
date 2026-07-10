@@ -16,13 +16,20 @@ import pandas as pd
 import yaml
 
 from hkg_tmax_probability.bucket_rules import BUCKET_KEYS, PROBABILITY_COLUMNS
-from hkg_tmax_probability.data_build import DEFAULT_DATABASE_URL, build_modeling_table, write_modeling_artifacts
+from hkg_tmax_probability.data_build import (
+    DEFAULT_DATABASE_URL,
+    build_modeling_table,
+    write_modeling_artifacts,
+)
 from hkg_tmax_probability.distribution_methods_v2 import (
     distribution_v2_predictor_columns,
     method_details_frame,
     predict_distribution_methods_v2,
 )
-from hkg_tmax_probability.label_publication_audit import apply_first_publication_labels, run_label_publication_audit
+from hkg_tmax_probability.label_publication_audit import (
+    apply_first_publication_labels,
+    run_label_publication_audit,
+)
 from hkg_tmax_probability.leaderboard_v2 import apply_v2_champion_gates
 from hkg_tmax_probability.leakage_audit import audit_modeling_table, write_leakage_audit
 from hkg_tmax_probability.live_inference import write_live_inference_example
@@ -241,108 +248,69 @@ def _first_publication_scoreboard(
     leaderboard.to_csv(output_dir / "first_publication_scoreboard.csv", index=False)
 
 
-def _write_model_card(output_dir: Path, leaderboard: pd.DataFrame, leakage: dict[str, Any], label_audit: dict[str, Any], row_gate: dict[str, Any]) -> None:
-    champion = leaderboard[leaderboard["champion_flag"]].iloc[0]
-    top = leaderboard.head(12)[
-        [
-            "rank",
-            "method",
-            "family",
-            "rps",
-            "relative_rps_gain_vs_b4",
-            "fold14_relative_rps_gain_vs_b4",
-            "presealed_relative_rps_gain_vs_b4",
-            "nll",
-            "brier",
-            "gates",
-            "champion_flag",
-        ]
-    ]
-    lines = [
-        "# HKG Tmax Probability Distribution Methods V2 Model Card",
-        "",
-        f"Supreme method after V2 gates: `{champion['method']}`.",
-        "",
-        "Scope: weather probability distribution only. No market prices, EV, order books, Kelly sizing, PnL, market-implied blending, or trade recommendations are used or emitted.",
-        "",
-        "Target: HKO Daily Extract one-decimal HKG daily maximum temperature bucket.",
-        "Forecast surface: strict HKO Info.gov local forecast rows selected at the configured pre-target cutoffs.",
-        "Primary cutoff: T-1 23:59 HKT. Sensitivity cutoffs: T-1 18:00 and T-1 21:00 HKT.",
-        "",
-        "Promotion rule: challengers must beat B4 by at least 1.5% RPS on folds 1-4 and 1.0% RPS on the 2022-2023 presealed holdout, while not worsening NLL by more than 0.005 or Brier by more than 0.002.",
-        "",
-        f"Champion normalized RPS: {champion['rps']:.6f}",
-        f"Champion NLL: {champion['nll']:.6f}",
-        f"Champion Brier: {champion['brier']:.6f}",
-        f"Champion ECE: {champion['ece']:.6f}",
-        f"Champion gates: `{champion['gates']}`",
-        "",
-        f"Leakage audit: `{leakage.get('status')}` with total violations `{leakage.get('total_violations')}`.",
-        f"Row-identity gate: `{row_gate.get('status')}` with violations `{row_gate.get('violations')}`.",
-        f"Label first-publication audit: `{label_audit.get('status')}`, bucket changes `{label_audit.get('bucket_changes')}`.",
-        "",
-        "## Top Leaderboard Rows",
-        "",
-        _markdown_table(top),
-        "",
-        "## Methods Benchmarked",
-        "",
-        "- V1 baselines and champion family: B0-B6, P1/P2, C1/C2, K0-K2, S1.",
-        "- V2 challengers: E1 normal EMOS, E2 Student-t EMOS, E3 two-piece normal EMOS, G1 tree location-scale, Q1 quantile CDF gradient boosting, Q2 threshold CDF gradient boosting, T1 time-decay B4, H1 conservative B4-plus-challenger pool.",
-    ]
-    (output_dir / "final_probability_model_card.md").write_text("\n".join(lines), encoding="utf-8")
+def _json_records(frame: pd.DataFrame) -> list[dict[str, Any]]:
+    return json.loads(frame.to_json(orient="records", date_format="iso"))
 
 
-def _write_supreme_summary(output_dir: Path, leaderboard: pd.DataFrame, fold14: pd.DataFrame, presealed: pd.DataFrame) -> None:
-    champion = leaderboard[leaderboard["champion_flag"]].iloc[0]
-    raw_best = leaderboard.iloc[0]
-    lines = [
-        "# HKG Tmax Probability Engine V2 Supreme Method Summary",
-        "",
-        f"Supreme method: `{champion['method']}`.",
-        f"Raw lowest-RPS method: `{raw_best['method']}`.",
-        "",
-        "The supreme method is chosen by proper scoring rules plus the predeclared V2 promotion gates. A challenger can have an attractive raw score and still fail promotion if its fold 1-4 gain, presealed gain, NLL, Brier, leakage, or row-identity contract does not clear the gate.",
-        "",
-        "## Supreme Row",
-        "",
-        _markdown_table(leaderboard[leaderboard["champion_flag"]]),
-        "",
-        "## Raw Leaderboard Top 20",
-        "",
-        _markdown_table(leaderboard.head(20)),
-        "",
-        "## Fold 1-4 Scoreboard",
-        "",
-        _markdown_table(fold14.sort_values("rps").head(20)),
-        "",
-        "## Presealed 2022-2023 Scoreboard",
-        "",
-        _markdown_table(presealed.sort_values("rps").head(20)),
-        "",
-        "Interpretation rule: B4 remains the default champion unless a challenger clears all promotion gates. This prevents choosing a more complex probability engine from a marginal, unstable, or poorly calibrated score difference.",
-    ]
-    (output_dir / "supreme_method_summary.md").write_text("\n".join(lines), encoding="utf-8")
-
-
-def _markdown_table(frame: pd.DataFrame) -> str:
-    if frame.empty:
-        return "_No rows._"
-    display = frame.copy()
-    for column in display.columns:
-        if pd.api.types.is_float_dtype(display[column]):
-            display[column] = display[column].map(lambda value: "" if pd.isna(value) else f"{float(value):.6f}")
-        else:
-            display[column] = display[column].map(lambda value: "" if pd.isna(value) else str(value))
-    columns = [str(column) for column in display.columns]
-    lines = [
-        "| " + " | ".join(columns) + " |",
-        "| " + " | ".join("---" for _ in columns) + " |",
-    ]
-    for _, row in display.iterrows():
-        values = [str(row[column]).replace("|", "\\|") for column in display.columns]
-        lines.append("| " + " | ".join(values) + " |")
-    return "\n".join(lines)
+def _write_model_selection_summary(
+    output_dir: Path,
+    leaderboard: pd.DataFrame,
+    fold14: pd.DataFrame,
+    presealed: pd.DataFrame,
+    config: dict[str, Any],
+    leakage: dict[str, Any],
+    label_audit: dict[str, Any],
+    row_gate: dict[str, Any],
+) -> None:
+    champion = leaderboard[leaderboard["champion_flag"]]
+    payload = {
+        "schema_version": 1,
+        "artifact_type": "hkg_tmax_probability_distribution_v2_model_selection_summary",
+        "scope": {
+            "target": "HKO Daily Extract one-decimal HKG daily maximum temperature bucket",
+            "forecast_surface": "strict HKO Info.gov local forecast rows at configured pre-target cutoffs",
+            "primary_cutoff": "T-1 23:59 HKT",
+            "sensitivity_cutoffs": ["T-1 18:00 HKT", "T-1 21:00 HKT"],
+            "probability_only": True,
+            "market_inputs_used": False,
+            "trade_recommendations_emitted": False,
+        },
+        "selection": {
+            "champion": _json_records(champion)[0],
+            "raw_lowest_rps": _json_records(leaderboard.head(1))[0],
+            "baseline_method": "B4_hierarchical_residual_pmf",
+            "primary_metric": "normalized_rps",
+            "promotion_gates": config.get("acceptance_gates", {}),
+            "decision_rule": (
+                "B4 remains champion unless a challenger clears every fold 1-4, presealed, "
+                "NLL, Brier, leakage, and row-identity gate"
+            ),
+        },
+        "audits": {
+            "leakage": leakage,
+            "row_identity": row_gate,
+            "label_first_publication": label_audit,
+        },
+        "scoreboard_extracts": {
+            "overall_top_20": _json_records(leaderboard.head(20)),
+            "fold_1_4_top_20": _json_records(fold14.sort_values("rps").head(20)),
+            "presealed_2022_2023_top_20": _json_records(presealed.sort_values("rps").head(20)),
+        },
+        "methods_benchmarked": {
+            "v1_families": ["B0-B6", "P1/P2", "C1/C2", "K0-K2", "S1"],
+            "v2_challengers": ["E1", "E2", "E3", "G1", "Q1", "Q2", "T1", "H1"],
+        },
+        "metric_artifacts": {
+            "leaderboard": "scoreboard.csv",
+            "by_split": "scoreboard_by_split.csv",
+            "first_publication": "first_publication_scoreboard.csv",
+            "bootstrap_deltas": "proper_score_deltas_bootstrap.csv",
+        },
+    }
+    (output_dir / "model_selection_summary.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _write_manifest(output_dir: Path, config_path: Path, artifact_names: list[str]) -> None:
@@ -374,7 +342,12 @@ def main() -> int:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=REPO_ROOT / "experiments" / "hkg_tmax_probability_distribution_methods_v2" / "results",
+        default=REPO_ROOT
+        / "experiments"
+        / "campaigns"
+        / "probability"
+        / "distribution-methods-v2"
+        / "results",
     )
     parser.add_argument("--database-url", type=str, default=None)
     args = parser.parse_args()
@@ -446,8 +419,16 @@ def main() -> int:
 
     champion_method = str(leaderboard[leaderboard["champion_flag"]]["method"].iloc[0])
     write_live_inference_example(output_dir, primary_predictions, champion_method)
-    _write_model_card(output_dir, leaderboard, leakage, label_details, row_gate)
-    _write_supreme_summary(output_dir, leaderboard, fold14, presealed)
+    _write_model_selection_summary(
+        output_dir,
+        leaderboard,
+        fold14,
+        presealed,
+        config,
+        leakage,
+        label_details,
+        row_gate,
+    )
     artifact_names = [path.name for path in output_dir.iterdir()]
     _write_manifest(output_dir, args.config.resolve(), artifact_names)
 

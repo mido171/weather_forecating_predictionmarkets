@@ -15,6 +15,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from hkg_tmax.evaluation.reporting import write_bounded_readme_section
+
 try:
     import cfgrib
 except ImportError as exc:  # pragma: no cover - runtime guidance
@@ -26,8 +28,10 @@ except ImportError as exc:  # pragma: no cover - runtime guidance
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "0005_public_gfs_gefs_himawari_fetch_smoke_20260708"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 NORMALIZED_DIR = EXPERIMENT_DIR / "normalized"
+README_RESULTS_START = "<!-- BEGIN GENERATED PUBLIC NORMALIZATION RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED PUBLIC NORMALIZATION RESULT -->"
 
 HKG_BBOX = {
     "min_lat": 21.5,
@@ -213,7 +217,9 @@ def source_timing_from_da(da: Any) -> dict[str, Any]:
     }
 
 
-def normalize_grib_source(source: str, rel_path: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, GribSourceOutput]:
+def normalize_grib_source(
+    source: str, rel_path: str
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, GribSourceOutput]:
     path = EXPERIMENT_DIR / rel_path
     datasets = load_grib_datasets(path)
     grid_rows: list[dict[str, Any]] = []
@@ -315,7 +321,9 @@ def normalize_grib_source(source: str, rel_path: str) -> tuple[pd.DataFrame, pd.
             station_values["issued_at_utc"] = timing["issued_at_utc"]
             station_values["valid_at_utc"] = timing["valid_at_utc"]
             station_values["lead_hour"] = timing["lead_hour"]
-            station_values[f"{meta['canonical']}_{point_unit.replace('-', '').replace(' ', '_')}"] = point_normalized
+            station_values[
+                f"{meta['canonical']}_{point_unit.replace('-', '').replace(' ', '_')}"
+            ] = point_normalized
 
     if "wind_u_10m_m_s1" in station_values and "wind_v_10m_m_s1" in station_values:
         u = float(station_values["wind_u_10m_m_s1"])
@@ -323,17 +331,17 @@ def normalize_grib_source(source: str, rel_path: str) -> tuple[pd.DataFrame, pd.
         station_values["wind_speed_10m_m_s1"] = math.hypot(u, v)
         station_values["wind_direction_from_deg"] = wind_dir_from_degrees(u, v)
     if "temperature_2m_degC" in station_values and "dewpoint_2m_degC" in station_values:
-        station_values["dewpoint_depression_2m_c"] = (
-            float(station_values["temperature_2m_degC"]) - float(station_values["dewpoint_2m_degC"])
-        )
+        station_values["dewpoint_depression_2m_c"] = float(
+            station_values["temperature_2m_degC"]
+        ) - float(station_values["dewpoint_2m_degC"])
     if "temperature_2m_max_degC" in station_values and "temperature_2m_degC" in station_values:
-        station_values["tmax_minus_instant_t2m_c"] = (
-            float(station_values["temperature_2m_max_degC"]) - float(station_values["temperature_2m_degC"])
-        )
+        station_values["tmax_minus_instant_t2m_c"] = float(
+            station_values["temperature_2m_max_degC"]
+        ) - float(station_values["temperature_2m_degC"])
     if "temperature_2m_max_degC" in station_values and "temperature_2m_min_degC" in station_values:
-        station_values["forecast_period_diurnal_range_c"] = (
-            float(station_values["temperature_2m_max_degC"]) - float(station_values["temperature_2m_min_degC"])
-        )
+        station_values["forecast_period_diurnal_range_c"] = float(
+            station_values["temperature_2m_max_degC"]
+        ) - float(station_values["temperature_2m_min_degC"])
 
     grid_df = pd.DataFrame(grid_rows)
     station_df = pd.DataFrame([station_values])
@@ -360,7 +368,9 @@ def normalize_grib_source(source: str, rel_path: str) -> tuple[pd.DataFrame, pd.
 
 
 def read_c_string(data: bytes, offset: int, length: int) -> str:
-    return data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    return (
+        data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    )
 
 
 def parse_himawari_key_fields(file_name: str) -> dict[str, Any]:
@@ -370,7 +380,9 @@ def parse_himawari_key_fields(file_name: str) -> dict[str, Any]:
     )
     if not match:
         return {}
-    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(
+        tzinfo=timezone.utc
+    )
     return {
         "satellite_code": match.group(1),
         "observed_at_utc": observed.isoformat().replace("+00:00", "Z"),
@@ -447,14 +459,20 @@ def parse_himawari_header() -> tuple[dict[str, Any], pd.DataFrame]:
         "columns": int(columns),
         "lines_in_this_segment": int(lines),
         "pixels_in_this_segment": int(columns) * int(lines),
-        "uncompressed_image_bytes_estimate_without_line_overhead": int(columns) * int(lines) * int(bits_per_pixel // 8),
+        "uncompressed_image_bytes_estimate_without_line_overhead": int(columns)
+        * int(lines)
+        * int(bits_per_pixel // 8),
         "band_number_from_calibration_block": int(band_number),
         "segment_number_from_segment_block": int(segment_number),
         "segment_count_from_segment_block": int(segment_total),
         "projection": {
-            "sub_satellite_longitude_deg": struct.unpack_from("<d", prefix, projection_offset + 3)[0],
+            "sub_satellite_longitude_deg": struct.unpack_from("<d", prefix, projection_offset + 3)[
+                0
+            ],
             "satellite_distance_km": struct.unpack_from("<d", prefix, projection_offset + 27)[0],
-            "earth_equatorial_radius_km": struct.unpack_from("<d", prefix, projection_offset + 35)[0],
+            "earth_equatorial_radius_km": struct.unpack_from("<d", prefix, projection_offset + 35)[
+                0
+            ],
             "earth_polar_radius_km": struct.unpack_from("<d", prefix, projection_offset + 43)[0],
             "earth_flattening": struct.unpack_from("<d", prefix, projection_offset + 51)[0],
         },
@@ -472,7 +490,9 @@ def parse_himawari_header() -> tuple[dict[str, Any], pd.DataFrame]:
     return payload, block_df
 
 
-def build_comparison_features(station_df: pd.DataFrame, bbox_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build_comparison_features(
+    station_df: pd.DataFrame, bbox_df: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     wide = station_df.set_index("source")
     rows: list[dict[str, Any]] = []
     if {"gfs", "gefs_control"}.issubset(set(wide.index)):
@@ -480,7 +500,13 @@ def build_comparison_features(station_df: pd.DataFrame, bbox_df: pd.DataFrame) -
             col
             for col in wide.columns
             if pd.api.types.is_numeric_dtype(wide[col])
-            and col not in {"target_latitude", "target_longitude", "nearest_grid_latitude", "nearest_grid_longitude"}
+            and col
+            not in {
+                "target_latitude",
+                "target_longitude",
+                "nearest_grid_latitude",
+                "nearest_grid_longitude",
+            }
         ]
         row = {
             "comparison": "gefs_control_minus_gfs_nearest_hko_gridpoint",
@@ -511,14 +537,16 @@ def build_comparison_features(station_df: pd.DataFrame, bbox_df: pd.DataFrame) -
             out[f"gfs_{metric}"] = float(gfs_value) if pd.notna(gfs_value) else None
             out[f"gefs_control_{metric}"] = float(gefs_value) if pd.notna(gefs_value) else None
             out[f"gefs_control_minus_gfs_{metric}"] = (
-                float(gefs_value) - float(gfs_value) if pd.notna(gfs_value) and pd.notna(gefs_value) else None
+                float(gefs_value) - float(gfs_value)
+                if pd.notna(gfs_value) and pd.notna(gefs_value)
+                else None
             )
         flat_rows.append(out)
     bbox_delta_df = pd.DataFrame(flat_rows)
     return station_delta_df, bbox_delta_df
 
 
-def write_readme(manifest: dict[str, Any], snapshot: dict[str, Any]) -> None:
+def build_readme_section(manifest: dict[str, Any], snapshot: dict[str, Any]) -> str:
     station = snapshot["station_nearest_features"]
     rows = []
     for source in ["gfs", "gefs_control"]:
@@ -536,7 +564,7 @@ def write_readme(manifest: dict[str, Any], snapshot: dict[str, Any]) -> None:
             )
         )
 
-    readme = f"""# Normalized Public GFS/GEFS/Himawari Smoke Data
+    return f"""## Latest Generated Normalization
 
 Generated: `{manifest["generated_at_utc"]}`
 
@@ -546,11 +574,11 @@ This folder converts the provider-native files under `raw/` into readable HKG-fo
 
 | File | Use |
 |---|---|
-| `feature_snapshot.json` | Compact one-file summary for humans and code. |
-| `model_target_station_features.csv` | One row per model source at the nearest grid point to the canonical HKO target station. |
-| `model_source_comparison_features.csv` | Direct GEFS-control minus GFS deltas. |
-| `gfs_hkg_bbox_grid_long.csv` / `gefs_hkg_bbox_grid_long.csv` | Long-form cropped HKG grid values. |
-| `himawari_b13_header_summary.json` | Decoded Himawari Standard Data metadata for the B13 segment. |
+| `normalized/feature_snapshot.json` | Compact one-file summary for humans and code. |
+| `normalized/model_target_station_features.csv` | One row per model source at the nearest grid point to the canonical HKO target station. |
+| `normalized/model_source_comparison_features.csv` | Direct GEFS-control minus GFS deltas. |
+| `normalized/gfs_hkg_bbox_grid_long.csv` / `normalized/gefs_hkg_bbox_grid_long.csv` | Long-form cropped HKG grid values. |
+| `normalized/himawari_b13_header_summary.json` | Decoded Himawari Standard Data metadata for the B13 segment. |
 
 ## Nearest-HKO Model Features
 
@@ -565,27 +593,16 @@ This folder converts the provider-native files under `raw/` into readable HKG-fo
 - Temperatures are normalized from Kelvin to Celsius; pressure from Pa to hPa; wind remains m/s.
 - Himawari is decoded to Standard Data header metadata. Pixel-value calibration/remapping is explicitly marked as not completed here.
 """
-    safe_write_text(NORMALIZED_DIR / "README.md", readme)
 
 
-def update_experiment_docs(manifest: dict[str, Any]) -> None:
-    note = f"""## Normalized Outputs
-
-Normalized, readable outputs were generated at `{manifest["generated_at_utc"]}` under `normalized/`.
-
-- `normalized/README.md` is the human entrypoint.
-- `normalized/model_target_station_features.csv` gives nearest-HKO model features.
-- `normalized/model_source_comparison_features.csv` gives GEFS-control minus GFS deltas.
-- `normalized/hkg_bbox_grid_long_all_sources.csv` gives all cropped model grid rows in long form.
-- `normalized/himawari_b13_header_summary.json` decodes Himawari B13 metadata and records that pixel calibration is still separate work.
-"""
-    for name in ["README.md", "RESULTS.md"]:
-        path = EXPERIMENT_DIR / name
-        existing = Path(win_path(path)).read_text(encoding="utf-8")
-        marker = "## Normalized Outputs"
-        if marker in existing:
-            existing = existing[: existing.index(marker)].rstrip()
-        safe_write_text(path, existing.rstrip() + "\n\n" + note)
+def update_experiment_readme(manifest: dict[str, Any], snapshot: dict[str, Any]) -> None:
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=build_readme_section(manifest, snapshot),
+        default_title="0005 Public GFS, GEFS, and Himawari Fetch Smoke",
+    )
 
 
 def main() -> int:
@@ -622,10 +639,7 @@ def main() -> int:
         "target_station": TARGET_STATION,
         "hkg_bbox": HKG_BBOX,
         "station_nearest_features": {
-            row["source"]: {
-                key: (None if pd.isna(value) else value)
-                for key, value in row.items()
-            }
+            row["source"]: {key: (None if pd.isna(value) else value) for key, value in row.items()}
             for row in station_all_df.to_dict(orient="records")
         },
         "source_comparison": station_delta_df.to_dict(orient="records"),
@@ -662,8 +676,7 @@ def main() -> int:
         },
     }
     safe_write_json(NORMALIZED_DIR / "normalization_manifest.json", manifest)
-    write_readme(manifest, snapshot)
-    update_experiment_docs(manifest)
+    update_experiment_readme(manifest, snapshot)
     print(NORMALIZED_DIR)
     return 0
 

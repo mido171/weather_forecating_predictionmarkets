@@ -17,9 +17,11 @@ from hkg_tmax.evaluation.official_residual_memory_runner import (
 )
 from hkg_tmax.evaluation.reporting import (
     artifact_manifest,
+    demote_markdown_headings,
     feature_missingness_report,
     markdown_table,
     source_eligibility_audit,
+    write_bounded_readme_section,
     write_csv,
     write_json,
     write_parquet,
@@ -31,12 +33,24 @@ from hkg_tmax.features.pruned_feature_policy import (
     validate_pruned_features,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_official_memory.yaml"
-DEFAULT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax" / "0003_official_residual_memory_20260706" / "results"
-DEFAULT_COMPAT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax_residual_ml_official_memory" / "results"
+DEFAULT_CONFIG = (
+    REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_official_memory.yaml"
+)
+DEFAULT_OUTPUT = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-tmax"
+    / "0003_official_residual_memory_20260706"
+    / "results"
+)
+DEFAULT_COMPAT_OUTPUT = (
+    REPO_ROOT / "experiments" / "campaigns" / "residual-modeling" / "official-memory" / "results"
+)
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
+README_RESULTS_START = "<!-- BEGIN GENERATED OFFICIAL RESIDUAL MEMORY RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED OFFICIAL RESIDUAL MEMORY RESULT -->"
 
 
 def utc_now() -> str:
@@ -52,7 +66,9 @@ def load_config(path: Path) -> dict[str, Any]:
         return yaml.safe_load(handle) or {}
 
 
-def read_previous_artifacts(results_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_previous_artifacts(
+    results_dir: Path,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     matrices = [
         pd.read_parquet(results_dir / "feature_matrix_trainval.parquet"),
         pd.read_parquet(results_dir / "feature_matrix_presealed_holdout.parquet"),
@@ -61,11 +77,17 @@ def read_previous_artifacts(results_dir: Path) -> tuple[pd.DataFrame, pd.DataFra
     matrix = pd.concat(matrices, ignore_index=True)
     matrix["target_date"] = pd.to_datetime(matrix["target_date"], errors="coerce").dt.normalize()
     predictions = pd.read_parquet(results_dir / "prediction_rows.parquet")
-    predictions["target_date"] = pd.to_datetime(predictions["target_date"], errors="coerce").dt.normalize()
-    lineage = pd.DataFrame(json.loads((results_dir / "feature_lineage.json").read_text(encoding="utf-8")))
+    predictions["target_date"] = pd.to_datetime(
+        predictions["target_date"], errors="coerce"
+    ).dt.normalize()
+    lineage = pd.DataFrame(
+        json.loads((results_dir / "feature_lineage.json").read_text(encoding="utf-8"))
+    )
     source_eligibility = pd.read_csv(results_dir / "source_eligibility_audit.csv")
     if "target_date" in source_eligibility:
-        source_eligibility["target_date"] = pd.to_datetime(source_eligibility["target_date"], errors="coerce").dt.normalize()
+        source_eligibility["target_date"] = pd.to_datetime(
+            source_eligibility["target_date"], errors="coerce"
+        ).dt.normalize()
     return matrix, predictions, lineage, source_eligibility
 
 
@@ -169,7 +191,9 @@ def summary_payload(
         "scope": "point_forecast_only_no_trading_no_probability",
         "feature_count_before_memory": int(feature_count),
         "residual_memory_feature_count": int(memory_feature_count),
-        "primary_score_summary": compact_score_summary(result.scoreboards["scoreboard"], primary_cutoff),
+        "primary_score_summary": compact_score_summary(
+            result.scoreboards["scoreboard"], primary_cutoff
+        ),
         "promotion": result.promotion,
         "leakage_audit_status": leakage.get("status"),
         "residual_memory_publication_safety_status": residual_memory_safety.get("status"),
@@ -179,55 +203,61 @@ def summary_payload(
     }
 
 
-def write_experiment_docs(exp_dir: Path, *, config_path: Path, summary: dict[str, Any]) -> None:
+def write_experiment_record(
+    exp_dir: Path,
+    *,
+    config_path: Path,
+    summary: dict[str, Any],
+    scoreboard: pd.DataFrame,
+) -> None:
     exp_dir.mkdir(parents=True, exist_ok=True)
     try:
         config_display = str(config_path.resolve().relative_to(REPO_ROOT))
     except ValueError:
         config_display = str(config_path)
-    write_text(
+    generated_model_card = demote_markdown_headings(
+        model_card(summary, scoreboard),
+        levels=2,
+    )
+    write_bounded_readme_section(
         exp_dir / "README.md",
-        f"""# 0003 Official Residual Memory
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=f"""## Latest Generated Run
 
 Status: `{summary.get("promotion", {}).get("decision")}`.
-
-Purpose: test whether lag-safe memory of prior official forecast residuals improves HKG Tmax point forecasts beyond the A7 residual-ML research candidate.
 
 Runner: `scripts/run_hkg_tmax_residual_ml_official_memory.py`
 
 Config: `{config_display}`
 
-Results: `results/`
-""",
-    )
-    write_text(
-        exp_dir / "HYPOTHESIS.md",
-        """# Hypothesis
+### Hypothesis
 
-Recent lag-safe official forecast residuals contain short-term forecaster, station, and regime bias that is not fully captured by official max, forecast revisions, HKO hourly state, station gradients, calendar, or target climatology.
-""",
-    )
-    write_text(
-        exp_dir / "PROTOCOL.md",
-        """# Protocol
+Recent lag-safe official forecast residuals contain short-term forecaster, station, and regime bias not fully captured by the official maximum, forecast revisions, HKO hourly state, station gradients, calendar, or target climatology.
 
-- Primary cutoff: `T-1 23:59 HKT`.
-- Sensitivity cutoffs: `T-1 21:00 HKT`, `T-1 18:00 HKT`.
-- Fold 1-4 are used for model and hyperparameter selection.
-- 2022-2023 is presealed holdout after candidate freeze.
-- 2024-2026-05 is sealed confirmation and report-only.
-- Residual-memory predictors use same-cutoff official residuals from `T-2` or older.
-- Lag-1 residuals, target-date residuals, raw audit payloads, helped/worsened labels, raw error bins, and sealed labels are excluded from predictors.
-""",
-    )
-    write_text(
-        exp_dir / "ASOF_CONTRACT.md",
-        """# As-Of Contract
+### As-Of Contract
 
-For prediction target date `T` at cutoff `c`, a residual-memory source row for prior date `d` is eligible only when `d <= T-2` and the prior official anchor for `d` was selected using the same cutoff profile `c`.
+For target date `T` at cutoff `c`, a residual-memory source date `d` is eligible only when `d <= T-2` and its official anchor was selected with the same cutoff profile. The target-day anchor is the latest eligible Info.gov local forecast issued at or before the cutoff.
 
-The selected target-day official anchor itself must be the latest eligible Info.gov local forecast row with issue time at or before the cutoff.
+### Protocol
+
+- Primary cutoff: `T-1 23:59 HKT`; sensitivity cutoffs: `T-1 21:00 HKT` and `T-1 18:00 HKT`.
+- Folds 1-4 select models and hyperparameters; 2022-2023 is presealed holdout after candidate freeze.
+- 2024 through 2026-05 is sealed confirmation and report-only.
+- Residual-memory predictors use same-cutoff residuals from `T-2` or older.
+- Lag-1 and target-date residuals, audit payloads, helped/worsened labels, raw error bins, and sealed labels are excluded from predictors.
+
+{generated_model_card}
+
+### Reproduce
+
+```powershell
+.\\.venv\\Scripts\\python.exe scripts\\run_hkg_tmax_residual_ml_official_memory.py --config {config_display} --output-dir {exp_dir / "results"}
+```
+
+Machine evidence: `results/summary.json`, `results/scoreboard.csv`, `results/leakage_audit.json`, `results/residual_memory_publication_safety_audit.json`, and `results/artifact_manifest.csv`.
 """,
+        default_title="0003 Official Residual Memory",
     )
     write_text(
         exp_dir / "DATA_MANIFEST.yaml",
@@ -238,16 +268,7 @@ The selected target-day official anchor itself must be the latest eligible Info.
   target_history: feature_safe.hko_target_history_pre2024
   hourly_readings: public.hko_info_gov_hourly_readings_1998_2026
 input_artifacts:
-  previous_results: experiments/hkg_tmax_residual_ml_strategy/results
-""",
-    )
-    write_text(
-        exp_dir / "REPRODUCE.md",
-        f"""# Reproduce
-
-```powershell
-.\\.venv\\Scripts\\python.exe scripts\\run_hkg_tmax_residual_ml_official_memory.py --config {config_path} --output-dir {exp_dir / "results"}
-```
+  previous_results: experiments/campaigns/residual-modeling/strategy/results
 """,
     )
     write_text(
@@ -261,15 +282,27 @@ reproducible: true
     )
 
 
-def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, database_url: str | None = None) -> dict[str, Any]:
+def run(
+    config_path: Path,
+    output_dir: Path,
+    compat_output_dir: Path | None,
+    database_url: str | None = None,
+) -> dict[str, Any]:
     del database_url  # This runner reuses already audited PostgreSQL-backed artifacts.
     config = load_config(config_path)
     seed = int(config.get("seed", 20260706))
-    previous_dir = REPO_ROOT / config.get("input_artifacts", {}).get("previous_results_dir", "experiments/hkg_tmax_residual_ml_strategy/results")
+    previous_dir = REPO_ROOT / config.get("input_artifacts", {}).get(
+        "previous_results_dir",
+        "experiments/campaigns/residual-modeling/strategy/results",
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     log(f"loading previous A7 artifacts from {previous_dir}")
-    matrix, previous_predictions, lineage, source_eligibility = read_previous_artifacts(previous_dir)
-    cutoff_profiles = list(config.get("cutoff_profiles", ["tminus1_2359", "tminus1_2100", "tminus1_1800"]))
+    matrix, previous_predictions, lineage, source_eligibility = read_previous_artifacts(
+        previous_dir
+    )
+    cutoff_profiles = list(
+        config.get("cutoff_profiles", ["tminus1_2359", "tminus1_2100", "tminus1_1800"])
+    )
     memory_config = config.get("residual_memory", {})
     min_counts_cfg = memory_config.get("min_counts", {})
     min_counts = {
@@ -294,9 +327,15 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
         max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90)),
     )
     feature_names = policy.feature_names
-    if len(feature_names) + len(memory_result.feature_names) > int(config.get("feature_policy", {}).get("max_features_with_residual_memory", 130)):
-        raise ValueError("Pruned feature set plus residual-memory block exceeds configured feature cap")
-    log(f"selected pruned features={len(feature_names)} residual_memory_features={len(memory_result.feature_names)}")
+    if len(feature_names) + len(memory_result.feature_names) > int(
+        config.get("feature_policy", {}).get("max_features_with_residual_memory", 130)
+    ):
+        raise ValueError(
+            "Pruned feature set plus residual-memory block exceeds configured feature cap"
+        )
+    log(
+        f"selected pruned features={len(feature_names)} residual_memory_features={len(memory_result.feature_names)}"
+    )
     result = run_official_residual_memory_experiment(
         matrix,
         previous_predictions,
@@ -310,7 +349,10 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
         matrix,
         lineage,
         feature_names=[*feature_names, *memory_result.feature_names],
-        router_thresholds={"sealed_rows_used_for_selection": False, "selection_stage": "rolling_validation_fold1_to_fold4"},
+        router_thresholds={
+            "sealed_rows_used_for_selection": False,
+            "selection_stage": "rolling_validation_fold1_to_fold4",
+        },
         router_predictions=pd.DataFrame(),
     )
     if memory_result.publication_safety_audit.get("status") != "pass":
@@ -327,11 +369,13 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
     )
     log("writing artifacts")
     write_json(output_dir / "summary.json", summary)
-    write_text(output_dir / "model_card.md", model_card(summary, result.scoreboards["scoreboard"]))
     for name, frame in result.scoreboards.items():
         write_csv(output_dir / f"{name}.csv", frame)
     write_csv(output_dir / "residual_memory_feature_audit.csv", memory_result.feature_audit)
-    write_json(output_dir / "residual_memory_publication_safety_audit.json", memory_result.publication_safety_audit)
+    write_json(
+        output_dir / "residual_memory_publication_safety_audit.json",
+        memory_result.publication_safety_audit,
+    )
     write_json(output_dir / "leakage_audit.json", leakage)
     write_json(
         output_dir / "row_count_audit.json",
@@ -341,15 +385,27 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
             "combined_prediction_rows": int(len(result.predictions)),
             "candidate_rows": int(len(result.candidate_rows)),
             "rows_by_cutoff": matrix.groupby("cutoff_profile").size().astype(int).to_dict(),
-            "prediction_rows_by_model": result.predictions.groupby("model_id").size().astype(int).to_dict(),
+            "prediction_rows_by_model": result.predictions.groupby("model_id")
+            .size()
+            .astype(int)
+            .to_dict(),
         },
     )
     write_json(output_dir / "row_identity_gate.json", result.row_identity_gate)
     write_json(output_dir / "feature_lineage.json", lineage.to_dict(orient="records"))
     write_json(output_dir / "model_selection_log.json", result.model_selection_log)
     write_json(output_dir / "ensemble_weights.json", result.ensemble_weights)
-    write_csv(output_dir / "feature_missingness_report.csv", feature_missingness_report(matrix, [*feature_names, *memory_result.feature_names]))
-    write_csv(output_dir / "feature_policy_report.csv", feature_policy_report(matrix, max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90))))
+    write_csv(
+        output_dir / "feature_missingness_report.csv",
+        feature_missingness_report(matrix, [*feature_names, *memory_result.feature_names]),
+    )
+    write_csv(
+        output_dir / "feature_policy_report.csv",
+        feature_policy_report(
+            matrix,
+            max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90)),
+        ),
+    )
     write_csv(output_dir / "feature_importance_lgbm.csv", result.feature_importance)
     write_csv(output_dir / "source_eligibility_audit.csv", source_eligibility_audit(matrix))
     write_csv(output_dir / "previous_source_eligibility_audit.csv", source_eligibility)
@@ -358,22 +414,36 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
     write_parquet(output_dir / "prediction_rows_candidates.parquet", result.candidate_rows)
     write_csv(output_dir / "prediction_rows_candidates.csv", result.candidate_rows)
     write_csv(output_dir / "artifact_manifest.csv", artifact_manifest(output_dir))
-    write_experiment_docs(output_dir.parent, config_path=config_path, summary=summary)
+    write_experiment_record(
+        output_dir.parent,
+        config_path=config_path,
+        summary=summary,
+        scoreboard=result.scoreboards["scoreboard"],
+    )
     if compat_output_dir is not None:
         compat_output_dir.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(output_dir, compat_output_dir, dirs_exist_ok=True)
+        shutil.copytree(
+            output_dir,
+            compat_output_dir,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("*.md"),
+        )
     return summary
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run HKG Tmax official residual-memory point-forecast experiment")
+    parser = argparse.ArgumentParser(
+        description="Run HKG Tmax official residual-memory point-forecast experiment"
+    )
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--compat-output-dir", default=str(DEFAULT_COMPAT_OUTPUT))
     parser.add_argument("--no-compat-copy", action="store_true")
     parser.add_argument(
         "--database-url",
-        default=os.environ.get("HKG_TMAX_DATABASE_URL") or os.environ.get("DATABASE_URL") or DEFAULT_DATABASE_URL,
+        default=os.environ.get("HKG_TMAX_DATABASE_URL")
+        or os.environ.get("DATABASE_URL")
+        or DEFAULT_DATABASE_URL,
     )
     return parser.parse_args()
 

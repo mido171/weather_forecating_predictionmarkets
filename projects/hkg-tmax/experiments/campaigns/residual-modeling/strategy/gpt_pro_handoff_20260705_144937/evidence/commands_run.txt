@@ -1,4 +1,0 @@
-.\.venv\Scripts\python.exe scripts\run_hkg_tmax_residual_ml_strategy.py --config configs\hkg_tmax\residual_ml_strategy.yaml --cutoff-profile tminus1_2359 --output-dir experiments\hkg_tmax_residual_ml_strategy\results_primary_smoke
-.\.venv\Scripts\python.exe scripts\run_hkg_tmax_residual_ml_strategy.py --config configs\hkg_tmax\residual_ml_strategy.yaml --output-dir experiments\hkg_tmax_residual_ml_strategy\results
-.\.venv\Scripts\python.exe -m compileall code\src\hkg_tmax scripts\run_hkg_tmax_residual_ml_strategy.py
-.\.venv\Scripts\python.exe -m pytest code\tests\test_hkg_tmax_residual_ml_strategy.py

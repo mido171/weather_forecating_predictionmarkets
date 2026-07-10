@@ -8,6 +8,36 @@ import pytest
 from scripts import backfill_public_weather_to_postgres as backfill
 
 
+def backfill_args() -> argparse.Namespace:
+    return backfill.build_arg_parser().parse_args(
+        ["--start-date", "2026-06-25", "--end-date", "2026-06-25"]
+    )
+
+
+def completed_summary(run_id: str) -> dict[str, object]:
+    return {
+        "run_id": run_id,
+        "status": "complete",
+        "execution_mode": "serial",
+        "elapsed_seconds": 12.5,
+        "start_date": "2026-06-25",
+        "end_date": "2026-06-25",
+        "source_issues_touched": 4,
+        "fetch_ok": 4,
+        "fetch_failed": 0,
+        "normalize_ok": 4,
+        "normalize_failed": 0,
+        "station_features_upserted": 8,
+        "area_features_upserted": 2,
+        "raw_bytes_deleted": 1024,
+        "max_staging_bytes": 2048,
+        "final_staging_bytes": 0,
+        "max_raw_object_bytes": 512,
+        "min_free_disk_bytes": 4096,
+        "by_source": {"gfs": {"fetch_ok": 4}},
+    }
+
+
 def test_parse_leads_default_range() -> None:
     assert backfill.parse_leads("0:48:3") == list(range(0, 49, 3))
     assert backfill.parse_leads("3,0,3") == [0, 3]
@@ -103,6 +133,13 @@ def test_optimized_cli_defaults_are_opt_in() -> None:
     assert optimized.model_normalize_workers == 1
     assert optimized.himawari_workers == 1
     assert optimized.model_range_coalesce_gap_bytes == 0
+    assert serial.experiment_dir == (
+        backfill.REPO_ROOT
+        / "experiments"
+        / "campaigns"
+        / "hkg-tmax"
+        / backfill.EXPERIMENT_ID
+    )
 
 
 def test_safe_delete_file_is_bounded_to_staging_root(tmp_path) -> None:
@@ -130,3 +167,64 @@ def test_file_size_counts_nested_raw_bytes(tmp_path) -> None:
 def test_unknown_source_rejected() -> None:
     with pytest.raises(argparse.ArgumentTypeError):
         backfill.normalize_sources("gfs,unknown")
+
+
+def test_experiment_writes_one_readme_and_keeps_machine_artifacts(tmp_path) -> None:
+    args = backfill_args()
+    run_id = "run-20260625"
+    summary = completed_summary(run_id)
+
+    backfill.initialize_experiment_docs(tmp_path, args, run_id)
+    backfill.write_results(tmp_path, summary)
+    backfill.write_status(tmp_path, "COMPLETE", summary)
+
+    markdown_files = sorted(
+        path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*.md")
+    )
+    assert markdown_files == ["README.md"]
+    assert (tmp_path / "RUN_CONFIG.yaml").is_file()
+    assert (tmp_path / "DATA_MANIFEST.yaml").is_file()
+    assert (tmp_path / "STATUS.yaml").is_file()
+    assert (tmp_path / "results" / "metrics.json").is_file()
+    assert (tmp_path / "results" / "runs" / run_id / "metrics.json").is_file()
+
+    readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert "## Acquisition Contract" in readme
+    assert "### Hypothesis" in readme
+    assert "### Protocol" in readme
+    assert "### As-Of Contract" in readme
+    assert "### Reproduce" in readme
+    assert "## Latest Run" in readme
+    assert "### Conclusion" in readme
+    assert f"Run id: `{run_id}`" in readme
+
+
+def test_readme_update_is_idempotent_across_reruns(tmp_path) -> None:
+    args = backfill_args()
+    first_summary = completed_summary("run-one")
+    (tmp_path / "README.md").write_text(
+        "# Curated Experiment Summary\n\nManual historical context must remain.\n",
+        encoding="utf-8",
+    )
+
+    backfill.initialize_experiment_docs(tmp_path, args, "run-one")
+    backfill.write_results(tmp_path, first_summary)
+    first_readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert "Manual historical context must remain." in first_readme
+
+    backfill.initialize_experiment_docs(tmp_path, args, "run-one")
+    backfill.write_results(tmp_path, first_summary)
+    assert (tmp_path / "README.md").read_text(encoding="utf-8") == first_readme
+
+    second_summary = completed_summary("run-two")
+    backfill.initialize_experiment_docs(tmp_path, args, "run-two")
+    backfill.write_results(tmp_path, second_summary)
+    rerun_readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+
+    assert rerun_readme.count("## Acquisition Contract") == 1
+    assert rerun_readme.count("## Latest Run") == 1
+    assert "run-one" not in rerun_readme
+    assert "run-two" in rerun_readme
+    assert "Manual historical context must remain." in rerun_readme
+    assert (tmp_path / "results" / "runs" / "run-one" / "metrics.json").is_file()
+    assert (tmp_path / "results" / "runs" / "run-two" / "metrics.json").is_file()

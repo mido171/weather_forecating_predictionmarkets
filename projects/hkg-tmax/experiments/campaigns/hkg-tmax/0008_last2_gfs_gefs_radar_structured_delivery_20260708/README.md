@@ -1,29 +1,32 @@
-# 0008_last2_gfs_gefs_radar_structured_delivery_20260708
+# 0008 Two-day GFS/GEFS/radar structured delivery
 
-Two-day structured delivery for GFS, GEFS control, and radar data.
+Status: `complete`. Window: 2026-07-06 00Z to 2026-07-08 00Z, end-exclusive.
 
-UTC window: `2026-07-06T00:00:00Z` to `2026-07-08T00:00:00Z` exclusive.
+## Result
 
-## Key Outputs
+| Output family | Rows |
+|---|---:|
+| Model request/index manifests | 272 each |
+| HKO model point features | 272 |
+| HKG bbox summary features | 3,840 |
+| Radar manifest/image features | 240 each |
+| Attribute catalog | 163 |
+| Source-issue glue | 512 |
 
-| Output | Rows | Meaning |
-|---|---:|---|
-| `normalized/model_fetch_manifest_last2.csv` | 272 | GFS/GEFS requested object manifest, status, URL, issue/valid/as-of clocks, raw hash/bytes from the 7-day run. |
-| `normalized/model_idx_catalog_last2.csv` | 272 | Full NOMADS GRIB index-level catalog per cycle/lead, including available variables. |
-| `normalized/model_station_features_last2.csv` | 272 | HKO point feature rows. |
-| `normalized/model_bbox_features_last2.csv` | 3840 | HKG bounding-box summary feature rows. |
-| `normalized/radar_envf_manifest_frames_last2.csv` | 240 | Historical ENVF-served HKO radar frame manifest. |
-| `normalized/radar_envf_image_features_last2.csv` | 240 | Numeric image-derived radar color/rainfall proxies. |
-| `normalized/attribute_catalog_last2.csv` | 163 | Column-by-column attribute catalog for every table above. |
-| `normalized/source_issue_glue_last2.csv` | 512 | High-level glue rows suitable for a Postgres registry table. |
-| `metadata/postgres_glue_schema.sql` | - | Proposed high-level Postgres schema. |
+The run produced compact structured tables and retained no raw payloads.
 
-## Leakage / As-Of Clocks
+## As-of and radar caveat
 
-GFS/GEFS rows retain `issued_at_utc`, `valid_at_utc`, and `availability_proxy_utc` from experiment 0007.
+GFS/GEFS kept issue, valid, and availability-proxy clocks. Radar came from an
+HKUST ENVF historical display of HKO imagery, not native exact-vintage HKO
+metadata. Its observed time plus 30 minutes was used conservatively and the
+source remains a proxy.
 
-Radar rows are from HKUST ENVF historical display of HKO radar imagery. They have observed image times, not native HKO historical issue metadata, so the delivery marks them `not_native_exact_vintage` and uses `observed_at_utc + 30m` as a conservative availability proxy.
+## Reproduce and evidence
 
-## Raw Retention
+```powershell
+.\.venv\Scripts\python.exe scripts\build_last2_gfs_gefs_radar_structured_delivery.py --help
+```
 
-This folder intentionally keeps no raw payloads. Radar image bytes are fetched, decoded into numeric features, and discarded in memory. The script removes its staging directory at the end.
+The `normalized/` CSV/JSON tables and `STATUS.yaml` are the retained evidence.
+Historical references to a removed SQL proposal are non-current provenance.

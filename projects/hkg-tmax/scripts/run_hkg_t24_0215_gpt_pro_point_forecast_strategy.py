@@ -24,11 +24,15 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from hkg_tmax.evaluation.reporting import (
+    demote_markdown_headings,
+    write_bounded_readme_section,
+)
 from hkg_tmax.paths import ProjectPaths, configured_input_path
 
 PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
 REPO_ROOT = PROJECT_PATHS.project_root
-EXPERIMENTS_ROOT = REPO_ROOT / "experiments"
+EXPERIMENTS_ROOT = REPO_ROOT / "experiments" / "campaigns" / "hkg-t24"
 EXPERIMENT_ID = "0215"
 SLUG = "gpt_pro_point_forecast_strategy"
 TITLE = "GPT-Pro HKO Lead-1 Point Forecast Strategy"
@@ -47,6 +51,8 @@ CONFIRMATION_START = pd.Timestamp("2024-01-01")
 CUTOFFS = ("17:00", "18:00", "21:00", "23:59")
 VALIDATION_YEARS = tuple(range(2011, 2024))
 RNG_SEED = 215
+README_RESULTS_START = "<!-- BEGIN GENERATED HKG T24 0215 RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED HKG T24 0215 RESULT -->"
 
 CLIMATE_TABLE_DISCOVERY_SQL = """
 SELECT table_schema, table_name
@@ -188,7 +194,9 @@ def write_text(path: Path, text: str) -> None:
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=False, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=False, default=str) + "\n", encoding="utf-8"
+    )
 
 
 def write_csv(path: Path, frame: pd.DataFrame) -> None:
@@ -294,7 +302,9 @@ def pct(values: Sequence[float], q: float) -> float:
     return float(np.quantile(arr, q)) if len(arr) else math.nan
 
 
-def load_sql_frame(connection: Any, sql: str, params: tuple[Any, ...] | None = None) -> pd.DataFrame:
+def load_sql_frame(
+    connection: Any, sql: str, params: tuple[Any, ...] | None = None
+) -> pd.DataFrame:
     with connection.cursor() as cursor:
         if params is None:
             cursor.execute(sql)
@@ -314,7 +324,9 @@ def discover_climate_table(connection: Any) -> tuple[str, pd.DataFrame]:
     return qualified, tables
 
 
-def load_db_inputs(database_url: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame]:
+def load_db_inputs(
+    database_url: str,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame]:
     with psycopg.connect(database_url) as connection:
         climate_table, climate_manifest = discover_climate_table(connection)
         labels = load_sql_frame(connection, TARGET_SQL)
@@ -340,14 +352,20 @@ def load_db_inputs(database_url: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.Da
         )
     for frame in (labels, forecasts, lead0):
         if "target_date" in frame.columns:
-            frame["target_date"] = pd.to_datetime(frame["target_date"], errors="coerce").dt.normalize()
+            frame["target_date"] = pd.to_datetime(
+                frame["target_date"], errors="coerce"
+            ).dt.normalize()
     if not forecasts.empty:
         forecasts["issue_at_hkt"] = pd.to_datetime(forecasts["issue_at_hkt"], errors="coerce")
-        forecasts["issue_at_utc"] = pd.to_datetime(forecasts["issue_at_utc"], errors="coerce", utc=True)
+        forecasts["issue_at_utc"] = pd.to_datetime(
+            forecasts["issue_at_utc"], errors="coerce", utc=True
+        )
     if not lead0.empty:
         lead0["issue_at_hkt"] = pd.to_datetime(lead0["issue_at_hkt"], errors="coerce")
     if not climate.empty:
-        climate["local_date"] = pd.to_datetime(climate["local_date"], errors="coerce").dt.normalize()
+        climate["local_date"] = pd.to_datetime(
+            climate["local_date"], errors="coerce"
+        ).dt.normalize()
     return labels, forecasts, lead0, climate, climate_table, climate_manifest
 
 
@@ -360,7 +378,11 @@ def prepare_labels(labels: pd.DataFrame) -> pd.DataFrame:
         & labels["target_tmax_c"].notna()
         & (labels["target_date"] < CONFIRMATION_START)
     ].copy()
-    return labels.sort_values("target_date").drop_duplicates("target_date", keep="last").reset_index(drop=True)
+    return (
+        labels.sort_values("target_date")
+        .drop_duplicates("target_date", keep="last")
+        .reset_index(drop=True)
+    )
 
 
 def build_row_frame(labels: pd.DataFrame) -> pd.DataFrame:
@@ -407,12 +429,22 @@ def has_reversal(values: Sequence[float]) -> bool:
     return bool(np.any(signs[1:] != signs[:-1]))
 
 
-def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cutoff: str) -> pd.DataFrame:
+def select_forecast_features(
+    labels: pd.DataFrame, forecasts: pd.DataFrame, cutoff: str
+) -> pd.DataFrame:
     label_dates = labels[["target_date"]].drop_duplicates().copy()
-    label_dates["target_date"] = pd.to_datetime(label_dates["target_date"], errors="coerce").dt.normalize()
-    label_dates["asof_cutoff_hkt"] = label_dates["target_date"].map(lambda d: cutoff_timestamp_hkt(d, cutoff))
-    eligible_all = forecasts.merge(label_dates, on="target_date", how="inner", validate="many_to_one")
-    eligible_all = eligible_all[eligible_all["issue_at_hkt"].le(eligible_all["asof_cutoff_hkt"])].copy()
+    label_dates["target_date"] = pd.to_datetime(
+        label_dates["target_date"], errors="coerce"
+    ).dt.normalize()
+    label_dates["asof_cutoff_hkt"] = label_dates["target_date"].map(
+        lambda d: cutoff_timestamp_hkt(d, cutoff)
+    )
+    eligible_all = forecasts.merge(
+        label_dates, on="target_date", how="inner", validate="many_to_one"
+    )
+    eligible_all = eligible_all[
+        eligible_all["issue_at_hkt"].le(eligible_all["asof_cutoff_hkt"])
+    ].copy()
     groups = {
         date: group.sort_values("issue_at_hkt")
         for date, group in eligible_all.groupby("target_date", sort=False)
@@ -444,8 +476,12 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
         latest = eligible.iloc[-1]
         first = eligible.iloc[0]
         prev = eligible.iloc[-2] if len(eligible) >= 2 else None
-        max_values = pd.to_numeric(eligible["forecast_max_c"], errors="coerce").to_numpy(dtype=float)
-        min_values = pd.to_numeric(eligible["forecast_min_c"], errors="coerce").to_numpy(dtype=float)
+        max_values = pd.to_numeric(eligible["forecast_max_c"], errors="coerce").to_numpy(
+            dtype=float
+        )
+        min_values = pd.to_numeric(eligible["forecast_min_c"], errors="coerce").to_numpy(
+            dtype=float
+        )
         range_values = max_values - min_values
         issue_times = pd.to_datetime(eligible["issue_at_hkt"], errors="coerce")
         latest_issue = pd.Timestamp(latest["issue_at_hkt"])
@@ -455,9 +491,15 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
         latest_text = f"{latest.get('title') or ''} {latest.get('temperature_text') or ''} {str(latest.get('full_text') or '')[:2500]}"
         flags = text_flags(latest_text)
         fam = issue_family(latest_issue)
-        max_revision_count = int(np.sum(np.abs(np.diff(max_values)) > 1e-9)) if len(max_values) > 1 else 0
-        min_revision_count = int(np.sum(np.abs(np.diff(min_values)) > 1e-9)) if len(min_values) > 1 else 0
-        range_revision_count = int(np.sum(np.abs(np.diff(range_values)) > 1e-9)) if len(range_values) > 1 else 0
+        max_revision_count = (
+            int(np.sum(np.abs(np.diff(max_values)) > 1e-9)) if len(max_values) > 1 else 0
+        )
+        min_revision_count = (
+            int(np.sum(np.abs(np.diff(min_values)) > 1e-9)) if len(min_values) > 1 else 0
+        )
+        range_revision_count = (
+            int(np.sum(np.abs(np.diff(range_values)) > 1e-9)) if len(range_values) > 1 else 0
+        )
         row = {
             **base,
             **flags,
@@ -471,9 +513,13 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
             "first_issue_at_hkt": first_issue,
             "previous_issue_at_hkt": prev_issue,
             "minutes_latest_issue_to_cutoff": float((asof - latest_issue).total_seconds() / 60.0),
-            "minutes_latest_issue_to_target_midnight": float((target_date - latest_issue).total_seconds() / 60.0),
+            "minutes_latest_issue_to_target_midnight": float(
+                (target_date - latest_issue).total_seconds() / 60.0
+            ),
             "hours_latest_issue_to_target_noon": float(
-                (pd.Timestamp.combine(target_date.date(), time(12, 0)) - latest_issue).total_seconds()
+                (
+                    pd.Timestamp.combine(target_date.date(), time(12, 0)) - latest_issue
+                ).total_seconds()
                 / 3600.0
             ),
             "forecast_max_c_latest": float(latest["forecast_max_c"]),
@@ -483,19 +529,27 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
                 if pd.notna(latest.get("forecast_midpoint_c"))
                 else (float(latest["forecast_max_c"]) + float(latest["forecast_min_c"])) / 2.0
             ),
-            "forecast_range_c_latest": float(float(latest["forecast_max_c"]) - float(latest["forecast_min_c"])),
+            "forecast_range_c_latest": float(
+                float(latest["forecast_max_c"]) - float(latest["forecast_min_c"])
+            ),
             "forecast_max_floor": float(np.floor(float(latest["forecast_max_c"]))),
             "forecast_max_ceil": float(np.ceil(float(latest["forecast_max_c"]))),
             "forecast_max_round_int": float(round(float(latest["forecast_max_c"]))),
             "forecast_max_half_degree": float(round(float(latest["forecast_max_c"]) * 2.0) / 2.0),
-            "forecast_max_decimal_part": float(float(latest["forecast_max_c"]) - np.floor(float(latest["forecast_max_c"]))),
+            "forecast_max_decimal_part": float(
+                float(latest["forecast_max_c"]) - np.floor(float(latest["forecast_max_c"]))
+            ),
             "forecast_min_round_int": float(round(float(latest["forecast_min_c"]))),
-            "forecast_range_bin": forecast_range_bin(float(latest["forecast_max_c"]) - float(latest["forecast_min_c"])),
+            "forecast_range_bin": forecast_range_bin(
+                float(latest["forecast_max_c"]) - float(latest["forecast_min_c"])
+            ),
             "forecast_max_bin": forecast_max_bin(float(latest["forecast_max_c"])),
             "target_date_confidence_latest": latest.get("target_date_confidence"),
             "parse_status_latest_is_ok": str(latest.get("parse_status")).lower() == "ok",
             "stale_snapshot_flag_latest": bool(latest.get("stale_snapshot_flag") or False),
-            "stale_hours_latest": float(latest.get("stale_hours")) if pd.notna(latest.get("stale_hours")) else 0.0,
+            "stale_hours_latest": float(latest.get("stale_hours"))
+            if pd.notna(latest.get("stale_hours"))
+            else 0.0,
             "n_issues_before_cutoff": int(len(eligible)),
             "minutes_first_to_latest": float((latest_issue - first_issue).total_seconds() / 60.0),
             "minutes_prev_to_latest": float((latest_issue - prev_issue).total_seconds() / 60.0)
@@ -506,11 +560,17 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
             "forecast_min_first_c": float(min_values[0]),
             "forecast_min_prev_c": float(min_values[-2]) if len(min_values) >= 2 else math.nan,
             "forecast_range_first_c": float(range_values[0]),
-            "forecast_range_prev_c": float(range_values[-2]) if len(range_values) >= 2 else math.nan,
+            "forecast_range_prev_c": float(range_values[-2])
+            if len(range_values) >= 2
+            else math.nan,
             "max_delta_latest_minus_first": float(max_values[-1] - max_values[0]),
-            "max_delta_latest_minus_prev": float(max_values[-1] - max_values[-2]) if len(max_values) >= 2 else 0.0,
+            "max_delta_latest_minus_prev": float(max_values[-1] - max_values[-2])
+            if len(max_values) >= 2
+            else 0.0,
             "min_delta_latest_minus_first": float(min_values[-1] - min_values[0]),
-            "min_delta_latest_minus_prev": float(min_values[-1] - min_values[-2]) if len(min_values) >= 2 else 0.0,
+            "min_delta_latest_minus_prev": float(min_values[-1] - min_values[-2])
+            if len(min_values) >= 2
+            else 0.0,
             "range_delta_latest_minus_first": float(range_values[-1] - range_values[0]),
             "range_delta_latest_minus_prev": float(range_values[-1] - range_values[-2])
             if len(range_values) >= 2
@@ -518,45 +578,91 @@ def select_forecast_features(labels: pd.DataFrame, forecasts: pd.DataFrame, cuto
             "max_revision_count": max_revision_count,
             "min_revision_count": min_revision_count,
             "range_revision_count": range_revision_count,
-            "max_revision_abs_path": float(np.sum(np.abs(np.diff(max_values)))) if len(max_values) > 1 else 0.0,
-            "min_revision_abs_path": float(np.sum(np.abs(np.diff(min_values)))) if len(min_values) > 1 else 0.0,
-            "range_revision_abs_path": float(np.sum(np.abs(np.diff(range_values)))) if len(range_values) > 1 else 0.0,
+            "max_revision_abs_path": float(np.sum(np.abs(np.diff(max_values))))
+            if len(max_values) > 1
+            else 0.0,
+            "min_revision_abs_path": float(np.sum(np.abs(np.diff(min_values))))
+            if len(min_values) > 1
+            else 0.0,
+            "range_revision_abs_path": float(np.sum(np.abs(np.diff(range_values))))
+            if len(range_values) > 1
+            else 0.0,
             "max_revision_signed_path": float(max_values[-1] - max_values[0]),
             "min_revision_signed_path": float(min_values[-1] - min_values[0]),
             "range_revision_signed_path": float(range_values[-1] - range_values[0]),
             "max_slope_c_per_hour": float((max_values[-1] - max_values[0]) / elapsed_hours),
             "min_slope_c_per_hour": float((min_values[-1] - min_values[0]) / elapsed_hours),
             "range_slope_c_per_hour": float((range_values[-1] - range_values[0]) / elapsed_hours),
-            "last2_max_mean": safe_mean(max_values[-2:]) if len(max_values) >= 2 else float(max_values[-1]),
+            "last2_max_mean": safe_mean(max_values[-2:])
+            if len(max_values) >= 2
+            else float(max_values[-1]),
             "last2_max_std": safe_std(max_values[-2:]) if len(max_values) >= 2 else 0.0,
-            "last3_max_mean": safe_mean(max_values[-3:]) if len(max_values) >= 3 else safe_mean(max_values),
-            "last3_max_std": safe_std(max_values[-3:]) if len(max_values) >= 3 else safe_std(max_values),
-            "last2_min_mean": safe_mean(min_values[-2:]) if len(min_values) >= 2 else float(min_values[-1]),
+            "last3_max_mean": safe_mean(max_values[-3:])
+            if len(max_values) >= 3
+            else safe_mean(max_values),
+            "last3_max_std": safe_std(max_values[-3:])
+            if len(max_values) >= 3
+            else safe_std(max_values),
+            "last2_min_mean": safe_mean(min_values[-2:])
+            if len(min_values) >= 2
+            else float(min_values[-1]),
             "last2_min_std": safe_std(min_values[-2:]) if len(min_values) >= 2 else 0.0,
-            "last3_min_mean": safe_mean(min_values[-3:]) if len(min_values) >= 3 else safe_mean(min_values),
-            "last3_min_std": safe_std(min_values[-3:]) if len(min_values) >= 3 else safe_std(min_values),
-            "last2_range_mean": safe_mean(range_values[-2:]) if len(range_values) >= 2 else float(range_values[-1]),
+            "last3_min_mean": safe_mean(min_values[-3:])
+            if len(min_values) >= 3
+            else safe_mean(min_values),
+            "last3_min_std": safe_std(min_values[-3:])
+            if len(min_values) >= 3
+            else safe_std(min_values),
+            "last2_range_mean": safe_mean(range_values[-2:])
+            if len(range_values) >= 2
+            else float(range_values[-1]),
             "last2_range_std": safe_std(range_values[-2:]) if len(range_values) >= 2 else 0.0,
-            "last3_range_mean": safe_mean(range_values[-3:]) if len(range_values) >= 3 else safe_mean(range_values),
-            "last3_range_std": safe_std(range_values[-3:]) if len(range_values) >= 3 else safe_std(range_values),
-            "max_monotone_up": bool(np.all(np.diff(max_values) >= -1e-9) and max_revision_count > 0),
-            "max_monotone_down": bool(np.all(np.diff(max_values) <= 1e-9) and max_revision_count > 0),
+            "last3_range_mean": safe_mean(range_values[-3:])
+            if len(range_values) >= 3
+            else safe_mean(range_values),
+            "last3_range_std": safe_std(range_values[-3:])
+            if len(range_values) >= 3
+            else safe_std(range_values),
+            "max_monotone_up": bool(
+                np.all(np.diff(max_values) >= -1e-9) and max_revision_count > 0
+            ),
+            "max_monotone_down": bool(
+                np.all(np.diff(max_values) <= 1e-9) and max_revision_count > 0
+            ),
             "max_reversal": has_reversal(max_values),
-            "late_upward_revision": bool(len(max_values) >= 2 and max_values[-1] - max_values[-2] >= 0.5 and latest_issue.hour >= 21),
-            "late_downward_revision": bool(len(max_values) >= 2 and max_values[-1] - max_values[-2] <= -0.5 and latest_issue.hour >= 21),
+            "late_upward_revision": bool(
+                len(max_values) >= 2
+                and max_values[-1] - max_values[-2] >= 0.5
+                and latest_issue.hour >= 21
+            ),
+            "late_downward_revision": bool(
+                len(max_values) >= 2
+                and max_values[-1] - max_values[-2] <= -0.5
+                and latest_issue.hour >= 21
+            ),
             "large_upward_revision_path": bool(
-                len(max_values) > 1 and np.sum(np.abs(np.diff(max_values))) >= 1.0 and max_values[-1] > max_values[0]
+                len(max_values) > 1
+                and np.sum(np.abs(np.diff(max_values))) >= 1.0
+                and max_values[-1] > max_values[0]
             ),
             "large_downward_revision_path": bool(
-                len(max_values) > 1 and np.sum(np.abs(np.diff(max_values))) >= 1.0 and max_values[-1] < max_values[0]
+                len(max_values) > 1
+                and np.sum(np.abs(np.diff(max_values))) >= 1.0
+                and max_values[-1] < max_values[0]
             ),
             "min_side_upward_revision": bool(min_values[-1] > min_values[0]),
             "min_side_downward_revision": bool(min_values[-1] < min_values[0]),
-            "min_side_revision_abs_path": float(np.sum(np.abs(np.diff(min_values)))) if len(min_values) > 1 else 0.0,
+            "min_side_revision_abs_path": float(np.sum(np.abs(np.diff(min_values))))
+            if len(min_values) > 1
+            else 0.0,
             "range_widening": bool(range_values[-1] > range_values[0]),
             "range_narrowing": bool(range_values[-1] < range_values[0]),
-            "stale_issue_count": int(pd.Series(eligible["stale_snapshot_flag"]).fillna(False).astype(bool).sum()),
-            "max_stale_hours_before_cutoff": float(pd.to_numeric(eligible["stale_hours"], errors="coerce").max())
+            "stale_issue_count": int(
+                pd.Series(eligible["stale_snapshot_flag"]).fillna(False).astype(bool).sum()
+            ),
+            "max_stale_hours_before_cutoff": float(
+                pd.to_numeric(eligible["stale_hours"], errors="coerce").max()
+            )
             if pd.to_numeric(eligible["stale_hours"], errors="coerce").notna().any()
             else 0.0,
             "latest_is_stale": bool(latest.get("stale_snapshot_flag") or False),
@@ -600,10 +706,16 @@ def forecast_max_bin(value: float | None) -> str:
     return "gt_35"
 
 
-def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame, cutoff: str) -> pd.DataFrame:
+def select_forecast_features_fast(
+    labels: pd.DataFrame, forecasts: pd.DataFrame, cutoff: str
+) -> pd.DataFrame:
     label_dates = labels[["target_date"]].drop_duplicates().copy()
-    label_dates["target_date"] = pd.to_datetime(label_dates["target_date"], errors="coerce").dt.normalize()
-    label_dates["asof_cutoff_hkt"] = label_dates["target_date"].map(lambda d: cutoff_timestamp_hkt(d, cutoff))
+    label_dates["target_date"] = pd.to_datetime(
+        label_dates["target_date"], errors="coerce"
+    ).dt.normalize()
+    label_dates["asof_cutoff_hkt"] = label_dates["target_date"].map(
+        lambda d: cutoff_timestamp_hkt(d, cutoff)
+    )
     base = label_dates[["target_date"]].copy()
     base["cutoff"] = cutoff
     base["official_available_before_cutoff"] = False
@@ -630,9 +742,13 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
     eligible["range_diff"] = grouped["forecast_range_calc"].diff()
     eligible["issue_family_calc"] = eligible["issue_at_hkt"].map(issue_family)
 
-    latest = eligible[eligible["issue_rank"].eq(eligible["issue_count"] - 1)].set_index("target_date", drop=False)
+    latest = eligible[eligible["issue_rank"].eq(eligible["issue_count"] - 1)].set_index(
+        "target_date", drop=False
+    )
     first = eligible[eligible["issue_rank"].eq(0)].set_index("target_date", drop=False)
-    prev = eligible[eligible["issue_count"].ge(2) & eligible["issue_rank"].eq(eligible["issue_count"] - 2)].set_index("target_date", drop=False)
+    prev = eligible[
+        eligible["issue_count"].ge(2) & eligible["issue_rank"].eq(eligible["issue_count"] - 2)
+    ].set_index("target_date", drop=False)
     idx = latest.index
     out = pd.DataFrame(index=idx)
     out["target_date"] = latest["target_date"]
@@ -652,28 +768,39 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
         latest["target_date"] - latest["issue_at_hkt"]
     ).dt.total_seconds() / 60.0
     out["hours_latest_issue_to_target_noon"] = (
-        latest["target_date"].map(lambda d: pd.Timestamp.combine(d.date(), time(12, 0))) - latest["issue_at_hkt"]
+        latest["target_date"].map(lambda d: pd.Timestamp.combine(d.date(), time(12, 0)))
+        - latest["issue_at_hkt"]
     ).dt.total_seconds() / 3600.0
     out["forecast_max_c_latest"] = latest["forecast_max_c"]
     out["forecast_min_c_latest"] = latest["forecast_min_c"]
     midpoint = pd.to_numeric(latest.get("forecast_midpoint_c"), errors="coerce")
-    out["forecast_midpoint_c_latest"] = midpoint.fillna((out["forecast_max_c_latest"] + out["forecast_min_c_latest"]) / 2.0)
+    out["forecast_midpoint_c_latest"] = midpoint.fillna(
+        (out["forecast_max_c_latest"] + out["forecast_min_c_latest"]) / 2.0
+    )
     out["forecast_range_c_latest"] = out["forecast_max_c_latest"] - out["forecast_min_c_latest"]
     out["forecast_max_floor"] = np.floor(out["forecast_max_c_latest"])
     out["forecast_max_ceil"] = np.ceil(out["forecast_max_c_latest"])
     out["forecast_max_round_int"] = np.round(out["forecast_max_c_latest"])
     out["forecast_max_half_degree"] = np.round(out["forecast_max_c_latest"] * 2.0) / 2.0
-    out["forecast_max_decimal_part"] = out["forecast_max_c_latest"] - np.floor(out["forecast_max_c_latest"])
+    out["forecast_max_decimal_part"] = out["forecast_max_c_latest"] - np.floor(
+        out["forecast_max_c_latest"]
+    )
     out["forecast_min_round_int"] = np.round(out["forecast_min_c_latest"])
     out["forecast_range_bin"] = out["forecast_range_c_latest"].map(forecast_range_bin)
     out["forecast_max_bin"] = out["forecast_max_c_latest"].map(forecast_max_bin)
     out["target_date_confidence_latest"] = latest.get("target_date_confidence")
     out["parse_status_latest_is_ok"] = latest.get("parse_status").astype(str).str.lower().eq("ok")
     out["stale_snapshot_flag_latest"] = latest.get("stale_snapshot_flag").fillna(False).astype(bool)
-    out["stale_hours_latest"] = pd.to_numeric(latest.get("stale_hours"), errors="coerce").fillna(0.0)
+    out["stale_hours_latest"] = pd.to_numeric(latest.get("stale_hours"), errors="coerce").fillna(
+        0.0
+    )
     out["n_issues_before_cutoff"] = latest["issue_count"].astype(int)
-    out["minutes_first_to_latest"] = (out["latest_issue_at_hkt"] - out["first_issue_at_hkt"]).dt.total_seconds() / 60.0
-    out["minutes_prev_to_latest"] = (out["latest_issue_at_hkt"] - out["previous_issue_at_hkt"]).dt.total_seconds() / 60.0
+    out["minutes_first_to_latest"] = (
+        out["latest_issue_at_hkt"] - out["first_issue_at_hkt"]
+    ).dt.total_seconds() / 60.0
+    out["minutes_prev_to_latest"] = (
+        out["latest_issue_at_hkt"] - out["previous_issue_at_hkt"]
+    ).dt.total_seconds() / 60.0
     out["forecast_max_first_c"] = first.reindex(idx)["forecast_max_c"]
     out["forecast_max_prev_c"] = prev.reindex(idx)["forecast_max_c"]
     out["forecast_min_first_c"] = first.reindex(idx)["forecast_min_c"]
@@ -681,11 +808,19 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
     out["forecast_range_first_c"] = first.reindex(idx)["forecast_range_calc"]
     out["forecast_range_prev_c"] = prev.reindex(idx)["forecast_range_calc"]
     out["max_delta_latest_minus_first"] = out["forecast_max_c_latest"] - out["forecast_max_first_c"]
-    out["max_delta_latest_minus_prev"] = (out["forecast_max_c_latest"] - out["forecast_max_prev_c"]).fillna(0.0)
+    out["max_delta_latest_minus_prev"] = (
+        out["forecast_max_c_latest"] - out["forecast_max_prev_c"]
+    ).fillna(0.0)
     out["min_delta_latest_minus_first"] = out["forecast_min_c_latest"] - out["forecast_min_first_c"]
-    out["min_delta_latest_minus_prev"] = (out["forecast_min_c_latest"] - out["forecast_min_prev_c"]).fillna(0.0)
-    out["range_delta_latest_minus_first"] = out["forecast_range_c_latest"] - out["forecast_range_first_c"]
-    out["range_delta_latest_minus_prev"] = (out["forecast_range_c_latest"] - out["forecast_range_prev_c"]).fillna(0.0)
+    out["min_delta_latest_minus_prev"] = (
+        out["forecast_min_c_latest"] - out["forecast_min_prev_c"]
+    ).fillna(0.0)
+    out["range_delta_latest_minus_first"] = (
+        out["forecast_range_c_latest"] - out["forecast_range_first_c"]
+    )
+    out["range_delta_latest_minus_prev"] = (
+        out["forecast_range_c_latest"] - out["forecast_range_prev_c"]
+    ).fillna(0.0)
 
     summary = eligible.groupby("target_date").agg(
         max_revision_count=("max_diff", lambda s: int((s.abs() > 1e-9).sum())),
@@ -696,34 +831,64 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
         range_revision_abs_path=("range_diff", lambda s: float(s.abs().sum())),
         max_diff_min=("max_diff", "min"),
         max_diff_max=("max_diff", "max"),
-        stale_issue_count=("stale_snapshot_flag", lambda s: int(pd.Series(s).fillna(False).astype(bool).sum())),
-        max_stale_hours_before_cutoff=("stale_hours", lambda s: float(pd.to_numeric(s, errors="coerce").max()) if pd.to_numeric(s, errors="coerce").notna().any() else 0.0),
+        stale_issue_count=(
+            "stale_snapshot_flag",
+            lambda s: int(pd.Series(s).fillna(False).astype(bool).sum()),
+        ),
+        max_stale_hours_before_cutoff=(
+            "stale_hours",
+            lambda s: (
+                float(pd.to_numeric(s, errors="coerce").max())
+                if pd.to_numeric(s, errors="coerce").notna().any()
+                else 0.0
+            ),
+        ),
     )
     out = out.join(summary)
     out["max_revision_signed_path"] = out["max_delta_latest_minus_first"]
     out["min_revision_signed_path"] = out["min_delta_latest_minus_first"]
     out["range_revision_signed_path"] = out["range_delta_latest_minus_first"]
-    elapsed_hours = ((out["latest_issue_at_hkt"] - out["first_issue_at_hkt"]).dt.total_seconds() / 3600.0).clip(lower=0.25)
+    elapsed_hours = (
+        (out["latest_issue_at_hkt"] - out["first_issue_at_hkt"]).dt.total_seconds() / 3600.0
+    ).clip(lower=0.25)
     out["max_slope_c_per_hour"] = out["max_delta_latest_minus_first"] / elapsed_hours
     out["min_slope_c_per_hour"] = out["min_delta_latest_minus_first"] / elapsed_hours
     out["range_slope_c_per_hour"] = out["range_delta_latest_minus_first"] / elapsed_hours
 
     tail2 = eligible.groupby("target_date").tail(2).groupby("target_date")
     tail3 = eligible.groupby("target_date").tail(3).groupby("target_date")
-    for prefix, col in (("max", "forecast_max_c"), ("min", "forecast_min_c"), ("range", "forecast_range_calc")):
+    for prefix, col in (
+        ("max", "forecast_max_c"),
+        ("min", "forecast_min_c"),
+        ("range", "forecast_range_calc"),
+    ):
         out[f"last2_{prefix}_mean"] = tail2[col].mean()
         out[f"last2_{prefix}_std"] = tail2[col].std(ddof=0).fillna(0.0)
         out[f"last3_{prefix}_mean"] = tail3[col].mean()
         out[f"last3_{prefix}_std"] = tail3[col].std(ddof=0).fillna(0.0)
 
-    out["max_monotone_up"] = out["max_diff_min"].fillna(0.0).ge(-1e-9) & out["max_revision_count"].gt(0)
-    out["max_monotone_down"] = out["max_diff_max"].fillna(0.0).le(1e-9) & out["max_revision_count"].gt(0)
-    reversal = eligible.groupby("target_date")["forecast_max_c"].agg(lambda s: has_reversal(s.to_numpy(dtype=float)))
+    out["max_monotone_up"] = out["max_diff_min"].fillna(0.0).ge(-1e-9) & out[
+        "max_revision_count"
+    ].gt(0)
+    out["max_monotone_down"] = out["max_diff_max"].fillna(0.0).le(1e-9) & out[
+        "max_revision_count"
+    ].gt(0)
+    reversal = eligible.groupby("target_date")["forecast_max_c"].agg(
+        lambda s: has_reversal(s.to_numpy(dtype=float))
+    )
     out["max_reversal"] = reversal
-    out["late_upward_revision"] = out["max_delta_latest_minus_prev"].ge(0.5) & out["latest_issue_hour"].ge(21)
-    out["late_downward_revision"] = out["max_delta_latest_minus_prev"].le(-0.5) & out["latest_issue_hour"].ge(21)
-    out["large_upward_revision_path"] = out["max_revision_abs_path"].ge(1.0) & out["max_delta_latest_minus_first"].gt(0)
-    out["large_downward_revision_path"] = out["max_revision_abs_path"].ge(1.0) & out["max_delta_latest_minus_first"].lt(0)
+    out["late_upward_revision"] = out["max_delta_latest_minus_prev"].ge(0.5) & out[
+        "latest_issue_hour"
+    ].ge(21)
+    out["late_downward_revision"] = out["max_delta_latest_minus_prev"].le(-0.5) & out[
+        "latest_issue_hour"
+    ].ge(21)
+    out["large_upward_revision_path"] = out["max_revision_abs_path"].ge(1.0) & out[
+        "max_delta_latest_minus_first"
+    ].gt(0)
+    out["large_downward_revision_path"] = out["max_revision_abs_path"].ge(1.0) & out[
+        "max_delta_latest_minus_first"
+    ].lt(0)
     out["min_side_upward_revision"] = out["min_delta_latest_minus_first"].gt(0)
     out["min_side_downward_revision"] = out["min_delta_latest_minus_first"].lt(0)
     out["min_side_revision_abs_path"] = out["min_revision_abs_path"]
@@ -745,9 +910,16 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
         out[f"resid_key_{name}"] = out[name]
     for family in ("1615", "1645", "1745", "1845", "2145", "2245", "2315", "2345"):
         out[f"is_{family}_family"] = out["latest_issue_family"].eq(family)
-    family_presence_frame = pd.crosstab(eligible["target_date"], eligible["issue_family_calc"]).astype(bool)
+    family_presence_frame = pd.crosstab(
+        eligible["target_date"], eligible["issue_family_calc"]
+    ).astype(bool)
     for family in ("1615", "1645", "1745", "1845", "2145", "2245", "2315", "2345"):
-        out[f"has_{family}_issue_before_cutoff"] = family_presence_frame.get(family, pd.Series(False, index=idx)).reindex(idx).fillna(False).astype(bool)
+        out[f"has_{family}_issue_before_cutoff"] = (
+            family_presence_frame.get(family, pd.Series(False, index=idx))
+            .reindex(idx)
+            .fillna(False)
+            .astype(bool)
+        )
 
     out = out.drop(columns=["max_diff_min", "max_diff_max"], errors="ignore").reset_index(drop=True)
     combined = base.merge(out, on=["target_date", "cutoff"], how="left", suffixes=("", "_fast"))
@@ -758,16 +930,25 @@ def select_forecast_features_fast(labels: pd.DataFrame, forecasts: pd.DataFrame,
         if fast_col in combined.columns:
             combined[col] = combined[fast_col].where(combined[fast_col].notna(), combined[col])
             combined = combined.drop(columns=[fast_col])
-    combined["official_available_before_cutoff"] = combined["official_available_before_cutoff"].fillna(False).astype(bool)
-    combined["n_issues_before_cutoff"] = pd.to_numeric(combined["n_issues_before_cutoff"], errors="coerce").fillna(0).astype(int)
+    combined["official_available_before_cutoff"] = (
+        combined["official_available_before_cutoff"].fillna(False).astype(bool)
+    )
+    combined["n_issues_before_cutoff"] = (
+        pd.to_numeric(combined["n_issues_before_cutoff"], errors="coerce").fillna(0).astype(int)
+    )
     return combined
 
 
 def add_official_features(frame: pd.DataFrame, forecasts: pd.DataFrame) -> pd.DataFrame:
-    parts = [select_forecast_features_fast(frame[["target_date"]].drop_duplicates(), forecasts, cutoff) for cutoff in CUTOFFS]
+    parts = [
+        select_forecast_features_fast(frame[["target_date"]].drop_duplicates(), forecasts, cutoff)
+        for cutoff in CUTOFFS
+    ]
     official = pd.concat(parts, ignore_index=True)
     out = frame.merge(official, on=["target_date", "cutoff"], how="left", validate="one_to_one")
-    out["official_available_before_cutoff"] = out["official_available_before_cutoff"].fillna(False).astype(bool)
+    out["official_available_before_cutoff"] = (
+        out["official_available_before_cutoff"].fillna(False).astype(bool)
+    )
     for col in out.columns:
         if col.startswith(("txt_", "is_", "has_")) or col in {
             "parse_status_latest_is_ok",
@@ -794,9 +975,13 @@ def calendar_index(start: pd.Timestamp, end: pd.Timestamp) -> pd.DatetimeIndex:
     return pd.date_range(start=start, end=end, freq="D")
 
 
-def add_target_history_features(frame: pd.DataFrame, labels: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+def add_target_history_features(
+    frame: pd.DataFrame, labels: pd.DataFrame
+) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy()
-    idx = calendar_index(labels["target_date"].min() - pd.Timedelta(days=370), labels["target_date"].max())
+    idx = calendar_index(
+        labels["target_date"].min() - pd.Timedelta(days=370), labels["target_date"].max()
+    )
     series = labels.set_index("target_date")["target_tmax_c"].reindex(idx)
     base = pd.DataFrame(index=idx)
     cols: list[str] = []
@@ -830,13 +1015,16 @@ def add_target_history_features(frame: pd.DataFrame, labels: pd.DataFrame) -> tu
     cols.append("target_tmax_rolling_iqr_14_ending_tminus2")
     base["target_tmax_trend_3"] = base["target_tmax_lag_2"] - base["target_tmax_lag_5"]
     base["target_tmax_trend_7"] = (
-        base["target_tmax_rolling_mean_3_ending_tminus2"] - base["target_tmax_rolling_mean_7_ending_tminus2"]
+        base["target_tmax_rolling_mean_3_ending_tminus2"]
+        - base["target_tmax_rolling_mean_7_ending_tminus2"]
     )
     base["target_tmax_trend_14"] = (
-        base["target_tmax_rolling_mean_7_ending_tminus2"] - base["target_tmax_rolling_mean_14_ending_tminus2"]
+        base["target_tmax_rolling_mean_7_ending_tminus2"]
+        - base["target_tmax_rolling_mean_14_ending_tminus2"]
     )
     base["target_tmax_trend_30"] = (
-        base["target_tmax_rolling_mean_7_ending_tminus2"] - base["target_tmax_rolling_mean_30_ending_tminus2"]
+        base["target_tmax_rolling_mean_7_ending_tminus2"]
+        - base["target_tmax_rolling_mean_30_ending_tminus2"]
     )
     base["target_tmax_acceleration"] = base["target_tmax_trend_7"] - base["target_tmax_trend_14"]
     cols.extend(
@@ -849,7 +1037,9 @@ def add_target_history_features(frame: pd.DataFrame, labels: pd.DataFrame) -> tu
         ]
     )
     base["target_date"] = base.index
-    out = out.merge(base.reset_index(drop=True), on="target_date", how="left", validate="many_to_one")
+    out = out.merge(
+        base.reset_index(drop=True), on="target_date", how="left", validate="many_to_one"
+    )
     for col in cols:
         out[f"{col}_missing"] = out[col].isna()
     return out, cols
@@ -858,12 +1048,16 @@ def add_target_history_features(frame: pd.DataFrame, labels: pd.DataFrame) -> tu
 def climate_pivot(climate: pd.DataFrame) -> pd.DataFrame:
     if climate.empty:
         return pd.DataFrame(index=calendar_index(START_DATE - pd.Timedelta(days=370), END_DATE))
-    table = climate.pivot_table(index="local_date", columns="variable", values="value", aggfunc="mean")
+    table = climate.pivot_table(
+        index="local_date", columns="variable", values="value", aggfunc="mean"
+    )
     table = table.reindex(calendar_index(START_DATE - pd.Timedelta(days=370), END_DATE))
     return table
 
 
-def add_climate_features(frame: pd.DataFrame, climate: pd.DataFrame) -> tuple[pd.DataFrame, list[str], pd.DataFrame]:
+def add_climate_features(
+    frame: pd.DataFrame, climate: pd.DataFrame
+) -> tuple[pd.DataFrame, list[str], pd.DataFrame]:
     out = frame.copy()
     pivot = climate_pivot(climate)
     features = pd.DataFrame(index=pivot.index)
@@ -871,7 +1065,9 @@ def add_climate_features(frame: pd.DataFrame, climate: pd.DataFrame) -> tuple[pd
     manifest_rows = []
     for variable in CLIMATE_VARIABLES:
         if variable not in pivot.columns:
-            manifest_rows.append({"variable": variable, "present": False, "rows": 0, "null_rate": math.nan})
+            manifest_rows.append(
+                {"variable": variable, "present": False, "rows": 0, "null_rate": math.nan}
+            )
             continue
         source = pd.to_numeric(pivot[variable], errors="coerce")
         manifest_rows.append(
@@ -879,7 +1075,9 @@ def add_climate_features(frame: pd.DataFrame, climate: pd.DataFrame) -> tuple[pd
                 "variable": variable,
                 "present": True,
                 "rows": int(source.notna().sum()),
-                "first_date": date_text(source.dropna().index.min()) if source.notna().any() else "",
+                "first_date": date_text(source.dropna().index.min())
+                if source.notna().any()
+                else "",
                 "last_date": date_text(source.dropna().index.max()) if source.notna().any() else "",
                 "null_rate": float(source.isna().mean()),
             }
@@ -915,34 +1113,57 @@ def add_climate_features(frame: pd.DataFrame, climate: pd.DataFrame) -> tuple[pd
                 )
                 cols.extend([delta_23, delta_27, trend])
     features["target_date"] = features.index
-    out = out.merge(features.reset_index(drop=True), on="target_date", how="left", validate="many_to_one")
+    out = out.merge(
+        features.reset_index(drop=True), on="target_date", how="left", validate="many_to_one"
+    )
     if "daily_rainfall_lag_2" in out.columns:
         out["rainfall_log1p_lag_2"] = np.log1p(out["daily_rainfall_lag_2"].clip(lower=0))
-        rain3 = out.get("daily_rainfall_rolling_mean_3_ending_tminus2", pd.Series(np.nan, index=out.index)) * 3.0
+        rain3 = (
+            out.get(
+                "daily_rainfall_rolling_mean_3_ending_tminus2", pd.Series(np.nan, index=out.index)
+            )
+            * 3.0
+        )
         out["rainfall_log1p_rolling_3"] = np.log1p(rain3.clip(lower=0))
         out["rainfall_any_3d"] = rain3.gt(0)
         cols.extend(["rainfall_log1p_lag_2", "rainfall_log1p_rolling_3", "rainfall_any_3d"])
     if {"bright_sunshine_duration_lag_2", "mean_cloud_amount_lag_2"}.issubset(out.columns):
-        out["sun_cloud_contrast_lag2"] = out["bright_sunshine_duration_lag_2"] - out["mean_cloud_amount_lag_2"]
+        out["sun_cloud_contrast_lag2"] = (
+            out["bright_sunshine_duration_lag_2"] - out["mean_cloud_amount_lag_2"]
+        )
         cols.append("sun_cloud_contrast_lag2")
     if {"global_solar_radiation_lag_2", "mean_cloud_amount_lag_2"}.issubset(out.columns):
-        out["solar_cloud_contrast_lag2"] = out["global_solar_radiation_lag_2"] - out["mean_cloud_amount_lag_2"]
+        out["solar_cloud_contrast_lag2"] = (
+            out["global_solar_radiation_lag_2"] - out["mean_cloud_amount_lag_2"]
+        )
         cols.append("solar_cloud_contrast_lag2")
     if {"mean_temperature_lag_2", "mean_dew_point_temperature_lag_2"}.issubset(out.columns):
-        out["humidity_heat_index_proxy_lag2"] = out["mean_temperature_lag_2"] + 0.15 * out["mean_dew_point_temperature_lag_2"]
+        out["humidity_heat_index_proxy_lag2"] = (
+            out["mean_temperature_lag_2"] + 0.15 * out["mean_dew_point_temperature_lag_2"]
+        )
         cols.append("humidity_heat_index_proxy_lag2")
     if "mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2" in out.columns:
-        out["wet_bulb_heat_storage_proxy"] = out["mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2"]
+        out["wet_bulb_heat_storage_proxy"] = out[
+            "mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2"
+        ]
         cols.append("wet_bulb_heat_storage_proxy")
     if {"daily_maximum_temperature_lag_2", "daily_minimum_temperature_lag_2"}.issubset(out.columns):
-        out["diurnal_range_lag2"] = out["daily_maximum_temperature_lag_2"] - out["daily_minimum_temperature_lag_2"]
+        out["diurnal_range_lag2"] = (
+            out["daily_maximum_temperature_lag_2"] - out["daily_minimum_temperature_lag_2"]
+        )
         cols.append("diurnal_range_lag2")
     if {"mean_sea_level_pressure_lag_2", "mean_sea_level_pressure_lag_7"}.issubset(out.columns):
-        out["pressure_tendency_2_to_7"] = out["mean_sea_level_pressure_lag_2"] - out["mean_sea_level_pressure_lag_7"]
+        out["pressure_tendency_2_to_7"] = (
+            out["mean_sea_level_pressure_lag_2"] - out["mean_sea_level_pressure_lag_7"]
+        )
         cols.append("pressure_tendency_2_to_7")
     if {"sea_temperature_am_lag_2", "sea_temperature_pm_lag_2"}.issubset(out.columns):
-        out["sea_temp_am_pm_mean_lag2"] = out[["sea_temperature_am_lag_2", "sea_temperature_pm_lag_2"]].mean(axis=1)
-        out["sea_temp_diurnal_diff_lag2"] = out["sea_temperature_pm_lag_2"] - out["sea_temperature_am_lag_2"]
+        out["sea_temp_am_pm_mean_lag2"] = out[
+            ["sea_temperature_am_lag_2", "sea_temperature_pm_lag_2"]
+        ].mean(axis=1)
+        out["sea_temp_diurnal_diff_lag2"] = (
+            out["sea_temperature_pm_lag_2"] - out["sea_temperature_am_lag_2"]
+        )
         cols.extend(["sea_temp_am_pm_mean_lag2", "sea_temp_diurnal_diff_lag2"])
     if "prevailing_wind_direction_lag_2" in out.columns:
         rad = np.deg2rad(out["prevailing_wind_direction_lag_2"])
@@ -955,7 +1176,9 @@ def add_climate_features(frame: pd.DataFrame, climate: pd.DataFrame) -> tuple[pd
             out["wind_vector_v_lag2"] = out["mean_wind_speed_lag_2"] * out["wind_dir_cos_lag2"]
             cols.extend(["wind_vector_u_lag2", "wind_vector_v_lag2"])
     if {"cloud_to_cloud_lightning_lag_2", "cloud_to_ground_lightning_lag_2"}.issubset(out.columns):
-        out["lightning_any_lag2"] = (out["cloud_to_cloud_lightning_lag_2"] + out["cloud_to_ground_lightning_lag_2"]).gt(0)
+        out["lightning_any_lag2"] = (
+            out["cloud_to_cloud_lightning_lag_2"] + out["cloud_to_ground_lightning_lag_2"]
+        ).gt(0)
         cols.append("lightning_any_lag2")
     for col in list(dict.fromkeys(cols)):
         if col in out.columns:
@@ -991,7 +1214,9 @@ def prior_year_stats_by_doy(labels: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def add_year_safe_climatology(frame: pd.DataFrame, labels: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+def add_year_safe_climatology(
+    frame: pd.DataFrame, labels: pd.DataFrame
+) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy()
     label = labels.copy()
     label["year"] = label["target_date"].dt.year.astype(int)
@@ -1029,9 +1254,18 @@ def add_year_safe_climatology(frame: pd.DataFrame, labels: pd.DataFrame) -> tupl
                     "season_clim_std": safe_std(values),
                 }
             )
-    out = out.merge(pd.DataFrame(month_rows), on=["year", "month"], how="left", validate="many_to_one")
-    out = out.merge(pd.DataFrame(season_rows), on=["year", "season_hko"], how="left", validate="many_to_one")
-    out = out.merge(prior_year_stats_by_doy(labels), on=["year", "day_of_year"], how="left", validate="many_to_one")
+    out = out.merge(
+        pd.DataFrame(month_rows), on=["year", "month"], how="left", validate="many_to_one"
+    )
+    out = out.merge(
+        pd.DataFrame(season_rows), on=["year", "season_hko"], how="left", validate="many_to_one"
+    )
+    out = out.merge(
+        prior_year_stats_by_doy(labels),
+        on=["year", "day_of_year"],
+        how="left",
+        validate="many_to_one",
+    )
     out["forecast_minus_doy_clim"] = out["forecast_max_c_latest"] - out["doy_clim_mean_31d"]
     out["forecast_minus_month_clim"] = out["forecast_max_c_latest"] - out["month_clim_mean"]
     out["official_forecast_high_for_season"] = out["forecast_max_c_latest"] >= out["month_clim_p90"]
@@ -1062,13 +1296,17 @@ def add_year_safe_climatology(frame: pd.DataFrame, labels: pd.DataFrame) -> tupl
     return out, cols
 
 
-def shrunk_group_map(history: pd.DataFrame, key: str, value: str, global_mean: float, shrink: float) -> dict[Any, float]:
+def shrunk_group_map(
+    history: pd.DataFrame, key: str, value: str, global_mean: float, shrink: float
+) -> dict[Any, float]:
     if history.empty or key not in history.columns:
         return {}
     grouped = history.dropna(subset=[key, value]).groupby(key)[value].agg(["count", "mean"])
     if grouped.empty:
         return {}
-    grouped["shrunk"] = (grouped["count"] * grouped["mean"] + shrink * global_mean) / (grouped["count"] + shrink)
+    grouped["shrunk"] = (grouped["count"] * grouped["mean"] + shrink * global_mean) / (
+        grouped["count"] + shrink
+    )
     grouped.loc[grouped["count"] < 25, "shrunk"] = global_mean
     return grouped["shrunk"].to_dict()
 
@@ -1080,10 +1318,18 @@ def map_or_global(series: pd.Series, mapping: dict[Any, float], global_value: fl
 def add_fold_safe_residual_history(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy()
     out["doy_band_15d"] = np.floor(out["day_of_year"] / 15).astype(int)
-    out["month_x_forecast_max_int_key"] = out["month"].astype(str) + "|" + out["forecast_max_round_int"].astype(str)
-    out["month_x_forecast_range_key"] = out["month"].astype(str) + "|" + out["forecast_range_bin"].astype(str)
-    out["season_x_forecast_range_key"] = out["season_hko"].astype(str) + "|" + out["forecast_range_bin"].astype(str)
-    out["season_x_forecast_max_key"] = out["season_hko"].astype(str) + "|" + out["forecast_max_bin"].astype(str)
+    out["month_x_forecast_max_int_key"] = (
+        out["month"].astype(str) + "|" + out["forecast_max_round_int"].astype(str)
+    )
+    out["month_x_forecast_range_key"] = (
+        out["month"].astype(str) + "|" + out["forecast_range_bin"].astype(str)
+    )
+    out["season_x_forecast_range_key"] = (
+        out["season_hko"].astype(str) + "|" + out["forecast_range_bin"].astype(str)
+    )
+    out["season_x_forecast_max_key"] = (
+        out["season_hko"].astype(str) + "|" + out["forecast_max_bin"].astype(str)
+    )
     cols = [
         "resid_global_mean",
         "resid_global_median",
@@ -1122,7 +1368,20 @@ def add_fold_safe_residual_history(frame: pd.DataFrame) -> tuple[pd.DataFrame, l
         "resid_low_bias_probability",
         "issue_sequence_completeness",
     ]
-    text_resid_cols = [f"resid_mean_by_{name}" for name in TEXT_PATTERNS if name in {"txt_hot", "txt_very_hot", "txt_showers", "txt_cloudy", "txt_thunderstorms", "txt_monsoon", "txt_tropical_cyclone"}]
+    text_resid_cols = [
+        f"resid_mean_by_{name}"
+        for name in TEXT_PATTERNS
+        if name
+        in {
+            "txt_hot",
+            "txt_very_hot",
+            "txt_showers",
+            "txt_cloudy",
+            "txt_thunderstorms",
+            "txt_monsoon",
+            "txt_tropical_cyclone",
+        }
+    ]
     cols.extend(text_resid_cols)
     for col in cols:
         out[col] = np.nan
@@ -1151,27 +1410,79 @@ def add_fold_safe_residual_history(frame: pd.DataFrame) -> tuple[pd.DataFrame, l
                 "resid_mean_by_month": ("month", "official_residual_c", 30.0),
                 "resid_mean_by_season_hko": ("season_hko", "official_residual_c", 30.0),
                 "resid_mean_by_doy_band_15d": ("doy_band_15d", "official_residual_c", 50.0),
-                "resid_mean_by_forecast_max_int": ("forecast_max_round_int", "official_residual_c", 50.0),
-                "resid_mean_by_forecast_max_half_degree": ("forecast_max_half_degree", "official_residual_c", 50.0),
+                "resid_mean_by_forecast_max_int": (
+                    "forecast_max_round_int",
+                    "official_residual_c",
+                    50.0,
+                ),
+                "resid_mean_by_forecast_max_half_degree": (
+                    "forecast_max_half_degree",
+                    "official_residual_c",
+                    50.0,
+                ),
                 "resid_mean_by_forecast_max_bin": ("forecast_max_bin", "official_residual_c", 50.0),
-                "resid_mean_by_forecast_range_bin": ("forecast_range_bin", "official_residual_c", 50.0),
-                "resid_mean_by_issue_hour_family": ("latest_issue_family", "official_residual_c", 50.0),
-                "resid_mean_by_latest_issue_family_x_month": ("latest_issue_family_month_key", "official_residual_c", 75.0),
-                "resid_mean_by_season_x_forecast_range_bin": ("season_x_forecast_range_key", "official_residual_c", 75.0),
-                "resid_mean_by_season_x_forecast_max_bin": ("season_x_forecast_max_key", "official_residual_c", 75.0),
-                "resid_mean_by_month_x_forecast_max_int": ("month_x_forecast_max_int_key", "official_residual_c", 75.0),
-                "resid_mean_by_month_x_forecast_range_bin": ("month_x_forecast_range_key", "official_residual_c", 75.0),
+                "resid_mean_by_forecast_range_bin": (
+                    "forecast_range_bin",
+                    "official_residual_c",
+                    50.0,
+                ),
+                "resid_mean_by_issue_hour_family": (
+                    "latest_issue_family",
+                    "official_residual_c",
+                    50.0,
+                ),
+                "resid_mean_by_latest_issue_family_x_month": (
+                    "latest_issue_family_month_key",
+                    "official_residual_c",
+                    75.0,
+                ),
+                "resid_mean_by_season_x_forecast_range_bin": (
+                    "season_x_forecast_range_key",
+                    "official_residual_c",
+                    75.0,
+                ),
+                "resid_mean_by_season_x_forecast_max_bin": (
+                    "season_x_forecast_max_key",
+                    "official_residual_c",
+                    75.0,
+                ),
+                "resid_mean_by_month_x_forecast_max_int": (
+                    "month_x_forecast_max_int_key",
+                    "official_residual_c",
+                    75.0,
+                ),
+                "resid_mean_by_month_x_forecast_range_bin": (
+                    "month_x_forecast_range_key",
+                    "official_residual_c",
+                    75.0,
+                ),
                 "expected_abs_resid_by_month": ("month", "abs_resid", 30.0),
-                "expected_abs_resid_by_season_x_range": ("season_x_forecast_range_key", "abs_resid", 75.0),
+                "expected_abs_resid_by_season_x_range": (
+                    "season_x_forecast_range_key",
+                    "abs_resid",
+                    75.0,
+                ),
                 "expected_abs_resid_by_forecast_max_bin": ("forecast_max_bin", "abs_resid", 50.0),
             }
             out.loc[row_idx, "latest_issue_family_month_key"] = (
-                out.loc[row_idx, "latest_issue_family"].astype(str) + "|" + out.loc[row_idx, "month"].astype(str)
+                out.loc[row_idx, "latest_issue_family"].astype(str)
+                + "|"
+                + out.loc[row_idx, "month"].astype(str)
             )
-            hist["latest_issue_family_month_key"] = hist["latest_issue_family"].astype(str) + "|" + hist["month"].astype(str)
+            hist["latest_issue_family_month_key"] = (
+                hist["latest_issue_family"].astype(str) + "|" + hist["month"].astype(str)
+            )
             for dest, (key, value, shrink) in maps.items():
-                mapping = shrunk_group_map(hist, key, value, global_mean if value == "official_residual_c" else float(hist[value].mean()), shrink)
-                fallback = global_mean if value == "official_residual_c" else float(hist[value].mean())
+                mapping = shrunk_group_map(
+                    hist,
+                    key,
+                    value,
+                    global_mean if value == "official_residual_c" else float(hist[value].mean()),
+                    shrink,
+                )
+                fallback = (
+                    global_mean if value == "official_residual_c" else float(hist[value].mean())
+                )
                 out.loc[row_idx, dest] = map_or_global(out.loc[row_idx, key], mapping, fallback)
             for dest, key, value in (
                 ("resid_median_by_month", "month", "official_residual_c"),
@@ -1184,28 +1495,65 @@ def add_fold_safe_residual_history(frame: pd.DataFrame) -> tuple[pd.DataFrame, l
                 ("resid_std_by_month_x_range", "month_x_forecast_range_key", "official_residual_c"),
             ):
                 if key in hist.columns:
-                    stat = hist.groupby(key)[value].agg(lambda s: float(s.quantile(0.80)) if "p80" in dest else float(s.std(ddof=0) if "std" in dest else s.median()))
-                    out.loc[row_idx, dest] = out.loc[row_idx, key].map(stat).astype(float).fillna(0.0 if "std" in dest else global_median)
-            for flag in ("txt_hot", "txt_very_hot", "txt_showers", "txt_cloudy", "txt_thunderstorms", "txt_monsoon", "txt_tropical_cyclone"):
+                    stat = hist.groupby(key)[value].agg(
+                        lambda s: (
+                            float(s.quantile(0.80))
+                            if "p80" in dest
+                            else float(s.std(ddof=0) if "std" in dest else s.median())
+                        )
+                    )
+                    out.loc[row_idx, dest] = (
+                        out.loc[row_idx, key]
+                        .map(stat)
+                        .astype(float)
+                        .fillna(0.0 if "std" in dest else global_median)
+                    )
+            for flag in (
+                "txt_hot",
+                "txt_very_hot",
+                "txt_showers",
+                "txt_cloudy",
+                "txt_thunderstorms",
+                "txt_monsoon",
+                "txt_tropical_cyclone",
+            ):
                 if flag in hist.columns:
                     grouped = hist.groupby(flag)["official_residual_c"].mean()
-                    out.loc[row_idx, f"resid_mean_by_{flag}"] = out.loc[row_idx, flag].map(grouped).fillna(global_mean)
+                    out.loc[row_idx, f"resid_mean_by_{flag}"] = (
+                        out.loc[row_idx, flag].map(grouped).fillna(global_mean)
+                    )
             for month, sub_idx in out.loc[row_idx].groupby("month").groups.items():
                 same_month = hist[hist["month"].eq(month)].sort_values("target_date")
-                out.loc[sub_idx, "resid_recent_30_prior_training_days_same_month"] = safe_mean(same_month["official_residual_c"].tail(30))
-                out.loc[sub_idx, "resid_recent_60_prior_training_days_same_month"] = safe_mean(same_month["official_residual_c"].tail(60))
+                out.loc[sub_idx, "resid_recent_30_prior_training_days_same_month"] = safe_mean(
+                    same_month["official_residual_c"].tail(30)
+                )
+                out.loc[sub_idx, "resid_recent_60_prior_training_days_same_month"] = safe_mean(
+                    same_month["official_residual_c"].tail(60)
+                )
             for season, sub_idx in out.loc[row_idx].groupby("season_hko").groups.items():
                 same_season = hist[hist["season_hko"].eq(season)].sort_values("target_date")
-                out.loc[sub_idx, "resid_recent_120_prior_training_days_same_season"] = safe_mean(same_season["official_residual_c"].tail(120))
-            out.loc[row_idx, "resid_recent_365_prior_training_days_all"] = safe_mean(hist.sort_values("target_date")["official_residual_c"].tail(365))
-            high_prob = hist.assign(high=hist["official_residual_c"].gt(0.3), low=hist["official_residual_c"].lt(-0.3))
+                out.loc[sub_idx, "resid_recent_120_prior_training_days_same_season"] = safe_mean(
+                    same_season["official_residual_c"].tail(120)
+                )
+            out.loc[row_idx, "resid_recent_365_prior_training_days_all"] = safe_mean(
+                hist.sort_values("target_date")["official_residual_c"].tail(365)
+            )
+            high_prob = hist.assign(
+                high=hist["official_residual_c"].gt(0.3), low=hist["official_residual_c"].lt(-0.3)
+            )
             high_by_month = high_prob.groupby("month")["high"].mean()
             low_by_month = high_prob.groupby("month")["low"].mean()
-            out.loc[row_idx, "resid_high_bias_probability"] = out.loc[row_idx, "month"].map(high_by_month).fillna(float(high_prob["high"].mean()))
-            out.loc[row_idx, "resid_low_bias_probability"] = out.loc[row_idx, "month"].map(low_by_month).fillna(float(high_prob["low"].mean()))
+            out.loc[row_idx, "resid_high_bias_probability"] = (
+                out.loc[row_idx, "month"].map(high_by_month).fillna(float(high_prob["high"].mean()))
+            )
+            out.loc[row_idx, "resid_low_bias_probability"] = (
+                out.loc[row_idx, "month"].map(low_by_month).fillna(float(high_prob["low"].mean()))
+            )
             median_n = hist.groupby("year")["n_issues_before_cutoff"].median().median()
             if pd.notna(median_n) and median_n > 0:
-                out.loc[row_idx, "issue_sequence_completeness"] = out.loc[row_idx, "n_issues_before_cutoff"] / float(median_n)
+                out.loc[row_idx, "issue_sequence_completeness"] = out.loc[
+                    row_idx, "n_issues_before_cutoff"
+                ] / float(median_n)
     return out, cols
 
 
@@ -1216,7 +1564,9 @@ def prior_month_quantile(frame: pd.DataFrame, value_col: str, q: float) -> pd.Se
     for (_cutoff, _month), group in frame.groupby(["cutoff", "month"], dropna=False, sort=False):
         group = group.sort_values("year")
         values_by_year = {
-            int(year): pd.to_numeric(year_group[value_col], errors="coerce").dropna().to_numpy(dtype=float)
+            int(year): pd.to_numeric(year_group[value_col], errors="coerce")
+            .dropna()
+            .to_numpy(dtype=float)
             for year, year_group in group.groupby("year", sort=True)
         }
         prior_values: list[np.ndarray] = []
@@ -1256,41 +1606,75 @@ def add_weather_regimes(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     }
     for threshold_name, (col, q) in threshold_cols.items():
         out[threshold_name] = prior_month_quantile(out, col, q) if col in out.columns else np.nan
-    rainfall_rolling3 = out.get("daily_rainfall_rolling_mean_3_ending_tminus2", pd.Series(np.nan, index=out.index))
+    rainfall_rolling3 = out.get(
+        "daily_rainfall_rolling_mean_3_ending_tminus2", pd.Series(np.nan, index=out.index)
+    )
     out["rainfall_heavy_3d"] = rainfall_rolling3 >= out["rain_roll3_p75"]
     out["hot_humid_persistence"] = (
         (out["target_tmax_rolling_mean_3_ending_tminus2"] >= out["target_roll3_p80"])
-        & (out.get("mean_dew_point_temperature_rolling_mean_3_ending_tminus2", np.nan) >= out["dew_roll3_p70"])
-        & (out.get("mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2", np.nan) >= out["wetbulb_roll3_p70"])
+        & (
+            out.get("mean_dew_point_temperature_rolling_mean_3_ending_tminus2", np.nan)
+            >= out["dew_roll3_p70"]
+        )
+        & (
+            out.get("mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2", np.nan)
+            >= out["wetbulb_roll3_p70"]
+        )
         & (out.get("daily_minimum_temperature_lag_2", np.nan) >= out["min_lag2_p75"])
     )
     out["extreme_heat_setup"] = (
         (out["forecast_max_c_latest"] >= out["official_max_p90"])
         & (out["target_tmax_rolling_mean_7_ending_tminus2"] >= out["target_roll7_p75"])
         & (rainfall_rolling3 <= out["rain_roll3_p40"])
-        & (out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan) <= out["cloud_roll3_p50"])
+        & (
+            out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan)
+            <= out["cloud_roll3_p50"]
+        )
     )
     out["dry_clear_radiative"] = (
-        (out.get("bright_sunshine_duration_rolling_mean_3_ending_tminus2", np.nan) >= out["sun_roll3_p75"])
-        & (out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan) <= out["cloud_roll3_p25"])
+        (
+            out.get("bright_sunshine_duration_rolling_mean_3_ending_tminus2", np.nan)
+            >= out["sun_roll3_p75"]
+        )
+        & (
+            out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan)
+            <= out["cloud_roll3_p25"]
+        )
         & (rainfall_rolling3 <= out["rain_roll3_p40"])
-        & (out.get("mean_relative_humidity_rolling_mean_3_ending_tminus2", np.nan) <= out["rh_roll3_p50"])
+        & (
+            out.get("mean_relative_humidity_rolling_mean_3_ending_tminus2", np.nan)
+            <= out["rh_roll3_p50"]
+        )
     )
     out["cloud_rain_suppressed"] = (
-        (out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan) >= out["cloud_roll3_p75"])
-        | (out.get("bright_sunshine_duration_rolling_mean_3_ending_tminus2", np.nan) <= out["sun_roll3_p25"])
+        (
+            out.get("mean_cloud_amount_rolling_mean_3_ending_tminus2", np.nan)
+            >= out["cloud_roll3_p75"]
+        )
+        | (
+            out.get("bright_sunshine_duration_rolling_mean_3_ending_tminus2", np.nan)
+            <= out["sun_roll3_p25"]
+        )
         | (rainfall_rolling3 >= out["rain_roll3_p75"])
         | out["txt_showers"]
         | out["txt_thunderstorms"]
     )
     out["convective_suppression_risk"] = out["txt_thunderstorms"] | out["rainfall_heavy_3d"]
-    out["pressure_falling_regime"] = out.get("pressure_tendency_2_to_7", pd.Series(np.nan, index=out.index)) <= prior_month_quantile(out, "pressure_tendency_2_to_7", 0.20)
-    out["pressure_rising_regime"] = out.get("pressure_tendency_2_to_7", pd.Series(np.nan, index=out.index)) >= prior_month_quantile(out, "pressure_tendency_2_to_7", 0.80)
+    out["pressure_falling_regime"] = out.get(
+        "pressure_tendency_2_to_7", pd.Series(np.nan, index=out.index)
+    ) <= prior_month_quantile(out, "pressure_tendency_2_to_7", 0.20)
+    out["pressure_rising_regime"] = out.get(
+        "pressure_tendency_2_to_7", pd.Series(np.nan, index=out.index)
+    ) >= prior_month_quantile(out, "pressure_tendency_2_to_7", 0.80)
     direction = out.get("prevailing_wind_direction_lag_2", pd.Series(np.nan, index=out.index))
     onshore = direction.between(60, 210, inclusive="both")
     northerly = direction.ge(300) | direction.le(60)
-    out["onshore_marine_flow_flag"] = (out.get("mean_wind_speed_lag_2", np.nan) >= out["wind_roll3_p70"]) & onshore
-    out["northerly_dry_flow_flag"] = (out.get("mean_wind_speed_lag_2", np.nan) >= out["wind_roll3_p70"]) & northerly
+    out["onshore_marine_flow_flag"] = (
+        out.get("mean_wind_speed_lag_2", np.nan) >= out["wind_roll3_p70"]
+    ) & onshore
+    out["northerly_dry_flow_flag"] = (
+        out.get("mean_wind_speed_lag_2", np.nan) >= out["wind_roll3_p70"]
+    ) & northerly
     out["marine_moderation_regime"] = out["onshore_marine_flow_flag"] & (
         out.get("mean_wind_speed_rolling_mean_3_ending_tminus2", np.nan) >= out["wind_roll3_p70"]
     )
@@ -1298,15 +1682,23 @@ def add_weather_regimes(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         out.get("mean_wind_speed_rolling_mean_3_ending_tminus2", np.nan) >= out["wind_roll3_p85"]
     ) | out["txt_windy"]
     out["monsoon_transition_regime"] = out["month"].isin([3, 4, 5, 10, 11]) & out["txt_monsoon"]
-    out["tropical_cyclone_proxy_regime"] = out["txt_tropical_cyclone"] | (out["txt_windy"] & out["txt_showers"] & out["pressure_falling_regime"])
+    out["tropical_cyclone_proxy_regime"] = out["txt_tropical_cyclone"] | (
+        out["txt_windy"] & out["txt_showers"] & out["pressure_falling_regime"]
+    )
     out["high_forecast_uncertainty_regime"] = (
         (out["forecast_range_c_latest"] >= out["range_p80"])
         | (out["max_revision_abs_path"] >= out["revision_abs_p80"])
         | (out["n_issues_before_cutoff"] <= out["n_issue_p10"])
     )
-    out["upward_revised_heat_regime"] = (out["max_delta_latest_minus_first"] >= 0.5) & (out["forecast_max_c_latest"] >= out["official_max_p75"])
-    out["late_upward_heat_regime"] = out["late_upward_revision"] & (out["forecast_max_c_latest"] >= out["official_max_p75"])
-    out["downward_cloud_revision_regime"] = (out["max_delta_latest_minus_first"] <= -0.5) & out["cloud_rain_suppressed"]
+    out["upward_revised_heat_regime"] = (out["max_delta_latest_minus_first"] >= 0.5) & (
+        out["forecast_max_c_latest"] >= out["official_max_p75"]
+    )
+    out["late_upward_heat_regime"] = out["late_upward_revision"] & (
+        out["forecast_max_c_latest"] >= out["official_max_p75"]
+    )
+    out["downward_cloud_revision_regime"] = (out["max_delta_latest_minus_first"] <= -0.5) & out[
+        "cloud_rain_suppressed"
+    ]
     cols = [
         "rainfall_heavy_3d",
         "hot_humid_persistence",
@@ -1415,7 +1807,9 @@ def add_analog_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         "resid_mean_by_issue_hour_family",
         "resid_recent_365_prior_training_days_all",
     ]
-    component_frame = out[[col for col in residual_components if col in out.columns]].apply(pd.to_numeric, errors="coerce")
+    component_frame = out[[col for col in residual_components if col in out.columns]].apply(
+        pd.to_numeric, errors="coerce"
+    )
     if component_frame.empty:
         base_mean = pd.Series(np.nan, index=out.index, dtype=float)
     else:
@@ -1424,8 +1818,15 @@ def add_analog_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         mask = np.isfinite(values)
         numerator = np.where(mask, values * weights, 0.0).sum(axis=1)
         denominator = np.where(mask, weights, 0.0).sum(axis=1)
-        fallback = pd.to_numeric(out.get("resid_global_mean", 0.0), errors="coerce").fillna(0.0).to_numpy(dtype=float)
-        base_mean = pd.Series(np.divide(numerator, denominator, out=fallback.copy(), where=denominator > 0), index=out.index)
+        fallback = (
+            pd.to_numeric(out.get("resid_global_mean", 0.0), errors="coerce")
+            .fillna(0.0)
+            .to_numpy(dtype=float)
+        )
+        base_mean = pd.Series(
+            np.divide(numerator, denominator, out=fallback.copy(), where=denominator > 0),
+            index=out.index,
+        )
     spread = (
         pd.to_numeric(out.get("resid_std_by_month_x_range", np.nan), errors="coerce")
         .fillna(pd.to_numeric(out.get("resid_std_by_forecast_range_bin", np.nan), errors="coerce"))
@@ -1438,8 +1839,12 @@ def add_analog_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         .fillna(pd.to_numeric(out.get("expected_abs_resid_by_month", np.nan), errors="coerce"))
         .fillna(spread * 0.80)
     )
-    forecast_anomaly = pd.to_numeric(out.get("forecast_minus_doy_clim", 0.0), errors="coerce").fillna(0.0).abs()
-    revision_size = pd.to_numeric(out.get("max_revision_abs_path", 0.0), errors="coerce").fillna(0.0).abs()
+    forecast_anomaly = (
+        pd.to_numeric(out.get("forecast_minus_doy_clim", 0.0), errors="coerce").fillna(0.0).abs()
+    )
+    revision_size = (
+        pd.to_numeric(out.get("max_revision_abs_path", 0.0), errors="coerce").fillna(0.0).abs()
+    )
     distance = (forecast_anomaly / 3.0 + revision_size / 2.0 + spread / 2.0).clip(lower=0.02)
     positive_prob = (
         pd.to_numeric(out.get("resid_high_bias_probability", np.nan), errors="coerce")
@@ -1463,10 +1868,19 @@ def add_analog_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         out[f"analog_resid_p25_{k}"] = mean - 0.674 * spread
         out[f"analog_resid_p75_{k}"] = mean + 0.674 * spread
         out[f"analog_prob_positive_resid_{k}"] = positive_prob
-        out[f"analog_prob_large_positive_{k}"] = (positive_prob * (abs_mean / (abs_mean + 0.5))).clip(0.0, 1.0)
-        out[f"analog_prob_large_negative_{k}"] = (negative_prob * (abs_mean / (abs_mean + 0.5))).clip(0.0, 1.0)
+        out[f"analog_prob_large_positive_{k}"] = (
+            positive_prob * (abs_mean / (abs_mean + 0.5))
+        ).clip(0.0, 1.0)
+        out[f"analog_prob_large_negative_{k}"] = (
+            negative_prob * (abs_mean / (abs_mean + 0.5))
+        ).clip(0.0, 1.0)
         out[f"analog_nearest_distance_{k}"] = distance / shrink
-        out[f"analog_effective_sample_size_{k}"] = np.minimum(float(k), pd.to_numeric(out.get("n_issues_before_cutoff", 1.0), errors="coerce").fillna(1.0) * 12.0 + 25.0)
+        out[f"analog_effective_sample_size_{k}"] = np.minimum(
+            float(k),
+            pd.to_numeric(out.get("n_issues_before_cutoff", 1.0), errors="coerce").fillna(1.0)
+            * 12.0
+            + 25.0,
+        )
     return out, names
 
 
@@ -1477,19 +1891,48 @@ def add_interactions(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     def add(name: str, series: pd.Series) -> None:
         interactions[name] = pd.to_numeric(series, errors="coerce")
 
-    add("forecast_max_x_is_hot_season", out["forecast_max_c_latest"] * out["is_hot_season"].astype(float))
+    add(
+        "forecast_max_x_is_hot_season",
+        out["forecast_max_c_latest"] * out["is_hot_season"].astype(float),
+    )
     for season in ("cool_dry", "spring_transition", "hot_wet", "autumn_transition"):
-        add(f"forecast_max_x_season_{season}", out["forecast_max_c_latest"] * out["season_hko"].eq(season).astype(float))
-    for flag in ("hot_humid_persistence", "cloud_rain_suppressed", "marine_moderation_regime", "upward_revised_heat_regime"):
+        add(
+            f"forecast_max_x_season_{season}",
+            out["forecast_max_c_latest"] * out["season_hko"].eq(season).astype(float),
+        )
+    for flag in (
+        "hot_humid_persistence",
+        "cloud_rain_suppressed",
+        "marine_moderation_regime",
+        "upward_revised_heat_regime",
+    ):
         if flag in out.columns:
             add(f"forecast_max_x_{flag}", out["forecast_max_c_latest"] * out[flag].astype(float))
-    add("forecast_range_x_high_uncertainty", out["forecast_range_c_latest"] * out["high_forecast_uncertainty_regime"].astype(float))
-    add("forecast_range_x_resid_std_by_range", out["forecast_range_c_latest"] * out["resid_std_by_forecast_range_bin"])
+    add(
+        "forecast_range_x_high_uncertainty",
+        out["forecast_range_c_latest"] * out["high_forecast_uncertainty_regime"].astype(float),
+    )
+    add(
+        "forecast_range_x_resid_std_by_range",
+        out["forecast_range_c_latest"] * out["resid_std_by_forecast_range_bin"],
+    )
     add("forecast_range_x_n_issues", out["forecast_range_c_latest"] * out["n_issues_before_cutoff"])
-    add("max_delta_first_x_forecast_max", out["max_delta_latest_minus_first"] * out["forecast_max_c_latest"])
-    add("max_delta_first_x_hot_humid", out["max_delta_latest_minus_first"] * out["hot_humid_persistence"].astype(float))
-    add("late_upward_x_recent_heat_count", out["late_upward_revision"].astype(float) * out.get("recent_heat_count_3d", 0.0))
-    add("late_downward_x_cloud_rain_suppressed", out["late_downward_revision"].astype(float) * out["cloud_rain_suppressed"].astype(float))
+    add(
+        "max_delta_first_x_forecast_max",
+        out["max_delta_latest_minus_first"] * out["forecast_max_c_latest"],
+    )
+    add(
+        "max_delta_first_x_hot_humid",
+        out["max_delta_latest_minus_first"] * out["hot_humid_persistence"].astype(float),
+    )
+    add(
+        "late_upward_x_recent_heat_count",
+        out["late_upward_revision"].astype(float) * out.get("recent_heat_count_3d", 0.0),
+    )
+    add(
+        "late_downward_x_cloud_rain_suppressed",
+        out["late_downward_revision"].astype(float) * out["cloud_rain_suppressed"].astype(float),
+    )
     for col in (
         "mean_dew_point_temperature_lag_2",
         "mean_wet_bulb_temperature_lag_2",
@@ -1500,19 +1943,42 @@ def add_interactions(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         if col in out.columns:
             add(f"{col}_x_forecast_max", out[col] * out["forecast_max_c_latest"])
     if "sea_temp_am_pm_mean_lag2" in out.columns:
-        add("sea_temp_anomaly_lag2_x_onshore", (out["sea_temp_am_pm_mean_lag2"] - out["doy_clim_mean_31d"]) * out["onshore_marine_flow_flag"].astype(float))
+        add(
+            "sea_temp_anomaly_lag2_x_onshore",
+            (out["sea_temp_am_pm_mean_lag2"] - out["doy_clim_mean_31d"])
+            * out["onshore_marine_flow_flag"].astype(float),
+        )
     if "mean_wind_speed_lag_2" in out.columns:
-        add("mean_wind_speed_lag2_x_onshore", out["mean_wind_speed_lag_2"] * out["onshore_marine_flow_flag"].astype(float))
-    add("pressure_falling_x_showers", out["pressure_falling_regime"].astype(float) * out["txt_showers"].astype(float))
-    add("pressure_rising_x_dry_clear", out["pressure_rising_regime"].astype(float) * out["dry_clear_radiative"].astype(float))
-    add("resid_mean_by_month_x_forecast_range", out["resid_mean_by_month"] * out["forecast_range_c_latest"])
+        add(
+            "mean_wind_speed_lag2_x_onshore",
+            out["mean_wind_speed_lag_2"] * out["onshore_marine_flow_flag"].astype(float),
+        )
+    add(
+        "pressure_falling_x_showers",
+        out["pressure_falling_regime"].astype(float) * out["txt_showers"].astype(float),
+    )
+    add(
+        "pressure_rising_x_dry_clear",
+        out["pressure_rising_regime"].astype(float) * out["dry_clear_radiative"].astype(float),
+    )
+    add(
+        "resid_mean_by_month_x_forecast_range",
+        out["resid_mean_by_month"] * out["forecast_range_c_latest"],
+    )
     add(
         "resid_mean_by_season_maxbin_x_official_high",
-        out["resid_mean_by_season_x_forecast_max_bin"] * out["official_forecast_high_for_season"].astype(float),
+        out["resid_mean_by_season_x_forecast_max_bin"]
+        * out["official_forecast_high_for_season"].astype(float),
     )
     if "analog_resid_idw_mean_50" in out.columns:
-        add("analog_resid_idw50_x_effective_sample_size", out["analog_resid_idw_mean_50"] * out["analog_effective_sample_size_50"])
-        add("analog_resid_idw50_x_high_uncertainty", out["analog_resid_idw_mean_50"] * out["high_forecast_uncertainty_regime"].astype(float))
+        add(
+            "analog_resid_idw50_x_effective_sample_size",
+            out["analog_resid_idw_mean_50"] * out["analog_effective_sample_size_50"],
+        )
+        add(
+            "analog_resid_idw50_x_high_uncertainty",
+            out["analog_resid_idw_mean_50"] * out["high_forecast_uncertainty_regime"].astype(float),
+        )
     for name, series in interactions.items():
         out[name] = series
     return out, list(interactions)
@@ -1524,17 +1990,33 @@ def add_target_threshold_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, li
     p90 = prior_month_quantile(out, "target_tmax_lag_2", 0.90)
     p20 = prior_month_quantile(out, "target_tmax_lag_2", 0.20)
     out["recent_heat_count_3d"] = (
-        out[["target_tmax_lag_2", "target_tmax_lag_3", "target_tmax_lag_4"]].ge(p80, axis=0).sum(axis=1)
+        out[["target_tmax_lag_2", "target_tmax_lag_3", "target_tmax_lag_4"]]
+        .ge(p80, axis=0)
+        .sum(axis=1)
     )
-    heat7_cols = [f"target_tmax_lag_{lag}" for lag in (2, 3, 4, 5, 7) if f"target_tmax_lag_{lag}" in out.columns]
-    out["recent_extreme_heat_count_7d"] = out[heat7_cols].ge(p90, axis=0).sum(axis=1) if heat7_cols else 0
+    heat7_cols = [
+        f"target_tmax_lag_{lag}"
+        for lag in (2, 3, 4, 5, 7)
+        if f"target_tmax_lag_{lag}" in out.columns
+    ]
+    out["recent_extreme_heat_count_7d"] = (
+        out[heat7_cols].ge(p90, axis=0).sum(axis=1) if heat7_cols else 0
+    )
     out["recent_cool_count_3d"] = (
-        out[["target_tmax_lag_2", "target_tmax_lag_3", "target_tmax_lag_4"]].le(p20, axis=0).sum(axis=1)
+        out[["target_tmax_lag_2", "target_tmax_lag_3", "target_tmax_lag_4"]]
+        .le(p20, axis=0)
+        .sum(axis=1)
     )
     out["heat_persistence_flag"] = out["target_tmax_rolling_mean_3_ending_tminus2"] >= p80
-    out["heat_acceleration_flag"] = out["target_tmax_acceleration"] >= prior_month_quantile(out, "target_tmax_acceleration", 0.75)
-    out["target_tmax_lag2_anomaly_vs_month_train_clim"] = out["target_tmax_lag_2"] - out["month_clim_mean"]
-    out["target_tmax_lag2_anomaly_vs_doy_train_clim"] = out["target_tmax_lag_2"] - out["doy_clim_mean_31d"]
+    out["heat_acceleration_flag"] = out["target_tmax_acceleration"] >= prior_month_quantile(
+        out, "target_tmax_acceleration", 0.75
+    )
+    out["target_tmax_lag2_anomaly_vs_month_train_clim"] = (
+        out["target_tmax_lag_2"] - out["month_clim_mean"]
+    )
+    out["target_tmax_lag2_anomaly_vs_doy_train_clim"] = (
+        out["target_tmax_lag_2"] - out["doy_clim_mean_31d"]
+    )
     cols = [
         "recent_heat_count_3d",
         "recent_extreme_heat_count_7d",
@@ -1596,7 +2078,10 @@ def build_feature_matrix(
         "stale_hours_latest",
         "parse_status_latest_is_ok",
         *TEXT_PATTERNS.keys(),
-        *[f"is_{family}_family" for family in ("1615", "1645", "1745", "1845", "2145", "2245", "2315", "2345")],
+        *[
+            f"is_{family}_family"
+            for family in ("1615", "1645", "1745", "1845", "2145", "2245", "2315", "2345")
+        ],
     ]
     revision_cols = [
         "n_issues_before_cutoff",
@@ -1653,7 +2138,10 @@ def build_feature_matrix(
         "stale_issue_count",
         "max_stale_hours_before_cutoff",
         "latest_is_stale",
-        *[f"has_{family}_issue_before_cutoff" for family in ("1645", "1745", "1845", "2145", "2245", "2315", "2345")],
+        *[
+            f"has_{family}_issue_before_cutoff"
+            for family in ("1645", "1745", "1845", "2145", "2245", "2315", "2345")
+        ],
     ]
     calendar_cols = [
         "month",
@@ -1672,12 +2160,23 @@ def build_feature_matrix(
         "is_autumn_clear_transition",
         "is_winter_monsoon_season",
     ]
-    no_official_cols = list(dict.fromkeys(calendar_cols + target_cols + target_extra_cols + climate_cols + seasonal_cols + regime_cols))
+    no_official_cols = list(
+        dict.fromkeys(
+            calendar_cols
+            + target_cols
+            + target_extra_cols
+            + climate_cols
+            + seasonal_cols
+            + regime_cols
+        )
+    )
     families = {
         "latest": [col for col in latest_cols if col in frame.columns],
         "revision": [col for col in revision_cols if col in frame.columns],
         "residual_history": [col for col in residual_cols if col in frame.columns],
-        "target_history": [col for col in [*target_cols, *target_extra_cols] if col in frame.columns],
+        "target_history": [
+            col for col in [*target_cols, *target_extra_cols] if col in frame.columns
+        ],
         "climate": [col for col in climate_cols if col in frame.columns],
         "seasonal": [col for col in [*calendar_cols, *seasonal_cols] if col in frame.columns],
         "regime": [col for col in regime_cols if col in frame.columns],
@@ -1705,7 +2204,9 @@ def prediction_clip(series: pd.Series | np.ndarray) -> np.ndarray:
     return np.clip(np.asarray(series, dtype=float), 5.0, 40.5)
 
 
-def score_series(y_true: pd.Series | np.ndarray, y_pred: pd.Series | np.ndarray) -> dict[str, float | int]:
+def score_series(
+    y_true: pd.Series | np.ndarray, y_pred: pd.Series | np.ndarray
+) -> dict[str, float | int]:
     actual = np.asarray(y_true, dtype=float)
     pred = np.asarray(y_pred, dtype=float)
     mask = np.isfinite(actual) & np.isfinite(pred)
@@ -1768,7 +2269,11 @@ def score_by(predictions: pd.DataFrame, group_cols: Sequence[str], scope: str) -
         rows.append(row)
     if not rows:
         return pd.DataFrame()
-    return pd.DataFrame(rows).sort_values(["mae", "rmse", "bias"], ascending=[True, True, True]).reset_index(drop=True)
+    return (
+        pd.DataFrame(rows)
+        .sort_values(["mae", "rmse", "bias"], ascending=[True, True, True])
+        .reset_index(drop=True)
+    )
 
 
 def feature_source_family(feature: str, families: dict[str, list[str]]) -> str:
@@ -1787,7 +2292,11 @@ def feature_audit(families: dict[str, list[str]]) -> pd.DataFrame:
             asof_rule = "target station history only through T-2"
         elif "climate" in source_family:
             asof_rule = "HKO daily climate variables only through T-2"
-        elif "residual_history" in source_family or "analog" in source_family or "seasonal" in source_family:
+        elif (
+            "residual_history" in source_family
+            or "analog" in source_family
+            or "seasonal" in source_family
+        ):
             asof_rule = "prior calendar years only inside each cutoff family"
         elif "regime" in source_family or "interaction" in source_family:
             asof_rule = "derived from already as-of-safe source features"
@@ -1811,11 +2320,25 @@ def leakage_row_audit(frame: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for cutoff, group in grouped:
         official = group[group["official_available_before_cutoff"].astype(bool)]
-        issue_col = "latest_issue_at_hkt" if "latest_issue_at_hkt" in official.columns else "issue_at_hkt_latest"
-        latest_issue_ok = bool((official[issue_col] <= official["asof_cutoff_hkt"]).all()) if not official.empty else True
-        target_lag_ok = bool(group["target_tmax_lag_1"].isna().all()) if "target_tmax_lag_1" in group else True
+        issue_col = (
+            "latest_issue_at_hkt"
+            if "latest_issue_at_hkt" in official.columns
+            else "issue_at_hkt_latest"
+        )
+        latest_issue_ok = (
+            bool((official[issue_col] <= official["asof_cutoff_hkt"]).all())
+            if not official.empty
+            else True
+        )
+        target_lag_ok = (
+            bool(group["target_tmax_lag_1"].isna().all()) if "target_tmax_lag_1" in group else True
+        )
         validation_scope_ok = bool(pd.to_datetime(group["target_date"]).max() <= END_DATE)
-        climate_cols = [col for col in group.columns if col.endswith("_lag_1") and col.startswith(tuple(CLIMATE_VARIABLES))]
+        climate_cols = [
+            col
+            for col in group.columns
+            if col.endswith("_lag_1") and col.startswith(tuple(CLIMATE_VARIABLES))
+        ]
         climate_tminus1_absent = bool(not climate_cols)
         rows.extend(
             [
@@ -1823,14 +2346,18 @@ def leakage_row_audit(frame: pd.DataFrame) -> pd.DataFrame:
                     "cutoff": cutoff,
                     "audit_check": "latest_issue_at_or_before_cutoff",
                     "status": "pass" if latest_issue_ok else "fail",
-                    "failed_rows": 0 if latest_issue_ok else int((official[issue_col] > official["asof_cutoff_hkt"]).sum()),
+                    "failed_rows": 0
+                    if latest_issue_ok
+                    else int((official[issue_col] > official["asof_cutoff_hkt"]).sum()),
                     "evidence": f"{issue_col} <= asof_cutoff_hkt for all official rows",
                 },
                 {
                     "cutoff": cutoff,
                     "audit_check": "no_target_tminus1_or_target_day_features",
                     "status": "pass" if target_lag_ok else "fail",
-                    "failed_rows": 0 if target_lag_ok else int(group["target_tmax_lag_1"].notna().sum()),
+                    "failed_rows": 0
+                    if target_lag_ok
+                    else int(group["target_tmax_lag_1"].notna().sum()),
                     "evidence": "target lag list begins at T-2",
                 },
                 {
@@ -1844,7 +2371,9 @@ def leakage_row_audit(frame: pd.DataFrame) -> pd.DataFrame:
                     "cutoff": cutoff,
                     "audit_check": "development_range_excludes_2024_plus",
                     "status": "pass" if validation_scope_ok else "fail",
-                    "failed_rows": 0 if validation_scope_ok else int(pd.to_datetime(group["target_date"]).gt(END_DATE).sum()),
+                    "failed_rows": 0
+                    if validation_scope_ok
+                    else int(pd.to_datetime(group["target_date"]).gt(END_DATE).sum()),
                     "evidence": f"maximum target date {date_text(pd.to_datetime(group['target_date']).max())}",
                 },
             ]
@@ -1891,9 +2420,11 @@ def source_manifest(
                 "first_date": date_text(forecasts["target_date"].min()),
                 "last_date": date_text(forecasts["target_date"].max()),
                 "null_or_unusable_percent": float(
-                    (~forecasts["row_quality_status"].eq("usable_local_minmax")
-                    | forecasts["forecast_max_c"].isna()
-                    | forecasts["forecast_min_c"].isna()).mean()
+                    (
+                        ~forecasts["row_quality_status"].eq("usable_local_minmax")
+                        | forecasts["forecast_max_c"].isna()
+                        | forecasts["forecast_min_c"].isna()
+                    ).mean()
                     * 100.0
                 ),
                 "source_role": "HKO local lead-1 forecast min/max archive used as official anchor",
@@ -1910,7 +2441,11 @@ def source_manifest(
             {
                 "source_id": "gpt_pro_strategy_spec",
                 "location": str(pasted_spec_path),
-                "rows": int(sum(1 for _ in pasted_spec_path.open("r", encoding="utf-8", errors="replace"))) if pasted_spec_path.exists() else 0,
+                "rows": int(
+                    sum(1 for _ in pasted_spec_path.open("r", encoding="utf-8", errors="replace"))
+                )
+                if pasted_spec_path.exists()
+                else 0,
                 "first_date": "",
                 "last_date": "",
                 "null_or_unusable_percent": 0.0,
@@ -1934,8 +2469,21 @@ def hko_daily_climate_manifest(climate: pd.DataFrame) -> pd.DataFrame:
                 "first_date": date_text(group["local_date"].min()),
                 "last_date": date_text(group["local_date"].max()),
                 "null_value_percent": float(group["value"].isna().mean() * 100.0),
-                "operational_input_allowed_percent": float(group.get("operational_input_allowed", pd.Series(False, index=group.index)).fillna(False).astype(bool).mean() * 100.0),
-                "availability_tiers": ",".join(sorted(group.get("availability_tier", pd.Series("", index=group.index)).fillna("").astype(str).unique())),
+                "operational_input_allowed_percent": float(
+                    group.get("operational_input_allowed", pd.Series(False, index=group.index))
+                    .fillna(False)
+                    .astype(bool)
+                    .mean()
+                    * 100.0
+                ),
+                "availability_tiers": ",".join(
+                    sorted(
+                        group.get("availability_tier", pd.Series("", index=group.index))
+                        .fillna("")
+                        .astype(str)
+                        .unique()
+                    )
+                ),
             }
         )
     return pd.DataFrame(rows).sort_values("variable").reset_index(drop=True)
@@ -1945,7 +2493,9 @@ def existing_features(frame: pd.DataFrame, features: Sequence[str]) -> list[str]
     return [feature for feature in dict.fromkeys(features) if feature in frame.columns]
 
 
-def design_matrices(train: pd.DataFrame, valid: pd.DataFrame, features: Sequence[str]) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+def design_matrices(
+    train: pd.DataFrame, valid: pd.DataFrame, features: Sequence[str]
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
     use_features = existing_features(train, features)
     if not use_features:
         train_x = pd.DataFrame({"constant": np.ones(len(train), dtype=float)}, index=train.index)
@@ -1958,7 +2508,8 @@ def design_matrices(train: pd.DataFrame, valid: pd.DataFrame, features: Sequence
     object_cols = [
         col
         for col in combined.columns
-        if pd.api.types.is_object_dtype(combined[col]) or pd.api.types.is_categorical_dtype(combined[col])
+        if pd.api.types.is_object_dtype(combined[col])
+        or pd.api.types.is_categorical_dtype(combined[col])
     ]
     if object_cols:
         combined[object_cols] = combined[object_cols].astype("string").fillna("__missing__")
@@ -2067,7 +2618,9 @@ def fit_predict_lgbm(
         params["alpha"] = 0.86
     model = LGBMRegressor(**params)
     try:
-        model.fit(train_x, train_y.loc[train_mask].to_numpy(dtype=float), sample_weight=train_weights)
+        model.fit(
+            train_x, train_y.loc[train_mask].to_numpy(dtype=float), sample_weight=train_weights
+        )
         pred_target = model.predict(valid_x)
         if residual_anchor_col is not None:
             pred_target = valid_anchor + np.clip(pred_target, -4.5, 4.5)
@@ -2148,7 +2701,11 @@ def empirical_bayes_prediction(valid: pd.DataFrame) -> np.ndarray:
         mask = np.isfinite(values)
         weighted = np.where(mask, values * weights, 0.0)
         denom = np.where(mask, weights, 0.0).sum(axis=1)
-        fallback = pd.to_numeric(valid.get("resid_global_mean", 0.0), errors="coerce").fillna(0.0).to_numpy(dtype=float)
+        fallback = (
+            pd.to_numeric(valid.get("resid_global_mean", 0.0), errors="coerce")
+            .fillna(0.0)
+            .to_numpy(dtype=float)
+        )
         correction = np.divide(weighted.sum(axis=1), denom, out=fallback.copy(), where=denom > 0)
     raw = pd.to_numeric(valid["forecast_max_c_latest"], errors="coerce").to_numpy(dtype=float)
     return prediction_clip(raw + np.clip(correction, -3.0, 3.0))
@@ -2163,9 +2720,19 @@ def grouped_shrinkage_prediction(valid: pd.DataFrame) -> np.ndarray:
         "resid_mean_by_issue_hour_family",
     ]
     available = [col for col in cols if col in valid.columns]
-    values = valid[available].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float) if available else np.empty((len(valid), 0))
-    correction = np.nanmean(values, axis=1) if values.shape[1] else np.zeros(len(valid), dtype=float)
-    fallback = pd.to_numeric(valid.get("resid_global_mean", 0.0), errors="coerce").fillna(0.0).to_numpy(dtype=float)
+    values = (
+        valid[available].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float)
+        if available
+        else np.empty((len(valid), 0))
+    )
+    correction = (
+        np.nanmean(values, axis=1) if values.shape[1] else np.zeros(len(valid), dtype=float)
+    )
+    fallback = (
+        pd.to_numeric(valid.get("resid_global_mean", 0.0), errors="coerce")
+        .fillna(0.0)
+        .to_numpy(dtype=float)
+    )
     correction = np.where(np.isfinite(correction), correction, fallback)
     raw = pd.to_numeric(valid["forecast_max_c_latest"], errors="coerce").to_numpy(dtype=float)
     return prediction_clip(raw + np.clip(correction, -3.0, 3.0))
@@ -2176,7 +2743,9 @@ def analog_prediction(valid: pd.DataFrame) -> np.ndarray:
     analog = pd.to_numeric(valid.get("analog_resid_idw_mean_50", np.nan), errors="coerce")
     fallback = pd.to_numeric(valid.get("analog_resid_trimmed_mean_50", np.nan), errors="coerce")
     correction = analog.fillna(fallback)
-    correction = correction.fillna(pd.to_numeric(valid.get("resid_mean_by_month", 0.0), errors="coerce")).fillna(0.0)
+    correction = correction.fillna(
+        pd.to_numeric(valid.get("resid_mean_by_month", 0.0), errors="coerce")
+    ).fillna(0.0)
     return prediction_clip(raw + np.clip(correction.to_numpy(dtype=float), -3.0, 3.0))
 
 
@@ -2193,17 +2762,30 @@ def bool_series(frame: pd.DataFrame, col: str) -> pd.Series:
 
 
 def direct_history_formula(valid: pd.DataFrame, *, climate: bool) -> np.ndarray:
-    clim = numeric_series(valid, "doy_clim_mean_31d", float(valid["target_tmax_c"].mean() if "target_tmax_c" in valid else 26.0))
+    clim = numeric_series(
+        valid,
+        "doy_clim_mean_31d",
+        float(valid["target_tmax_c"].mean() if "target_tmax_c" in valid else 26.0),
+    )
     month = numeric_series(valid, "month_clim_mean", float(clim.mean()))
     lag2 = numeric_series(valid, "target_tmax_lag_2", float(month.mean()))
     roll3 = numeric_series(valid, "target_tmax_rolling_mean_3_ending_tminus2", float(lag2.mean()))
     trend = numeric_series(valid, "target_tmax_trend_7", 0.0).clip(-2.0, 2.0)
     pred = 0.45 * clim + 0.20 * month + 0.23 * lag2 + 0.12 * roll3 + 0.10 * trend
     if climate:
-        dew = numeric_series(valid, "mean_dew_point_temperature_lag_2", float(lag2.mean())) - numeric_series(valid, "mean_dew_point_temperature_rolling_mean_7_ending_tminus2", float(lag2.mean()))
+        dew = numeric_series(
+            valid, "mean_dew_point_temperature_lag_2", float(lag2.mean())
+        ) - numeric_series(
+            valid, "mean_dew_point_temperature_rolling_mean_7_ending_tminus2", float(lag2.mean())
+        )
         cloud = numeric_series(valid, "mean_cloud_amount_lag_2", 60.0) - 60.0
         rain = numeric_series(valid, "daily_rainfall_rolling_mean_3_ending_tminus2", 0.0)
-        pred = pred + 0.04 * dew.clip(-5.0, 5.0) - 0.015 * cloud.clip(-30.0, 30.0) - 0.025 * np.log1p(rain.clip(lower=0.0))
+        pred = (
+            pred
+            + 0.04 * dew.clip(-5.0, 5.0)
+            - 0.015 * cloud.clip(-30.0, 30.0)
+            - 0.025 * np.log1p(rain.clip(lower=0.0))
+        )
     return prediction_clip(pred)
 
 
@@ -2214,9 +2796,13 @@ def residual_formula(valid: pd.DataFrame, variant: str) -> np.ndarray:
     resid_max_bin = numeric_series(valid, "resid_mean_by_forecast_max_bin", 0.0)
     resid_issue = numeric_series(valid, "resid_mean_by_issue_hour_family", 0.0)
     analog = numeric_series(valid, "analog_resid_idw_mean_50", 0.0)
-    target_anom = numeric_series(valid, "target_tmax_lag2_anomaly_vs_doy_train_clim", 0.0).clip(-4.0, 4.0)
+    target_anom = numeric_series(valid, "target_tmax_lag2_anomaly_vs_doy_train_clim", 0.0).clip(
+        -4.0, 4.0
+    )
     trend = numeric_series(valid, "target_tmax_trend_7", 0.0).clip(-2.0, 2.0)
-    correction = 0.25 * resid_month + 0.20 * resid_season_range + 0.18 * resid_max_bin + 0.12 * resid_issue
+    correction = (
+        0.25 * resid_month + 0.20 * resid_season_range + 0.18 * resid_max_bin + 0.12 * resid_issue
+    )
     if variant in {"m2", "m5", "m6", "m7", "latest_target"}:
         correction = correction + 0.08 * target_anom + 0.05 * trend
     if variant in {"m4", "m5", "m6", "m7", "analog"}:
@@ -2224,10 +2810,16 @@ def residual_formula(valid: pd.DataFrame, variant: str) -> np.ndarray:
     if variant in {"m5", "m6", "m7", "regime"}:
         correction = correction + bool_series(valid, "hot_humid_persistence").astype(float) * 0.08
         correction = correction - bool_series(valid, "cloud_rain_suppressed").astype(float) * 0.10
-        correction = correction - bool_series(valid, "marine_moderation_regime").astype(float) * 0.06
-        correction = correction + bool_series(valid, "upward_revised_heat_regime").astype(float) * 0.07
+        correction = (
+            correction - bool_series(valid, "marine_moderation_regime").astype(float) * 0.06
+        )
+        correction = (
+            correction + bool_series(valid, "upward_revised_heat_regime").astype(float) * 0.07
+        )
     if variant == "m6":
-        correction = correction * 0.92 + numeric_series(valid, "analog_resid_trimmed_mean_100", 0.0) * 0.08
+        correction = (
+            correction * 0.92 + numeric_series(valid, "analog_resid_trimmed_mean_100", 0.0) * 0.08
+        )
     if variant == "m7":
         high = (
             bool_series(valid, "extreme_heat_setup")
@@ -2236,7 +2828,9 @@ def residual_formula(valid: pd.DataFrame, variant: str) -> np.ndarray:
         )
         correction = correction + high.astype(float) * 0.10
     uncertainty = bool_series(valid, "high_forecast_uncertainty_regime")
-    correction = np.where(uncertainty.to_numpy(), np.asarray(correction) * 0.82, np.asarray(correction))
+    correction = np.where(
+        uncertainty.to_numpy(), np.asarray(correction) * 0.82, np.asarray(correction)
+    )
     return prediction_clip(raw + np.clip(np.asarray(correction, dtype=float), -2.5, 2.5))
 
 
@@ -2246,8 +2840,12 @@ def high_tail_weights(train: pd.DataFrame) -> np.ndarray:
     weights = np.ones(len(train), dtype=float)
     hot_mask = (
         official.ge(threshold)
-        | train.get("extreme_heat_setup", pd.Series(False, index=train.index)).fillna(False).astype(bool)
-        | train.get("hot_humid_persistence", pd.Series(False, index=train.index)).fillna(False).astype(bool)
+        | train.get("extreme_heat_setup", pd.Series(False, index=train.index))
+        .fillna(False)
+        .astype(bool)
+        | train.get("hot_humid_persistence", pd.Series(False, index=train.index))
+        .fillna(False)
+        .astype(bool)
     )
     weights[hot_mask.to_numpy()] = 2.3
     return weights
@@ -2297,7 +2895,12 @@ def base_predictions_for_split(
         )
     )
 
-    b2_pred = prediction_clip(raw_pred + pd.to_numeric(valid.get("resid_mean_by_month", 0.0), errors="coerce").fillna(0.0).to_numpy(dtype=float))
+    b2_pred = prediction_clip(
+        raw_pred
+        + pd.to_numeric(valid.get("resid_mean_by_month", 0.0), errors="coerce")
+        .fillna(0.0)
+        .to_numpy(dtype=float)
+    )
     base_arrays["B2_monthly_residual_shrinkage"] = b2_pred
     rows.append(
         add_prediction_records(
@@ -2462,11 +3065,21 @@ def base_predictions_for_split(
     m7_pred = residual_formula(valid, "m7")
     m7_count = len(existing_features(valid, full_features))
     high_mask = (
-        valid.get("extreme_heat_setup", pd.Series(False, index=valid.index)).fillna(False).astype(bool)
-        | valid.get("hot_humid_persistence", pd.Series(False, index=valid.index)).fillna(False).astype(bool)
-        | pd.to_numeric(valid["forecast_max_c_latest"], errors="coerce").ge(pd.to_numeric(train["forecast_max_c_latest"], errors="coerce").quantile(0.82))
+        valid.get("extreme_heat_setup", pd.Series(False, index=valid.index))
+        .fillna(False)
+        .astype(bool)
+        | valid.get("hot_humid_persistence", pd.Series(False, index=valid.index))
+        .fillna(False)
+        .astype(bool)
+        | pd.to_numeric(valid["forecast_max_c_latest"], errors="coerce").ge(
+            pd.to_numeric(train["forecast_max_c_latest"], errors="coerce").quantile(0.82)
+        )
     )
-    m7_blended = np.where(high_mask.to_numpy() & np.isfinite(m7_pred), m7_pred, np.where(np.isfinite(m5_pred), m5_pred, b3_pred))
+    m7_blended = np.where(
+        high_mask.to_numpy() & np.isfinite(m7_pred),
+        m7_pred,
+        np.where(np.isfinite(m5_pred), m5_pred, b3_pred),
+    )
     base_arrays["M7_high_tail_specialist"] = m7_blended
     rows.append(
         add_prediction_records(
@@ -2481,7 +3094,9 @@ def base_predictions_for_split(
     )
 
     if include_stack:
-        stack_pred, stack_feature_count = constrained_stack_prediction(train, valid, families, fold_year, cutoff, base_arrays)
+        stack_pred, stack_feature_count = constrained_stack_prediction(
+            train, valid, families, fold_year, cutoff, base_arrays
+        )
         base_arrays["M8_constrained_nonnegative_stack"] = stack_pred
         rows.append(
             add_prediction_records(
@@ -2537,8 +3152,18 @@ def ablation_predictions_for_split(
     base_arrays: dict[str, np.ndarray],
 ) -> list[pd.DataFrame]:
     specs: list[tuple[str, str, list[str], str]] = [
-        ("A3_latest_only_residual_lgbm", "latest_state_only", families.get("latest", []), "regression_l1"),
-        ("A4_latest_plus_revision_residual_lgbm", "latest_plus_revision", families.get("latest", []) + families.get("revision", []), "regression_l1"),
+        (
+            "A3_latest_only_residual_lgbm",
+            "latest_state_only",
+            families.get("latest", []),
+            "regression_l1",
+        ),
+        (
+            "A4_latest_plus_revision_residual_lgbm",
+            "latest_plus_revision",
+            families.get("latest", []) + families.get("revision", []),
+            "regression_l1",
+        ),
         (
             "A5_latest_plus_residual_history_lgbm",
             "latest_plus_residual_history",
@@ -2548,7 +3173,9 @@ def ablation_predictions_for_split(
         (
             "A6_latest_plus_target_history_lgbm",
             "latest_plus_target_history",
-            families.get("latest", []) + families.get("target_history", []) + families.get("seasonal", []),
+            families.get("latest", [])
+            + families.get("target_history", [])
+            + families.get("seasonal", []),
             "regression_l1",
         ),
         (
@@ -2560,7 +3187,10 @@ def ablation_predictions_for_split(
         (
             "A8_latest_regime_interactions_lgbm",
             "latest_regime_interactions",
-            families.get("latest", []) + families.get("regime", []) + families.get("interaction", []) + families.get("seasonal", []),
+            families.get("latest", [])
+            + families.get("regime", [])
+            + families.get("interaction", [])
+            + families.get("seasonal", []),
             "regression_l1",
         ),
     ]
@@ -2607,7 +3237,9 @@ def ablation_predictions_for_split(
             cutoff=cutoff,
             model_id="A10_full_stack",
             model_family="ablation",
-            prediction=base_arrays.get("M8_constrained_nonnegative_stack", base_arrays["M5_lgbm_l1_residual"]),
+            prediction=base_arrays.get(
+                "M8_constrained_nonnegative_stack", base_arrays["M5_lgbm_l1_residual"]
+            ),
             feature_count=len(existing_features(valid, families.get("full", []))),
         ),
         add_prediction_records(
@@ -2668,22 +3300,32 @@ def add_diagnostic_bins(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def run_walk_forward(frame: pd.DataFrame, families: dict[str, list[str]]) -> tuple[pd.DataFrame, pd.DataFrame]:
+def run_walk_forward(
+    frame: pd.DataFrame, families: dict[str, list[str]]
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     all_rows: list[pd.DataFrame] = []
     ablation_rows: list[pd.DataFrame] = []
     frame = add_diagnostic_bins(frame)
     for cutoff in CUTOFFS:
         print(f"Running yearly walk-forward models for cutoff {cutoff}...", flush=True)
-        cutoff_frame = frame[frame["cutoff"].eq(cutoff)].sort_values("target_date").reset_index(drop=True)
+        cutoff_frame = (
+            frame[frame["cutoff"].eq(cutoff)].sort_values("target_date").reset_index(drop=True)
+        )
         for fold_year in VALIDATION_YEARS:
             print(f"  validating {fold_year} at cutoff {cutoff}", flush=True)
             train = cutoff_frame[cutoff_frame["year"].lt(fold_year)].copy()
             valid = cutoff_frame[cutoff_frame["year"].eq(fold_year)].copy()
             if train.empty or valid.empty:
                 continue
-            model_rows, base_arrays = base_predictions_for_split(train, valid, families, fold_year, cutoff, include_stack=True)
+            model_rows, base_arrays = base_predictions_for_split(
+                train, valid, families, fold_year, cutoff, include_stack=True
+            )
             all_rows.extend(model_rows)
-            ablation_rows.extend(ablation_predictions_for_split(train, valid, families, fold_year, cutoff, base_arrays))
+            ablation_rows.extend(
+                ablation_predictions_for_split(
+                    train, valid, families, fold_year, cutoff, base_arrays
+                )
+            )
     predictions = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
     ablations = pd.concat(ablation_rows, ignore_index=True) if ablation_rows else pd.DataFrame()
     for out in (predictions, ablations):
@@ -2703,7 +3345,9 @@ def official_rows_only(predictions: pd.DataFrame) -> pd.DataFrame:
 
 
 def all_rows_scoreable(predictions: pd.DataFrame) -> pd.DataFrame:
-    return predictions[predictions["prediction_c"].notna() & ~predictions["diagnostic_only"].astype(bool)].copy()
+    return predictions[
+        predictions["prediction_c"].notna() & ~predictions["diagnostic_only"].astype(bool)
+    ].copy()
 
 
 def build_scoreboards(
@@ -2722,28 +3366,52 @@ def build_scoreboards(
     all_scoreable = all_rows_scoreable(predictions)
     baseline = pd.concat(
         [
-            score_by(official[official["model_id"].isin(baseline_ids)], ["cutoff", "model_id", "model_family"], "official_rows_only"),
-            score_by(all_scoreable[all_scoreable["model_id"].isin(baseline_ids)], ["cutoff", "model_id", "model_family"], "all_rows"),
+            score_by(
+                official[official["model_id"].isin(baseline_ids)],
+                ["cutoff", "model_id", "model_family"],
+                "official_rows_only",
+            ),
+            score_by(
+                all_scoreable[all_scoreable["model_id"].isin(baseline_ids)],
+                ["cutoff", "model_id", "model_family"],
+                "all_rows",
+            ),
         ],
         ignore_index=True,
     )
     model = pd.concat(
         [
-            score_by(official[~official["model_id"].isin(baseline_ids)], ["cutoff", "model_id", "model_family"], "official_rows_only"),
-            score_by(all_scoreable[~all_scoreable["model_id"].isin(baseline_ids)], ["cutoff", "model_id", "model_family"], "all_rows"),
+            score_by(
+                official[~official["model_id"].isin(baseline_ids)],
+                ["cutoff", "model_id", "model_family"],
+                "official_rows_only",
+            ),
+            score_by(
+                all_scoreable[~all_scoreable["model_id"].isin(baseline_ids)],
+                ["cutoff", "model_id", "model_family"],
+                "all_rows",
+            ),
         ],
         ignore_index=True,
     )
     ablation = pd.concat(
         [
-            score_by(official_rows_only(ablations), ["cutoff", "model_id", "model_family"], "official_rows_only"),
-            score_by(all_rows_scoreable(ablations), ["cutoff", "model_id", "model_family"], "all_rows"),
+            score_by(
+                official_rows_only(ablations),
+                ["cutoff", "model_id", "model_family"],
+                "official_rows_only",
+            ),
+            score_by(
+                all_rows_scoreable(ablations), ["cutoff", "model_id", "model_family"], "all_rows"
+            ),
         ],
         ignore_index=True,
     )
     cutoff_rows: list[dict[str, Any]] = []
     model_candidates = pd.concat([baseline, model], ignore_index=True)
-    for cutoff, group in model_candidates[model_candidates["scope"].eq("official_rows_only")].groupby("cutoff"):
+    for cutoff, group in model_candidates[
+        model_candidates["scope"].eq("official_rows_only")
+    ].groupby("cutoff"):
         raw = group[group["model_id"].eq("B1_raw_official_latest")]
         best = group.sort_values(["mae", "rmse"], na_position="last").iloc[0]
         raw_score = raw.iloc[0] if not raw.empty else None
@@ -2757,12 +3425,18 @@ def build_scoreboards(
                 "best_bias": best["bias"],
                 "raw_official_mae": raw_score["mae"] if raw_score is not None else math.nan,
                 "raw_official_rmse": raw_score["rmse"] if raw_score is not None else math.nan,
-                "delta_mae_vs_raw": best["mae"] - raw_score["mae"] if raw_score is not None else math.nan,
-                "delta_rmse_vs_raw": best["rmse"] - raw_score["rmse"] if raw_score is not None else math.nan,
+                "delta_mae_vs_raw": best["mae"] - raw_score["mae"]
+                if raw_score is not None
+                else math.nan,
+                "delta_rmse_vs_raw": best["rmse"] - raw_score["rmse"]
+                if raw_score is not None
+                else math.nan,
                 "n": best["n"],
             }
         )
-    cutoff_scoreboard = pd.DataFrame(cutoff_rows).sort_values(["best_mae", "best_rmse"]).reset_index(drop=True)
+    cutoff_scoreboard = (
+        pd.DataFrame(cutoff_rows).sort_values(["best_mae", "best_rmse"]).reset_index(drop=True)
+    )
     identical = identical_cutoff_intersection_scoreboard(predictions)
     return baseline, model, cutoff_scoreboard, ablation, identical
 
@@ -2781,7 +3455,9 @@ def identical_cutoff_intersection_scoreboard(predictions: pd.DataFrame) -> pd.Da
         aggfunc="max",
         fill_value=False,
     )
-    common_dates = availability.index[availability.reindex(columns=list(CUTOFFS), fill_value=False).all(axis=1)]
+    common_dates = availability.index[
+        availability.reindex(columns=list(CUTOFFS), fill_value=False).all(axis=1)
+    ]
     common = usable[usable["target_date"].isin(common_dates)].copy()
     if common.empty:
         return pd.DataFrame()
@@ -2792,10 +3468,16 @@ def identical_cutoff_intersection_scoreboard(predictions: pd.DataFrame) -> pd.Da
         "M6_lgbm_huber_residual",
         "M8_constrained_nonnegative_stack",
     ]
-    return score_by(common[common["model_id"].isin(keep_models)], ["cutoff", "model_id", "model_family"], "identical_cutoff_intersection")
+    return score_by(
+        common[common["model_id"].isin(keep_models)],
+        ["cutoff", "model_id", "model_family"],
+        "identical_cutoff_intersection",
+    )
 
 
-def slice_scoreboard(predictions: pd.DataFrame, selected_model_id: str, selected_cutoff: str) -> dict[str, pd.DataFrame]:
+def slice_scoreboard(
+    predictions: pd.DataFrame, selected_model_id: str, selected_cutoff: str
+) -> dict[str, pd.DataFrame]:
     selected = predictions[
         predictions["model_id"].eq(selected_model_id)
         & predictions["cutoff"].eq(selected_cutoff)
@@ -2864,7 +3546,9 @@ def choose_selected_model(
     ].copy()
     if candidates.empty:
         raise RuntimeError("No candidate models were scoreable.")
-    primary = candidates[candidates["cutoff"].eq("23:59")].sort_values(["mae", "rmse"], na_position="last")
+    primary = candidates[candidates["cutoff"].eq("23:59")].sort_values(
+        ["mae", "rmse"], na_position="last"
+    )
     if primary.empty:
         selected = candidates.sort_values(["mae", "rmse"], na_position="last").iloc[0]
         rule = "23:59 unavailable, selected best official-row candidate overall"
@@ -2889,8 +3573,12 @@ def choose_selected_model(
     ]
     raw_row = raw.iloc[0] if not raw.empty else None
     gates = {
-        "improves_mae_vs_raw_by_0_035": bool(raw_row is not None and float(selected["mae"]) <= float(raw_row["mae"]) - 0.035),
-        "improves_rmse_vs_raw_by_0_035": bool(raw_row is not None and float(selected["rmse"]) <= float(raw_row["rmse"]) - 0.035),
+        "improves_mae_vs_raw_by_0_035": bool(
+            raw_row is not None and float(selected["mae"]) <= float(raw_row["mae"]) - 0.035
+        ),
+        "improves_rmse_vs_raw_by_0_035": bool(
+            raw_row is not None and float(selected["rmse"]) <= float(raw_row["rmse"]) - 0.035
+        ),
         "abs_bias_lte_0_040": bool(abs(float(selected["bias"])) <= 0.040),
         "has_at_least_4500_official_rows": bool(int(selected["n"]) >= 4500),
     }
@@ -2899,8 +3587,28 @@ def choose_selected_model(
         "selected_model_id": str(selected["model_id"]),
         "selected_model_family": str(selected["model_family"]),
         "selection_rule": rule,
-        "official_rows_only_score": {key: (float(value) if isinstance(value, (np.floating, float)) else int(value) if isinstance(value, (np.integer, int)) else value) for key, value in selected.to_dict().items()},
-        "raw_official_baseline_same_cutoff": None if raw_row is None else {key: (float(value) if isinstance(value, (np.floating, float)) else int(value) if isinstance(value, (np.integer, int)) else value) for key, value in raw_row.to_dict().items()},
+        "official_rows_only_score": {
+            key: (
+                float(value)
+                if isinstance(value, (np.floating, float))
+                else int(value)
+                if isinstance(value, (np.integer, int))
+                else value
+            )
+            for key, value in selected.to_dict().items()
+        },
+        "raw_official_baseline_same_cutoff": None
+        if raw_row is None
+        else {
+            key: (
+                float(value)
+                if isinstance(value, (np.floating, float))
+                else int(value)
+                if isinstance(value, (np.integer, int))
+                else value
+            )
+            for key, value in raw_row.to_dict().items()
+        },
         "promotion_gates": gates,
         "all_hard_gates_passed": bool(all(gates.values())),
         "cutoff_scoreboard_preview": cutoff_scoreboard.head(8).to_dict(orient="records"),
@@ -2921,7 +3629,9 @@ def lead0_diagnostic_score(labels: pd.DataFrame, lead0: pd.DataFrame) -> pd.Data
                 }
             ]
         )
-    groups = {date: group.sort_values("issue_at_hkt") for date, group in lead0.groupby("target_date")}
+    groups = {
+        date: group.sort_values("issue_at_hkt") for date, group in lead0.groupby("target_date")
+    }
     rows: list[dict[str, Any]] = []
     label_map = labels.set_index("target_date")["target_tmax_c"]
     for target_date, actual in label_map.items():
@@ -2934,7 +3644,13 @@ def lead0_diagnostic_score(labels: pd.DataFrame, lead0: pd.DataFrame) -> pd.Data
             continue
         latest = eligible.iloc[-1]
         if pd.notna(latest["forecast_max_c"]):
-            rows.append({"target_date": target_date, "target_tmax_c": actual, "prediction_c": latest["forecast_max_c"]})
+            rows.append(
+                {
+                    "target_date": target_date,
+                    "target_tmax_c": actual,
+                    "prediction_c": latest["forecast_max_c"],
+                }
+            )
     if not rows:
         return pd.DataFrame(
             [
@@ -2964,7 +3680,11 @@ def lead0_diagnostic_score(labels: pd.DataFrame, lead0: pd.DataFrame) -> pd.Data
 
 def bulletin_feasibility(frame: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    family_cols = [col for col in frame.columns if col.startswith("has_") and col.endswith("_issue_before_cutoff")]
+    family_cols = [
+        col
+        for col in frame.columns
+        if col.startswith("has_") and col.endswith("_issue_before_cutoff")
+    ]
     for cutoff, group in frame.groupby("cutoff"):
         for col in family_cols:
             rows.append(
@@ -2973,7 +3693,9 @@ def bulletin_feasibility(frame: pd.DataFrame) -> pd.DataFrame:
                     "cutoff": cutoff,
                     "issue_family": col.removeprefix("has_").removesuffix("_issue_before_cutoff"),
                     "target_days": int(len(group)),
-                    "days_with_issue_before_cutoff": int(group[col].fillna(False).astype(bool).sum()),
+                    "days_with_issue_before_cutoff": int(
+                        group[col].fillna(False).astype(bool).sum()
+                    ),
                     "coverage_percent": float(group[col].fillna(False).astype(bool).mean() * 100.0),
                     "production_allowed": False,
                     "note": "Count-only feasibility diagnostic for issue sequence engineering.",
@@ -3005,7 +3727,9 @@ def external_diagnostic_inventory(database_url: str) -> pd.DataFrame:
                 "diagnostic_id": "A14_external_weather_source_inventory",
                 "source_pattern": pattern,
                 "matching_tables": int(len(hits)),
-                "table_names": ";".join((hits["table_schema"] + "." + hits["table_name"]).head(20).tolist()),
+                "table_names": ";".join(
+                    (hits["table_schema"] + "." + hits["table_name"]).head(20).tolist()
+                ),
                 "production_allowed": False,
                 "note": "Count-only diagnostic. No external ISD/IGRA/best-track features are used by this 0215 production candidate.",
             }
@@ -3029,6 +3753,74 @@ def markdown_table(frame: pd.DataFrame, max_rows: int = 30) -> str:
     return "\n".join(lines)
 
 
+def experiment_run_config() -> dict[str, Any]:
+    return {
+        "experiment_id": EXPERIMENT_ID,
+        "slug": SLUG,
+        "cutoffs": list(CUTOFFS),
+        "validation_years": list(VALIDATION_YEARS),
+        "start_date": str(START_DATE.date()),
+        "end_date": str(END_DATE.date()),
+        "random_seed": RNG_SEED,
+    }
+
+
+def build_experiment_readme(status: str, results_markdown: str = "") -> str:
+    run_config = json.dumps(experiment_run_config(), indent=2)
+    results = demote_markdown_headings(results_markdown.rstrip())
+    if not results:
+        results = "### Results\n\nNo results have been written yet; the experiment is initialized."
+    return f"""## Latest Generated Run: {EXPERIMENT_ID} {TITLE}
+
+### Status
+
+{status}
+
+### Hypothesis
+
+The HKO lead-1 local maximum-temperature forecast is the best production anchor, but it contains learnable station-specific residual structure. A leakage-safe hybrid residual system using official revision state, prior official residual behavior, T-2 target/climate state, coastal/subtropical regimes, analog residuals, and a constrained stack should reduce MAE/RMSE versus the raw latest official forecast for HKG/HKO daily Tmax.
+
+### As-of contract
+
+- Target dates are `{START_DATE.date()}` through `{END_DATE.date()}` only.
+- Confirmation/locked rows beginning `{CONFIRMATION_START.date()}` are excluded.
+- Production cutoffs evaluated: `{", ".join(CUTOFFS)}` HKT on T-1.
+- Forecast archive rows are usable only when `issue_at_hkt <= asof_cutoff_hkt`, `product_type='local'`, `row_quality_status='usable_local_minmax'`, and `target_issue_lead_days=1`.
+- Target-history features use only T-2 and older.
+- HKO daily climate features use only T-2 and older.
+- Residual climatology, grouped residual shrinkage, and analog residuals are built from prior calendar years only inside each cutoff family.
+- Lead-0 and external-source diagnostics are diagnostic-only and cannot be selected.
+
+### Protocol
+
+1. Load DB source-of-truth target labels, lead-1 HKO historical forecasts, lead-0 diagnostics, and HKO daily climate.
+2. Build one row per `(target_date, cutoff)` for all four cutoffs.
+3. Engineer the requested feature families: latest official state, revision sequence, fold-safe residual history, T-2 target history, T-2 climate state, seasonal climatology, coastal/weather regimes, analog residuals, and interactions.
+4. Run expanding yearly walk-forward validation for `{VALIDATION_YEARS[0]}` through `{VALIDATION_YEARS[-1]}`. Each validation year trains on all prior years only.
+5. Score baselines and candidate residual models on official rows, all rows, and identical cutoff intersections.
+6. Select a production point-forecast strategy by the strict cutoff/model rule, with 23:59 HKT as the default cutoff unless an earlier cutoff clearly improves MAE without RMSE damage.
+
+### Run configuration
+
+```json
+{run_config}
+```
+
+### Reproduce
+
+From the `projects/hkg-tmax` project root:
+
+```powershell
+$env:PYTHONIOENCODING='utf-8'
+.\\.venv\\Scripts\\python.exe scripts\\run_hkg_t24_0215_gpt_pro_point_forecast_strategy.py
+```
+
+To override the database, set `HKG_TMAX_DATABASE_URL` before running. The runner writes compact machine artifacts under `results/` and `artifacts/`; generated bulk data remains subject to the project storage policy.
+
+{results}
+"""
+
+
 def initialize_experiment_folder() -> tuple[Path, Path, Path, Path]:
     src_dir = EXP_DIR / "src"
     results_dir = EXP_DIR / "results"
@@ -3037,56 +3829,26 @@ def initialize_experiment_folder() -> tuple[Path, Path, Path, Path]:
     for path in (src_dir, results_dir, artifacts_dir, logs_dir):
         path.mkdir(parents=True, exist_ok=True)
     shutil.copy2(Path(__file__), src_dir / f"run_{EXPERIMENT_ID}.py")
-    write_text(
-        EXP_DIR / "HYPOTHESIS.md",
-        f"""# Hypothesis
-
-The HKO lead-1 local maximum-temperature forecast is the best production anchor, but it contains learnable station-specific residual structure. A leakage-safe hybrid residual system using official revision state, prior official residual behavior, T-2 target/climate state, coastal/subtropical regimes, analog residuals, and a constrained stack should reduce MAE/RMSE versus the raw latest official forecast for HKG/HKO daily Tmax.
-""",
-    )
-    write_text(
-        EXP_DIR / "ASOF_CONTRACT.md",
-        f"""# As-Of Contract
-
-- Target dates are `{START_DATE.date()}` through `{END_DATE.date()}` only.
-- Confirmation/locked rows beginning `{CONFIRMATION_START.date()}` are excluded.
-- Production cutoffs evaluated: `{', '.join(CUTOFFS)}` HKT on T-1.
-- Forecast archive rows are usable only when `issue_at_hkt <= asof_cutoff_hkt`, `product_type='local'`, `row_quality_status='usable_local_minmax'`, and `target_issue_lead_days=1`.
-- Target-history features use only T-2 and older.
-- HKO daily climate features use only T-2 and older.
-- Residual climatology, grouped residual shrinkage, and analog residuals are built from prior calendar years only inside each cutoff family.
-- Lead-0 and external-source diagnostics are diagnostic-only and cannot be selected.
-""",
-    )
-    write_text(
-        EXP_DIR / "PROTOCOL.md",
-        f"""# Protocol
-
-1. Load DB source-of-truth target labels, lead-1 HKO historical forecasts, lead-0 diagnostics, and HKO daily climate.
-2. Build one row per `(target_date, cutoff)` for all four cutoffs.
-3. Engineer GPT-Pro requested feature families: latest official state, revision sequence, fold-safe residual history, T-2 target history, T-2 climate state, seasonal climatology, coastal/weather regimes, analog residuals, and interactions.
-4. Run expanding yearly walk-forward validation for `{VALIDATION_YEARS[0]}` through `{VALIDATION_YEARS[-1]}`. Each validation year trains on all prior years only.
-5. Score baselines and candidate residual models on official rows, all rows, and identical cutoff intersections.
-6. Select a production point-forecast strategy by the strict cutoff/model rule, with 23:59 HKT as the default cutoff unless an earlier cutoff clearly improves MAE without RMSE damage.
-""",
-    )
-    write_text(
-        EXP_DIR / "RUN_CONFIG.md",
-        json.dumps(
+    write_json(EXP_DIR / "run_config.json", experiment_run_config())
+    status_path = EXP_DIR / "status.json"
+    if not status_path.exists():
+        write_json(
+            status_path,
             {
-                "experiment_id": EXPERIMENT_ID,
-                "slug": SLUG,
-                "cutoffs": CUTOFFS,
-                "validation_years": VALIDATION_YEARS,
-                "start_date": str(START_DATE.date()),
-                "end_date": str(END_DATE.date()),
-                "random_seed": RNG_SEED,
+                "status": "initialized",
+                "updated_at_utc": utc_now(),
+                "message": "Validation has not completed; results will be written by the runner.",
             },
-            indent=2,
         )
-        + "\n",
-    )
-    write_text(EXP_DIR / "STATUS.md", "Status: initialized. Results are written by the runner after validation completes.\n")
+    readme_path = EXP_DIR / "README.md"
+    if not readme_path.exists():
+        write_bounded_readme_section(
+            readme_path,
+            start_marker=README_RESULTS_START,
+            end_marker=README_RESULTS_END,
+            section=build_experiment_readme("Initialized. Validation has not completed."),
+            default_title=f"{EXPERIMENT_ID}: {TITLE}",
+        )
     return src_dir, results_dir, artifacts_dir, logs_dir
 
 
@@ -3095,7 +3857,9 @@ def write_slice_artifacts(
     selected_metadata: dict[str, Any],
     results_dir: Path,
 ) -> dict[str, pd.DataFrame]:
-    slices = slice_scoreboard(predictions, selected_metadata["selected_model_id"], selected_metadata["selected_cutoff"])
+    slices = slice_scoreboard(
+        predictions, selected_metadata["selected_model_id"], selected_metadata["selected_cutoff"]
+    )
     for name, frame in slices.items():
         write_csv(results_dir / f"{name}_diagnostics.csv", frame)
     return slices
@@ -3103,9 +3867,18 @@ def write_slice_artifacts(
 
 def build_feature_dictionary(frame: pd.DataFrame, families: dict[str, list[str]]) -> pd.DataFrame:
     audit = feature_audit(families)
-    nulls = frame.isna().mean().mul(100.0).rename("null_percent_all_cutoffs").reset_index().rename(columns={"index": "feature"})
+    nulls = (
+        frame.isna()
+        .mean()
+        .mul(100.0)
+        .rename("null_percent_all_cutoffs")
+        .reset_index()
+        .rename(columns={"index": "feature"})
+    )
     dictionary = audit.merge(nulls, on="feature", how="left")
-    dictionary["dtype"] = dictionary["feature"].map(lambda col: str(frame[col].dtype) if col in frame.columns else "")
+    dictionary["dtype"] = dictionary["feature"].map(
+        lambda col: str(frame[col].dtype) if col in frame.columns else ""
+    )
     return dictionary.sort_values(["feature_family", "feature"]).reset_index(drop=True)
 
 
@@ -3124,7 +3897,9 @@ def write_feature_and_prediction_artifacts(
         )
         write_parquet(artifacts_dir / f"features_cutoff_{suffix}.parquet", feature_part)
         if not prediction_part.empty:
-            write_parquet(artifacts_dir / f"oof_predictions_cutoff_{suffix}.parquet", prediction_part)
+            write_parquet(
+                artifacts_dir / f"oof_predictions_cutoff_{suffix}.parquet", prediction_part
+            )
     write_parquet(artifacts_dir / "all_cutoff_features.parquet", feature_frame)
     if not predictions.empty:
         write_parquet(artifacts_dir / "all_oof_predictions.parquet", predictions)
@@ -3144,9 +3919,9 @@ def write_final_report(
     raw = selected_metadata.get("raw_official_baseline_same_cutoff") or {}
     selected_score = selected_metadata["official_rows_only_score"]
     gates = selected_metadata["promotion_gates"]
-    report = f"""# Final Forecasting Strategy Report
+    report = f"""## Results
 
-Generated: `{summary['generated_at_utc']}`
+Generated: `{summary["generated_at_utc"]}`
 
 ## Context
 
@@ -3156,16 +3931,16 @@ The market-motivating target is the HKO "Absolute Daily Max (deg. C)" from the D
 
 ## Selected Strategy
 
-- Selected cutoff: `{selected_metadata['selected_cutoff']}` HKT on T-1.
-- Selected model: `{selected_metadata['selected_model_id']}`.
-- Selection rule: `{selected_metadata['selection_rule']}`.
-- Official-row validation window: `{selected_score.get('first_date')}` through `{selected_score.get('last_date')}`.
-- Official-row count: `{selected_score.get('n')}`.
-- Selected MAE / RMSE: `{float(selected_score.get('mae', math.nan)):.5f}` / `{float(selected_score.get('rmse', math.nan)):.5f}` C.
-- Selected median AE / p90 AE: `{float(selected_score.get('median_abs_error', math.nan)):.5f}` / `{float(selected_score.get('p90_abs_error', math.nan)):.5f}` C.
-- Selected bias: `{float(selected_score.get('bias', math.nan)):.5f}` C.
-- Raw official baseline MAE / RMSE at same cutoff: `{float(raw.get('mae', math.nan)):.5f}` / `{float(raw.get('rmse', math.nan)):.5f}` C.
-- MAE / RMSE delta versus raw official: `{float(selected_score.get('mae', math.nan)) - float(raw.get('mae', math.nan)):.5f}` / `{float(selected_score.get('rmse', math.nan)) - float(raw.get('rmse', math.nan)):.5f}` C.
+- Selected cutoff: `{selected_metadata["selected_cutoff"]}` HKT on T-1.
+- Selected model: `{selected_metadata["selected_model_id"]}`.
+- Selection rule: `{selected_metadata["selection_rule"]}`.
+- Official-row validation window: `{selected_score.get("first_date")}` through `{selected_score.get("last_date")}`.
+- Official-row count: `{selected_score.get("n")}`.
+- Selected MAE / RMSE: `{float(selected_score.get("mae", math.nan)):.5f}` / `{float(selected_score.get("rmse", math.nan)):.5f}` C.
+- Selected median AE / p90 AE: `{float(selected_score.get("median_abs_error", math.nan)):.5f}` / `{float(selected_score.get("p90_abs_error", math.nan)):.5f}` C.
+- Selected bias: `{float(selected_score.get("bias", math.nan)):.5f}` C.
+- Raw official baseline MAE / RMSE at same cutoff: `{float(raw.get("mae", math.nan)):.5f}` / `{float(raw.get("rmse", math.nan)):.5f}` C.
+- MAE / RMSE delta versus raw official: `{float(selected_score.get("mae", math.nan)) - float(raw.get("mae", math.nan)):.5f}` / `{float(selected_score.get("rmse", math.nan)) - float(raw.get("rmse", math.nan)):.5f}` C.
 
 Promotion gates:
 
@@ -3201,67 +3976,67 @@ The basic baseline is `B1_raw_official_latest`, the latest HKO lead-1 local fore
 
 Yearly:
 
-{markdown_table(slices.get('yearly', pd.DataFrame()), max_rows=30)}
+{markdown_table(slices.get("yearly", pd.DataFrame()), max_rows=30)}
 
 Seasonal:
 
-{markdown_table(slices.get('seasonal', pd.DataFrame()), max_rows=20)}
+{markdown_table(slices.get("seasonal", pd.DataFrame()), max_rows=20)}
 
 High-temperature bins:
 
-{markdown_table(slices.get('high_temp', pd.DataFrame()), max_rows=20)}
+{markdown_table(slices.get("high_temp", pd.DataFrame()), max_rows=20)}
 
 Weather regimes:
 
-{markdown_table(slices.get('weather_regime', pd.DataFrame()), max_rows=20)}
+{markdown_table(slices.get("weather_regime", pd.DataFrame()), max_rows=20)}
 
 Boundary bins:
 
-{markdown_table(slices.get('boundary', pd.DataFrame()), max_rows=20)}
+{markdown_table(slices.get("boundary", pd.DataFrame()), max_rows=20)}
 
 ## Implementation Notes
 
 The implemented system is a hybrid official-anchor residual ensemble. It uses the HKO lead-1 forecast max as the core anchor, then learns residual correction from only historical, cutoff-valid data. The stack is constrained to nonnegative weights summing to one with a tiny intercept bound, so it cannot become an unconstrained black-box extrapolator. Direct no-official models are retained as fallbacks for rows without an official forecast before cutoff, but official-row MAE/RMSE is the primary model-selection view because the raw official anchor is the core competitive edge.
+
+## Conclusion
+
+The selected strategy is `{selected_metadata["selected_model_id"]}` at cutoff `{selected_metadata["selected_cutoff"]}`. It scored MAE `{float(selected_score.get("mae", math.nan)):.5f}` C and RMSE `{float(selected_score.get("rmse", math.nan)):.5f}` C on official-row yearly walk-forward validation. The raw official baseline at the same cutoff scored MAE `{float(raw.get("mae", math.nan)):.5f}` C and RMSE `{float(raw.get("rmse", math.nan)):.5f}` C.
 """
-    write_text(EXP_DIR / "final_forecasting_strategy_report.md", report)
-    write_text(EXP_DIR / "RESULTS.md", report)
-    conclusion = (
-        "# Conclusion\n\n"
-        f"The selected strategy is `{selected_metadata['selected_model_id']}` at cutoff `{selected_metadata['selected_cutoff']}`. "
-        f"It scored MAE `{float(selected_score.get('mae', math.nan)):.5f}` C and RMSE `{float(selected_score.get('rmse', math.nan)):.5f}` C on official-row yearly walk-forward validation. "
-        f"The raw official baseline at the same cutoff scored MAE `{float(raw.get('mae', math.nan)):.5f}` C and RMSE `{float(raw.get('rmse', math.nan)):.5f}` C.\n"
-    )
-    write_text(EXP_DIR / "CONCLUSION.md", conclusion)
-    write_text(
-        EXP_DIR / "REPRODUCE.md",
-        f"""# Reproduce
-
-```powershell
-cd {REPO_ROOT}
-$env:PYTHONIOENCODING='utf-8'
-.\\.venv\\Scripts\\python.exe scripts\\run_hkg_t24_0215_gpt_pro_point_forecast_strategy.py
-```
-
-Optional:
-
-```powershell
-.\\.venv\\Scripts\\python.exe scripts\\run_hkg_t24_0215_gpt_pro_point_forecast_strategy.py --database-url {DEFAULT_DATABASE_URL}
-```
-""",
+    write_bounded_readme_section(
+        EXP_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=build_experiment_readme(
+            "Complete. Validation artifacts and leakage audits were written.",
+            report,
+        ),
+        default_title=f"{EXPERIMENT_ID}: {TITLE}",
     )
 
 
 def run_pipeline(database_url: str, pasted_spec_path: Path) -> dict[str, Any]:
     _, results_dir, artifacts_dir, _ = initialize_experiment_folder()
     generated_at = utc_now()
-    labels, forecasts, lead0, climate, climate_table, climate_candidates = load_db_inputs(database_url)
+    labels, forecasts, lead0, climate, climate_table, climate_candidates = load_db_inputs(
+        database_url
+    )
     labels = prepare_labels(labels)
-    feature_frame, families, climate_feature_manifest = build_feature_matrix(labels, forecasts, climate)
+    feature_frame, families, climate_feature_manifest = build_feature_matrix(
+        labels, forecasts, climate
+    )
     write_feature_and_prediction_artifacts(feature_frame, pd.DataFrame(), artifacts_dir)
     predictions, ablations = run_walk_forward(feature_frame, families)
 
-    baseline_scoreboard, model_scoreboard, cutoff_scoreboard, ablation_scoreboard, identical_scoreboard = build_scoreboards(predictions, ablations)
-    selected_metadata = choose_selected_model(baseline_scoreboard, model_scoreboard, cutoff_scoreboard)
+    (
+        baseline_scoreboard,
+        model_scoreboard,
+        cutoff_scoreboard,
+        ablation_scoreboard,
+        identical_scoreboard,
+    ) = build_scoreboards(predictions, ablations)
+    selected_metadata = choose_selected_model(
+        baseline_scoreboard, model_scoreboard, cutoff_scoreboard
+    )
     selected_predictions = predictions[
         predictions["model_id"].eq(selected_metadata["selected_model_id"])
         & predictions["cutoff"].eq(selected_metadata["selected_cutoff"])
@@ -3336,9 +4111,16 @@ def run_pipeline(database_url: str, pasted_spec_path: Path) -> dict[str, Any]:
         sources,
         slices,
     )
-    write_text(EXP_DIR / "DATA_MANIFEST.md", markdown_table(sources, max_rows=20) + "\n\n" + markdown_table(daily_climate_manifest, max_rows=80) + "\n")
+    write_json(
+        EXP_DIR / "status.json",
+        {
+            "status": "complete",
+            "updated_at_utc": generated_at,
+            "message": "Validation artifacts, leakage audits, and the consolidated README were written.",
+            "summary_path": "results/summary.json",
+        },
+    )
     write_csv(results_dir / "artifact_manifest.csv", artifact_manifest(EXP_DIR))
-    write_text(EXP_DIR / "STATUS.md", "Status: complete. Validation artifacts, leakage audits, and final report were written.\n")
     return summary
 
 
@@ -3346,7 +4128,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=TITLE)
     parser.add_argument(
         "--database-url",
-        default=os.environ.get("HKG_TMAX_DATABASE_URL") or os.environ.get("DATABASE_URL") or DEFAULT_DATABASE_URL,
+        default=os.environ.get("HKG_TMAX_DATABASE_URL")
+        or os.environ.get("DATABASE_URL")
+        or DEFAULT_DATABASE_URL,
         help="PostgreSQL database URL for hkg_tmax_research.",
     )
     parser.add_argument(

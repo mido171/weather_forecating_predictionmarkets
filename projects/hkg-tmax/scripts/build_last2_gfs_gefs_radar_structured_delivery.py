@@ -17,23 +17,25 @@ import pandas as pd
 import requests
 from PIL import Image
 
+from hkg_tmax.evaluation.reporting import (
+    demote_markdown_headings,
+    write_bounded_readme_section,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXPERIMENT_ID = "0007_public_7day_gfs_gefs_himawari_backfill_rehearsal_20260708"
 SOURCE_NORMALIZED_DIR = (
-    REPO_ROOT
-    / "experiments"
-    / "hkg_tmax"
-    / SOURCE_EXPERIMENT_ID
-    / "normalized"
+    REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / SOURCE_EXPERIMENT_ID / "normalized"
 )
 EXPERIMENT_ID = "0008_last2_gfs_gefs_radar_structured_delivery_20260708"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 NORMALIZED_DIR = EXPERIMENT_DIR / "normalized"
 METADATA_DIR = EXPERIMENT_DIR / "metadata"
 LOG_DIR = EXPERIMENT_DIR / "logs"
 STAGING_DIR = EXPERIMENT_DIR / "staging"
 USER_AGENT = "weather-markets-hkg-last2-gfs-gefs-radar-structured/1.0"
+README_RESULTS_START = "<!-- BEGIN GENERATED LAST-TWO-DAY DELIVERY RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED LAST-TWO-DAY DELIVERY RESULT -->"
 
 LAST_COMPLETE_UTC_END = date(2026, 7, 7)
 LAST_TWO_UTC_DAYS = [date(2026, 7, 6), date(2026, 7, 7)]
@@ -515,7 +517,9 @@ def main() -> int:
         "radar": {
             "source": "HKUST ENVF HKO radar historical display",
             "frame_count": int(len(radar_manifest)),
-            "image_feature_ok": int((radar_features.get("image_fetch_status") == "ok").sum()) if not radar_features.empty else 0,
+            "image_feature_ok": int((radar_features.get("image_fetch_status") == "ok").sum())
+            if not radar_features.empty
+            else 0,
             "cadence_minutes": 12,
             "native_issue_metadata_status": "not_native_exact_vintage",
             "availability_proxy_method": "observed_at_utc + 30m",
@@ -558,8 +562,13 @@ Radar rows are from HKUST ENVF historical display of HKO radar imagery. They hav
 
 This folder intentionally keeps no raw payloads. Radar image bytes are fetched, decoded into numeric features, and discarded in memory. The script removes its staging directory at the end.
 """
-    with open(wp(EXPERIMENT_DIR / "README.md"), "w", encoding="utf-8") as handle:
-        handle.write(readme)
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=demote_markdown_headings(readme),
+        default_title="0008 Last-Two-Day Structured Delivery",
+    )
 
     status = """state: COMPLETE_WITH_RADAR_NATIVE_ISSUE_CAVEAT
 gate_result: LAST2_STRUCTURED_DELIVERY_DONE

@@ -35,7 +35,7 @@ src/hkg_tmax_demo_trading + apps/polymarket-backtester (local demo only)
 | `config/hkg_t24/` | T-24 strategy configuration | T-24 governance tests |
 | `db/migrations/postgres/` | ordered database migrations | migration/schema tests |
 | `db/schemas/`, `db/sql/` | JSON schemas and canonical SQL | schema contract tests |
-| `experiments/campaigns/` | immutable compact research evidence | experiment index/manifest checks |
+| `experiments/campaigns/` | one README dossier per campaign/experiment plus machine evidence and a retired-doc hash ledger | campaign documentation layout and provenance checks |
 | `experiments/registry/` | governed ID allocation | experiment tests |
 | `experiments/templates/standard/` | mandatory new-experiment contract | repository validation |
 | `scripts/` | thin bounded entry points | same-name focused tests where available |

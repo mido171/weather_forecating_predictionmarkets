@@ -14,11 +14,17 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from hkg_tmax.evaluation.reporting import (
+    demote_markdown_headings,
+    write_bounded_readme_section,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "0005_public_gfs_gefs_himawari_fetch_smoke_20260708"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 USER_AGENT = "weather-markets-hkg-fetch-smoke/1.0"
+README_RESULTS_START = "<!-- BEGIN GENERATED PUBLIC FETCH RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED PUBLIC FETCH RESULT -->"
 
 HKG_BBOX = {
     "leftlon": "113.0",
@@ -169,14 +175,24 @@ def fetch_latest_grib(
             attempts[-1]["first_200_bytes"] = data[:200].decode("utf-8", errors="replace")
             continue
 
-        out_path = EXPERIMENT_DIR / "raw" / source / f"{output_stem}_{cycle:%Y%m%d}_{cycle:%H}z_f{lead_hour:03d}_hkg_bbox.grib2"
+        out_path = (
+            EXPERIMENT_DIR
+            / "raw"
+            / source
+            / f"{output_stem}_{cycle:%Y%m%d}_{cycle:%H}z_f{lead_hour:03d}_hkg_bbox.grib2"
+        )
         safe_write_bytes(out_path, data)
 
         idx_url = index_url_builder(cycle, lead_hour=lead_hour)
         idx_record: dict[str, Any] = {"url": idx_url, "status": "not_fetched"}
         try:
             idx_data, idx_headers = request_bytes(idx_url, timeout=30)
-            idx_path = EXPERIMENT_DIR / "raw" / source / f"{output_stem}_{cycle:%Y%m%d}_{cycle:%H}z_f{lead_hour:03d}.idx"
+            idx_path = (
+                EXPERIMENT_DIR
+                / "raw"
+                / source
+                / f"{output_stem}_{cycle:%Y%m%d}_{cycle:%H}z_f{lead_hour:03d}.idx"
+            )
             safe_write_bytes(idx_path, idx_data)
             idx_record = {
                 "url": idx_url,
@@ -213,7 +229,9 @@ def fetch_latest_grib(
     raise RuntimeError(f"No fetchable {source} cycle found in recent cycle window")
 
 
-def s3_list(bucket: str, prefix: str, max_keys: int = 1000, delimiter: str | None = None) -> dict[str, Any]:
+def s3_list(
+    bucket: str, prefix: str, max_keys: int = 1000, delimiter: str | None = None
+) -> dict[str, Any]:
     params = {"list-type": "2", "prefix": prefix, "max-keys": str(max_keys)}
     if delimiter:
         params["delimiter"] = delimiter
@@ -245,7 +263,9 @@ def parse_himawari_observed_at_from_key(key: str) -> str | None:
         match = re.search(r"HS_H08_(\d{8})_(\d{4})_", key)
     if not match:
         return None
-    dt = datetime.strptime(match.group(1) + match.group(2), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    dt = datetime.strptime(match.group(1) + match.group(2), "%Y%m%d%H%M").replace(
+        tzinfo=timezone.utc
+    )
     return dt.isoformat().replace("+00:00", "Z")
 
 
@@ -282,11 +302,7 @@ def fetch_latest_himawari() -> tuple[FetchRecord, dict[str, Any]]:
             if "_B13_" in item["key"] and item["key"].endswith(".DAT.bz2")
         ]
         if not preferred:
-            preferred = [
-                item
-                for item in scan_listing["keys"]
-                if item["key"].endswith(".DAT.bz2")
-            ]
+            preferred = [item for item in scan_listing["keys"] if item["key"].endswith(".DAT.bz2")]
         if not preferred:
             attempts[-1]["scan_prefix"] = scan_prefix
             attempts[-1]["error"] = "scan prefix had no DAT.bz2 objects"
@@ -301,7 +317,12 @@ def fetch_latest_himawari() -> tuple[FetchRecord, dict[str, Any]]:
         decompressed_header_path: str | None = None
         try:
             decompressed = bz2.decompress(data[: min(len(data), 2_000_000)])
-            header_path = EXPERIMENT_DIR / "raw" / "himawari" / (Path(selected["key"]).name + ".first_decompressed_bytes.bin")
+            header_path = (
+                EXPERIMENT_DIR
+                / "raw"
+                / "himawari"
+                / (Path(selected["key"]).name + ".first_decompressed_bytes.bin")
+            )
             safe_write_bytes(header_path, decompressed[:4096])
             decompressed_header_path = str(header_path.relative_to(EXPERIMENT_DIR))
         except Exception:
@@ -326,7 +347,11 @@ def fetch_latest_himawari() -> tuple[FetchRecord, dict[str, Any]]:
                 f"first_decompressed_bytes={decompressed_header_path}."
             ),
         )
-        return record, {"attempts": attempts, "selected_object": selected, "scan_listing_path": "metadata/himawari_latest_scan_listing.json"}
+        return record, {
+            "attempts": attempts,
+            "selected_object": selected,
+            "scan_listing_path": "metadata/himawari_latest_scan_listing.json",
+        }
 
     raise RuntimeError("No fetchable Himawari-9 AHI object found in recent window")
 
@@ -339,7 +364,10 @@ def write_experiment_docs(records: list[FetchRecord], details: dict[str, Any]) -
         "records": [asdict(record) for record in records],
         "details": details,
     }
-    safe_write_text(EXPERIMENT_DIR / "artifacts" / "fetch_summary.json", json.dumps(manifest, indent=2, sort_keys=True))
+    safe_write_text(
+        EXPERIMENT_DIR / "artifacts" / "fetch_summary.json",
+        json.dumps(manifest, indent=2, sort_keys=True),
+    )
 
     rows = []
     for record in records:
@@ -366,9 +394,7 @@ This folder proves direct public-provider fetchability for the latest accessible
 
 Raw provider payloads live under `raw/`. Machine-readable metadata lives in `artifacts/fetch_summary.json`.
 """
-    safe_write_text(EXPERIMENT_DIR / "README.md", readme)
-
-    asof = """# As-Of Contract
+    asof = """## As-of contract
 
 This smoke does not score a model. It verifies provider access and timestamp fields.
 
@@ -390,9 +416,7 @@ availableAt proxy in this smoke = S3 LastModified
 eligible if observedAt + latency buffer <= target_date T-1 15:00 HKT
 ```
 """
-    safe_write_text(EXPERIMENT_DIR / "ASOF_CONTRACT.md", asof)
-
-    results = f"""# Results
+    results = f"""## Results
 
 All three requested public sources returned provider-native payloads.
 
@@ -404,7 +428,21 @@ All three requested public sources returned provider-native payloads.
 
 See `artifacts/fetch_summary.json` for URLs, hashes, byte counts, issued/observed timestamps, and request details.
 """
-    safe_write_text(EXPERIMENT_DIR / "RESULTS.md", results)
+    evidence = """## Evidence map
+
+- `artifacts/fetch_summary.json`: URLs, hashes, byte counts, timestamps, and request details.
+- `STATUS.yaml`: machine-readable completion gate.
+- `normalized/`: compact normalized CSV/JSON evidence when normalization has been run.
+"""
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=demote_markdown_headings(
+            "\n\n".join(section.strip() for section in (readme, asof, results, evidence))
+        ),
+        default_title="0005 Public GFS, GEFS, and Himawari Fetch Smoke",
+    )
 
     status = """state: COMPLETE
 gate_result: FETCH_SMOKE_PASS
@@ -434,7 +472,9 @@ def main() -> int:
         records.append(record)
         details[source] = extra
         with (EXPERIMENT_DIR / "logs" / "run_log.jsonl").open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps({"event": f"{source}_fetched", "record": asdict(record)}) + "\n")
+            handle.write(
+                json.dumps({"event": f"{source}_fetched", "record": asdict(record)}) + "\n"
+            )
         time.sleep(1)
 
     record, extra = fetch_latest_himawari()

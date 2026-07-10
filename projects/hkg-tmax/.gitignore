@@ -52,6 +52,8 @@ experiments/**/*.onnx
 .DS_Store
 Thumbs.db
 *.zip
+# Bounded, hash-verified recovery artifact for the campaign-doc migration.
+!experiments/campaigns/DOCUMENT_ARCHIVE_PRE_CONSOLIDATION.zip
 *.rar
 *.7z
 *.log

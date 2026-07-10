@@ -1,5 +1,20 @@
 # Changelog
 
+## Campaign documentation consolidation - 2026-07-10
+
+- Replaced 813 scattered campaign Markdown files with 26 canonical root,
+  campaign, and experiment READMEs while retaining machine-readable run evidence.
+- Preserved all 821 original Markdown/text documents in a byte-exact ZIP and
+  SHA-256 provenance ledger tied to source commit `b2da67a`.
+- Added a fail-closed campaign documentation guard for inventory, snapshot,
+  layout enforcement, safe pruning, and exact archive verification.
+- Consolidated the standard experiment template and hardened active producers
+  so reruns update a canonical README or machine-readable summaries instead of
+  recreating nested reports.
+- Added focused regression coverage, regenerated the experiment index and script
+  registry, and documented recovery and compatibility boundaries in
+  `docs/migrations/2026-07-10-campaign-documentation-consolidation.md`.
+
 ## Script runtime-path consolidation - 2026-07-10
 
 - Routed the 36-script migration census through `ProjectPaths`, replacing repository-local

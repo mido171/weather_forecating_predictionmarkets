@@ -13,7 +13,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from hkg_tmax_probability.bucket_rules import BUCKET_KEYS, PROBABILITY_COLUMNS, normalize_probability_matrix
+from hkg_tmax_probability.bucket_rules import (
+    BUCKET_KEYS,
+    PROBABILITY_COLUMNS,
+    normalize_probability_matrix,
+)
 from hkg_tmax_probability.scoring import calibration_errors, per_bucket_brier, summarize_scores
 
 
@@ -225,28 +229,59 @@ def bootstrap_deltas(predictions: pd.DataFrame, baseline_method: str, iterations
     return pd.DataFrame(rows)
 
 
-def write_model_card(output_dir: Path, leaderboard: pd.DataFrame, leakage: dict[str, Any], label_audit: dict[str, Any]) -> None:
+def _json_record(row: pd.Series) -> dict[str, Any]:
+    record: dict[str, Any] = {}
+    for key, value in row.items():
+        if pd.isna(value):
+            record[str(key)] = None
+        elif isinstance(value, np.generic):
+            record[str(key)] = value.item()
+        elif isinstance(value, pd.Timestamp):
+            record[str(key)] = value.isoformat()
+        else:
+            record[str(key)] = value
+    return record
+
+
+def write_model_summary(
+    output_dir: Path,
+    leaderboard: pd.DataFrame,
+    leakage: dict[str, Any],
+    label_audit: dict[str, Any],
+    acceptance_gates: dict[str, Any],
+) -> None:
     champion = leaderboard[leaderboard["champion_flag"]].iloc[0]
-    lines = [
-        "# HKG Tmax Probability Bucket V1 Model Card",
-        "",
-        f"Champion: `{champion['method']}`",
-        "",
-        "Scope: weather probability distribution only. No market prices, EV, order books, Kelly sizing, PnL, or trade recommendations are used or emitted.",
-        "",
-        "Primary target: HKO Daily Extract one-decimal HKG daily maximum temperature bucket.",
-        "",
-        f"Primary normalized RPS: {champion['rps']:.6f}",
-        f"NLL: {champion['nll']:.6f}",
-        f"Brier: {champion['brier']:.6f}",
-        f"ECE: {champion['ece']:.6f}",
-        "",
-        f"Leakage audit status: `{leakage.get('status')}` with total violations `{leakage.get('total_violations')}`.",
-        f"Label first-publication audit: `{label_audit.get('status')}`, bucket changes `{label_audit.get('bucket_changes')}`.",
-        "",
-        "Selection rule: leaderboard sorted by normalized RPS ascending; methods must also pass no-worse NLL/Brier gates versus B4.",
-    ]
-    (output_dir / "final_probability_model_card.md").write_text("\n".join(lines), encoding="utf-8")
+    payload = {
+        "schema_version": 1,
+        "artifact_type": "hkg_tmax_probability_bucket_v1_model_selection_summary",
+        "scope": {
+            "target": "HKO Daily Extract one-decimal HKG daily maximum temperature bucket",
+            "probability_only": True,
+            "market_inputs_used": False,
+            "trade_recommendations_emitted": False,
+        },
+        "selection": {
+            "champion": _json_record(champion),
+            "baseline_method": "B4_hierarchical_residual_pmf",
+            "primary_metric": "normalized_rps",
+            "ranking": "ascending",
+            "promotion_gates": acceptance_gates,
+            "gate_rule": "candidate must pass the configured no-worse NLL and Brier gates versus B4",
+        },
+        "audits": {
+            "leakage": leakage,
+            "label_first_publication": label_audit,
+        },
+        "metric_artifacts": {
+            "leaderboard": "scoreboard.csv",
+            "by_split": "scoreboard_by_split.csv",
+            "bootstrap_deltas": "proper_score_deltas_bootstrap.csv",
+        },
+    }
+    (output_dir / "model_selection_summary.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
 
 
 def write_manifest(output_dir: Path, config_path: Path, artifact_names: list[str]) -> None:

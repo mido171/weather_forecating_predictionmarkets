@@ -20,14 +20,20 @@ import cfgrib
 import numpy as np
 import pandas as pd
 
+from hkg_tmax.evaluation.reporting import (
+    demote_markdown_headings,
+    write_bounded_readme_section,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "0006_public_daily_coverage_benchmark_20260707"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 RAW_DIR = EXPERIMENT_DIR / "raw"
 NORMALIZED_DIR = EXPERIMENT_DIR / "normalized"
 TARGET_DAY = date(2026, 7, 7)
 USER_AGENT = "weather-markets-hkg-public-daily-benchmark/1.0"
+README_RESULTS_START = "<!-- BEGIN GENERATED DAILY COVERAGE RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED DAILY COVERAGE RESULT -->"
 
 HKG_BBOX = {"leftlon": "113.0", "rightlon": "115.5", "toplat": "23.5", "bottomlat": "21.5"}
 HKO = {
@@ -109,7 +115,9 @@ def request_bytes(url: str, timeout: int = 120) -> tuple[bytes, dict[str, str]]:
         return response.read(), headers
 
 
-def fetch_to_path(source: str, item_id: str, url: str, path: Path, timeout: int = 120) -> FetchResult:
+def fetch_to_path(
+    source: str, item_id: str, url: str, path: Path, timeout: int = 120
+) -> FetchResult:
     started = time.perf_counter()
     try:
         if Path(wp(path)).exists():
@@ -233,7 +241,9 @@ def crop_dataarray(da: Any) -> Any:
         if lat_values[0] > lat_values[-1]
         else slice(float(HKG_BBOX["bottomlat"]), float(HKG_BBOX["toplat"]))
     )
-    return da.sel(latitude=lat_slice, longitude=slice(float(HKG_BBOX["leftlon"]), float(HKG_BBOX["rightlon"])))
+    return da.sel(
+        latitude=lat_slice, longitude=slice(float(HKG_BBOX["leftlon"]), float(HKG_BBOX["rightlon"]))
+    )
 
 
 def nearest_grid(ds: Any) -> tuple[float, float]:
@@ -244,7 +254,9 @@ def nearest_grid(ds: Any) -> tuple[float, float]:
     return lat, lon
 
 
-def normalize_model_file(source: str, cycle_hour: int, path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def normalize_model_file(
+    source: str, cycle_hour: int, path: Path
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     started = time.perf_counter()
     dsets = cfgrib.open_datasets(wp(path), backend_kwargs={"indexpath": ""})
     station_row: dict[str, Any] = {
@@ -270,9 +282,15 @@ def normalize_model_file(source: str, cycle_hour: int, path: Path) -> tuple[dict
             attrs = da.attrs
             units = attrs.get("GRIB_units")
             short_name = attrs.get("GRIB_shortName", var_name)
-            canonical = re.sub(r"[^a-zA-Z0-9]+", "_", f"{short_name}_{attrs.get('GRIB_typeOfLevel', '')}").strip("_").lower()
+            canonical = (
+                re.sub(r"[^a-zA-Z0-9]+", "_", f"{short_name}_{attrs.get('GRIB_typeOfLevel', '')}")
+                .strip("_")
+                .lower()
+            )
             issued_at = iso_timestamp(da.coords["time"].values if "time" in da.coords else None)
-            valid_at = iso_timestamp(da.coords["valid_time"].values if "valid_time" in da.coords else None)
+            valid_at = iso_timestamp(
+                da.coords["valid_time"].values if "valid_time" in da.coords else None
+            )
             lead = lead_hours(da.coords["step"].values if "step" in da.coords else None)
             station_row["issued_at_utc"] = issued_at
             station_row["valid_at_utc"] = valid_at
@@ -373,7 +391,9 @@ def hko_pixel(header: dict[str, Any]) -> tuple[int, int, float, float]:
     rpol = proj["earth_polar_radius_km"]
     rs = proj["satellite_distance_km"]
     phi_c = math.atan((rpol * rpol) / (req * req) * math.tan(lat))
-    re_phi = rpol / math.sqrt(1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2)
+    re_phi = rpol / math.sqrt(
+        1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2
+    )
     rel_lon = lon - lon0
     r1 = rs - re_phi * math.cos(phi_c) * math.cos(rel_lon)
     r2 = -re_phi * math.cos(phi_c) * math.sin(rel_lon)
@@ -390,19 +410,26 @@ def hko_pixel(header: dict[str, Any]) -> tuple[int, int, float, float]:
 def himawari_bt(data: bytes, header: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     columns = int(header["columns"])
     lines = int(header["lines_in_segment"])
-    counts = np.frombuffer(data, dtype="<u2", count=columns * lines, offset=int(header["header_total_bytes"])).reshape(
-        lines, columns
-    )
+    counts = np.frombuffer(
+        data, dtype="<u2", count=columns * lines, offset=int(header["header_total_bytes"])
+    ).reshape(lines, columns)
     cal = header["calibration"]
     valid = (counts != int(cal["outside_scan_count"])) & (counts != int(cal["error_count"]))
-    radiance = cal["count_to_radiance_slope"] * counts.astype("float64") + cal["count_to_radiance_intercept"]
+    radiance = (
+        cal["count_to_radiance_slope"] * counts.astype("float64")
+        + cal["count_to_radiance_intercept"]
+    )
     radiance[~valid] = np.nan
     radiance[radiance <= 0] = np.nan
     c1 = 1.191042e8
     c2 = 1.4387752e4
     wavelength = cal["central_wavelength_um"]
     effective_bt = c2 / (wavelength * np.log(c1 / (radiance * (wavelength**5)) + 1.0))
-    bt_k = cal["radiance_to_bt_c0"] + cal["radiance_to_bt_c1"] * effective_bt + cal["radiance_to_bt_c2"] * effective_bt**2
+    bt_k = (
+        cal["radiance_to_bt_c0"]
+        + cal["radiance_to_bt_c1"] * effective_bt
+        + cal["radiance_to_bt_c2"] * effective_bt**2
+    )
     return counts, radiance.astype("float32"), (bt_k - 273.15).astype("float32")
 
 
@@ -450,7 +477,16 @@ def himawari_scan_datetimes() -> list[datetime]:
     scans = []
     for hour in range(24):
         for minute in range(0, 60, 10):
-            scans.append(datetime(TARGET_DAY.year, TARGET_DAY.month, TARGET_DAY.day, hour, minute, tzinfo=timezone.utc))
+            scans.append(
+                datetime(
+                    TARGET_DAY.year,
+                    TARGET_DAY.month,
+                    TARGET_DAY.day,
+                    hour,
+                    minute,
+                    tzinfo=timezone.utc,
+                )
+            )
     return scans
 
 
@@ -459,7 +495,9 @@ def himawari_url(scan: datetime) -> str:
     return f"https://noaa-himawari9.s3.amazonaws.com/{key}"
 
 
-def fetch_model_data() -> tuple[list[FetchResult], dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+def fetch_model_data() -> tuple[
+    list[FetchResult], dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]
+]:
     fetch_results: list[FetchResult] = []
     idx_catalog: dict[str, Any] = {}
     station_rows: list[dict[str, Any]] = []
@@ -470,23 +508,38 @@ def fetch_model_data() -> tuple[list[FetchResult], dict[str, Any], list[dict[str
             if source == "gfs":
                 url = build_gfs_url(cycle_hour)
                 idx_url = gfs_idx_url(cycle_hour)
-                path = RAW_DIR / "gfs" / f"gfs_{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}.grib2"
+                path = (
+                    RAW_DIR
+                    / "gfs"
+                    / f"gfs_{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}.grib2"
+                )
             else:
                 url = build_gefs_url(cycle_hour)
                 idx_url = gefs_idx_url(cycle_hour)
-                path = RAW_DIR / "gefs_control" / f"gefs_control_{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}.grib2"
-            result = fetch_to_path(source, f"{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}", url, path)
+                path = (
+                    RAW_DIR
+                    / "gefs_control"
+                    / f"gefs_control_{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}.grib2"
+                )
+            result = fetch_to_path(
+                source, f"{TARGET_DAY:%Y%m%d}_{cycle_hour:02d}z_f{MODEL_LEAD_HOUR:03d}", url, path
+            )
             fetch_results.append(result)
             try:
                 idx_data, _headers = request_bytes(idx_url, timeout=30)
                 idx_catalog[f"{source}_{cycle_hour:02d}z"] = parse_idx(idx_data)
             except Exception as exc:
-                idx_catalog[f"{source}_{cycle_hour:02d}z"] = {"error": f"{type(exc).__name__}: {exc}", "url": idx_url}
+                idx_catalog[f"{source}_{cycle_hour:02d}z"] = {
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "url": idx_url,
+                }
             if result.status == "ok":
                 station_row, rows = normalize_model_file(source, cycle_hour, path)
                 station_rows.append(station_row)
                 bbox_rows.extend(rows)
-            print(f"model {source} {cycle_hour:02d}z {result.status} {result.bytes} bytes", flush=True)
+            print(
+                f"model {source} {cycle_hour:02d}z {result.status} {result.bytes} bytes", flush=True
+            )
     return fetch_results, idx_catalog, station_rows, bbox_rows
 
 
@@ -496,11 +549,15 @@ def fetch_himawari_data() -> tuple[list[FetchResult], list[dict[str, Any]]]:
     for idx, scan in enumerate(himawari_scan_datetimes(), start=1):
         file_name = f"HS_H09_{scan:%Y%m%d}_{scan:%H%M}_B13_FLDK_R20_S0510.DAT.bz2"
         path = RAW_DIR / "himawari_b13_s0510" / f"{TARGET_DAY:%Y%m%d}" / file_name
-        result = fetch_to_path("himawari9_b13_s0510", scan.strftime("%Y%m%d_%H%M"), himawari_url(scan), path)
+        result = fetch_to_path(
+            "himawari9_b13_s0510", scan.strftime("%Y%m%d_%H%M"), himawari_url(scan), path
+        )
         fetch_results.append(result)
         if result.status == "ok":
             rows.append(normalize_himawari_file(result, path))
-        print(f"himawari {idx:03d}/144 {scan:%H%M} {result.status} {result.bytes} bytes", flush=True)
+        print(
+            f"himawari {idx:03d}/144 {scan:%H%M} {result.status} {result.bytes} bytes", flush=True
+        )
     return fetch_results, rows
 
 
@@ -526,9 +583,13 @@ def write_outputs(
     model_fetch_df.to_csv(wp(NORMALIZED_DIR / "model_fetch_timings.csv"), index=False)
     himawari_fetch_df.to_csv(wp(NORMALIZED_DIR / "himawari_fetch_timings.csv"), index=False)
     if not model_station_df.empty:
-        model_station_df.to_parquet(wp(NORMALIZED_DIR / "model_cycle_station_features.parquet"), index=False)
+        model_station_df.to_parquet(
+            wp(NORMALIZED_DIR / "model_cycle_station_features.parquet"), index=False
+        )
     if not himawari_df.empty:
-        himawari_df.to_parquet(wp(NORMALIZED_DIR / "himawari_b13_s0510_scan_features.parquet"), index=False)
+        himawari_df.to_parquet(
+            wp(NORMALIZED_DIR / "himawari_b13_s0510_scan_features.parquet"), index=False
+        )
 
     elapsed_total = time.perf_counter() - total_started
     summary = {
@@ -541,35 +602,51 @@ def write_outputs(
             "himawari9": "B13 infrared HKO-containing full-disk segment S0510, every 10 minutes for 24h",
         },
         "attribute_counts": {
-            "gfs_full_product_latest_idx_messages": idx_catalog.get("gfs_00z", {}).get("message_count"),
-            "gfs_full_product_latest_idx_unique_variables": idx_catalog.get("gfs_00z", {}).get("unique_variable_count"),
-            "gfs_full_product_latest_idx_unique_variable_level_pairs": idx_catalog.get("gfs_00z", {}).get(
-                "unique_variable_level_pair_count"
+            "gfs_full_product_latest_idx_messages": idx_catalog.get("gfs_00z", {}).get(
+                "message_count"
             ),
-            "gefs_control_full_product_latest_idx_messages": idx_catalog.get("gefs_control_00z", {}).get("message_count"),
-            "gefs_control_full_product_latest_idx_unique_variables": idx_catalog.get("gefs_control_00z", {}).get(
+            "gfs_full_product_latest_idx_unique_variables": idx_catalog.get("gfs_00z", {}).get(
                 "unique_variable_count"
             ),
-            "gefs_control_full_product_latest_idx_unique_variable_level_pairs": idx_catalog.get("gefs_control_00z", {}).get(
-                "unique_variable_level_pair_count"
-            ),
+            "gfs_full_product_latest_idx_unique_variable_level_pairs": idx_catalog.get(
+                "gfs_00z", {}
+            ).get("unique_variable_level_pair_count"),
+            "gefs_control_full_product_latest_idx_messages": idx_catalog.get(
+                "gefs_control_00z", {}
+            ).get("message_count"),
+            "gefs_control_full_product_latest_idx_unique_variables": idx_catalog.get(
+                "gefs_control_00z", {}
+            ).get("unique_variable_count"),
+            "gefs_control_full_product_latest_idx_unique_variable_level_pairs": idx_catalog.get(
+                "gefs_control_00z", {}
+            ).get("unique_variable_level_pair_count"),
             "selected_model_feature_pack_variables_per_cycle_min": int(
-                model_station_df["normalized_variable_count"].min() if not model_station_df.empty else 0
+                model_station_df["normalized_variable_count"].min()
+                if not model_station_df.empty
+                else 0
             ),
             "selected_model_feature_pack_variables_per_cycle_max": int(
-                model_station_df["normalized_variable_count"].max() if not model_station_df.empty else 0
+                model_station_df["normalized_variable_count"].max()
+                if not model_station_df.empty
+                else 0
             ),
             "himawari_raw_files_per_full_disk_scan": 160,
             "himawari_raw_files_per_hko_segment_scan_all_bands": 16,
             "himawari_selected_b13_segment_files_per_day": 144,
-            "himawari_selected_feature_columns": int(len(himawari_df.columns) if not himawari_df.empty else 0),
+            "himawari_selected_feature_columns": int(
+                len(himawari_df.columns) if not himawari_df.empty else 0
+            ),
         },
         "timing_seconds": {
             "total_download_plus_normalize": elapsed_total,
             "model_download_total": float(sum(item.elapsed_seconds for item in model_fetches)),
-            "himawari_download_total": float(sum(item.elapsed_seconds for item in himawari_fetches)),
+            "himawari_download_total": float(
+                sum(item.elapsed_seconds for item in himawari_fetches)
+            ),
             "model_normalize_total": float(
-                model_station_df["normalization_elapsed_seconds"].sum() if not model_station_df.empty else 0.0
+                model_station_df["normalization_elapsed_seconds"].sum()
+                if not model_station_df.empty
+                else 0.0
             ),
             "himawari_normalize_total": float(
                 himawari_df["normalization_elapsed_seconds"].sum() if not himawari_df.empty else 0.0
@@ -622,7 +699,13 @@ This benchmark fetched and normalized one complete practical daily coverage set:
 
 See `normalized/daily_coverage_benchmark_summary.json` for timings, bytes, and attribute counts.
 """
-    write_text(EXPERIMENT_DIR / "README.md", readme)
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=demote_markdown_headings(readme),
+        default_title="0006 Public Daily Coverage Benchmark",
+    )
     write_text(
         EXPERIMENT_DIR / "STATUS.yaml",
         "state: COMPLETE\n"
@@ -638,7 +721,15 @@ def main() -> int:
     ensure_dir(NORMALIZED_DIR)
     model_fetches, idx_catalog, station_rows, bbox_rows = fetch_model_data()
     himawari_fetches, himawari_rows = fetch_himawari_data()
-    write_outputs(total_started, model_fetches, idx_catalog, station_rows, bbox_rows, himawari_fetches, himawari_rows)
+    write_outputs(
+        total_started,
+        model_fetches,
+        idx_catalog,
+        station_rows,
+        bbox_rows,
+        himawari_fetches,
+        himawari_rows,
+    )
     print(EXPERIMENT_DIR)
     return 0
 

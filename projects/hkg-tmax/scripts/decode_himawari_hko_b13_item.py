@@ -16,12 +16,15 @@ from urllib.request import Request, urlopen
 import numpy as np
 import pandas as pd
 
+from hkg_tmax.evaluation.reporting import write_bounded_readme_section
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "0005_public_gfs_gefs_himawari_fetch_smoke_20260708"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 RAW_DIR = EXPERIMENT_DIR / "raw" / "himawari_hko_candidate"
 OUT_DIR = EXPERIMENT_DIR / "normalized" / "himawari_hko_b13_s0510_item"
+README_RESULTS_START = "<!-- BEGIN GENERATED HIMAWARI ITEM RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED HIMAWARI ITEM RESULT -->"
 
 SEGMENT = "0510"
 FILE_NAME = f"HS_H09_20260708_0620_B13_FLDK_R20_S{SEGMENT}.DAT.bz2"
@@ -57,7 +60,9 @@ def write_json(path: Path, payload: Any) -> None:
 
 
 def read_c_string(data: bytes, offset: int, length: int) -> str:
-    return data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    return (
+        data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    )
 
 
 def fetch_if_missing(path: Path) -> dict[str, Any]:
@@ -90,7 +95,9 @@ def parse_file_name(file_name: str) -> dict[str, Any]:
     )
     if not match:
         return {}
-    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(
+        tzinfo=timezone.utc
+    )
     return {
         "satellite_code": match.group(1),
         "observed_at_utc": observed.isoformat().replace("+00:00", "Z"),
@@ -119,7 +126,13 @@ def parse_header(data: bytes, source_record: dict[str, Any]) -> dict[str, Any]:
         block_length = struct.unpack_from("<H", data, offset + 1)[0]
         if not (1 <= block_no <= 11) or block_length <= 0:
             break
-        blocks.append({"block_number": int(block_no), "offset": int(offset), "length_bytes": int(block_length)})
+        blocks.append(
+            {
+                "block_number": int(block_no),
+                "offset": int(offset),
+                "length_bytes": int(block_length),
+            }
+        )
         offset += block_length
         if len(blocks) == 11:
             break
@@ -157,7 +170,9 @@ def parse_header(data: bytes, source_record: dict[str, Any]) -> dict[str, Any]:
     for _ in range(number_of_observation_times):
         line_number = struct.unpack_from("<H", data, cursor)[0]
         mjd = struct.unpack_from("<d", data, cursor + 2)[0]
-        observation_times.append({"line_number": int(line_number), "mjd": mjd, "utc": mjd_to_iso(mjd)})
+        observation_times.append(
+            {"line_number": int(line_number), "mjd": mjd, "utc": mjd_to_iso(mjd)}
+        )
         cursor += 10
 
     header = {
@@ -220,7 +235,9 @@ def hko_pixel_from_projection(header: dict[str, Any]) -> dict[str, Any]:
     rpol = proj["earth_polar_radius_km"]
     rs = proj["satellite_distance_km"]
     phi_c = math.atan((rpol * rpol) / (req * req) * math.tan(lat))
-    re_phi = rpol / math.sqrt(1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2)
+    re_phi = rpol / math.sqrt(
+        1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2
+    )
     rel_lon = lon - lon0
     r1 = rs - re_phi * math.cos(phi_c) * math.cos(rel_lon)
     r2 = -re_phi * math.cos(phi_c) * math.sin(rel_lon)
@@ -238,20 +255,28 @@ def hko_pixel_from_projection(header: dict[str, Any]) -> dict[str, Any]:
         "global_column_float": global_column,
         "local_row_0based": local_row,
         "local_col_0based": local_col,
-        "inside_this_segment": 0 <= local_row < header["lines_in_segment"] and 0 <= local_col < header["columns"],
+        "inside_this_segment": 0 <= local_row < header["lines_in_segment"]
+        and 0 <= local_col < header["columns"],
     }
 
 
-def decode_pixels(data: bytes, header: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def decode_pixels(
+    data: bytes, header: dict[str, Any]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     columns = int(header["columns"])
     lines = int(header["lines_in_segment"])
     offset = int(header["header_total_bytes"])
-    counts = np.frombuffer(data, dtype="<u2", count=columns * lines, offset=offset).reshape(lines, columns)
+    counts = np.frombuffer(data, dtype="<u2", count=columns * lines, offset=offset).reshape(
+        lines, columns
+    )
     cal = header["calibration"]
     error_count = int(cal["error_count"])
     outside_count = int(cal["outside_scan_count"])
     valid = (counts != error_count) & (counts != outside_count)
-    radiance = cal["count_to_radiance_slope"] * counts.astype("float64") + cal["count_to_radiance_intercept"]
+    radiance = (
+        cal["count_to_radiance_slope"] * counts.astype("float64")
+        + cal["count_to_radiance_intercept"]
+    )
     radiance[~valid] = np.nan
     radiance[radiance <= 0] = np.nan
     wavelength_um = cal["central_wavelength_um"]
@@ -322,14 +347,16 @@ def write_pixel_outputs(
         & (pixel_df["local_col_0based"] >= c0)
         & (pixel_df["local_col_0based"] < c1)
     ].copy()
-    window["is_projected_hko_pixel"] = (
-        (window["local_row_0based"] == hko_row) & (window["local_col_0based"] == hko_col)
+    window["is_projected_hko_pixel"] = (window["local_row_0based"] == hko_row) & (
+        window["local_col_0based"] == hko_col
     )
     window_path = OUT_DIR / "hko_b13_s0510_hko_21x21_window.csv"
     window.to_csv(wp(window_path), index=False)
 
     valid_bt = bt_c[np.isfinite(bt_c)]
-    bins = np.arange(math.floor(float(np.nanmin(valid_bt))), math.ceil(float(np.nanmax(valid_bt))) + 1, 1.0)
+    bins = np.arange(
+        math.floor(float(np.nanmin(valid_bt))), math.ceil(float(np.nanmax(valid_bt))) + 1, 1.0
+    )
     hist_counts, edges = np.histogram(valid_bt, bins=bins)
     hist_df = pd.DataFrame(
         {
@@ -411,16 +438,18 @@ def build_summary(
 
 
 def write_header_tables(header: dict[str, Any]) -> None:
-    pd.DataFrame(header["header_blocks"]).to_csv(wp(OUT_DIR / "hko_b13_s0510_header_blocks.csv"), index=False)
+    pd.DataFrame(header["header_blocks"]).to_csv(
+        wp(OUT_DIR / "hko_b13_s0510_header_blocks.csv"), index=False
+    )
     write_json(OUT_DIR / "hko_b13_s0510_header_full.json", header)
     write_json(OUT_DIR / "hko_b13_s0510_calibration.json", header["calibration"])
 
 
-def write_readme(summary: dict[str, Any]) -> None:
+def build_readme_section(summary: dict[str, Any]) -> str:
     hko = summary["hko_projected_pixel"]
     seg = summary["segment_pixel_summary"]
     win = summary["hko_21x21_window_summary"]
-    readme = f"""# Himawari HKG B13 S0510 Item
+    return f"""## Latest Generated Himawari Item
 
 Generated: `{summary["generated_at_utc"]}`
 
@@ -430,13 +459,13 @@ This is one decoded Himawari-9 item for HKG inspection: B13 infrared full-disk s
 
 | File | What it contains |
 |---|---|
-| `hko_b13_s0510_item_summary.json` | Header, calibration, HKO pixel, segment stats, and output inventory. |
-| `hko_b13_s0510_hko_21x21_window.csv` | Readable 441-pixel local window centered on HKO. |
-| `hko_b13_s0510_all_pixels_first_5000_rows.csv` | First rows of the full pixel table for quick viewing. |
-| `hko_b13_s0510_all_pixels.parquet` | Full decoded 3,025,000-pixel table. |
-| `hko_b13_s0510_all_pixels.csv.gz` | Full decoded 3,025,000-pixel table as compressed CSV. |
-| `hko_b13_s0510_header_full.json` | Complete parsed HSD header fields. |
-| `hko_b13_s0510_calibration.json` | Count-to-radiance and radiance-to-brightness-temperature coefficients. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_item_summary.json` | Header, calibration, HKO pixel, segment stats, and output inventory. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_hko_21x21_window.csv` | Readable 441-pixel local window centered on HKO. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_all_pixels_first_5000_rows.csv` | First rows of the full pixel table for quick viewing. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_all_pixels.parquet` | Full decoded 3,025,000-pixel table. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_all_pixels.csv.gz` | Full decoded 3,025,000-pixel table as compressed CSV. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_header_full.json` | Complete parsed HSD header fields. |
+| `normalized/himawari_hko_b13_s0510_item/hko_b13_s0510_calibration.json` | Count-to-radiance and radiance-to-brightness-temperature coefficients. |
 
 ## HKO Pixel
 
@@ -464,7 +493,16 @@ This is one decoded Himawari-9 item for HKG inspection: B13 infrared full-disk s
 
 `quality_code`: `0 = valid`, `1 = outside scan`, `2 = error`.
 """
-    write_text(OUT_DIR / "README.md", readme)
+
+
+def update_experiment_readme(summary: dict[str, Any]) -> None:
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=build_readme_section(summary),
+        default_title="0005 Public GFS, GEFS, and Himawari Fetch Smoke",
+    )
 
 
 def update_status() -> None:
@@ -490,7 +528,7 @@ def main() -> int:
     outputs = write_pixel_outputs(header, counts, radiance, bt_c, quality_code, hko_pixel)
     summary = build_summary(header, counts, radiance, bt_c, quality_code, hko_pixel, outputs)
     write_json(OUT_DIR / "hko_b13_s0510_item_summary.json", summary)
-    write_readme(summary)
+    update_experiment_readme(summary)
     update_status()
     print(OUT_DIR)
     return 0

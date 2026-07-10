@@ -1,23 +1,43 @@
-# Public GFS/GEFS/Himawari Fetch Smoke
+# 0005 Public GFS/GEFS/Himawari fetch smoke
 
-Generated: `2026-07-08T06:35:31.089440Z`
+Status: `fetch_smoke_pass`.
 
-This folder proves direct public-provider fetchability for the latest accessible GFS, GEFS, and Himawari-9 payloads without using GribStream.
+## Purpose and result
 
-| Source | Status | issuedAt / observedAt UTC | validAt UTC | Bytes | Saved payload |
-|---|---|---:|---:|---:|---|
-| gfs | fetched | 2026-07-08T00:00:00Z | 2026-07-09T00:00:00Z | 4062413 | `raw\gfs\gfs_20260708_00z_f024_hkg_bbox.grib2` |
-| gefs | fetched | 2026-07-08T00:00:00Z | 2026-07-09T00:00:00Z | 3515940 | `raw\gefs\gefs_control_20260708_00z_f024_hkg_bbox.grib2` |
-| himawari9 | fetched | 2026-07-08T06:20:00Z | 2026-07-08T06:20:00Z | 1347225 | `raw\himawari\HS_H09_20260708_0620_B13_FLDK_R20_S0110.DAT.bz2` |
+Prove direct public-provider fetchability without GribStream. The historical
+run fetched provider-native payloads for GFS, GEFS control, and Himawari-9:
 
-Raw provider payloads live under `raw/`. Machine-readable metadata lives in `artifacts/fetch_summary.json`.
+| Source | Timestamp | Bytes |
+|---|---|---:|
+| GFS | issued 2026-07-08 00Z, valid 2026-07-09 00Z | 4,062,413 |
+| GEFS control | issued 2026-07-08 00Z, valid 2026-07-09 00Z | 3,515,940 |
+| Himawari-9 B13 | observed 2026-07-08 06:20Z | 1,347,225 |
 
-## Normalized Outputs
+Normalized CSV/JSON outputs preserve model station/bbox features and Himawari
+header metadata. Himawari pixel calibration remained separate work.
 
-Normalized, readable outputs were generated at `2026-07-08T07:53:09.863891Z` under `normalized/`.
+## Historical availability semantics
 
-- `normalized/README.md` is the human entrypoint.
-- `normalized/model_target_station_features.csv` gives nearest-HKO model features.
-- `normalized/model_source_comparison_features.csv` gives GEFS-control minus GFS deltas.
-- `normalized/hkg_bbox_grid_long_all_sources.csv` gives all cropped model grid rows in long form.
-- `normalized/himawari_b13_header_summary.json` decodes Himawari B13 metadata and records that pixel calibration is still separate work.
+- GFS/GEFS: issue time plus a conservative publication buffer (historically
+  six hours unless a provider audit proves tighter).
+- Himawari: observed time plus latency and native file metadata, using the
+  conservative later availability.
+
+These are acquisition semantics, not authority to weaken the current H24N
+contract.
+
+## Reproduce safely
+
+Inspect both CLIs before any bounded network run:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\fetch_public_gfs_gefs_himawari_smoke.py --help
+.\.venv\Scripts\python.exe scripts\normalize_public_gfs_gefs_himawari_smoke.py --help
+```
+
+## Evidence map
+
+`STATUS.yaml` and the compact `normalized/` CSV/JSON files remain. Historical
+raw payload references in the original prose are not current retained files.
+`normalized/himawari_b13_decompressed_prefix_hex.txt` is diagnostic data, not
+active documentation.

@@ -13,7 +13,8 @@ import time
 import xml.etree.ElementTree as ET
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, time as dt_time, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from datetime import time as dt_time
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
@@ -26,14 +27,20 @@ import httpx
 import numpy as np
 import pandas as pd
 
+from hkg_tmax.evaluation.reporting import (
+    demote_markdown_headings,
+    write_bounded_readme_section,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "0007_public_7day_gfs_gefs_himawari_backfill_rehearsal_20260708"
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 RAW_DIR = EXPERIMENT_DIR / "raw"
 NORMALIZED_DIR = EXPERIMENT_DIR / "normalized"
 METADATA_DIR = EXPERIMENT_DIR / "metadata"
 USER_AGENT = "weather-markets-hkg-public-7day-backfill-rehearsal/1.0"
+README_RESULTS_START = "<!-- BEGIN GENERATED PUBLIC BACKFILL REHEARSAL RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED PUBLIC BACKFILL REHEARSAL RESULT -->"
 
 HKG_BBOX = {"leftlon": "113.0", "rightlon": "115.5", "toplat": "23.5", "bottomlat": "21.5"}
 HKO = {
@@ -202,7 +209,9 @@ def request_bytes(url: str, timeout: int = 180) -> tuple[bytes, dict[str, str]]:
 
 
 def request_bytes_follow_redirects(url: str, timeout: int = 60) -> tuple[bytes, dict[str, str]]:
-    with httpx.Client(follow_redirects=True, timeout=timeout, headers={"User-Agent": USER_AGENT}) as client:
+    with httpx.Client(
+        follow_redirects=True, timeout=timeout, headers={"User-Agent": USER_AGENT}
+    ) as client:
         response = client.get(url)
         response.raise_for_status()
         headers = {key.lower(): value for key, value in response.headers.items()}
@@ -258,7 +267,9 @@ def fetch_to_path(task: FetchTask, timeout: int = 180) -> FetchResult:
                     availability_proxy_utc=task.availability_proxy_utc,
                     availability_proxy_method=task.availability_proxy_method,
                     http_last_modified_utc=parse_http_datetime(headers.get("last-modified")),
-                    content_length_header=int(headers["content-length"]) if headers.get("content-length", "").isdigit() else None,
+                    content_length_header=int(headers["content-length"])
+                    if headers.get("content-length", "").isdigit()
+                    else None,
                     content_type=headers.get("content-type"),
                     error=invalid,
                 )
@@ -290,7 +301,9 @@ def fetch_to_path(task: FetchTask, timeout: int = 180) -> FetchResult:
                 availability_proxy_utc=task.availability_proxy_utc,
                 availability_proxy_method=task.availability_proxy_method,
                 http_last_modified_utc=parse_http_datetime(headers.get("last-modified")),
-                content_length_header=int(headers["content-length"]) if headers.get("content-length", "").isdigit() else None,
+                content_length_header=int(headers["content-length"])
+                if headers.get("content-length", "").isdigit()
+                else None,
                 content_type=headers.get("content-type"),
                 error=invalid,
             )
@@ -317,7 +330,9 @@ def fetch_to_path(task: FetchTask, timeout: int = 180) -> FetchResult:
             availability_proxy_utc=task.availability_proxy_utc,
             availability_proxy_method=task.availability_proxy_method,
             http_last_modified_utc=parse_http_datetime(headers.get("last-modified")),
-            content_length_header=int(headers["content-length"]) if headers.get("content-length", "").isdigit() else None,
+            content_length_header=int(headers["content-length"])
+            if headers.get("content-length", "").isdigit()
+            else None,
             content_type=headers.get("content-type"),
         )
     except (HTTPError, URLError, TimeoutError, OSError) as exc:
@@ -492,8 +507,17 @@ def build_himawari_tasks(days: list[date], bands: list[str], segment: str) -> li
         for scan in himawari_scans(day):
             for band in bands:
                 resolution = himawari_resolution_for_band(band)
-                file_name = f"HS_H09_{scan:%Y%m%d}_{scan:%H%M}_{band}_FLDK_{resolution}_{segment}.DAT.bz2"
-                raw_path = RAW_DIR.relative_to(EXPERIMENT_DIR) / "himawari" / band / segment / f"{day:%Y%m%d}" / file_name
+                file_name = (
+                    f"HS_H09_{scan:%Y%m%d}_{scan:%H%M}_{band}_FLDK_{resolution}_{segment}.DAT.bz2"
+                )
+                raw_path = (
+                    RAW_DIR.relative_to(EXPERIMENT_DIR)
+                    / "himawari"
+                    / band
+                    / segment
+                    / f"{day:%Y%m%d}"
+                    / file_name
+                )
                 available_at = scan + timedelta(minutes=30)
                 tasks.append(
                     FetchTask(
@@ -611,7 +635,9 @@ def crop_dataarray(da: Any) -> Any:
         if lat_values[0] > lat_values[-1]
         else slice(float(HKG_BBOX["bottomlat"]), float(HKG_BBOX["toplat"]))
     )
-    return da.sel(latitude=lat_slice, longitude=slice(float(HKG_BBOX["leftlon"]), float(HKG_BBOX["rightlon"])))
+    return da.sel(
+        latitude=lat_slice, longitude=slice(float(HKG_BBOX["leftlon"]), float(HKG_BBOX["rightlon"]))
+    )
 
 
 def nearest_grid(ds: Any) -> tuple[float, float]:
@@ -710,13 +736,21 @@ def normalize_model_result(fetch: FetchResult) -> dict[str, Any]:
                     f"{short_name}_{type_level}_{level}_{step_type}",
                 ).strip("_")
 
-                issued_at = iso(pd.Timestamp(scalar_coord(da, "time"))) if scalar_coord(da, "time") is not None else None
+                issued_at = (
+                    iso(pd.Timestamp(scalar_coord(da, "time")))
+                    if scalar_coord(da, "time") is not None
+                    else None
+                )
                 valid_at = (
                     iso(pd.Timestamp(scalar_coord(da, "valid_time")))
                     if scalar_coord(da, "valid_time") is not None
                     else None
                 )
-                lead = lead_hours_from_coord(scalar_coord(da, "step")) if scalar_coord(da, "step") is not None else None
+                lead = (
+                    lead_hours_from_coord(scalar_coord(da, "step"))
+                    if scalar_coord(da, "step") is not None
+                    else None
+                )
                 if issued_at:
                     station_row["issued_at_utc_grib"] = issued_at
                 if valid_at:
@@ -769,16 +803,28 @@ def normalize_model_result(fetch: FetchResult) -> dict[str, Any]:
                 variable_count += 1
         station_row["normalized_variable_count"] = variable_count
         station_row["normalization_elapsed_seconds"] = time.perf_counter() - started
-        return {"status": "ok", "fetch": asdict(fetch), "station_row": station_row, "bbox_rows": summary_rows}
+        return {
+            "status": "ok",
+            "fetch": asdict(fetch),
+            "station_row": station_row,
+            "bbox_rows": summary_rows,
+        }
     except Exception as exc:
         station_row["normalized_variable_count"] = variable_count
         station_row["normalization_elapsed_seconds"] = time.perf_counter() - started
         station_row["normalization_error"] = f"{type(exc).__name__}: {exc}"
-        return {"status": "error", "fetch": asdict(fetch), "station_row": station_row, "bbox_rows": summary_rows}
+        return {
+            "status": "error",
+            "fetch": asdict(fetch),
+            "station_row": station_row,
+            "bbox_rows": summary_rows,
+        }
 
 
 def read_c_string(data: bytes, offset: int, length: int) -> str:
-    return data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    return (
+        data[offset : offset + length].split(b"\0", 1)[0].decode("ascii", errors="replace").strip()
+    )
 
 
 def mjd_to_iso(mjd: float) -> str | None:
@@ -795,7 +841,9 @@ def parse_himawari_file_name(file_name: str) -> dict[str, Any]:
     )
     if not match:
         return {}
-    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    observed = datetime.strptime(match.group(2) + match.group(3), "%Y%m%d%H%M").replace(
+        tzinfo=timezone.utc
+    )
     return {
         "satellite_code": match.group(1),
         "observed_at_utc": iso(observed),
@@ -824,7 +872,9 @@ def parse_himawari_header(data: bytes, fetch: FetchResult) -> dict[str, Any]:
     for _ in range(number_of_observation_times):
         line_number = struct.unpack_from("<H", data, cursor)[0]
         mjd = struct.unpack_from("<d", data, cursor + 2)[0]
-        observation_times.append({"line_number": int(line_number), "mjd": float(mjd), "utc": mjd_to_iso(mjd)})
+        observation_times.append(
+            {"line_number": int(line_number), "mjd": float(mjd), "utc": mjd_to_iso(mjd)}
+        )
         cursor += 10
 
     return {
@@ -883,7 +933,9 @@ def hko_pixel(header: dict[str, Any]) -> tuple[int, int, float, float]:
     rpol = proj["earth_polar_radius_km"]
     rs = proj["satellite_distance_km"]
     phi_c = math.atan((rpol * rpol) / (req * req) * math.tan(lat))
-    re_phi = rpol / math.sqrt(1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2)
+    re_phi = rpol / math.sqrt(
+        1.0 - ((req * req - rpol * rpol) / (req * req)) * math.cos(phi_c) ** 2
+    )
     rel_lon = lon - lon0
     r1 = rs - re_phi * math.cos(phi_c) * math.cos(rel_lon)
     r2 = -re_phi * math.cos(phi_c) * math.sin(rel_lon)
@@ -897,32 +949,45 @@ def hko_pixel(header: dict[str, Any]) -> tuple[int, int, float, float]:
     return local_row, local_col, global_line, global_col
 
 
-def himawari_bt(data: bytes, header: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def himawari_bt(
+    data: bytes, header: dict[str, Any]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     columns = int(header["columns"])
     lines = int(header["lines_in_segment"])
-    counts = np.frombuffer(data, dtype="<u2", count=columns * lines, offset=int(header["header_total_bytes"])).reshape(
-        lines, columns
-    )
+    counts = np.frombuffer(
+        data, dtype="<u2", count=columns * lines, offset=int(header["header_total_bytes"])
+    ).reshape(lines, columns)
     cal = header["calibration"]
     error_count = int(cal["error_count"])
     outside_count = int(cal["outside_scan_count"])
     valid = (counts != outside_count) & (counts != error_count)
-    radiance = cal["count_to_radiance_slope"] * counts.astype("float64") + cal["count_to_radiance_intercept"]
+    radiance = (
+        cal["count_to_radiance_slope"] * counts.astype("float64")
+        + cal["count_to_radiance_intercept"]
+    )
     radiance[~valid] = np.nan
     radiance[radiance <= 0] = np.nan
     c1 = 1.191042e8
     c2 = 1.4387752e4
     wavelength = cal["central_wavelength_um"]
     effective_bt = c2 / (wavelength * np.log(c1 / (radiance * (wavelength**5)) + 1.0))
-    bt_k = cal["radiance_to_bt_c0"] + cal["radiance_to_bt_c1"] * effective_bt + cal["radiance_to_bt_c2"] * effective_bt**2
+    bt_k = (
+        cal["radiance_to_bt_c0"]
+        + cal["radiance_to_bt_c1"] * effective_bt
+        + cal["radiance_to_bt_c2"] * effective_bt**2
+    )
     quality_code = np.zeros_like(counts, dtype="uint8")
     quality_code[counts == outside_count] = 1
     quality_code[counts == error_count] = 2
     return counts, radiance.astype("float32"), (bt_k - 273.15).astype("float32"), quality_code
 
 
-def window_features(prefix: str, matrix: np.ndarray, row: int, col: int, radius: int) -> dict[str, Any]:
-    window = matrix[max(0, row - radius) : row + radius + 1, max(0, col - radius) : col + radius + 1]
+def window_features(
+    prefix: str, matrix: np.ndarray, row: int, col: int, radius: int
+) -> dict[str, Any]:
+    window = matrix[
+        max(0, row - radius) : row + radius + 1, max(0, col - radius) : col + radius + 1
+    ]
     vals = window[np.isfinite(window)]
     if vals.size == 0:
         return {f"{prefix}_pixel_count": 0}
@@ -980,7 +1045,11 @@ def normalize_himawari_result(fetch: FetchResult) -> dict[str, Any]:
         if file_created and parse_iso(file_created):
             observed_plus_30 = parse_iso(fetch.availability_proxy_utc)
             created = parse_iso(file_created)
-            available_proxy = iso(max(created, observed_plus_30)) if observed_plus_30 and created else file_created
+            available_proxy = (
+                iso(max(created, observed_plus_30))
+                if observed_plus_30 and created
+                else file_created
+            )
 
         valid_bt = bt_c[np.isfinite(bt_c)]
         row_data: dict[str, Any] = {
@@ -993,7 +1062,12 @@ def normalize_himawari_result(fetch: FetchResult) -> dict[str, Any]:
             "availability_proxy_utc": available_proxy,
             "availability_proxy_method": "max(hsd_file_creation_utc, observed_at_utc + 30m conservative buffer)",
             "t24_next_target_date_hkt": (
-                (parse_iso(header.get("observed_at_utc") or fetch.observed_at_utc).astimezone(HKT).date() + timedelta(days=1)).isoformat()
+                (
+                    parse_iso(header.get("observed_at_utc") or fetch.observed_at_utc)
+                    .astimezone(HKT)
+                    .date()
+                    + timedelta(days=1)
+                ).isoformat()
                 if parse_iso(header.get("observed_at_utc") or fetch.observed_at_utc)
                 else None
             ),
@@ -1001,9 +1075,18 @@ def normalize_himawari_result(fetch: FetchResult) -> dict[str, Any]:
                 header.get("observed_at_utc") or fetch.observed_at_utc
             ),
             "eligible_for_next_day_t24_cutoff": (
-                parse_iso(available_proxy) <= parse_iso(t24_next_day_cutoff_for_observed(header.get("observed_at_utc") or fetch.observed_at_utc))
+                parse_iso(available_proxy)
+                <= parse_iso(
+                    t24_next_day_cutoff_for_observed(
+                        header.get("observed_at_utc") or fetch.observed_at_utc
+                    )
+                )
                 if parse_iso(available_proxy)
-                and parse_iso(t24_next_day_cutoff_for_observed(header.get("observed_at_utc") or fetch.observed_at_utc))
+                and parse_iso(
+                    t24_next_day_cutoff_for_observed(
+                        header.get("observed_at_utc") or fetch.observed_at_utc
+                    )
+                )
                 else None
             ),
             "file_creation_utc": file_created,
@@ -1034,10 +1117,18 @@ def normalize_himawari_result(fetch: FetchResult) -> dict[str, Any]:
         row_data.update(window_features("w11", bt_c, row, col, 5))
         row_data.update(window_features("w21", bt_c, row, col, 10))
         if "w21_mean_bt_c" in row_data:
-            row_data["hko_minus_w21_mean_bt_c"] = float(row_data["hko_bt_c"] - row_data["w21_mean_bt_c"])
+            row_data["hko_minus_w21_mean_bt_c"] = float(
+                row_data["hko_bt_c"] - row_data["w21_mean_bt_c"]
+            )
         if 5 <= row < bt_c.shape[0] - 5 and 5 <= col < bt_c.shape[1] - 5:
-            row_data["east_west_gradient_bt_c"] = float(np.nanmean(bt_c[row - 5 : row + 6, col + 1 : col + 6]) - np.nanmean(bt_c[row - 5 : row + 6, col - 5 : col]))
-            row_data["south_north_gradient_bt_c"] = float(np.nanmean(bt_c[row + 1 : row + 6, col - 5 : col + 6]) - np.nanmean(bt_c[row - 5 : row, col - 5 : col + 6]))
+            row_data["east_west_gradient_bt_c"] = float(
+                np.nanmean(bt_c[row - 5 : row + 6, col + 1 : col + 6])
+                - np.nanmean(bt_c[row - 5 : row + 6, col - 5 : col])
+            )
+            row_data["south_north_gradient_bt_c"] = float(
+                np.nanmean(bt_c[row + 1 : row + 6, col - 5 : col + 6])
+                - np.nanmean(bt_c[row - 5 : row, col - 5 : col + 6])
+            )
         row_data["normalization_elapsed_seconds"] = time.perf_counter() - started
         return {"status": "ok", "fetch": asdict(fetch), "row": row_data}
     except Exception as exc:
@@ -1083,7 +1174,9 @@ def run_pool(
                 result = {
                     "status": "worker_exception",
                     "error": f"{type(exc).__name__}: {exc}",
-                    "job": object_to_record(futures[future]) if not isinstance(futures[future], (str, int, float)) else futures[future],
+                    "job": object_to_record(futures[future])
+                    if not isinstance(futures[future], (str, int, float))
+                    else futures[future],
                 }
             out.append(result)
             if index == 1 or index % progress_every == 0 or index == len(jobs):
@@ -1115,7 +1208,9 @@ def probe_himawari_scan_size(scan: datetime, segment: str, band: str) -> dict[st
         return {"status": "error", "error": f"{type(exc).__name__}: {exc}", "scan": iso(scan)}
     segment_token = f"_{segment}.DAT.bz2"
     band_token = f"_{band}_"
-    selected_band_segment = [row for row in rows if band_token in row["key"] and row["key"].endswith(segment_token)]
+    selected_band_segment = [
+        row for row in rows if band_token in row["key"] and row["key"].endswith(segment_token)
+    ]
     selected_all_bands_segment = [row for row in rows if row["key"].endswith(segment_token)]
     return {
         "status": "ok",
@@ -1125,14 +1220,21 @@ def probe_himawari_scan_size(scan: datetime, segment: str, band: str) -> dict[st
         "selected_band_segment_files": len(selected_band_segment),
         "selected_band_segment_bytes": int(sum(row["size"] for row in selected_band_segment)),
         "all_bands_selected_segment_files": len(selected_all_bands_segment),
-        "all_bands_selected_segment_bytes": int(sum(row["size"] for row in selected_all_bands_segment)),
+        "all_bands_selected_segment_bytes": int(
+            sum(row["size"] for row in selected_all_bands_segment)
+        ),
         "all_bands_selected_segment_to_selected_band_ratio": (
-            float(sum(row["size"] for row in selected_all_bands_segment) / sum(row["size"] for row in selected_band_segment))
+            float(
+                sum(row["size"] for row in selected_all_bands_segment)
+                / sum(row["size"] for row in selected_band_segment)
+            )
             if selected_band_segment and sum(row["size"] for row in selected_band_segment)
             else None
         ),
         "full_disk_all_bands_to_selected_band_segment_ratio": (
-            float(sum(row["size"] for row in rows) / sum(row["size"] for row in selected_band_segment))
+            float(
+                sum(row["size"] for row in rows) / sum(row["size"] for row in selected_band_segment)
+            )
             if selected_band_segment and sum(row["size"] for row in selected_band_segment)
             else None
         ),
@@ -1147,7 +1249,9 @@ def dataframe(records: list[dict[str, Any]]) -> pd.DataFrame:
 def summarize_fetches(fetches: list[FetchResult]) -> dict[str, Any]:
     by_source: dict[str, dict[str, Any]] = {}
     for item in fetches:
-        bucket = by_source.setdefault(item.source, {"requested": 0, "ok": 0, "bytes": 0, "sum_elapsed_seconds": 0.0})
+        bucket = by_source.setdefault(
+            item.source, {"requested": 0, "ok": 0, "bytes": 0, "sum_elapsed_seconds": 0.0}
+        )
         bucket["requested"] += 1
         bucket["ok"] += int(item.status == "ok")
         bucket["bytes"] += item.bytes
@@ -1195,7 +1299,9 @@ def compute_backfill_estimates(
     days_2015 = max(0, (end - history_2015_start).days + 1)
     days_2017 = max(0, (end - history_2017_start).days + 1)
 
-    selected_himawari_bytes = sum(item.bytes for item in fetches if item.kind == "himawari_hsd" and item.status == "ok")
+    selected_himawari_bytes = sum(
+        item.bytes for item in fetches if item.kind == "himawari_hsd" and item.status == "ok"
+    )
     himawari_per_day = selected_himawari_bytes / day_count if day_count else 0.0
     all_bands_ratio = probe.get("all_bands_selected_segment_to_selected_band_ratio") or 16.0
     full_disk_ratio = probe.get("full_disk_all_bands_to_selected_band_segment_ratio") or 160.0
@@ -1221,12 +1327,28 @@ def compute_backfill_estimates(
             "normalized_gb_2017_01_01_to_run_end": per_day_normalized * days_2017 / 1_000_000_000,
         },
         "himawari_scale_estimates_from_probe": {
-            "selected_b13_s0510_raw_gb_2015_07_07_to_run_end": himawari_per_day * days_2015 / 1_000_000_000,
-            "selected_b13_s0510_raw_gb_2017_01_01_to_run_end": himawari_per_day * days_2017 / 1_000_000_000,
-            "all_bands_s0510_raw_gb_2015_07_07_to_run_end": himawari_per_day * all_bands_ratio * days_2015 / 1_000_000_000,
-            "all_bands_s0510_raw_gb_2017_01_01_to_run_end": himawari_per_day * all_bands_ratio * days_2017 / 1_000_000_000,
-            "full_disk_all_bands_raw_gb_2015_07_07_to_run_end": himawari_per_day * full_disk_ratio * days_2015 / 1_000_000_000,
-            "full_disk_all_bands_raw_gb_2017_01_01_to_run_end": himawari_per_day * full_disk_ratio * days_2017 / 1_000_000_000,
+            "selected_b13_s0510_raw_gb_2015_07_07_to_run_end": himawari_per_day
+            * days_2015
+            / 1_000_000_000,
+            "selected_b13_s0510_raw_gb_2017_01_01_to_run_end": himawari_per_day
+            * days_2017
+            / 1_000_000_000,
+            "all_bands_s0510_raw_gb_2015_07_07_to_run_end": himawari_per_day
+            * all_bands_ratio
+            * days_2015
+            / 1_000_000_000,
+            "all_bands_s0510_raw_gb_2017_01_01_to_run_end": himawari_per_day
+            * all_bands_ratio
+            * days_2017
+            / 1_000_000_000,
+            "full_disk_all_bands_raw_gb_2015_07_07_to_run_end": himawari_per_day
+            * full_disk_ratio
+            * days_2015
+            / 1_000_000_000,
+            "full_disk_all_bands_raw_gb_2017_01_01_to_run_end": himawari_per_day
+            * full_disk_ratio
+            * days_2017
+            / 1_000_000_000,
             "all_bands_s0510_to_b13_s0510_ratio": all_bands_ratio,
             "full_disk_all_bands_to_b13_s0510_ratio": full_disk_ratio,
         },
@@ -1252,7 +1374,9 @@ def write_outputs(
     fetch_records = [asdict(item) for item in fetches]
     fetch_df = dataframe(fetch_records)
     idx_df = dataframe(idx_rows)
-    model_station_df = dataframe([item["station_row"] for item in model_norms if item.get("station_row")])
+    model_station_df = dataframe(
+        [item["station_row"] for item in model_norms if item.get("station_row")]
+    )
     model_bbox_df = dataframe([row for item in model_norms for row in item.get("bbox_rows", [])])
     himawari_df = dataframe([item["row"] for item in himawari_norms if item.get("row")])
     model_norm_status_df = dataframe(
@@ -1278,11 +1402,17 @@ def write_outputs(
 
     fetch_df.to_csv(wp(NORMALIZED_DIR / "fetch_manifest.csv"), index=False)
     idx_df.to_csv(wp(NORMALIZED_DIR / "model_idx_catalog.csv"), index=False)
-    model_station_df.to_csv(wp(NORMALIZED_DIR / "model_cycle_lead_station_features.csv"), index=False)
-    model_bbox_df.to_csv(wp(NORMALIZED_DIR / "model_cycle_lead_bbox_summary_features.csv"), index=False)
+    model_station_df.to_csv(
+        wp(NORMALIZED_DIR / "model_cycle_lead_station_features.csv"), index=False
+    )
+    model_bbox_df.to_csv(
+        wp(NORMALIZED_DIR / "model_cycle_lead_bbox_summary_features.csv"), index=False
+    )
     himawari_df.to_csv(wp(NORMALIZED_DIR / "himawari_b13_s0510_scan_features.csv"), index=False)
     model_norm_status_df.to_csv(wp(NORMALIZED_DIR / "model_normalization_status.csv"), index=False)
-    himawari_norm_status_df.to_csv(wp(NORMALIZED_DIR / "himawari_normalization_status.csv"), index=False)
+    himawari_norm_status_df.to_csv(
+        wp(NORMALIZED_DIR / "himawari_normalization_status.csv"), index=False
+    )
 
     for frame, name in [
         (fetch_df, "fetch_manifest.parquet"),
@@ -1315,7 +1445,11 @@ def write_outputs(
     sanity = {
         "experiment_id": EXPERIMENT_ID,
         "generated_at_utc": utc_now_iso(),
-        "date_range_utc": {"start": min(days).isoformat(), "end": max(days).isoformat(), "days": len(days)},
+        "date_range_utc": {
+            "start": min(days).isoformat(),
+            "end": max(days).isoformat(),
+            "days": len(days),
+        },
         "scope": {
             "gfs": "NOMADS filtered HKG bbox, cycles 00/06/12/18, common leads f000..f048 every 3h",
             "gefs_control": "NOMADS filtered GEFS control HKG bbox, cycles 00/06/12/18, common leads f000..f048 every 3h",
@@ -1327,17 +1461,29 @@ def write_outputs(
         "fetch_summary_by_source": fetch_summary,
         "day_coverage": day_coverage(fetch_df),
         "attribute_counts": {
-            "gfs_idx_message_count_min": int(idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().min())
-            if not idx_df.empty and not idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().empty
+            "gfs_idx_message_count_min": int(
+                idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().min()
+            )
+            if not idx_df.empty
+            and not idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().empty
             else None,
-            "gfs_idx_message_count_max": int(idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().max())
-            if not idx_df.empty and not idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().empty
+            "gfs_idx_message_count_max": int(
+                idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().max()
+            )
+            if not idx_df.empty
+            and not idx_df[idx_df["source"] == "gfs"]["message_count"].dropna().empty
             else None,
-            "gefs_idx_message_count_min": int(idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().min())
-            if not idx_df.empty and not idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().empty
+            "gefs_idx_message_count_min": int(
+                idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().min()
+            )
+            if not idx_df.empty
+            and not idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().empty
             else None,
-            "gefs_idx_message_count_max": int(idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().max())
-            if not idx_df.empty and not idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().empty
+            "gefs_idx_message_count_max": int(
+                idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().max()
+            )
+            if not idx_df.empty
+            and not idx_df[idx_df["source"] == "gefs_control"]["message_count"].dropna().empty
             else None,
             "model_station_feature_columns": int(len(model_station_df.columns)),
             "model_bbox_summary_columns": int(len(model_bbox_df.columns)),
@@ -1350,26 +1496,42 @@ def write_outputs(
             "model_station_rows": int(len(model_station_df)),
             "model_bbox_variable_rows": int(len(model_bbox_df)),
             "himawari_scan_rows": int(len(himawari_df)),
-            "model_normalization_errors": int((model_norm_status_df.get("normalization_status", pd.Series(dtype=str)) == "error").sum())
+            "model_normalization_errors": int(
+                (
+                    model_norm_status_df.get("normalization_status", pd.Series(dtype=str))
+                    == "error"
+                ).sum()
+            )
             if not model_norm_status_df.empty
             else 0,
-            "himawari_normalization_errors": int((himawari_norm_status_df.get("normalization_status", pd.Series(dtype=str)) == "error").sum())
+            "himawari_normalization_errors": int(
+                (
+                    himawari_norm_status_df.get("normalization_status", pd.Series(dtype=str))
+                    == "error"
+                ).sum()
+            )
             if not himawari_norm_status_df.empty
             else 0,
         },
         "leakage_safety": {
             "model_availability_contract": f"issued_at_utc + {MODEL_AVAILABILITY_BUFFER_HOURS}h",
             "himawari_availability_contract": "max(hsd_file_creation_utc, observed_at_utc + 30m)",
-            "fetch_rows_missing_availability_proxy": int(fetch_df["availability_proxy_utc"].isna().sum())
+            "fetch_rows_missing_availability_proxy": int(
+                fetch_df["availability_proxy_utc"].isna().sum()
+            )
             if not fetch_df.empty and "availability_proxy_utc" in fetch_df
             else None,
-            "model_rows_missing_grib_issued_at": int(model_station_df["issued_at_utc_grib"].isna().sum())
+            "model_rows_missing_grib_issued_at": int(
+                model_station_df["issued_at_utc_grib"].isna().sum()
+            )
             if not model_station_df.empty and "issued_at_utc_grib" in model_station_df
             else None,
             "himawari_rows_missing_observed_at": int(himawari_df["observed_at_utc"].isna().sum())
             if not himawari_df.empty and "observed_at_utc" in himawari_df
             else None,
-            "himawari_rows_missing_file_creation": int(himawari_df["file_creation_utc"].isna().sum())
+            "himawari_rows_missing_file_creation": int(
+                himawari_df["file_creation_utc"].isna().sum()
+            )
             if not himawari_df.empty and "file_creation_utc" in himawari_df
             else None,
         },
@@ -1393,7 +1555,11 @@ def write_outputs(
     write_json(NORMALIZED_DIR / "sanity_report.json", sanity)
 
     status = "COMPLETE"
-    if any(item.status != "ok" for item in fetches) or sanity["normalized_rows"]["model_normalization_errors"] or sanity["normalized_rows"]["himawari_normalization_errors"]:
+    if (
+        any(item.status != "ok" for item in fetches)
+        or sanity["normalized_rows"]["model_normalization_errors"]
+        or sanity["normalized_rows"]["himawari_normalization_errors"]
+    ):
         status = "COMPLETE_WITH_GAPS"
     write_text(
         EXPERIMENT_DIR / "STATUS.yaml",
@@ -1455,12 +1621,20 @@ the availability proxy, raw path, URL, byte count, and SHA256.
 | `normalized/himawari_b13_s0510_scan_features.csv` | One normalized row per B13 HKG-segment scan. |
 | `normalized/backfill_size_estimates.json` | Estimated raw/normalized size for 2015+ and 2017+ backfills. |
 """
-    write_text(EXPERIMENT_DIR / "README.md", readme)
+    write_bounded_readme_section(
+        EXPERIMENT_DIR / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=demote_markdown_headings(readme),
+        default_title="0007 Public Seven-Day Backfill Rehearsal",
+    )
     return sanity
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run a 7-day public GFS/GEFS/Himawari backfill rehearsal.")
+    parser = argparse.ArgumentParser(
+        description="Run a 7-day public GFS/GEFS/Himawari backfill rehearsal."
+    )
     parser.add_argument("--days", type=int, default=1)
     parser.add_argument("--end-date", type=parse_date, default=completed_utc_yesterday())
     parser.add_argument("--lead-hours", type=parse_leads, default=DEFAULT_MODEL_LEADS)
@@ -1483,7 +1657,9 @@ def main() -> int:
     total_started = time.perf_counter()
     days = date_span(args.end_date, args.days)
     leads = args.lead_hours if isinstance(args.lead_hours, list) else parse_leads(args.lead_hours)
-    args.himawari_bands = [part.strip().upper() for part in args.himawari_bands.split(",") if part.strip()]
+    args.himawari_bands = [
+        part.strip().upper() for part in args.himawari_bands.split(",") if part.strip()
+    ]
     ensure_dir(RAW_DIR)
     ensure_dir(NORMALIZED_DIR)
     ensure_dir(METADATA_DIR)
@@ -1517,7 +1693,9 @@ def main() -> int:
         FetchResult(**record)
         if isinstance(record, dict) and "kind" in record and "status" in record
         else record
-        for record in run_pool("download", all_tasks, fetch_to_path, args.download_workers, progress_every=100)
+        for record in run_pool(
+            "download", all_tasks, fetch_to_path, args.download_workers, progress_every=100
+        )
     ]
     download_wall = time.perf_counter() - download_started
 
@@ -1562,9 +1740,15 @@ def main() -> int:
         "model_normalize_wall_seconds": model_norm_wall,
         "himawari_normalize_wall_seconds": himawari_norm_wall,
         "download_sum_elapsed_seconds": float(sum(item.elapsed_seconds for item in fetches)),
-        "model_download_sum_elapsed_seconds": float(sum(item.elapsed_seconds for item in model_fetches)),
-        "himawari_download_sum_elapsed_seconds": float(sum(item.elapsed_seconds for item in himawari_fetches)),
-        "parallel_download_speedup_estimate": float(sum(item.elapsed_seconds for item in fetches) / download_wall)
+        "model_download_sum_elapsed_seconds": float(
+            sum(item.elapsed_seconds for item in model_fetches)
+        ),
+        "himawari_download_sum_elapsed_seconds": float(
+            sum(item.elapsed_seconds for item in himawari_fetches)
+        ),
+        "parallel_download_speedup_estimate": float(
+            sum(item.elapsed_seconds for item in fetches) / download_wall
+        )
         if download_wall
         else None,
     }

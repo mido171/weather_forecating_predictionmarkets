@@ -15,7 +15,7 @@ Read, in order:
 4. `docs/INDEX.md`
 5. the relevant contract under `docs/contracts/` or
    `docs/specifications/hkg-t24/`
-6. the relevant experiment conclusion and `EXPERIMENT_INDEX.md`
+6. the relevant experiment README decision and `EXPERIMENT_INDEX.md`
 
 Then prove repository identity without a deep scan:
 
@@ -69,8 +69,8 @@ the source tree inside an experiment or handoff.
   provenance. New records must also contain relocation-safe relative paths.
 - Never overwrite a completed experiment. Create a new governed ID.
 - Record negative, null, blocked, and rejected outcomes.
-- Large outputs stay external; Git receives compact manifests, protocols,
-  metrics, conclusions, and reproduction instructions only.
+- Large outputs stay external; Git receives one compact README dossier per
+  campaign/experiment plus machine-readable manifests, metrics, and audits.
 - Do not use market prices as meteorological features unless an explicit
   research contract authorizes it. This repository does not place orders.
 

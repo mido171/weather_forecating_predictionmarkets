@@ -11,8 +11,15 @@ import pandas as pd
 import yaml
 
 from hkg_tmax_probability.bucket_rules import BUCKET_KEYS, PROBABILITY_COLUMNS
-from hkg_tmax_probability.data_build import DEFAULT_DATABASE_URL, build_modeling_table, write_modeling_artifacts
-from hkg_tmax_probability.label_publication_audit import apply_first_publication_labels, run_label_publication_audit
+from hkg_tmax_probability.data_build import (
+    DEFAULT_DATABASE_URL,
+    build_modeling_table,
+    write_modeling_artifacts,
+)
+from hkg_tmax_probability.label_publication_audit import (
+    apply_first_publication_labels,
+    run_label_publication_audit,
+)
 from hkg_tmax_probability.leakage_audit import audit_modeling_table, write_leakage_audit
 from hkg_tmax_probability.live_inference import write_live_inference_example
 from hkg_tmax_probability.models import predict_all_methods
@@ -24,7 +31,7 @@ from hkg_tmax_probability.reporting import (
     score_predictions,
     write_diagnostics,
     write_manifest,
-    write_model_card,
+    write_model_summary,
 )
 from hkg_tmax_probability.validation import split_windows_from_config, train_validation_frames
 
@@ -179,7 +186,16 @@ def _first_publication_scoreboard(output_dir: Path, predictions: pd.DataFrame, l
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "probability_bucket_v1.yaml")
-    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "experiments" / "hkg_tmax_probability_buckets_v1" / "results")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=REPO_ROOT
+        / "experiments"
+        / "campaigns"
+        / "probability"
+        / "buckets-v1"
+        / "results",
+    )
     parser.add_argument("--database-url", type=str, default=None)
     args = parser.parse_args()
 
@@ -246,7 +262,13 @@ def main() -> int:
 
     champion_method = str(leaderboard[leaderboard["champion_flag"]]["method"].iloc[0])
     write_live_inference_example(output_dir, primary_predictions, champion_method)
-    write_model_card(output_dir, leaderboard, leakage, label_details)
+    write_model_summary(
+        output_dir,
+        leaderboard,
+        leakage,
+        label_details,
+        config.get("acceptance_gates", {}),
+    )
     artifact_names = [path.name for path in output_dir.iterdir()]
     write_manifest(output_dir, args.config.resolve(), artifact_names)
 

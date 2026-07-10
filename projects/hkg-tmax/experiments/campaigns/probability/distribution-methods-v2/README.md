@@ -1,37 +1,49 @@
-# HKG Tmax Probability Distribution Methods V2
+# Probability distribution methods V2
 
-This experiment tests whether true EMOS-style or other distribution engines beat the current probability champion, `B4_hierarchical_residual_pmf`.
+Status: `accepted`. Supreme method: `B4_hierarchical_residual_pmf`.
 
-Scope is weather probability only. The benchmark uses no market prices, no EV, no order books, no Kelly sizing, no PnL, no market-implied blending, and no trade recommendations.
+## Question and contract
 
-## Implementation
+Test true EMOS-style and other continuous/discrete distribution engines
+against B4 using weather data only. Primary historical cutoff: T-1 23:59 HKT;
+sensitivity cutoffs: 18:00 and 21:00. Sealed confirmation was not used for
+selection.
 
-- Config: `configs/hkg_tmax/probability_distribution_methods_v2.yaml`
-- Runner: `scripts/run_hkg_tmax_probability_distribution_methods_v2.py`
-- New V2 methods: `code/src/hkg_tmax_probability/distribution_methods_v2.py`
-- V2 champion gates: `code/src/hkg_tmax_probability/leaderboard_v2.py`
-- Tests: `code/tests/test_hkg_tmax_probability_distribution_methods_v2.py`
-
-## Data Surface
-
-The experiment reuses the V1 modeling table build from PostgreSQL `hkg_tmax_research`.
-
-- Forecast rows: strict HKO Info.gov local forecast rows.
-- Primary cutoff: `T-1 23:59 HKT`.
-- Cutoff sensitivity: `T-1 18:00 HKT`, `T-1 21:00 HKT`, `T-1 23:59 HKT`.
-- Target labels: canonical HKO Daily Extract one-decimal HKG daily Tmax, with sealed confirmation rows used only by the sealed confirmation split.
-- Bucket contract: `<=24.9`, `25.0..25.9`, ..., `33.0..33.9`, `>=34.0`; `31.9` remains bucket `31`, `32.0` enters bucket `32`.
+A challenger had to beat B4 by at least 1.5% RPS on folds 1-4 and 1.0% on the
+2022-2023 presealed holdout, while staying within 0.005 NLL and 0.002 Brier.
 
 ## Result
 
-Final artifacts are under `results/`.
+| Method | RPS | Decision |
+|---|---:|---|
+| B5 kernel analog | 0.041287 | Failed fold/presealed/NLL gates |
+| H1 linear pool | 0.041470 | Gain too small |
+| S1 simplex stack | 0.041472 | Gain too small |
+| T1 time-decay B4 | 0.041486 | Fold gate failed |
+| B4 hierarchical residual PMF | 0.041524 | Retained reference champion |
+| E2 Student-t EMOS | 0.041658 | Worse RPS; NLL gate failed |
 
-Primary files to read first:
+Normal, Student-t, two-piece normal EMOS, tree location-scale, quantile CDF,
+and threshold CDF challengers did not promote. Leakage, row identity, and live
+no-trading audits passed.
 
-1. `results/supreme_method_summary.md`
-2. `results/scoreboard.csv`
-3. `results/final_probability_model_card.md`
-4. `results/leakage_audit.json`
-5. `results/row_identity_gate.json`
+## Decision and limitation
 
-Outcome: `B4_hierarchical_residual_pmf` remains the supreme method because no challenger clears the predeclared promotion gates.
+B4 remains champion. V2's full model runner was not rerun after a later
+Markdown-renderer-only patch; this does not change the frozen scoreboards but
+is retained as a reproducibility limitation.
+
+## Reproduce
+
+```powershell
+$env:HKG_TMAX_DATABASE_URL = '<local PostgreSQL URL>'
+.\.venv\Scripts\python.exe scripts\run_hkg_tmax_probability_distribution_methods_v2.py --config config\experiments\hkg_tmax\probability_distribution_methods_v2.yaml --output-dir experiments\campaigns\probability\distribution-methods-v2\results
+.\.venv\Scripts\python.exe -m pytest tests\test_hkg_tmax_probability_distribution_methods_v2.py -q
+```
+
+## Evidence map
+
+`results/scoreboard.csv`, split/cutoff scoreboards, distribution-parameter
+Parquet, `method_selection_log.json`, `leakage_audit.json`,
+`row_identity_gate.json`, and `reproducibility_manifest.json` remain.
+`RUN_CONFIG.yaml` uses `HKG_TMAX_DATABASE_URL` rather than storing a DSN.

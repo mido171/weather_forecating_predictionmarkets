@@ -1,29 +1,33 @@
-# Public Daily Coverage Benchmark
+# 0006 Public daily coverage benchmark
 
-Generated: `2026-07-08T08:36:14.244429Z`
+Status: `complete`. Target UTC day: 2026-07-07.
 
-Target UTC day: `2026-07-07`
+## Question and result
 
-This benchmark fetched and normalized one complete practical daily coverage set:
+Measure one practical day of GFS, GEFS control, and 10-minute Himawari B13
+coverage.
 
-- GFS: `00/06/12/18Z`, f024, selected HKG weather feature pack.
-- GEFS control: `00/06/12/18Z`, f024, selected HKG weather feature pack.
-- Himawari-9: B13 HKG segment `S0510`, every 10 minutes, 144 scans.
-
-## Result
-
-| Metric | Value |
+| Metric | Result |
 |---|---:|
-| total download + normalize seconds | 578.23 |
-| model items ok | 8 / 8 |
-| Himawari items ok | 141 / 144 |
-| total downloaded MB | 520.70 |
-| model normalized station rows | 8 |
-| Himawari normalized scan rows | 141 |
+| Download + normalize time | 578.23 s |
+| Model items | 8/8 |
+| Himawari scans | 141/144 |
+| Downloaded volume | 520.70 MB |
+| Model station rows | 8 |
+| Himawari scan rows | 141 |
 
-See `normalized/daily_coverage_benchmark_summary.json` for timings, bytes, and attribute counts.
+GEFS was repaired by removing `MSLET` after NOMADS returned HTTP 500.
 
+## Decision and limitations
 
-## GEFS Repair
+One-day feasibility passed. Three Himawari scans were unavailable; this run did
+not prove a long-history backfill.
 
-GEFS was rerun after removing `MSLET`, which caused NOMADS filter HTTP 500. The table above uses the repaired equivalent timing.
+## Reproduce and evidence
+
+```powershell
+.\.venv\Scripts\python.exe scripts\benchmark_public_daily_coverage_gfs_gefs_himawari.py --help
+```
+
+`normalized/daily_coverage_benchmark_summary.json` is the machine summary.
+CSV manifests and `STATUS.yaml` preserve coverage and timestamps.

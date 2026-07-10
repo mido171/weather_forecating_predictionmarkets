@@ -8,7 +8,7 @@ Read in this order:
 2. `EXPERIMENT_INDEX.md`
 3. `FIRST_GOALS.md`
 4. `AGENTS.md`
-5. active experiment `README.md`, `STATUS.yaml`, and `CONCLUSION.md`
+5. active experiment `README.md`, `STATUS.yaml`, and machine evidence map
 6. linked prior experiments
 7. relevant docs/config.
 
@@ -94,10 +94,11 @@ When researching external facts:
 
 Start from:
 
-- `CONCLUSION.md`;
-- `RESULTS.md`;
+- the campaign `README.md`;
+- the experiment `README.md`, especially its status, result, decision, and
+  limitations sections;
 - `STATUS.yaml`;
-- `DATA_MANIFEST.yaml`.
+- `DATA_MANIFEST.yaml` and `results/metrics.json` when present.
 
 Read logs/artifacts only when needed.
 

@@ -27,7 +27,13 @@ from hkg_tmax_db.connection import import_psycopg, redact_database_url
 
 PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
 REPO_ROOT = PROJECT_PATHS.project_root
-EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
+EXPERIMENT_ROOT = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-t24"
+    / "0214_tactical_h24n_gribstream_backfill"
+)
 REQUEST_ROOT = EXPERIMENT_ROOT / "request_payloads"
 RAW_ROOT = PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / "gribstream_tactical_smoke"
 SECRET_FILE = REPO_ROOT / "secrets/local/gribstream.env"

@@ -7,13 +7,20 @@ import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import numpy as np
 import pandas as pd
 import psycopg
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / "0004_station_hour_residual_information_atlas_20260708"
+EXPERIMENT_DIR = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-tmax"
+    / "0004_station_hour_residual_information_atlas_20260708"
+)
 RESULTS_DIR = EXPERIMENT_DIR / "results"
 ARTIFACTS_DIR = EXPERIMENT_DIR / "artifacts"
 LOGS_DIR = EXPERIMENT_DIR / "logs"
@@ -28,6 +35,14 @@ MIN_ACTION_TRAIN_ROWS = 2500
 MIN_ACTION_FOLD_ROWS = 250
 TOP_VALUE_FEATURES = 220
 RANDOM_SEED = 20260708
+README_GENERATED_START = "<!-- BEGIN GENERATED: station-hour-residual-information-atlas -->"
+README_GENERATED_END = "<!-- END GENERATED: station-hour-residual-information-atlas -->"
+DEFAULT_README_PREAMBLE = """# Station-Hour Residual Information Atlas
+
+This is the canonical human dossier for the station-hour residual information atlas. The
+runner refreshes only the marked generated section below; curator-owned context outside the
+markers is preserved.
+"""
 
 
 def now_utc() -> str:
@@ -47,10 +62,45 @@ def fs_path(path: Path) -> str:
     return text
 
 
+def redact_database_url(database_url: str) -> str:
+    parsed = urlsplit(database_url)
+    if "@" not in parsed.netloc:
+        return database_url
+    credentials, address = parsed.netloc.rsplit("@", 1)
+    if ":" not in credentials:
+        return database_url
+    username, _ = credentials.split(":", 1)
+    return urlunsplit(parsed._replace(netloc=f"{username}:***@{address}"))
+
+
 def write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(fs_path(path), "w", encoding="utf-8") as handle:
         handle.write(text.rstrip() + "\n")
+
+
+def write_bounded_readme_section(path: Path, generated_section: str) -> None:
+    existing = path.read_text(encoding="utf-8") if path.exists() else DEFAULT_README_PREAMBLE
+    start_count = existing.count(README_GENERATED_START)
+    end_count = existing.count(README_GENERATED_END)
+    if start_count != end_count or start_count > 1:
+        raise RuntimeError(f"Malformed generated README markers in {path}")
+
+    block = (
+        f"{README_GENERATED_START}\n"
+        f"{generated_section.strip()}\n"
+        f"{README_GENERATED_END}"
+    )
+    if start_count == 1:
+        start = existing.index(README_GENERATED_START)
+        end_start = existing.find(README_GENERATED_END, start)
+        if end_start < 0:
+            raise RuntimeError(f"Malformed generated README markers in {path}")
+        end = end_start + len(README_GENERATED_END)
+        parts = [existing[:start].strip(), block, existing[end:].strip()]
+    else:
+        parts = [existing.strip(), block]
+    write_text(path, "\n\n".join(part for part in parts if part))
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -732,33 +782,8 @@ def compute_significance_score(summary: pd.DataFrame, spearman: pd.DataFrame, ac
     }
 
 
-def write_static_protocol_docs(database_url: str) -> None:
-    redacted = database_url.replace("postgres:root@", "postgres:***@")
-    write_text(EXPERIMENT_DIR / "HYPOTHESIS.md", """# Hypothesis
-
-Hourly Info.gov HKO and neighboring-station observations available before the T-1 23:59 HKT cutoff contain directional information about the official forecast residual `target_tmax_c - official_max_c`.
-
-The strongest expected mechanisms are forecast-observation contradiction, inland/coastal heat contrast, late-evening heat retention, network heat ceiling, and humid/rain-cooled overforecast suppression.
-
-Falsification: station-hour features show only weak, unstable correlations across time splits and do not produce any guarded walk-forward residual-correction improvement beyond a bias-only correction.
-""")
-    write_text(EXPERIMENT_DIR / "PROTOCOL.md", """# Protocol
-
-This is a diagnostic information atlas, not a promoted model.
-
-- Target frame: pre-2024 `label_core.hko_daily_tmax`, 2000-01-02 through 2023-12-31.
-- Forecast anchor: latest eligible `public.hko_historical_forecasts_2000_2026` local forecast for target date T with `issue_at_utc <= T-1 23:59 HKT`.
-- Hourly observations: `public.hko_info_gov_hourly_readings_1998_2026`, filtered to `dispatch_at_utc <= cutoff` and the prior 24 hours.
-- Features: HKO, network, role, and station latest/snapshot/window features plus official-forecast contradiction transforms.
-- Metrics: Pearson correlations, Spearman correlations for top features, temporal split stability, quantile residual spread, and guarded single-feature walk-forward residual correction.
-- Confirmation guard: no rows on or after 2024-01-01.
-""")
-    write_text(EXPERIMENT_DIR / "ASOF_CONTRACT.md", """# As-Of Contract
-
-The decision cutoff is T-1 23:59 HKT. A forecast row is eligible only if `issue_at_utc <= cutoff_at_utc`. An hourly reading is eligible only if both `dispatch_at_utc <= cutoff_at_utc` and `observation_at_utc <= cutoff_at_utc`.
-
-The experiment uses only the 24-hour observation window ending at the cutoff. It does not use target-day observations after the cutoff and does not read `sealed_confirmation` labels.
-""")
+def write_static_protocol_artifacts(database_url: str) -> None:
+    redacted = redact_database_url(database_url)
     write_text(EXPERIMENT_DIR / "DATA_MANIFEST.yaml", f"""database_url_redacted: "{redacted}"
 tables:
   target: label_core.hko_daily_tmax
@@ -793,18 +818,9 @@ walk_forward_folds:
   - ["fold3_2017_2019", "train<=2016-12-31", "valid=2017-01-01..2019-12-31"]
   - ["fold4_2020_2023", "train<=2019-12-31", "valid=2020-01-01..2023-12-31"]
 """)
-    write_text(EXPERIMENT_DIR / "REPRODUCE.md", """# Reproduce
-
-```powershell
-Set-Location <weather-markets-repo>\\projects\\hkg-tmax
-.\\.venv\\Scripts\\python.exe scripts\\run_hkg_tmax_0004_station_hour_residual_information_atlas.py
-```
-
-The runner creates temporary Postgres tables and writes local experiment artifacts. It does not mutate persistent database tables.
-""")
 
 
-def write_result_docs(
+def write_experiment_readme(
     *,
     summary: pd.DataFrame,
     spearman: pd.DataFrame,
@@ -824,11 +840,42 @@ def write_result_docs(
             f"and bias-only `{best_action['bias_only_mae']:.6f}`. "
             f"Delta vs bias-only `{best_action['delta_vs_bias_only_c']:.6f}` C."
         )
-    results = f"""# Results
+    generated_section = f"""## Generated Experiment Dossier
+
+This experiment mines PostgreSQL hourly Info.gov readings for station, role, network, and HKO features that explain the official forecast residual for HKG daily Tmax.
+
+Main result: **{score}/100 significance**, `INFORMATION_GAIN_POSITIVE_NO_PROMOTE`.
+
+## Hypothesis
+
+Hourly Info.gov HKO and neighboring-station observations available before the T-1 23:59 HKT cutoff contain directional information about the official forecast residual `target_tmax_c - official_max_c`.
+
+The strongest expected mechanisms are forecast-observation contradiction, inland/coastal heat contrast, late-evening heat retention, network heat ceiling, and humid/rain-cooled overforecast suppression.
+
+Falsification: station-hour features show only weak, unstable correlations across time splits and do not produce any guarded walk-forward residual-correction improvement beyond a bias-only correction.
+
+## As-Of Contract
+
+The decision cutoff is T-1 23:59 HKT. A forecast row is eligible only if `issue_at_utc <= cutoff_at_utc`. An hourly reading is eligible only if both `dispatch_at_utc <= cutoff_at_utc` and `observation_at_utc <= cutoff_at_utc`.
+
+The experiment uses only the 24-hour observation window ending at the cutoff. It does not use target-day observations after the cutoff and does not read `sealed_confirmation` labels.
+
+## Protocol
+
+This is a diagnostic information atlas, not a promoted model.
+
+- Target frame: pre-2024 `label_core.hko_daily_tmax`, 2000-01-02 through 2023-12-31.
+- Forecast anchor: latest eligible `public.hko_historical_forecasts_2000_2026` local forecast for target date T with `issue_at_utc <= T-1 23:59 HKT`.
+- Hourly observations: `public.hko_info_gov_hourly_readings_1998_2026`, filtered to `dispatch_at_utc <= cutoff` and the prior 24 hours.
+- Features: HKO, network, role, and station latest/snapshot/window features plus official-forecast contradiction transforms.
+- Metrics: Pearson correlations, Spearman correlations for top features, temporal split stability, quantile residual spread, and guarded single-feature walk-forward residual correction.
+- Confirmation guard: no rows on or after 2024-01-01.
+
+## Results
 
 Generated: `{metrics['generated_at_utc']}`
 
-## Headline
+### Headline
 
 Significance score: **{score}/100**.
 
@@ -836,7 +883,7 @@ This is a meaningful station-hour signal discovery result, not a deployable cham
 
 {best_action_text}
 
-## Data Scope
+### Data Scope
 
 | Metric | Value |
 |---|---:|
@@ -849,35 +896,35 @@ This is a meaningful station-hour signal discovery result, not a deployable cham
 | Distinct stations | {db_counts.get('station_count')} |
 | Confirmation rows used | {db_counts.get('uses_confirmation_rows')} |
 
-## Top Pearson Signals
+### Top Pearson Signals
 
 {md_table(summary.head(25)[['feature_name','feature_family','station','station_role','transform','window_hours','snapshot_hour','n','max_abs_primary_corr','pearson_residual','pearson_abs_error','pearson_under_gt1','pearson_over_gt1','pearson_hot_under','residual_corr_train_eval_same_sign']], max_rows=25)}
 
-## Top Spearman And Quantile-Spread Signals
+### Top Spearman And Quantile-Spread Signals
 
 {md_table(spearman.head(25), max_rows=25)}
 
-## Feature-Family Summary
+### Feature-Family Summary
 
 {md_table(family_board, max_rows=40)}
 
-## Station Leaderboard
+### Station Leaderboard
 
 {md_table(station_board.head(40), max_rows=40)}
 
-## Guarded Single-Feature Walk-Forward Actionability
+### Guarded Single-Feature Walk-Forward Actionability
 
 {md_table(actionability.head(30), max_rows=30)}
 
-## Interpretation
+### Interpretation
 
 The best signals cluster around official-forecast contradiction and late-window heat state: HKO/network/station temperatures above the official max, 24h maxima, and role/station heat ceilings. That is exactly the mechanism we hoped to see: the official forecast absorbs broad weather level, but it can still lag live thermal evidence.
 
 Humidity/range/overforecast suppression appears in the secondary ranks rather than as a dominant global linear effect. That usually means it should be tested as an interaction with rain/thunderstorm and inland-coastal contrast, not as a standalone linear feature.
 
 No champion changes from this diagnostic run. The next model experiment should promote only the stable top families into a bounded residual or probability specialist, with feature selection frozen inside walk-forward folds.
-"""
-    conclusion = f"""# Conclusion
+
+## Conclusion
 
 Status: `INFORMATION_GAIN_POSITIVE_NO_PROMOTE`
 
@@ -886,6 +933,36 @@ The station-hour atlas produced real signal and supports further controlled mode
 Significance score: `{score}/100`.
 
 Why not higher: the top correlations are coherent and supported by thousands of rows, but single-feature guarded walk-forward corrections only produce small incremental MAE movement once compared with an official-bias correction. The result is strong enough to justify a specialist experiment, not strong enough to declare a new champion.
+
+## Limitations
+
+- This is a diagnostic information atlas, not a multivariate production model.
+- The guarded actionability screen evaluates one feature at a time and does not prove stable interaction gains.
+- Confirmation dates beginning 2024-01-01 remain excluded from this experiment.
+
+## Reproduce
+
+```powershell
+Set-Location <weather-markets-repo>\\projects\\hkg-tmax
+.\\.venv\\Scripts\\python.exe scripts\\run_hkg_tmax_0004_station_hour_residual_information_atlas.py
+```
+
+The runner creates temporary PostgreSQL tables and overwrites this bounded README plus the machine-readable evidence below. It does not mutate persistent database tables.
+
+## Evidence Map
+
+- `STATUS.yaml`: experiment status and promotion decision.
+- `DATA_MANIFEST.yaml`: governed source tables and date window.
+- `RUN_CONFIG.yaml`: deterministic seed, cutoff, thresholds, and walk-forward folds.
+- `results/metrics.json`: headline metrics and ranked feature records.
+- `artifacts/summary.json`: machine-readable result summary.
+- `artifacts/station_hour_feature_correlations.csv`: Pearson signal table.
+- `artifacts/top_feature_spearman_and_spreads.csv`: rank and spread diagnostics.
+- `artifacts/univariate_walkforward_actionability.csv`: guarded actionability results.
+- `artifacts/station_leaderboard.csv`: station-level ranking.
+- `artifacts/feature_family_summary.csv`: family-level ranking.
+- `artifacts/analysis_frame.parquet`: analysis frame.
+- `artifacts/top_feature_values.parquet`: selected feature values.
 """
     status = f"""status: information_gain_positive_no_promote
 primary_conclusion: "station-hour features contain coherent official-residual signal, but no deployable champion is promoted"
@@ -894,23 +971,13 @@ confirmation_rows_used: {db_counts.get('uses_confirmation_rows')}
 reproducible: true
 significance_score_1_to_100: {score}
 """
-    readme = f"""# Station-Hour Residual Information Atlas
-
-This experiment mines PostgreSQL hourly Info.gov readings for station, role, network, and HKO features that explain the official forecast residual for HKG daily Tmax.
-
-Main result: **{score}/100 significance**, `INFORMATION_GAIN_POSITIVE_NO_PROMOTE`.
-
-Read `RESULTS.md` for the ranked signals and `CONCLUSION.md` for the promotion decision.
-"""
-    write_text(EXPERIMENT_DIR / "RESULTS.md", results)
-    write_text(EXPERIMENT_DIR / "CONCLUSION.md", conclusion)
     write_text(EXPERIMENT_DIR / "STATUS.yaml", status)
-    write_text(EXPERIMENT_DIR / "README.md", readme)
+    write_bounded_readme_section(EXPERIMENT_DIR / "README.md", generated_section)
 
 
 def run(database_url: str) -> dict[str, Any]:
     ensure_dirs()
-    write_static_protocol_docs(database_url)
+    write_static_protocol_artifacts(database_url)
     with psycopg.connect(database_url, options="-c timezone=UTC") as connection:
         db_counts = build_postgres_temp_tables(connection)
         if int(db_counts.get("uses_confirmation_rows", "1")) != 0:
@@ -946,7 +1013,7 @@ def run(database_url: str) -> dict[str, Any]:
     metrics["significance"] = compute_significance_score(summary, spearman, actionability, db_counts)
     write_json(RESULTS_DIR / "metrics.json", metrics)
     write_json(ARTIFACTS_DIR / "summary.json", metrics)
-    write_result_docs(
+    write_experiment_readme(
         summary=summary,
         spearman=spearman,
         actionability=actionability,

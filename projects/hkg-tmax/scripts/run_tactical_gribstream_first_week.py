@@ -31,7 +31,13 @@ PROJECT_PATHS = ProjectPaths.discover(Path(__file__))
 REPO_ROOT = PROJECT_PATHS.project_root
 SMOKE_SCRIPT = REPO_ROOT / "scripts/run_tactical_gribstream_h24n_smoke.py"
 TACTICAL_MIGRATION = REPO_ROOT / "db/migrations/postgres/20260625_0007_tactical_gribstream_h24n_schema.sql"
-EXPERIMENT_ROOT = REPO_ROOT / "experiments/0214_tactical_h24n_gribstream_backfill"
+EXPERIMENT_ROOT = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-t24"
+    / "0214_tactical_h24n_gribstream_backfill"
+)
 FIRST_WEEK_ROOT = EXPERIMENT_ROOT / "first_week_pull"
 REQUEST_ROOT = FIRST_WEEK_ROOT / "request_payloads"
 RAW_ROOT = PROJECT_PATHS.data_root / "_pipeline_internal" / "raw" / "gribstream_tactical_first_week"

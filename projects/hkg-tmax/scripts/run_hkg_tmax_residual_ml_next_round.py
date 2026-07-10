@@ -34,20 +34,21 @@ from hkg_tmax.evaluation.no_harm_reporting import (
 )
 from hkg_tmax.evaluation.reporting import (
     artifact_manifest,
+    demote_markdown_headings,
     feature_missingness_report,
     next_round_model_card,
     next_round_summary_payload,
     source_eligibility_audit,
+    write_bounded_readme_section,
     write_csv,
     write_json,
     write_parquet,
-    write_text,
 )
 from hkg_tmax.features.leakage_guards import next_round_leakage_audit_payload
 from hkg_tmax.features.pruned_feature_policy import (
     CANDIDATE_META_FEATURES,
-    feature_policy_report,
     family_for_feature,
+    feature_policy_report,
     router_feature_names,
     validate_pruned_features,
 )
@@ -66,14 +67,28 @@ from hkg_tmax.modeling.selective_router import (
     predict_router_scores,
     select_router_thresholds,
 )
-from hkg_tmax.modeling.tail_specialist import apply_tail_overlay, fit_tail_models, predict_tail_scores
-
+from hkg_tmax.modeling.tail_specialist import (
+    apply_tail_overlay,
+    fit_tail_models,
+    predict_tail_scores,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = REPO_ROOT / "config" / "experiments" / "hkg_tmax" / "residual_ml_next_round.yaml"
-DEFAULT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax" / "0002_selective_no_harm_router_20260705" / "results"
-DEFAULT_COMPAT_OUTPUT = REPO_ROOT / "experiments" / "hkg_tmax_residual_ml_next_round" / "results"
+DEFAULT_OUTPUT = (
+    REPO_ROOT
+    / "experiments"
+    / "campaigns"
+    / "hkg-tmax"
+    / "0002_selective_no_harm_router_20260705"
+    / "results"
+)
+DEFAULT_COMPAT_OUTPUT = (
+    REPO_ROOT / "experiments" / "campaigns" / "residual-modeling" / "next-round" / "results"
+)
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
+README_RESULTS_START = "<!-- BEGIN GENERATED SELECTIVE ROUTER RESULT -->"
+README_RESULTS_END = "<!-- END GENERATED SELECTIVE ROUTER RESULT -->"
 
 
 def utc_now() -> str:
@@ -89,7 +104,9 @@ def load_config(path: Path) -> dict[str, Any]:
         return yaml.safe_load(handle) or {}
 
 
-def read_previous_artifacts(results_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def read_previous_artifacts(
+    results_dir: Path,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     matrices = [
         pd.read_parquet(results_dir / "feature_matrix_trainval.parquet"),
         pd.read_parquet(results_dir / "feature_matrix_presealed_holdout.parquet"),
@@ -98,11 +115,17 @@ def read_previous_artifacts(results_dir: Path) -> tuple[pd.DataFrame, pd.DataFra
     matrix = pd.concat(matrices, ignore_index=True)
     matrix["target_date"] = pd.to_datetime(matrix["target_date"], errors="coerce").dt.normalize()
     predictions = pd.read_parquet(results_dir / "prediction_rows.parquet")
-    predictions["target_date"] = pd.to_datetime(predictions["target_date"], errors="coerce").dt.normalize()
-    lineage = pd.DataFrame(json.loads((results_dir / "feature_lineage.json").read_text(encoding="utf-8")))
+    predictions["target_date"] = pd.to_datetime(
+        predictions["target_date"], errors="coerce"
+    ).dt.normalize()
+    lineage = pd.DataFrame(
+        json.loads((results_dir / "feature_lineage.json").read_text(encoding="utf-8"))
+    )
     source_eligibility = pd.read_csv(results_dir / "source_eligibility_audit.csv")
     if "target_date" in source_eligibility:
-        source_eligibility["target_date"] = pd.to_datetime(source_eligibility["target_date"], errors="coerce").dt.normalize()
+        source_eligibility["target_date"] = pd.to_datetime(
+            source_eligibility["target_date"], errors="coerce"
+        ).dt.normalize()
     return matrix, predictions, lineage, source_eligibility
 
 
@@ -149,7 +172,11 @@ def run_pruned_candidate_pass(
     ensemble_weights: dict[str, Any] = {}
     a3_features = a3_pruned_features(feature_names)
     for cutoff in cutoff_profiles:
-        cutoff_frame = official_rows(matrix[matrix["cutoff_profile"].eq(cutoff)]).sort_values("target_date").reset_index(drop=True)
+        cutoff_frame = (
+            official_rows(matrix[matrix["cutoff_profile"].eq(cutoff)])
+            .sort_values("target_date")
+            .reset_index(drop=True)
+        )
         if cutoff_frame.empty:
             continue
         cutoff_parts: list[pd.DataFrame] = []
@@ -158,10 +185,14 @@ def run_pruned_candidate_pass(
                 cutoff_frame["target_date"].between(fold.train_start, fold.train_end)
                 & cutoff_frame["label_source"].eq("label_core")
             ].copy()
-            valid = cutoff_frame[cutoff_frame["target_date"].between(fold.valid_start, fold.valid_end)].copy()
+            valid = cutoff_frame[
+                cutoff_frame["target_date"].between(fold.valid_start, fold.valid_end)
+            ].copy()
             if train.empty or valid.empty:
                 continue
-            log(f"fit pruned candidates cutoff={cutoff} fold={fold.fold_id} train={len(train)} valid={len(valid)}")
+            log(
+                f"fit pruned candidates cutoff={cutoff} fold={fold.fold_id} train={len(train)} valid={len(valid)}"
+            )
             base = valid.copy()
             base["fold_id"] = fold.fold_id
             base["stage"] = fold.stage
@@ -179,10 +210,34 @@ def run_pruned_candidate_pass(
             base["resid_C1_catboost"] = base["candidate_resid_catboost_c"]
             base["resid_C1_linear"] = base["candidate_resid_linear_c"]
             cutoff_parts.append(add_candidate_meta_features(base))
-            importance_frames.append(feature_importance_frame(model_a3).assign(fold_id=fold.fold_id, cutoff_profile=cutoff, model_slot="M2a_pruned_A3_LGBM_residual"))
-            importance_frames.append(feature_importance_frame(model_full).assign(fold_id=fold.fold_id, cutoff_profile=cutoff, model_slot="M2b_pruned_full_LGBM_residual"))
-            importance_frames.append(feature_importance_frame(model_cat).assign(fold_id=fold.fold_id, cutoff_profile=cutoff, model_slot="M3_pruned_CatBoost_residual"))
-            importance_frames.append(feature_importance_frame(model_linear).assign(fold_id=fold.fold_id, cutoff_profile=cutoff, model_slot="M4_robust_linear_residual"))
+            importance_frames.append(
+                feature_importance_frame(model_a3).assign(
+                    fold_id=fold.fold_id,
+                    cutoff_profile=cutoff,
+                    model_slot="M2a_pruned_A3_LGBM_residual",
+                )
+            )
+            importance_frames.append(
+                feature_importance_frame(model_full).assign(
+                    fold_id=fold.fold_id,
+                    cutoff_profile=cutoff,
+                    model_slot="M2b_pruned_full_LGBM_residual",
+                )
+            )
+            importance_frames.append(
+                feature_importance_frame(model_cat).assign(
+                    fold_id=fold.fold_id,
+                    cutoff_profile=cutoff,
+                    model_slot="M3_pruned_CatBoost_residual",
+                )
+            )
+            importance_frames.append(
+                feature_importance_frame(model_linear).assign(
+                    fold_id=fold.fold_id,
+                    cutoff_profile=cutoff,
+                    model_slot="M4_robust_linear_residual",
+                )
+            )
             linear_diagnostics.append(
                 {
                     "cutoff_profile": cutoff,
@@ -195,10 +250,20 @@ def run_pruned_candidate_pass(
         if not cutoff_parts:
             continue
         candidates = pd.concat(cutoff_parts, ignore_index=True)
-        weight_cols = ["resid_C0_zero", "resid_C1_lgbm_a3", "resid_C1_lgbm_full", "resid_C1_catboost", "resid_C1_linear"]
-        model = fit_nonnegative_weights(candidates[candidates["stage"].eq("rolling_validation")], weight_cols)
+        weight_cols = [
+            "resid_C0_zero",
+            "resid_C1_lgbm_a3",
+            "resid_C1_lgbm_full",
+            "resid_C1_catboost",
+            "resid_C1_linear",
+        ]
+        model = fit_nonnegative_weights(
+            candidates[candidates["stage"].eq("rolling_validation")], weight_cols
+        )
         candidates["prediction_c"] = apply_ensemble(candidates, model)
-        candidates["candidate_resid_ensemble_c"] = candidates["prediction_c"] - candidates["anchor_forecast_max_c"]
+        candidates["candidate_resid_ensemble_c"] = (
+            candidates["prediction_c"] - candidates["anchor_forecast_max_c"]
+        )
         candidates = add_candidate_meta_features(candidates)
         ensemble_weights[cutoff] = model
         all_candidates.append(candidates)
@@ -208,30 +273,51 @@ def run_pruned_candidate_pass(
         c1["residual_prediction_c"] = c1["prediction_c"] - c1["anchor_forecast_max_c"]
         all_c1_predictions.append(c1)
     return {
-        "candidate_rows": pd.concat(all_candidates, ignore_index=True) if all_candidates else pd.DataFrame(),
-        "c1_predictions": pd.concat(all_c1_predictions, ignore_index=True) if all_c1_predictions else pd.DataFrame(),
-        "feature_importance": pd.concat(importance_frames, ignore_index=True) if importance_frames else pd.DataFrame(),
+        "candidate_rows": pd.concat(all_candidates, ignore_index=True)
+        if all_candidates
+        else pd.DataFrame(),
+        "c1_predictions": pd.concat(all_c1_predictions, ignore_index=True)
+        if all_c1_predictions
+        else pd.DataFrame(),
+        "feature_importance": pd.concat(importance_frames, ignore_index=True)
+        if importance_frames
+        else pd.DataFrame(),
         "linear_diagnostics": pd.DataFrame(linear_diagnostics),
         "ensemble_weights": ensemble_weights,
     }
 
 
-def score_router_for_cutoff(candidates: pd.DataFrame, router_features: list[str], config: dict[str, Any], seed: int) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame, dict[str, Any]]:
+def score_router_for_cutoff(
+    candidates: pd.DataFrame, router_features: list[str], config: dict[str, Any], seed: int
+) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame, dict[str, Any]]:
     scored_parts: list[pd.DataFrame] = []
     model_params: dict[str, Any] = {"fold_models": []}
     rolling = build_router_labels(candidates[candidates["stage"].eq("rolling_validation")]).copy()
     if rolling.empty:
         thresholds = select_router_thresholds(candidates, config)
-        return apply_selective_router(candidates, pd.DataFrame(), {}, thresholds), thresholds, pd.DataFrame(thresholds.get("selection_rows", [])), model_params
+        return (
+            apply_selective_router(candidates, pd.DataFrame(), {}, thresholds),
+            thresholds,
+            pd.DataFrame(thresholds.get("selection_rows", [])),
+            model_params,
+        )
     for fold_id, valid in rolling.groupby("fold_id", dropna=False):
         train = rolling[~rolling["fold_id"].eq(fold_id)].copy()
         if train.empty:
             train = rolling.copy()
         models = fit_router_models(train, router_features, seed)
         scored = predict_router_scores(valid, models)
-        scored["router_training_fold_ids"] = "|".join(sorted(map(str, train["fold_id"].dropna().unique().tolist())))
+        scored["router_training_fold_ids"] = "|".join(
+            sorted(map(str, train["fold_id"].dropna().unique().tolist()))
+        )
         scored_parts.append(scored)
-        model_params["fold_models"].append({"fold_id": str(fold_id), "training_rows": models["training_rows"], "features": models["features"]})
+        model_params["fold_models"].append(
+            {
+                "fold_id": str(fold_id),
+                "training_rows": models["training_rows"],
+                "features": models["features"],
+            }
+        )
     final_train = rolling.copy()
     final_models = fit_router_models(final_train, router_features, seed + 101)
     for stage in ["presealed_holdout", "sealed_confirmation"]:
@@ -239,10 +325,14 @@ def score_router_for_cutoff(candidates: pd.DataFrame, router_features: list[str]
         if valid.empty:
             continue
         scored = predict_router_scores(valid, final_models)
-        scored["router_training_fold_ids"] = "|".join(sorted(map(str, final_train["fold_id"].dropna().unique().tolist())))
+        scored["router_training_fold_ids"] = "|".join(
+            sorted(map(str, final_train["fold_id"].dropna().unique().tolist()))
+        )
         scored_parts.append(scored)
     scored_all = pd.concat(scored_parts, ignore_index=True) if scored_parts else pd.DataFrame()
-    thresholds = select_router_thresholds(scored_all[scored_all["stage"].eq("rolling_validation")], config)
+    thresholds = select_router_thresholds(
+        scored_all[scored_all["stage"].eq("rolling_validation")], config
+    )
     selection_frame = pd.DataFrame(thresholds.get("selection_rows", []))
     c2 = apply_selective_router(scored_all, pd.DataFrame(), {}, thresholds)
     model_params["final_training_rows"] = final_models["training_rows"]
@@ -250,7 +340,9 @@ def score_router_for_cutoff(candidates: pd.DataFrame, router_features: list[str]
     return c2, thresholds, selection_frame, model_params
 
 
-def select_tail_thresholds(scored_tail: pd.DataFrame, base_router: pd.DataFrame, config: dict[str, Any]) -> tuple[dict[str, Any], pd.DataFrame]:
+def select_tail_thresholds(
+    scored_tail: pd.DataFrame, base_router: pd.DataFrame, config: dict[str, Any]
+) -> tuple[dict[str, Any], pd.DataFrame]:
     tail_config = config.get("tail_specialist", {})
     rolling_tail = scored_tail[scored_tail["stage"].eq("rolling_validation")].copy()
     rolling_base = base_router[base_router["stage"].eq("rolling_validation")].copy()
@@ -269,16 +361,36 @@ def select_tail_thresholds(scored_tail: pd.DataFrame, base_router: pd.DataFrame,
                 candidate = apply_tail_overlay(rolling_tail, rolling_base, {}, thresholds)
                 metrics = build_scoreboards(candidate)["scoreboard"]
                 row = metrics.iloc[0].to_dict() if not metrics.empty else {}
-                rows.append({**thresholds, **row, "tail_apply_rate": float(candidate["tail_overlay_applied_flag"].mean()) if len(candidate) else 0.0})
+                rows.append(
+                    {
+                        **thresholds,
+                        **row,
+                        "tail_apply_rate": float(candidate["tail_overlay_applied_flag"].mean())
+                        if len(candidate)
+                        else 0.0,
+                    }
+                )
                 idx += 1
     frame = pd.DataFrame(rows)
     if frame.empty:
-        return {"threshold_id": "tail_disabled", "tail150_probability": 1.0, "tail_sign_probability": 1.0, "min_abs_tail_correction_c": 999.0, "hard_abs_cap_c": 1.0}, frame
+        return {
+            "threshold_id": "tail_disabled",
+            "tail150_probability": 1.0,
+            "tail_sign_probability": 1.0,
+            "min_abs_tail_correction_c": 999.0,
+            "hard_abs_cap_c": 1.0,
+        }, frame
     best = frame.sort_values(["rmse", "mae"], na_position="last").iloc[0].to_dict()
     return best, frame
 
 
-def score_tail_for_cutoff(candidates: pd.DataFrame, c2: pd.DataFrame, router_features: list[str], config: dict[str, Any], seed: int) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame, dict[str, Any]]:
+def score_tail_for_cutoff(
+    candidates: pd.DataFrame,
+    c2: pd.DataFrame,
+    router_features: list[str],
+    config: dict[str, Any],
+    seed: int,
+) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame, dict[str, Any]]:
     scored_parts: list[pd.DataFrame] = []
     model_params: dict[str, Any] = {"fold_models": []}
     rolling = candidates[candidates["stage"].eq("rolling_validation")].copy()
@@ -288,9 +400,17 @@ def score_tail_for_cutoff(candidates: pd.DataFrame, c2: pd.DataFrame, router_fea
             train = rolling.copy()
         models = fit_tail_models(train, router_features, seed)
         scored = predict_tail_scores(valid, models)
-        scored["tail_training_fold_ids"] = "|".join(sorted(map(str, train["fold_id"].dropna().unique().tolist())))
+        scored["tail_training_fold_ids"] = "|".join(
+            sorted(map(str, train["fold_id"].dropna().unique().tolist()))
+        )
         scored_parts.append(scored)
-        model_params["fold_models"].append({"fold_id": str(fold_id), "training_rows": models["training_rows"], "tail150_rate": models["tail150_rate"]})
+        model_params["fold_models"].append(
+            {
+                "fold_id": str(fold_id),
+                "training_rows": models["training_rows"],
+                "tail150_rate": models["tail150_rate"],
+            }
+        )
     if not rolling.empty:
         final_models = fit_tail_models(rolling, router_features, seed + 211)
         for stage in ["presealed_holdout", "sealed_confirmation"]:
@@ -298,7 +418,9 @@ def score_tail_for_cutoff(candidates: pd.DataFrame, c2: pd.DataFrame, router_fea
             if valid.empty:
                 continue
             scored = predict_tail_scores(valid, final_models)
-            scored["tail_training_fold_ids"] = "|".join(sorted(map(str, rolling["fold_id"].dropna().unique().tolist())))
+            scored["tail_training_fold_ids"] = "|".join(
+                sorted(map(str, rolling["fold_id"].dropna().unique().tolist()))
+            )
             scored_parts.append(scored)
         model_params["final_training_rows"] = final_models["training_rows"]
         model_params["features"] = final_models["features"]
@@ -346,13 +468,20 @@ def write_required_artifacts(
         sort=False,
     )
     scoreboards = build_scoreboards(combined_predictions)
-    raw_primary = previous_predictions[previous_predictions["model_id"].eq("A0_raw_official")].copy()
-    a7_primary = previous_predictions[previous_predictions["model_id"].eq("A7_final_residual_ensemble")].copy()
-    nh_audit = no_harm_audit(c2, raw_predictions=raw_primary, current_a7_predictions=a7_primary, config=config)
+    raw_primary = previous_predictions[
+        previous_predictions["model_id"].eq("A0_raw_official")
+    ].copy()
+    a7_primary = previous_predictions[
+        previous_predictions["model_id"].eq("A7_final_residual_ensemble")
+    ].copy()
+    nh_audit = no_harm_audit(
+        c2, raw_predictions=raw_primary, current_a7_predictions=a7_primary, config=config
+    )
     leakage = next_round_leakage_audit_payload(
         matrix,
         lineage,
-        feature_names=feature_names + [feature for feature in CANDIDATE_META_FEATURES if feature in c2.columns],
+        feature_names=feature_names
+        + [feature for feature in CANDIDATE_META_FEATURES if feature in c2.columns],
         router_thresholds=router_thresholds,
         router_predictions=c2,
     )
@@ -368,31 +497,43 @@ def write_required_artifacts(
     )
     write_json(output_dir / "summary.json", summary)
     write_json(output_dir / "next_round_summary.json", summary)
-    write_text(
-        output_dir / "next_round_model_card.md",
-        next_round_model_card(
-            summary=summary,
-            scoreboard=scoreboards["scoreboard"],
-            no_harm_audit=nh_audit,
-            leakage_audit=leakage,
-            router_thresholds=router_thresholds,
-            feature_count=len(feature_names),
-        ),
+    model_card = next_round_model_card(
+        summary=summary,
+        scoreboard=scoreboards["scoreboard"],
+        no_harm_audit=nh_audit,
+        leakage_audit=leakage,
+        router_thresholds=router_thresholds,
+        feature_count=len(feature_names),
     )
     for name, frame in scoreboards.items():
         write_csv(output_dir / f"{name}.csv", frame)
     official_proxy = scoreboards["scoreboard_by_regime"]
     if not official_proxy.empty:
         official_proxy = official_proxy[
-            official_proxy["scope"].isin(["by_official_max_bin", "by_official_range_bin", "by_issue_hour_bucket"])
+            official_proxy["scope"].isin(
+                ["by_official_max_bin", "by_official_range_bin", "by_issue_hour_bucket"]
+            )
         ]
     write_csv(output_dir / "scoreboard_by_official_error_proxy.csv", official_proxy)
-    threshold_frame = pd.concat(router_threshold_frames, ignore_index=True) if router_threshold_frames else pd.DataFrame()
+    threshold_frame = (
+        pd.concat(router_threshold_frames, ignore_index=True)
+        if router_threshold_frames
+        else pd.DataFrame()
+    )
     write_csv(output_dir / "router_threshold_selection.csv", threshold_frame)
     write_csv(output_dir / "router_oof_diagnostics.csv", c2)
-    write_csv(output_dir / "router_apply_rate_by_split.csv", apply_rate_by(c2, ["cutoff_profile", "stage"]))
-    write_csv(output_dir / "router_apply_rate_by_month.csv", apply_rate_by(c2, ["cutoff_profile", "month"]))
-    write_csv(output_dir / "router_apply_rate_by_regime.csv", apply_rate_by(c2, ["cutoff_profile", "season_bucket"]))
+    write_csv(
+        output_dir / "router_apply_rate_by_split.csv",
+        apply_rate_by(c2, ["cutoff_profile", "stage"]),
+    )
+    write_csv(
+        output_dir / "router_apply_rate_by_month.csv",
+        apply_rate_by(c2, ["cutoff_profile", "month"]),
+    )
+    write_csv(
+        output_dir / "router_apply_rate_by_regime.csv",
+        apply_rate_by(c2, ["cutoff_profile", "season_bucket"]),
+    )
     write_csv(output_dir / "router_benefit_deciles.csv", benefit_deciles(c2))
     write_csv(output_dir / "help_worse_rows.csv", help_worse_rows(c2))
     tail_scoreboard = build_scoreboards(c3)["scoreboard"] if not c3.empty else pd.DataFrame()
@@ -426,45 +567,96 @@ def write_required_artifacts(
                 "feature_name": feature,
                 "family": family_for_feature(feature),
                 "dtype": str(matrix[feature].dtype) if feature in matrix else "missing",
-                "missing_pct": float(matrix[feature].isna().mean() * 100.0) if feature in matrix else None,
+                "missing_pct": float(matrix[feature].isna().mean() * 100.0)
+                if feature in matrix
+                else None,
             }
             for feature in feature_names
         ],
     )
-    write_csv(output_dir / "feature_missingness_report.csv", feature_missingness_report(matrix, feature_names))
-    write_csv(output_dir / "feature_policy_report.csv", feature_policy_report(matrix, max_raw_features=config["feature_policy"]["max_raw_features"]))
+    write_csv(
+        output_dir / "feature_missingness_report.csv",
+        feature_missingness_report(matrix, feature_names),
+    )
+    write_csv(
+        output_dir / "feature_policy_report.csv",
+        feature_policy_report(
+            matrix, max_raw_features=config["feature_policy"]["max_raw_features"]
+        ),
+    )
     importance = c1_result["feature_importance"]
-    write_csv(output_dir / "feature_importance_lgbm.csv", importance[importance["model_slot"].astype(str).str.contains("LGBM", na=False)] if not importance.empty else pd.DataFrame())
-    write_csv(output_dir / "feature_importance_catboost.csv", importance[importance["model_slot"].astype(str).str.contains("CatBoost", na=False)] if not importance.empty else pd.DataFrame())
+    write_csv(
+        output_dir / "feature_importance_lgbm.csv",
+        importance[importance["model_slot"].astype(str).str.contains("LGBM", na=False)]
+        if not importance.empty
+        else pd.DataFrame(),
+    )
+    write_csv(
+        output_dir / "feature_importance_catboost.csv",
+        importance[importance["model_slot"].astype(str).str.contains("CatBoost", na=False)]
+        if not importance.empty
+        else pd.DataFrame(),
+    )
     write_csv(output_dir / "linear_model_diagnostics.csv", c1_result["linear_diagnostics"])
     write_json(output_dir / "ensemble_weights.json", c1_result["ensemble_weights"])
-    write_json(output_dir / "router_model_params.json", {"thresholds": router_thresholds, "model_params": router_model_params})
+    write_json(
+        output_dir / "router_model_params.json",
+        {"thresholds": router_thresholds, "model_params": router_model_params},
+    )
     write_csv(output_dir / "anchor_provenance_audit.csv", anchor_audit)
     write_json(output_dir / "anchor_provenance_summary.json", anchor_summary)
     write_csv(output_dir / "source_eligibility_audit.csv", source_eligibility)
     write_parquet(output_dir / "prediction_rows.parquet", combined_predictions)
     write_csv(output_dir / "prediction_rows.csv", combined_predictions)
     write_csv(output_dir / "artifact_manifest.csv", artifact_manifest(output_dir))
+    write_bounded_readme_section(
+        output_dir.parent / "README.md",
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        section=(
+            demote_markdown_headings(model_card).strip()
+            + "\n\nMachine evidence: `results/next_round_summary.json`, "
+            "`results/scoreboard.csv`, `results/no_harm_audit.json`, "
+            "`results/leakage_audit.json`, and `results/artifact_manifest.csv`."
+        ),
+        default_title="Selective No-Harm Router",
+    )
     if compat_output_dir is not None:
         compat_output_dir.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(output_dir, compat_output_dir, dirs_exist_ok=True)
+        shutil.copytree(
+            output_dir,
+            compat_output_dir,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("*.md"),
+        )
     return summary
 
 
-def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, database_url: str) -> dict[str, Any]:
+def run(
+    config_path: Path, output_dir: Path, compat_output_dir: Path | None, database_url: str
+) -> dict[str, Any]:
     config = load_config(config_path)
     seed = int(config.get("seed", 20260705))
-    previous_dir = REPO_ROOT / config.get("input_artifacts", {}).get("previous_results_dir", "experiments/hkg_tmax_residual_ml_strategy/results")
+    previous_dir = REPO_ROOT / config.get("input_artifacts", {}).get(
+        "previous_results_dir",
+        "experiments/campaigns/residual-modeling/strategy/results",
+    )
     log(f"loading previous leakage-safe artifacts from {previous_dir}")
-    matrix, previous_predictions, lineage, source_eligibility = read_previous_artifacts(previous_dir)
-    cutoff_profiles = list(config.get("cutoff_profiles", ["tminus1_2359", "tminus1_2100", "tminus1_1800"]))
+    matrix, previous_predictions, lineage, source_eligibility = read_previous_artifacts(
+        previous_dir
+    )
+    cutoff_profiles = list(
+        config.get("cutoff_profiles", ["tminus1_2359", "tminus1_2100", "tminus1_1800"])
+    )
     policy = validate_pruned_features(
         matrix,
         max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90)),
     )
     feature_names = policy.feature_names
     log(f"selected pruned raw features={len(feature_names)} missing={len(policy.missing_features)}")
-    c1_result = run_pruned_candidate_pass(matrix, cutoff_profiles=cutoff_profiles, feature_names=feature_names, seed=seed)
+    c1_result = run_pruned_candidate_pass(
+        matrix, cutoff_profiles=cutoff_profiles, feature_names=feature_names, seed=seed
+    )
     candidate_rows = c1_result["candidate_rows"]
     router_all: list[pd.DataFrame] = []
     router_threshold_frames: list[pd.DataFrame] = []
@@ -478,16 +670,25 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
         candidates = candidate_rows[candidate_rows["cutoff_profile"].eq(cutoff)].copy()
         if candidates.empty:
             continue
-        r_features = router_feature_names(candidates, max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90)))
+        r_features = router_feature_names(
+            candidates,
+            max_raw_features=int(config.get("feature_policy", {}).get("max_raw_features", 90)),
+        )
         log(f"fit router cutoff={cutoff} router_features={len(r_features)}")
-        c2_cutoff, thresholds, threshold_frame, params = score_router_for_cutoff(candidates, r_features, config, seed)
+        c2_cutoff, thresholds, threshold_frame, params = score_router_for_cutoff(
+            candidates, r_features, config, seed
+        )
         threshold_frame["cutoff_profile"] = cutoff
         router_all.append(c2_cutoff)
         router_threshold_frames.append(threshold_frame)
-        router_thresholds_by_cutoff[cutoff] = {key: value for key, value in thresholds.items() if key != "selection_rows"}
+        router_thresholds_by_cutoff[cutoff] = {
+            key: value for key, value in thresholds.items() if key != "selection_rows"
+        }
         router_params_by_cutoff[cutoff] = params
         log(f"fit tail overlay cutoff={cutoff}")
-        c3_cutoff, tail_thresholds, tail_threshold_frame, tail_params = score_tail_for_cutoff(candidates, c2_cutoff, r_features, config, seed)
+        c3_cutoff, tail_thresholds, tail_threshold_frame, tail_params = score_tail_for_cutoff(
+            candidates, c2_cutoff, r_features, config, seed
+        )
         tail_threshold_frame["cutoff_profile"] = cutoff
         tail_all.append(c3_cutoff)
         tail_threshold_frames.append(tail_threshold_frame)
@@ -524,8 +725,12 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
             ]
         )
         anchor_summary = {"status": "fail", "error": str(exc)}
-    primary_thresholds = router_thresholds_by_cutoff.get(config.get("primary_cutoff_profile", "tminus1_2359"), {})
-    primary_tail_thresholds = tail_thresholds_by_cutoff.get(config.get("primary_cutoff_profile", "tminus1_2359"), {})
+    primary_thresholds = router_thresholds_by_cutoff.get(
+        config.get("primary_cutoff_profile", "tminus1_2359"), {}
+    )
+    primary_tail_thresholds = tail_thresholds_by_cutoff.get(
+        config.get("primary_cutoff_profile", "tminus1_2359"), {}
+    )
     log("writing required artifacts")
     return write_required_artifacts(
         output_dir=output_dir,
@@ -541,7 +746,9 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
         router_threshold_frames=router_threshold_frames,
         router_thresholds=primary_thresholds,
         router_model_params=router_params_by_cutoff,
-        tail_threshold_frame=pd.concat(tail_threshold_frames, ignore_index=True) if tail_threshold_frames else pd.DataFrame(),
+        tail_threshold_frame=pd.concat(tail_threshold_frames, ignore_index=True)
+        if tail_threshold_frames
+        else pd.DataFrame(),
         tail_thresholds=primary_tail_thresholds,
         tail_model_params=tail_params_by_cutoff,
         feature_names=feature_names,
@@ -552,13 +759,17 @@ def run(config_path: Path, output_dir: Path, compat_output_dir: Path | None, dat
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run HKG Tmax residual ML next-round selective router experiment")
+    parser = argparse.ArgumentParser(
+        description="Run HKG Tmax residual ML next-round selective router experiment"
+    )
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--compat-output-dir", default=str(DEFAULT_COMPAT_OUTPUT))
     parser.add_argument(
         "--database-url",
-        default=os.environ.get("HKG_TMAX_DATABASE_URL") or os.environ.get("DATABASE_URL") or DEFAULT_DATABASE_URL,
+        default=os.environ.get("HKG_TMAX_DATABASE_URL")
+        or os.environ.get("DATABASE_URL")
+        or DEFAULT_DATABASE_URL,
     )
     parser.add_argument("--no-compat-copy", action="store_true")
     return parser.parse_args()

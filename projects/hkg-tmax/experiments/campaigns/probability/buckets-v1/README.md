@@ -1,33 +1,43 @@
-# HKG Tmax Probability Bucket Calibration V1
+# Probability bucket calibration V1
 
-Weather-probability-only experiment for converting strict HKO Info.gov lead-1 local forecast max/min rows into HKG Tmax bucket probability distributions.
+Status: `complete`. Scope: weather probability only.
 
-No market prices, expected value, order books, Kelly sizing, PnL, market-implied blending, or trade recommendations are used.
+## Question and contract
+
+Convert strict HKO Info.gov lead-1 local forecast rows into one-decimal HKG
+Tmax bucket distributions. No market prices, EV, order books, sizing, PnL, or
+trade recommendations were used.
+
+The target was the HKO Daily Extract one-decimal daily maximum. Leakage and
+label first-publication audits were mandatory.
+
+## Result and decision
+
+`B4_hierarchical_residual_pmf` won under the configured simplicity/gating
+contract:
+
+| Metric | B4 |
+|---|---:|
+| Normalized RPS | 0.041524 |
+| NLL | 1.037181 |
+| Brier | 0.045921 |
+| ECE | 0.019859 |
+
+B5 had a lower raw RPS but failed the NLL no-worse gate. The conservative stack
+did not clear the minimum RPS gain. Leakage passed with zero violations and
+the label audit reported zero bucket changes.
 
 ## Reproduce
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\run_hkg_tmax_probability_bucket_v1.py --config configs\hkg_tmax\probability_bucket_v1.yaml --output-dir experiments\hkg_tmax_probability_buckets_v1\results
+$env:HKG_TMAX_DATABASE_URL = '<local PostgreSQL URL>'
+.\.venv\Scripts\python.exe scripts\run_hkg_tmax_probability_bucket_v1.py --config config\experiments\hkg_tmax\probability_bucket_v1.yaml --output-dir experiments\campaigns\probability\buckets-v1\results
 ```
 
-## Main Artifacts
+## Evidence map
 
-```text
-results/scoreboard.csv
-results/scoreboard_by_split.csv
-results/scoreboard_by_cutoff.csv
-results/modeling_table.parquet
-results/selected_forecast_rows.parquet
-results/per_fold_predictions.parquet
-results/bucket_probabilities.parquet
-results/one_decimal_pmfs.parquet
-results/leakage_audit.json
-results/label_publication_audit.json
-results/model_selection_log.json
-results/final_probability_model_card.md
-results/reproducibility_manifest.json
-```
-
-## Current Result
-
-`B4_hierarchical_residual_pmf` is the champion under the configured simplicity gate. `B5_kernel_analog_pmf` had the lowest normalized RPS but failed the NLL no-worse gate. `S1_conservative_simplex_stack` passed NLL/Brier but its RPS gain versus B4 was below the configured promotion threshold.
+`results/scoreboard*.csv`, `bucket_probabilities.parquet`,
+`one_decimal_pmfs.parquet`, `leakage_audit.json`,
+`label_publication_audit.json`, `model_selection_log.json`, and
+`reproducibility_manifest.json` remain. The manifest's historical Markdown
+entry is recoverable through the campaign provenance ledger.

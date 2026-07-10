@@ -46,10 +46,14 @@ if str(SCRIPTS_DIR) not in sys.path:
 import run_public_gfs_gefs_himawari_7day_backfill_rehearsal as public  # noqa: E402
 
 EXPERIMENT_ID = "0009_public_weather_backfill_jun25_jul7_lean_db_20260708"
-DEFAULT_EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / EXPERIMENT_ID
+DEFAULT_EXPERIMENT_DIR = REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / EXPERIMENT_ID
 USER_AGENT = "weather-markets-hkg-public-weather-backfill-db/1.0"
 HKT = timezone(timedelta(hours=8))
 S3_RANGE_WORKERS = 4
+README_CONTRACT_START = "<!-- BEGIN GENERATED BACKFILL CONTRACT -->"
+README_CONTRACT_END = "<!-- END GENERATED BACKFILL CONTRACT -->"
+README_RESULTS_START = "<!-- BEGIN GENERATED BACKFILL LATEST RUN -->"
+README_RESULTS_END = "<!-- END GENERATED BACKFILL LATEST RUN -->"
 
 MODEL_SELECTOR_LEVELS: dict[str, tuple[str, ...]] = {
     "TMP": ("2 m above ground",),
@@ -219,6 +223,38 @@ def write_json(path: Path, payload: Any) -> None:
 def write_text(path: Path, text: str) -> None:
     ensure_dir(path.parent)
     Path(wp(path)).write_text(text, encoding="utf-8")
+
+
+def upsert_readme_section(
+    path: Path,
+    *,
+    title: str,
+    start_marker: str,
+    end_marker: str,
+    content: str,
+) -> None:
+    """Insert or replace one generated README section without touching manual prose."""
+    path_s = Path(wp(path))
+    existing = path_s.read_text(encoding="utf-8") if path_s.exists() else f"# {title}\n"
+    start_count = existing.count(start_marker)
+    end_count = existing.count(end_marker)
+    if start_count != end_count or start_count > 1:
+        raise RuntimeError(f"Malformed generated README section in {path}")
+
+    block = f"{start_marker}\n{content.strip()}\n{end_marker}"
+    if start_count == 1:
+        start_index = existing.index(start_marker)
+        end_index = existing.index(end_marker, start_index) + len(end_marker)
+        prefix = existing[:start_index].rstrip()
+        suffix = existing[end_index:].lstrip("\r\n").rstrip()
+    else:
+        prefix = existing.rstrip()
+        suffix = ""
+
+    parts = [part for part in (prefix, block, suffix) if part]
+    updated = "\n\n".join(parts) + "\n"
+    if updated != existing:
+        write_text(path, updated)
 
 
 def file_size(path: Path) -> int:
@@ -2219,18 +2255,64 @@ def initialize_experiment_docs(experiment_dir: Path, args: argparse.Namespace, r
     ensure_dir(experiment_dir / "metadata")
     ensure_dir(experiment_dir / "artifacts")
     ensure_dir(experiment_dir / "normalized")
-    if not (experiment_dir / "README.md").exists():
-        write_text(
-            experiment_dir / "README.md",
-            f"""# {experiment_id}
+    upsert_readme_section(
+        experiment_dir / "README.md",
+        title=experiment_id,
+        start_marker=README_CONTRACT_START,
+        end_marker=README_CONTRACT_END,
+        content=f"""## Acquisition Contract
 
-Lean DB-backed public weather backfill for HKG Tmax research.
+Lean DB-backed public weather backfill for HKG Tmax research. The pipeline streams public GFS,
+GEFS control, Himawari B13/S0510, and radar imagery into `weather_backfill` Postgres tables while
+deleting raw payloads immediately after successful normalization and DB commit.
 
-This experiment streams public GFS, GEFS control, Himawari B13/S0510, and radar imagery into
-`weather_backfill` Postgres tables while deleting raw payloads immediately after successful
-normalization and DB commit.
+### Hypothesis
+
+Point-in-time public NWP, satellite infrared, and radar scalar features can be acquired with
+strict availability timestamps and minimal disk retention, creating a richer leakage-safe
+feature store for later HKG Tmax residual experiments.
+
+### Protocol
+
+Process one UTC day at a time. For each source issue, download only the required raw payload,
+validate it, normalize scalar station and area features, write source metadata and features to
+Postgres, then delete raw bytes before moving to the next item. Every feature must join to a
+source issue with `available_at_utc`.
+
+Optimized mode uses bounded fetch/normalize workers, keeps DB writes serialized in the main
+process, and deletes each raw payload only after the DB commit or recorded failure handling.
+
+### As-Of Contract
+
+Model issues use `issued_at_utc + 6h` as a conservative availability proxy unless a stronger
+provider timestamp is captured. Himawari uses the later of native HSD file creation time and
+observed time plus 30 minutes. ENVF radar frames use observed time plus 30 minutes and are
+marked as historical display proxy, not native exact radar issue metadata.
+
+### Reproduce
+
+```powershell
+$env:HKG_TMAX_DATABASE_URL = '<local postgres url>'
+.\\.venv\\Scripts\\python.exe scripts\\backfill_public_weather_to_postgres.py --execute --start-date {args.start_date} --end-date {args.end_date}
+```
+
+Review `RUN_CONFIG.yaml` before execution. `DATA_MANIFEST.yaml`, `STATUS.yaml`,
+`results/metrics.json`, and `results/runs/<run_id>/metrics.json` are the machine-readable evidence.
 """,
-        )
+    )
+    upsert_readme_section(
+        experiment_dir / "README.md",
+        title=experiment_id,
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        content=f"""## Latest Run
+
+State: `initialized`
+Run id: `{run_id}`
+
+Results are pending. See `STATUS.yaml` for the current machine-readable state.
+""",
+    )
     write_text(
         experiment_dir / "RUN_CONFIG.yaml",
         f"""experiment_id: {experiment_id}
@@ -2255,38 +2337,6 @@ dry_run: {args.dry_run}
 """,
     )
     write_text(
-        experiment_dir / "HYPOTHESIS.md",
-        """# Hypothesis
-
-Point-in-time public NWP, satellite infrared, and radar scalar features can be acquired with
-strict availability timestamps and minimal disk retention, creating a richer leakage-safe
-feature store for later HKG Tmax residual experiments.
-""",
-    )
-    write_text(
-        experiment_dir / "PROTOCOL.md",
-        """# Protocol
-
-Process one UTC day at a time. For each source issue, download only the required raw payload,
-validate it, normalize scalar station and area features, write source metadata and features to
-Postgres, then delete raw bytes before moving to the next item. Every feature must join to a
-source issue with `available_at_utc`.
-
-Optimized mode uses bounded fetch/normalize workers, keeps DB writes serialized in the main
-process, and deletes each raw payload only after the DB commit or recorded failure handling.
-""",
-    )
-    write_text(
-        experiment_dir / "ASOF_CONTRACT.md",
-        """# As-Of Contract
-
-Model issues use `issued_at_utc + 6h` as a conservative availability proxy unless a stronger
-provider timestamp is captured. Himawari uses the later of native HSD file creation time and
-observed time plus 30 minutes. ENVF radar frames use observed time plus 30 minutes and are
-marked as historical display proxy, not native exact radar issue metadata.
-""",
-    )
-    write_text(
         experiment_dir / "DATA_MANIFEST.yaml",
         f"""sources:
   - noaa_gfs_public_nomads_or_s3_idx_range
@@ -2298,16 +2348,6 @@ date_range_utc:
   end: {args.end_date}
 raw_retention: deleted_after_db_commit
 database_schema: weather_backfill
-""",
-    )
-    write_text(
-        experiment_dir / "REPRODUCE.md",
-        f"""# Reproduce
-
-```powershell
-$env:HKG_TMAX_DATABASE_URL = '<local postgres url>'
-.\\.venv\\Scripts\\python.exe scripts\\backfill_public_weather_to_postgres.py --start-date {args.start_date} --end-date {args.end_date}
-```
 """,
     )
 
@@ -2327,7 +2367,9 @@ def write_results(experiment_dir: Path, summary: dict[str, Any]) -> None:
     write_json(run_results_dir / "metrics.json", summary)
     write_json(experiment_dir / "results" / "metrics.json", summary)
     lines = [
-        "# Results",
+        "## Latest Run",
+        "",
+        "### Results",
         "",
         f"State: `{summary.get('status')}`",
         f"Run id: `{summary.get('run_id')}`",
@@ -2364,24 +2406,26 @@ def write_results(experiment_dir: Path, summary: dict[str, Any]) -> None:
     lines.extend(
         [
             "",
-            "## Notes",
+            "### Notes",
             "",
             "- Raw payloads are intentionally not retained.",
             "- Radar is sourced from ENVF historical display imagery and is marked as a proxy, not native exact radar issue metadata.",
+            "",
+            "### Conclusion",
+            "",
+            f"Status: `{summary.get('status')}`.",
+            "",
+            "This run is an acquisition and persistence experiment, not a model promotion experiment. Its",
+            "main acceptance criteria are leakage-clock completeness, DB feature persistence, and raw",
+            "staging cleanup.",
         ]
     )
-    write_text(experiment_dir / "RESULTS.md", "\n".join(lines) + "\n")
-    write_text(run_results_dir / "RESULTS.md", "\n".join(lines) + "\n")
-    write_text(
-        experiment_dir / "CONCLUSION.md",
-        f"""# Conclusion
-
-Status: `{summary.get('status')}`.
-
-This run is an acquisition and persistence experiment, not a model promotion experiment. Its
-main acceptance criteria are leakage-clock completeness, DB feature persistence, and raw
-staging cleanup.
-""",
+    upsert_readme_section(
+        experiment_dir / "README.md",
+        title=str(summary.get("experiment_id") or "Public Weather Backfill"),
+        start_marker=README_RESULTS_START,
+        end_marker=README_RESULTS_END,
+        content="\n".join(lines),
     )
 
 

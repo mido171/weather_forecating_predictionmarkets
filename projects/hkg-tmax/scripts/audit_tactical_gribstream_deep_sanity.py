@@ -18,7 +18,9 @@ from psycopg.rows import dict_row
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_DATABASE_URL = "postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research"
 DEFAULT_OUTPUT_NAME = "full_tactical_backfill_ok_tmax"
-EXPERIMENT_ROOT = REPO / "experiments" / "0214_tactical_h24n_gribstream_backfill"
+EXPERIMENT_ROOT = (
+    REPO / "experiments" / "campaigns" / "hkg-t24" / "0214_tactical_h24n_gribstream_backfill"
+)
 
 SOURCE_CASE = """
 CASE
@@ -1071,7 +1073,6 @@ def main() -> None:
     progress_json = output_dir / "progress.json"
     api_log = EXPERIMENT_ROOT / "logs" / f"gribstream_{args.output_name}_api_events.jsonl"
     report_json = output_dir / "deep_sanity_audit_20260625.json"
-    report_md = output_dir / "DEEP_SANITY_AUDIT_20260625.md"
 
     report = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -1083,7 +1084,6 @@ def main() -> None:
         "db": audit_db(args.database_url, args.skip_file_hash),
     }
     report_json.write_text(json.dumps(report, indent=2, default=json_default), encoding="utf-8")
-    report_md.write_text(build_markdown(report), encoding="utf-8")
 
     total_rows = report["db"]["table_counts"]["forecast_wide"]["rows"]
     full_rows = sum(row["rows"] for row in report["db"]["forecast_counts_by_source_dataset"] if row["source_scope"] == "full")
@@ -1091,7 +1091,6 @@ def main() -> None:
         json.dumps(
             {
                 "report_json": str(report_json),
-                "report_md": str(report_md),
                 "forecast_wide_rows": total_rows,
                 "full_scope_rows": full_rows,
                 "non_full_rows": total_rows - full_rows,

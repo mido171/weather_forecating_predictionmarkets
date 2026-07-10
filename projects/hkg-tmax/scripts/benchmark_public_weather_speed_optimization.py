@@ -26,7 +26,9 @@ import run_public_gfs_gefs_himawari_7day_backfill_rehearsal as public  # noqa: E
 
 
 DEFAULT_EXPERIMENT_ID = "0011_public_weather_speed_optimization_20260709"
-DEFAULT_EXPERIMENT_DIR = REPO_ROOT / "experiments" / "hkg_tmax" / DEFAULT_EXPERIMENT_ID
+DEFAULT_EXPERIMENT_DIR = (
+    REPO_ROOT / "experiments" / "campaigns" / "hkg-tmax" / DEFAULT_EXPERIMENT_ID
+)
 DEFAULT_STAGING_ROOT = REPO_ROOT / "_s0011"
 DEFAULT_TRIALS = (
     "wgrib2_probe,"

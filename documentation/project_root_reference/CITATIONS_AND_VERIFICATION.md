@@ -15,7 +15,7 @@ This repository treats that as event-specific and rechecks every market.
 Official HKO resources:
 
 - Daily Extract: `https://www.hko.gov.hk/en/cis/dailyExtract.htm`
-- CLMMAXT station HKO:  
+- CLMMAXT station HKO:
   `https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=CLMMAXT&rformat=csv&station=HKO`
 - Open-data catalog: `https://www.hko.gov.hk/en/abouthko/opendata_intro.htm`
 - Station information: `https://www.hko.gov.hk/en/cis/stn.htm`
@@ -27,9 +27,9 @@ HKO documentation describes `CLMMAXT` as Daily Maximum Temperature, station code
 
 Official direct resources include:
 
-- latest one-minute mean temperature:  
+- latest one-minute mean temperature:
   `https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_temperature.csv`
-- latest max/min since midnight:  
+- latest max/min since midnight:
   `https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_since_midnight_maxmin.csv`
 
 The HKO open-data catalog documents update frequencies and provisional status.

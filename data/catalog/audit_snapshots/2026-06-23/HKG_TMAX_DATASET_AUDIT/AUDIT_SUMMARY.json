@@ -1,0 +1,58 @@
+{
+  "generated_at_utc": "2026-06-23T11:53:01.458398+00:00",
+  "profile_summary": {
+    "datasets_profiled": 13,
+    "files_profiled": 52,
+    "row_tables_profiled": 51,
+    "row_table_rows_total": 7219745,
+    "attributes_profiled": 1869
+  },
+  "report_character_count": 916916,
+  "dataset_count": 13,
+  "table_decision_count": 52,
+  "attribute_decision_count": 1869,
+  "quality_issue_count": 22,
+  "station_dossier_count": 36,
+  "headline_decision": "Preserve almost all sources in layered storage; only exact-vintage official forecasts, causally lagged target history, approved static context, and prospectively exact-vintage live feeds may enter operational T-24 features.",
+  "critical_blockers": [
+    "ISD wind direction constant at 20 degrees",
+    "IGRA sentinel/scaling contamination",
+    "timezone/HKT-versus-UTC semantics require audit",
+    "press archive impossible temperatures/leads",
+    "NCEP cycle fields empty"
+  ],
+  "files": {
+    "HKG_TMAX_DATASET_DB_AND_MODEL_VALUE_AUDIT.md": {
+      "bytes": 917027,
+      "sha256": "c5a99d1ac75cb2002d2f4a0320b0ffcedc3bf00c42a77c03e4ef08e3772191df"
+    },
+    "HKG_TMAX_DATASET_DECISION_MATRIX.csv": {
+      "bytes": 2927,
+      "sha256": "23ec92db4e65f408d262181e572c565e20fdb771078edcdfa50daf0aaba456e9"
+    },
+    "HKG_TMAX_TABLE_DECISIONS_ALL_52.csv": {
+      "bytes": 16176,
+      "sha256": "2ff119344613cd3f088bbc749bf78e3b0c1972162233047ce1833cf794e331ed"
+    },
+    "HKG_TMAX_ATTRIBUTE_DECISIONS_ALL_1869.csv": {
+      "bytes": 778542,
+      "sha256": "bdd5904bac4af25d022596c52aad202b3c8063b0fdf5584013ab545c325719fa"
+    },
+    "HKG_TMAX_DATA_QUALITY_ISSUES.csv": {
+      "bytes": 5960,
+      "sha256": "60916256dc73a40fbe639b24cd91ac210a0c21c09f96856dca4c91fb19275d9c"
+    },
+    "HKG_TMAX_ISD_STATION_DOSSIER_36.csv": {
+      "bytes": 6877,
+      "sha256": "930023835b19cf595f5b56f8d52fa454ed70d5a71bd3d96b73a05acbdca3e0d5"
+    },
+    "HKG_TMAX_DB_SCHEMA_BLUEPRINT.sql": {
+      "bytes": 12222,
+      "sha256": "5129f3d2f9a378b0bc044101365c001c4aaaa6c440dbd5acd9acb9bcf9b4032f"
+    },
+    "README.md": {
+      "bytes": 1097,
+      "sha256": "a5703242f5066e5f899cb5626374f6f2da4db57ad92d5da5e842dcf2d691162e"
+    }
+  }
+}

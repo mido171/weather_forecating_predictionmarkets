@@ -1,0 +1,57 @@
+{
+  "id": "T37",
+  "suffix": "live_daily_inference_monitoring_model_registry",
+  "title": "Live Daily Inference, Monitoring, and Model Registry",
+  "phase": "F Production",
+  "deps": [
+    "T35",
+    "T36"
+  ],
+  "mission": "Deploy the exact-vintage daily pipeline that freezes the T\u221224 snapshot, issues the forecast, records every decision, and updates states only after settlement.",
+  "inputs": [
+    "Confirmed/frozen system",
+    "collectors",
+    "snapshot builder",
+    "model registry",
+    "scheduler"
+  ],
+  "steps": [
+    "Schedule source polling before cutoff with freshness checks.",
+    "At cutoff freeze snapshot and source manifest.",
+    "Run all available experts, router, specialists and distribution.",
+    "Persist expert forecasts, predicted errors, weights, corrections, abstention and final P50.",
+    "Emit warnings/no-forecast if critical sources fail rather than using future data.",
+    "After target settles, score every expert and update online states.",
+    "Monitor drift, calibration, source latency, missing cycles and feature ranges.",
+    "Support rollback to previous model version."
+  ],
+  "db_objects": [
+    "live issued forecasts/expert outputs/state updates/monitoring"
+  ],
+  "outputs": [
+    "production service/CLI",
+    "scheduler definitions",
+    "dashboard queries",
+    "alert rules",
+    "rollback runbook",
+    "live model card"
+  ],
+  "tests": [
+    "Dry-run historical replay",
+    "cutoff race conditions",
+    "missing-source fallback",
+    "state update order",
+    "rollback"
+  ],
+  "acceptance": [
+    "One command/service produces auditable forecast",
+    "No post-cutoff source can enter",
+    "Every issued forecast immutable"
+  ],
+  "failure": [
+    "Critical data unavailable: issue degraded/no-forecast status according to policy"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t37_live_daily_inference_monitoring_model_registry.md"
+}

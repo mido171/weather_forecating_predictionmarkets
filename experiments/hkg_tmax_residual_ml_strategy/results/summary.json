@@ -1,0 +1,46 @@
+{
+  "generated_at_utc": "2026-07-05T12:33:12Z",
+  "database_url_redacted": "postgresql://postgres:***@127.0.0.1:5432/hkg_tmax_research",
+  "config": {
+    "seed": 20260705,
+    "allow_leakage_failures": false,
+    "dates": {
+      "start_date": "2000-01-02",
+      "presealed_end_date": "2023-12-31",
+      "sealed_start_date": "2024-01-01",
+      "sealed_end_date": "2026-05-31"
+    },
+    "cutoff_profiles": [
+      "tminus1_1500",
+      "tminus1_1800",
+      "tminus1_2100",
+      "tminus1_2359"
+    ],
+    "primary_cutoff_profile": "tminus1_2359",
+    "anchor_source": "public.hko_historical_forecasts_2000_2026",
+    "hourly_source": "public.hko_info_gov_hourly_readings_1998_2026",
+    "target_history_source": "feature_safe.hko_target_history_pre2024",
+    "sealed_confirmation_mode": "sealed_blind_mode"
+  },
+  "source_counts": {
+    "target_rows": 9647,
+    "forecast_rows": 88277,
+    "hourly_rows": 252644,
+    "target_history_rows": 48577
+  },
+  "feature_rows": 38588,
+  "feature_count": 323,
+  "prediction_rows": 157670,
+  "leakage_status": "pass",
+  "promotion": {
+    "outcome": "no_promote_cosmetic",
+    "primary_cutoff": "tminus1_2359",
+    "raw_official_mae": 0.9308580564931607,
+    "final_mae": 0.8986654294414583,
+    "mae_improvement": 0.03219262705170234,
+    "rmse_delta": -0.041669260149067355,
+    "p90_delta": -0.09577485772337013,
+    "n_scored": 5629
+  },
+  "output_dir": "experiments\\hkg_tmax_residual_ml_strategy\\results"
+}

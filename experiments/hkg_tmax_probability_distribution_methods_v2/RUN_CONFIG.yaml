@@ -1,0 +1,23 @@
+config_path: configs/hkg_tmax/probability_distribution_methods_v2.yaml
+runner: scripts/run_hkg_tmax_probability_distribution_methods_v2.py
+output_dir: experiments/hkg_tmax_probability_distribution_methods_v2/results
+database_url: postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research
+primary_cutoff: t_minus_1_2359_hkt
+sensitivity_cutoffs:
+  - t_minus_1_1800_hkt
+  - t_minus_1_2100_hkt
+  - t_minus_1_2359_hkt
+selection_splits:
+  - fold1
+  - fold2
+  - fold3
+  - fold4
+  - presealed_2022_2023
+sealed_confirmation:
+  split: sealed_2024_2026_05
+  tuning_allowed: false
+promotion_gates:
+  fold14_min_rps_gain_vs_b4: 0.015
+  presealed_min_rps_gain_vs_b4: 0.010
+  nll_worse_than_b4_max: 0.005
+  brier_worse_than_b4_max: 0.002

@@ -1,0 +1,11 @@
+target_station: Hong Kong Observatory
+target_variable: daily_maximum_temperature_c
+timezone: Asia/Hong_Kong
+decision_cutoff_local_time: '15:00:00'
+decision_day_offset: -1
+cutoff_contract_version: hkg_t24_1500hkt_v1
+confirmation_policy:
+  development_end: '2023-12-31'
+  locked_validation_year: 2024
+  final_historical_test_year: 2025
+  post_final_holdout_year: 2026

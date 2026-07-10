@@ -1,0 +1,55 @@
+{
+  "id": "T18",
+  "suffix": "canonical_target_date_t24_snapshot_builder",
+  "title": "Canonical Target-Date T\u221224 Snapshot Builder",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T01",
+    "T14",
+    "T16",
+    "T17"
+  ],
+  "mission": "Build deterministic, replayable source snapshots for each target date containing only information eligible at the cutoff.",
+  "inputs": [
+    "Eligible official/NWP/live/source views",
+    "target-date calendar",
+    "cutoff contract",
+    "location registry"
+  ],
+  "steps": [
+    "For each target date calculate cutoff UTC.",
+    "Select latest eligible official vintage and retain revision history IDs.",
+    "Select latest eligible run per model and all required target-day valid hours; retain earlier eligible runs for aging/revision.",
+    "Select latest eligible station/live observations.",
+    "Attach causally available target-memory source dates.",
+    "Store source availability/missingness masks.",
+    "Hash selected source IDs/objects and builder version.",
+    "Create development snapshots without joining labels; labels join only in research role."
+  ],
+  "db_objects": [
+    "feature_store.target_snapshot_manifest",
+    "snapshot source-link tables"
+  ],
+  "outputs": [
+    "snapshot builder code/SQL",
+    "snapshot_coverage.csv",
+    "source_selection_examples.md",
+    "snapshot_hash_reproducibility.csv"
+  ],
+  "tests": [
+    "No selected available_at > cutoff",
+    "same inputs same hash",
+    "target label inaccessible",
+    "year boundary/leap tests"
+  ],
+  "acceptance": [
+    "One reproducible snapshot per target/date/version",
+    "No forward-looking row can enter feature generation"
+  ],
+  "failure": [
+    "Missing source yields explicit availability mask, not future fallback"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t18_canonical_target_date_t24_snapshot_builder.md"
+}

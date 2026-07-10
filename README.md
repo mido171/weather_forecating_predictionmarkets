@@ -25,9 +25,10 @@ Then read, in order:
 1. `CODEX_START_HERE.md`
 2. `FIRST_GOALS.md`
 3. `AGENTS.md`
-4. `docs/01_RESEARCH_CHARTER.md`
-5. `docs/02_TARGET_AND_SETTLEMENT.md`
-6. `docs/03_ASOF_AND_LEAKAGE.md`
+4. `docs/PROJECT_STRUCTURE_AND_CODE_MAP.md`
+5. `docs/01_RESEARCH_CHARTER.md`
+6. `docs/02_TARGET_AND_SETTLEMENT.md`
+7. `docs/03_ASOF_AND_LEAKAGE.md`
 
 ## Repository map
 
@@ -39,13 +40,16 @@ Then read, in order:
 ├── EXPERIMENT_INDEX.md           Registry summary
 ├── .codex/agents/                Specialist Codex subagents
 ├── .agents/skills/               Repeatable Codex skills
+├── code/
+│   ├── src/                       Python packages: hkg_tmax and hkg_tmax_db
+│   └── tests/                     Pytest suite
 ├── config/                       Source, target, horizon, split, station config
 ├── docs/                         Research and operational specifications
 ├── data/                         Raw/bronze/silver/gold schemas and archives
 ├── experiments/                  One immutable folder per experiment
-├── src/hkg_tmax/                 Executable infrastructure
 ├── scripts/                      Bootstrap, archive, and validation commands
-└── tests/                        Leakage, target, storage, and config tests
+├── migrations/                   SQL migrations
+└── tasks/                        A-to-Z task packages and completion records
 ```
 
 ## What this bootstrap already implements

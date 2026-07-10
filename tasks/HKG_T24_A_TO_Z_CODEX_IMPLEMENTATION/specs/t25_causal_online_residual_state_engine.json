@@ -1,0 +1,50 @@
+{
+  "id": "T25",
+  "suffix": "causal_online_residual_state_engine",
+  "title": "Causal Online Residual and Source Performance State Engine",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T14",
+    "T18"
+  ],
+  "mission": "Implement multi-timescale, source/model/regime residual states that update only after settlement.",
+  "inputs": [
+    "Official and expert predictions",
+    "settled labels through allowed dates",
+    "target snapshots"
+  ],
+  "steps": [
+    "Implement EWMA half-lives 5/10/20/40 plus robust median and shrinkage.",
+    "Maintain signed bias, absolute error, volatility, over/under streaks and support counts.",
+    "Key states by source era, model, season and carefully selected regimes with hierarchical fallback.",
+    "Enforce score-then-update order.",
+    "Cold-start and missing-settlement handling.",
+    "Replay states from scratch deterministically."
+  ],
+  "db_objects": [
+    "feature_store online_state tables",
+    "live state store"
+  ],
+  "outputs": [
+    "state_definition.csv",
+    "state_replay_tests.csv",
+    "cold_start_policy.md",
+    "sample_state_history.parquet"
+  ],
+  "tests": [
+    "No current target in state",
+    "deterministic replay",
+    "gap handling",
+    "era reset/change-point tests"
+  ],
+  "acceptance": [
+    "State at T depends only on settled dates before T",
+    "No low-support unshrunk context state"
+  ],
+  "failure": [
+    "Settlement unavailable: freeze state; never infer residual"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t25_causal_online_residual_state_engine.md"
+}

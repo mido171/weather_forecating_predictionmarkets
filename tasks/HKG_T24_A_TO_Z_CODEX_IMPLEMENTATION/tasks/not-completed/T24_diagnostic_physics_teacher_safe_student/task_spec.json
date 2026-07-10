@@ -1,0 +1,52 @@
+{
+  "id": "T24",
+  "suffix": "diagnostic_physics_teacher_safe_student",
+  "title": "Diagnostic Physics Teacher-to-Safe-Student Features",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T15",
+    "T18",
+    "T21",
+    "T22"
+  ],
+  "mission": "Use timestamp-blocked IGRA, finalized climate, marine and TC sources to discover mechanisms and train deployable proxy students from safe inputs.",
+  "inputs": [
+    "Clean diagnostic sources",
+    "safe station/NWP/official features",
+    "target snapshots"
+  ],
+  "steps": [
+    "Define teacher states such as ridge height, low-level heat/moisture, marine temperature suppression, cloud/radiation and TC geometry.",
+    "Train cross-fitted student models using only safe inputs to predict each teacher state.",
+    "Evaluate student fidelity and incremental residual value separately.",
+    "Never include teacher values in production scoring.",
+    "Record exact teacher availability status and student feature lineage.",
+    "Reject students that only reproduce target outcomes indirectly or fail folds."
+  ],
+  "db_objects": [
+    "research teacher/student artifacts",
+    "feature_store safe_student outputs if promoted"
+  ],
+  "outputs": [
+    "teacher_state_definitions.csv",
+    "student_oof_predictions.parquet",
+    "fidelity_metrics.csv",
+    "incremental_value.csv",
+    "promotion_decisions.md"
+  ],
+  "tests": [
+    "Teacher exclusion from live schema",
+    "cross-fitting",
+    "ablation against safe inputs"
+  ],
+  "acceptance": [
+    "Only causal safe-student outputs promoted",
+    "Diagnostic teacher remains blocked"
+  ],
+  "failure": [
+    "Poor fidelity or no incremental lift: preserve negative result and reject"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t24_diagnostic_physics_teacher_safe_student.md"
+}

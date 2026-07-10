@@ -1,0 +1,76 @@
+{
+  "state": "COMPLETE",
+  "summary": {
+    "area_features_upserted": 412,
+    "by_source": {
+      "envf_hkust_hko_radar": {
+        "manifest_frames": 1,
+        "skipped_existing": 1
+      },
+      "gefs_control": {
+        "area_features_upserted": 182,
+        "fetch_ok": 1,
+        "normalize_ok": 1,
+        "raw_bytes_deleted": 8124301,
+        "source_issues_touched": 1,
+        "station_features_upserted": 16
+      },
+      "gfs": {
+        "area_features_upserted": 208,
+        "fetch_ok": 1,
+        "normalize_ok": 1,
+        "raw_bytes_deleted": 10566094,
+        "source_issues_touched": 1,
+        "station_features_upserted": 18
+      },
+      "himawari9_b13_s0510": {
+        "area_features_upserted": 22,
+        "fetch_ok": 2,
+        "normalize_ok": 2,
+        "raw_bytes_deleted": 6273152,
+        "skipped_existing": 1,
+        "source_issues_touched": 2,
+        "station_features_upserted": 190
+      }
+    },
+    "completed_at_utc": "2026-07-08T14:33:24.031961Z",
+    "cycles": [
+      0
+    ],
+    "day_elapsed_seconds": {
+      "2026-07-07": 49.20357219997095
+    },
+    "elapsed_seconds": 49.41119430004619,
+    "end_date": "2026-07-07",
+    "expected": {
+      "days": 1,
+      "himawari_scans": 144,
+      "model_objects": 2,
+      "radar_expected_frames_approx": 120,
+      "total_static_tasks_without_radar_manifest": 146
+    },
+    "experiment_id": "0009_public_weather_backfill_jun25_jul7_lean_db_20260708",
+    "fetch_ok": 4,
+    "leads": [
+      30
+    ],
+    "max_staging_bytes": 0,
+    "normalize_ok": 4,
+    "radar_manifest_frames": 1,
+    "raw_bytes_deleted": 24963547,
+    "run_id": "0009_public_weather_backfill_jun25_jul7_lean_db_20260708_20260708T143234Z",
+    "skipped_existing": 2,
+    "source_issues_touched": 4,
+    "sources": [
+      "gefs_control",
+      "gfs",
+      "himawari_b13_s0510",
+      "radar"
+    ],
+    "start_date": "2026-07-07",
+    "started_at_utc": "2026-07-08T14:32:34.613398Z",
+    "station_features_upserted": 224,
+    "status": "complete"
+  },
+  "updated_at_utc": "2026-07-08T14:33:24.054683Z"
+}

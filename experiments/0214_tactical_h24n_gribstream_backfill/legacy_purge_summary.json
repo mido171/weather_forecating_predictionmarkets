@@ -1,0 +1,54 @@
+{
+  "applied_schema": true,
+  "database": "postgresql://***:***@127.0.0.1:5432/hkg_tmax_research",
+  "database_purge": {
+    "after": {
+      "catalog.variable_selector_snapshot": 0,
+      "catalog.weather_model": 0,
+      "nwp_core.model_run": 0,
+      "nwp_core.point_value": 0,
+      "nwp_core.point_value.gribstream_linked": 0,
+      "nwp_tactical.acquisition_chunk": 0,
+      "nwp_tactical.forecast_wide": 0,
+      "nwp_tactical.raw_response_object": 0,
+      "quarantine.rejected_payload": 0,
+      "raw_audit.acquisition_request": 0,
+      "raw_audit.acquisition_request.gribstream": 0,
+      "raw_audit.response_object": 0
+    },
+    "before": {
+      "catalog.variable_selector_snapshot": 80,
+      "catalog.weather_model": 17,
+      "nwp_core.model_run": 65,
+      "nwp_core.point_value": 3313728,
+      "nwp_core.point_value.gribstream_linked": 3313728,
+      "nwp_tactical.acquisition_chunk": 0,
+      "nwp_tactical.forecast_wide": 0,
+      "nwp_tactical.raw_response_object": 0,
+      "quarantine.rejected_payload": 0,
+      "raw_audit.acquisition_request": 124,
+      "raw_audit.acquisition_request.gribstream": 124,
+      "raw_audit.response_object": 131
+    },
+    "executed": true
+  },
+  "purged_raw": true,
+  "raw_purge": [
+    {
+      "bytes_before": 21657533,
+      "executed": true,
+      "existed": true,
+      "files_before": 134,
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\_pipeline_internal\\raw\\gribstream"
+    },
+    {
+      "bytes_before": 0,
+      "executed": true,
+      "existed": true,
+      "files_before": 0,
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\raw\\gribstream"
+    }
+  ],
+  "status": "executed",
+  "updated_at_utc": "2026-06-24T23:45:36Z"
+}

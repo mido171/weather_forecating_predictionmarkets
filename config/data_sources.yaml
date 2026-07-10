@@ -685,6 +685,118 @@ sources:
     priority: P2
     tags: [terrain, land_cover, geospatial]
 
+  - id: noaa_ghcnh_hko
+    provider: NOAA NCEI
+    role: exact_or_nearest_hourly_station_history_for_hko_headquarters
+    access:
+      method: official_archive_discovery
+      url: https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly
+    cadence: archive_release
+    historical_range: station_specific
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: preserve archive version and distinguish from HKO live feeds
+    revision_policy: archive may revise; hash every retrieval
+    priority: P0
+    tags: [observations, station, ghcnh, noaa]
+
+  - id: noaa_oisst_v21
+    provider: NOAA
+    role: daily_gridded_sea_surface_temperature
+    access:
+      method: official_ocean_archive_subset_required
+      url: https://www.ncei.noaa.gov/products/optimum-interpolation-sst
+    cadence: daily
+    historical_range: "1981-09-present"
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: preserve publication/revision timestamps and retrieval time; do not assume preliminary equals final
+    revision_policy: distinguish preliminary and revised products where exposed
+    priority: P0
+    tags: [ocean, sst, noaa, gridded]
+
+  - id: himawari_ahi_noaa_aws
+    provider: JMA / NOAA Open Data Registry
+    role: geostationary_satellite_cloud_and_radiation_context
+    access:
+      method: official_open_archive_subset_required
+      url: https://registry.opendata.aws/noaa-himawari/
+    cadence: scan_product_specific
+    historical_range: "2015-07-present"
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve source object key, checksum where available, scan time, channel, crop policy, and retrieval time
+    revision_policy: original scans immutable; never replace one scan with another
+    priority: P0
+    tags: [satellite, himawari, cloud, gridded]
+
+  - id: gpm_imerg_final
+    provider: NASA GPM
+    role: historical_gridded_precipitation_final_run
+    access:
+      method: official_api_credentials_subset_required
+      url: https://gpm.nasa.gov/data/imerg
+    cadence: half_hourly
+    historical_range: "about_2000-present"
+    point_in_time_status: RETROSPECTIVE_ONLY
+    availability_rule: preserve observation window, product version, run type, publication time, and retrieval time
+    revision_policy: Final run supersedes Early/Late for retrospective use only; never masquerade as live
+    priority: P0
+    tags: [precipitation, imerg, nasa, gridded, retrospective]
+
+  - id: gpm_imerg_early_late
+    provider: NASA GPM
+    role: near_real_time_gridded_precipitation
+    access:
+      method: official_api_credentials_subset_required
+      url: https://gpm.nasa.gov/data/imerg
+    cadence: half_hourly
+    historical_range: live_from_collector_start
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve run type, issue time, observation window, retrieval time, and revision relationship
+    revision_policy: Early and Late are separate operational products; do not overwrite either with Final
+    priority: P0
+    tags: [precipitation, imerg, nasa, gridded, live]
+
+  - id: cams_eac4_reanalysis
+    provider: Copernicus Atmosphere Monitoring Service
+    role: retrospective_aerosol_haze_reanalysis
+    access:
+      method: ads_api_credentials_subset_required
+      url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4
+    cadence: product_specific
+    historical_range: maximum_available_history
+    point_in_time_status: RETROSPECTIVE_ONLY
+    availability_rule: preserve ADS request parameters, product version, release lag, and retrieval time
+    revision_policy: retrospective reanalysis versioned by retrieval and product metadata
+    priority: P1
+    tags: [aerosol, haze, cams, retrospective]
+
+  - id: cams_global_composition_forecasts
+    provider: Copernicus Atmosphere Monitoring Service
+    role: operational_aerosol_haze_forecasts
+    access:
+      method: ads_api_credentials_subset_required
+      url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts
+    cadence: forecast_cycle_specific
+    historical_range: live_from_collector_start
+    point_in_time_status: OPERATIONAL_POINT_IN_TIME
+    availability_rule: preserve forecast cycle, lead, variable, level, actual availability, and retrieval time
+    revision_policy: never overwrite an older forecast cycle
+    priority: P1
+    tags: [aerosol, haze, cams, forecast, live]
+
+  - id: hong_kong_epd_air_quality_observations
+    provider: Hong Kong Environmental Protection Department
+    role: official_local_air_quality_observations
+    access:
+      method: official_open_data_discovery
+      url: https://www.epd.gov.hk/epd/english/environmentinhk/air/data/air_data.html
+    cadence: hourly_or_subhourly
+    historical_range: dataset_specific
+    point_in_time_status: PROXY_WITH_LIMITATIONS
+    availability_rule: establish source timestamps, station metadata, relocation history, and revision behavior before operational use
+    revision_policy: provider_specific; preserve raw snapshots and metadata versions
+    priority: P1
+    tags: [air_quality, aerosol, epd, hong_kong]
+
   - id: polymarket_gamma_event_by_slug
     provider: Polymarket
     role: event_market_rules_metadata

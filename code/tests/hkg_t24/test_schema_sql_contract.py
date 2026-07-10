@@ -42,3 +42,25 @@ def test_validation_scaffold_tables_exist_without_model_outputs() -> None:
     assert "CREATE TABLE IF NOT EXISTS model_validation.scoreboard" in FOUNDATION_SQL
     assert "first_target_date_hkt date NOT NULL" in FOUNDATION_SQL
     assert "CREATE TABLE IF NOT EXISTS model_validation.negative_control_result" in FOUNDATION_SQL
+
+
+def test_jira002_feature_family_tables_exist() -> None:
+    for table_name in (
+        "model_features.official_features",
+        "model_features.official_revision_features",
+        "model_features.target_memory_features",
+        "model_features.online_residual_state",
+        "model_features.nwp_daily_features",
+        "model_features.nwp_ensemble_features",
+        "model_features.station_proxy_features",
+        "model_features.diagnostic_proxy_features",
+        "model_features.static_geospatial_features",
+    ):
+        assert f"CREATE TABLE IF NOT EXISTS {table_name}" in FOUNDATION_SQL
+    assert "ALTER TABLE model_features.feature_matrix ADD COLUMN IF NOT EXISTS target_tmax_c" in FOUNDATION_SQL
+
+
+def test_jira002_oof_tables_enforce_chronology() -> None:
+    assert "CREATE TABLE IF NOT EXISTS model_oof.expert_prediction" in FOUNDATION_SQL
+    assert "train_end_date < test_start_date" in FOUNDATION_SQL
+    assert "CREATE TABLE IF NOT EXISTS model_oof.expert_artifact" in FOUNDATION_SQL

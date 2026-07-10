@@ -1,0 +1,57 @@
+{
+  "id": "T33",
+  "suffix": "expected_error_router_static_dynamic_abstention",
+  "title": "Expected-Error Router with Static Priors, Dynamic Weights, and Abstention",
+  "phase": "D Modelling",
+  "deps": [
+    "T32"
+  ],
+  "mission": "Train the concrete facts-on-the-ground \u2192 predicted expert error \u2192 weight distribution router and prove it beats static/simple blends.",
+  "inputs": [
+    "ROUTER_TRAINING_SPECIFICATION.md",
+    "OOF meta-table",
+    "context features",
+    "expert availability masks"
+  ],
+  "steps": [
+    "Fit non-negative static MAE-optimal blend on inner OOF data.",
+    "Fit one regularized expected-absolute-error model per expert using context only.",
+    "Calibrate predicted errors.",
+    "Convert predicted errors to softmax dynamic weights.",
+    "Tune temperature and static/dynamic shrinkage lambda inside temporal folds.",
+    "Apply per-expert weight caps, minimum history and missing-source masks.",
+    "Train expected-benefit abstention versus stable blend.",
+    "Add recent causal performance states.",
+    "Evaluate weight turnover, context calibration and expert win rates.",
+    "Create capped challenger adapter interface."
+  ],
+  "db_objects": [
+    "research router artifacts/OOF decisions"
+  ],
+  "outputs": [
+    "router_oof_predictions.parquet",
+    "router_weights.parquet",
+    "predicted_vs_realized_error.csv",
+    "static_vs_dynamic_scoreboard.csv",
+    "abstention_metrics.csv",
+    "router_model_card.md"
+  ],
+  "tests": [
+    "OOF-only meta-training",
+    "weights nonnegative/sum one",
+    "missing expert zero weight",
+    "no outcome context",
+    "fold-tuned parameters"
+  ],
+  "acceptance": [
+    "Dynamic router improves or is rejected in favor of static blend",
+    "Abstention prevents low-confidence damage",
+    "All decisions explainable"
+  ],
+  "failure": [
+    "No stable dynamic lift: deploy static blend; preserve router as negative result"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t33_expected_error_router_static_dynamic_abstention.md"
+}

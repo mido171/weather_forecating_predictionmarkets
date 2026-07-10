@@ -1,0 +1,48 @@
+{
+  "by_source": {},
+  "cycles": [
+    0,
+    6,
+    12,
+    18
+  ],
+  "elapsed_seconds": 0.0,
+  "end_date": "2026-07-08",
+  "expected": {
+    "days": 29,
+    "himawari_scans": 4176,
+    "model_objects": 3944,
+    "radar_expected_frames_approx": 3480,
+    "total_static_tasks_without_radar_manifest": 8120
+  },
+  "experiment_id": "0010_public_weather_backfill_jun10_jul8_lean_db_test_20260709",
+  "leads": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    30,
+    33,
+    36,
+    39,
+    42,
+    45,
+    48
+  ],
+  "run_id": "0010_public_weather_backfill_jun10_jul8_lean_db_test_20260709_20260709T082729Z",
+  "sources": [
+    "gefs_control",
+    "gfs",
+    "himawari_b13_s0510",
+    "radar"
+  ],
+  "start_date": "2026-06-10",
+  "started_at_utc": "2026-07-09T08:27:29.613453Z",
+  "status": "dry_run"
+}

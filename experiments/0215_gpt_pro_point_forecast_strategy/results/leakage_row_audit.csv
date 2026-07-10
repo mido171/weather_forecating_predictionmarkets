@@ -1,0 +1,17 @@
+cutoff,audit_check,status,failed_rows,evidence
+17:00,latest_issue_at_or_before_cutoff,pass,0,latest_issue_at_hkt <= asof_cutoff_hkt for all official rows
+17:00,no_target_tminus1_or_target_day_features,pass,0,target lag list begins at T-2
+17:00,no_climate_tminus1_features,pass,0,climate lag list begins at T-2
+17:00,development_range_excludes_2024_plus,pass,0,maximum target date 2023-12-31
+18:00,latest_issue_at_or_before_cutoff,pass,0,latest_issue_at_hkt <= asof_cutoff_hkt for all official rows
+18:00,no_target_tminus1_or_target_day_features,pass,0,target lag list begins at T-2
+18:00,no_climate_tminus1_features,pass,0,climate lag list begins at T-2
+18:00,development_range_excludes_2024_plus,pass,0,maximum target date 2023-12-31
+21:00,latest_issue_at_or_before_cutoff,pass,0,latest_issue_at_hkt <= asof_cutoff_hkt for all official rows
+21:00,no_target_tminus1_or_target_day_features,pass,0,target lag list begins at T-2
+21:00,no_climate_tminus1_features,pass,0,climate lag list begins at T-2
+21:00,development_range_excludes_2024_plus,pass,0,maximum target date 2023-12-31
+23:59,latest_issue_at_or_before_cutoff,pass,0,latest_issue_at_hkt <= asof_cutoff_hkt for all official rows
+23:59,no_target_tminus1_or_target_day_features,pass,0,target lag list begins at T-2
+23:59,no_climate_tminus1_features,pass,0,climate lag list begins at T-2
+23:59,development_range_excludes_2024_plus,pass,0,maximum target date 2023-12-31

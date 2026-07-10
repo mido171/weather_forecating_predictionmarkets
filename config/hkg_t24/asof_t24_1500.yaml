@@ -1,0 +1,17 @@
+schema_version: 1
+timezone: Asia/Hong_Kong
+forecast_question: HKO Headquarters official daily Tmax for local day T
+cutoff_hkt: T-1 15:00:00
+cutoff_utc: T-1 07:00:00
+governing_timestamp: available_at
+eligibility_rule: feature.available_at_hkt <= cutoff_hkt
+locked_test_start: '2025-01-01'
+ordinary_research_locked_test_policy: deny
+forbidden:
+- target-day observation or target-derived value as predictor
+- T-1 full-day aggregate at 15:00 T-1
+- centered rolling windows crossing cutoff
+- validation or locked-test rows used to fit preprocessing, feature selection, calibration,
+  or model choice
+- final reanalysis, final TC best tracks, final retrospective precipitation as operational
+  input

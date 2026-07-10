@@ -1,0 +1,2393 @@
+{
+  "state": "COMPLETE_WITH_FAILURES",
+  "summary": {
+    "area_features_upserted": 28539,
+    "by_source": {
+      "gefs_control": {
+        "area_features_upserted": 13104,
+        "db_write_seconds_total": 32.92379629990319,
+        "fetch_ok": 68,
+        "fetch_seconds_total": 1141.6637919001514,
+        "max_raw_object_bytes": 8902811,
+        "max_staging_bytes_after_fetch": 101375374,
+        "normalize_ok": 68,
+        "normalize_seconds_total": 458.19507110037375,
+        "raw_bytes_deleted": 550249943,
+        "raw_files_deleted": 68,
+        "source_issues_touched": 68,
+        "station_features_upserted": 1144,
+        "total_seconds_total": 1632.7826593004283
+      },
+      "gfs": {
+        "area_features_upserted": 13884,
+        "db_write_seconds_total": 58.09357159974752,
+        "fetch_ok": 68,
+        "fetch_seconds_total": 1836.2704625998158,
+        "max_raw_object_bytes": 12499160,
+        "max_staging_bytes_after_fetch": 155356055,
+        "normalize_ok": 68,
+        "normalize_seconds_total": 581.1707723999862,
+        "raw_bytes_deleted": 812942804,
+        "raw_files_deleted": 68,
+        "source_issues_touched": 68,
+        "station_features_upserted": 1204,
+        "total_seconds_total": 2475.5348065995495
+      },
+      "himawari9_b13_s0510": {
+        "area_features_upserted": 1551,
+        "db_write_seconds_total": 37.431492100527976,
+        "fetch_failed": 3,
+        "fetch_ok": 141,
+        "fetch_seconds_total": 749.5725044000428,
+        "max_raw_object_bytes": 3027972,
+        "max_staging_bytes_after_fetch": 24188410,
+        "normalize_ok": 141,
+        "normalize_seconds_total": 423.9190480996622,
+        "raw_bytes_deleted": 422846677,
+        "raw_files_deleted": 141,
+        "source_issues_touched": 144,
+        "station_features_upserted": 13395,
+        "total_seconds_total": 1210.923044600233
+      }
+    },
+    "completed_at_utc": "2026-07-09T15:33:40.034571Z",
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day_elapsed_seconds": {
+      "2026-06-15": 718.0837527000112
+    },
+    "db_write_seconds_total": 128.44886000017868,
+    "elapsed_seconds": 718.5351940999972,
+    "end_date": "2026-06-15",
+    "execution_mode": "optimized",
+    "expected": {
+      "days": 1,
+      "himawari_scans": 144,
+      "model_objects": 136,
+      "radar_expected_frames_approx": 0,
+      "total_static_tasks_without_radar_manifest": 280
+    },
+    "experiment_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709",
+    "fetch_failed": 3,
+    "fetch_ok": 277,
+    "fetch_seconds_total": 3727.50675890001,
+    "final_staging_bytes": 0,
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "max_raw_object_bytes": 12499160,
+    "max_staging_bytes": 155356055,
+    "min_free_disk_bytes": 238283309056,
+    "normalize_ok": 277,
+    "normalize_seconds_total": 1463.284891600022,
+    "phase_observations": [
+      {
+        "db_write": 0.20059600000968203,
+        "fetch": 26.454244200023822,
+        "item_id": "gfs_20260615_00z_f000",
+        "normalize": 7.4332265999983065,
+        "source": "gfs",
+        "total": 34.08806680003181
+      },
+      {
+        "db_write": 0.43527409998932853,
+        "fetch": 28.750104899983853,
+        "item_id": "gfs_20260615_00z_f015",
+        "normalize": 9.813850599981379,
+        "source": "gfs",
+        "total": 38.99922959995456
+      },
+      {
+        "db_write": 0.9867195000406355,
+        "fetch": 29.65722839999944,
+        "item_id": "gfs_20260615_00z_f003",
+        "normalize": 12.45108990004519,
+        "source": "gfs",
+        "total": 43.095037800085265
+      },
+      {
+        "db_write": 0.29021520004607737,
+        "fetch": 32.83804239996243,
+        "item_id": "gfs_20260615_00z_f018",
+        "normalize": 7.781854300003033,
+        "source": "gfs",
+        "total": 40.91011190001154
+      },
+      {
+        "db_write": 0.12122869997983798,
+        "fetch": 33.19326159998309,
+        "item_id": "gfs_20260615_00z_f012",
+        "normalize": 7.53595089999726,
+        "source": "gfs",
+        "total": 40.85044119996019
+      },
+      {
+        "db_write": 0.1704026999650523,
+        "fetch": 34.43308099999558,
+        "item_id": "gfs_20260615_00z_f006",
+        "normalize": 7.199215599976014,
+        "source": "gfs",
+        "total": 41.80269929993665
+      },
+      {
+        "db_write": 0.12377629999537021,
+        "fetch": 36.015199100016616,
+        "item_id": "gfs_20260615_00z_f021",
+        "normalize": 6.982402699999511,
+        "source": "gfs",
+        "total": 43.1213781000115
+      },
+      {
+        "db_write": 0.29172350000590086,
+        "fetch": 39.9368254999863,
+        "item_id": "gfs_20260615_00z_f009",
+        "normalize": 7.668939900002442,
+        "source": "gfs",
+        "total": 47.89748889999464
+      },
+      {
+        "db_write": 0.1032011000206694,
+        "fetch": 29.122274500026833,
+        "item_id": "gfs_20260615_00z_f024",
+        "normalize": 7.322147200000472,
+        "source": "gfs",
+        "total": 36.547622800047975
+      },
+      {
+        "db_write": 0.4645586999831721,
+        "fetch": 25.792374899960123,
+        "item_id": "gfs_20260615_00z_f027",
+        "normalize": 7.076642400003038,
+        "source": "gfs",
+        "total": 33.33357599994633
+      },
+      {
+        "db_write": 0.14688450004905462,
+        "fetch": 24.926842499990016,
+        "item_id": "gfs_20260615_00z_f039",
+        "normalize": 7.731393900001422,
+        "source": "gfs",
+        "total": 32.80512090004049
+      },
+      {
+        "db_write": 8.033841900003608,
+        "fetch": 26.339791400008835,
+        "item_id": "gfs_20260615_00z_f036",
+        "normalize": 9.632360200048424,
+        "source": "gfs",
+        "total": 44.00599350006087
+      },
+      {
+        "db_write": 0.2040940999868326,
+        "fetch": 28.49598569999216,
+        "item_id": "gfs_20260615_00z_f033",
+        "normalize": 6.817463600018527,
+        "source": "gfs",
+        "total": 35.51754339999752
+      },
+      {
+        "db_write": 0.2803040000144392,
+        "fetch": 32.72472499997821,
+        "item_id": "gfs_20260615_00z_f030",
+        "normalize": 9.643997800012585,
+        "source": "gfs",
+        "total": 42.64902680000523
+      },
+      {
+        "db_write": 0.6737370999762788,
+        "fetch": 23.345804499986116,
+        "item_id": "gfs_20260615_00z_f042",
+        "normalize": 6.834817199967802,
+        "source": "gfs",
+        "total": 30.854358799930196
+      },
+      {
+        "db_write": 0.27319390000775456,
+        "fetch": 5.810605999955442,
+        "item_id": "gfs_20260615_06z_f000",
+        "normalize": 4.343281300039962,
+        "source": "gfs",
+        "total": 10.427081200003158
+      },
+      {
+        "db_write": 0.1046640999848023,
+        "fetch": 18.320031800016295,
+        "item_id": "gfs_20260615_00z_f045",
+        "normalize": 7.986579500022344,
+        "source": "gfs",
+        "total": 26.41127540002344
+      },
+      {
+        "db_write": 0.1797746999654919,
+        "fetch": 7.606237399973907,
+        "item_id": "gfs_20260615_00z_f048",
+        "normalize": 7.822985299979337,
+        "source": "gfs",
+        "total": 15.608997399918735
+      },
+      {
+        "db_write": 0.4268171999719925,
+        "fetch": 25.29460590000963,
+        "item_id": "gfs_20260615_06z_f003",
+        "normalize": 6.985329599992838,
+        "source": "gfs",
+        "total": 32.70675269997446
+      },
+      {
+        "db_write": 2.0563964000320993,
+        "fetch": 27.579262499988545,
+        "item_id": "gfs_20260615_06z_f018",
+        "normalize": 7.676493600010872,
+        "source": "gfs",
+        "total": 37.312152500031516
+      },
+      {
+        "db_write": 2.0274003999656998,
+        "fetch": 24.61869089998072,
+        "item_id": "gfs_20260615_06z_f024",
+        "normalize": 9.655780399974901,
+        "source": "gfs",
+        "total": 36.30187169992132
+      },
+      {
+        "db_write": 2.4765850999974646,
+        "fetch": 35.85006009996869,
+        "item_id": "gfs_20260615_06z_f012",
+        "normalize": 9.021946299995761,
+        "source": "gfs",
+        "total": 47.34859149996191
+      },
+      {
+        "db_write": 4.024820499995258,
+        "fetch": 36.536219400004484,
+        "item_id": "gfs_20260615_06z_f006",
+        "normalize": 7.907515599974431,
+        "source": "gfs",
+        "total": 48.46855549997417
+      },
+      {
+        "db_write": 0.5404195999726653,
+        "fetch": 36.5140918000252,
+        "item_id": "gfs_20260615_06z_f015",
+        "normalize": 7.516043599986006,
+        "source": "gfs",
+        "total": 44.57055499998387
+      },
+      {
+        "db_write": 0.2650359999970533,
+        "fetch": 14.58624030003557,
+        "item_id": "gfs_20260615_06z_f027",
+        "normalize": 7.520821699989028,
+        "source": "gfs",
+        "total": 22.37209800002165
+      },
+      {
+        "db_write": 0.5634863000013866,
+        "fetch": 40.482495500007644,
+        "item_id": "gfs_20260615_06z_f009",
+        "normalize": 8.348607400024775,
+        "source": "gfs",
+        "total": 49.394589200033806
+      },
+      {
+        "db_write": 0.41611099999863654,
+        "fetch": 41.01019619998988,
+        "item_id": "gfs_20260615_06z_f021",
+        "normalize": 8.035121400025673,
+        "source": "gfs",
+        "total": 49.46142860001419
+      },
+      {
+        "db_write": 0.1027351999655366,
+        "fetch": 15.924123200005852,
+        "item_id": "gfs_20260615_06z_f030",
+        "normalize": 7.822973300004378,
+        "source": "gfs",
+        "total": 23.849831699975766
+      },
+      {
+        "db_write": 0.09971379995113239,
+        "fetch": 12.137696799996775,
+        "item_id": "gfs_20260615_06z_f033",
+        "normalize": 6.197549800039269,
+        "source": "gfs",
+        "total": 18.434960399987176
+      },
+      {
+        "db_write": 1.7548206000356004,
+        "fetch": 18.806796499993652,
+        "item_id": "gfs_20260615_12z_f000",
+        "normalize": 3.6300574999768287,
+        "source": "gfs",
+        "total": 24.19167460000608
+      },
+      {
+        "db_write": 1.5729688999708742,
+        "fetch": 30.574529900040943,
+        "item_id": "gfs_20260615_06z_f036",
+        "normalize": 8.03661899996223,
+        "source": "gfs",
+        "total": 40.18411779997405
+      },
+      {
+        "db_write": 0.13580069999443367,
+        "fetch": 28.800480299978517,
+        "item_id": "gfs_20260615_06z_f048",
+        "normalize": 8.41894040000625,
+        "source": "gfs",
+        "total": 37.3552213999792
+      },
+      {
+        "db_write": 0.5318868999602273,
+        "fetch": 32.204772699973546,
+        "item_id": "gfs_20260615_06z_f042",
+        "normalize": 7.401521399966441,
+        "source": "gfs",
+        "total": 40.138180999900214
+      },
+      {
+        "db_write": 0.44055220001609996,
+        "fetch": 39.993636499973945,
+        "item_id": "gfs_20260615_06z_f039",
+        "normalize": 8.223079399962444,
+        "source": "gfs",
+        "total": 48.65726809995249
+      },
+      {
+        "db_write": 0.1264019000227563,
+        "fetch": 37.587916999997105,
+        "item_id": "gfs_20260615_06z_f045",
+        "normalize": 8.955579400004353,
+        "source": "gfs",
+        "total": 46.669898300024215
+      },
+      {
+        "db_write": 0.5060869000153616,
+        "fetch": 31.25179129996104,
+        "item_id": "gfs_20260615_12z_f006",
+        "normalize": 7.941017600009218,
+        "source": "gfs",
+        "total": 39.69889579998562
+      },
+      {
+        "db_write": 3.3338313000276685,
+        "fetch": 33.80459680000786,
+        "item_id": "gfs_20260615_12z_f003",
+        "normalize": 8.134555700002238,
+        "source": "gfs",
+        "total": 45.272983800037764
+      },
+      {
+        "db_write": 0.08805209997808561,
+        "fetch": 16.75580230000196,
+        "item_id": "gfs_20260615_12z_f018",
+        "normalize": 8.85518980002962,
+        "source": "gfs",
+        "total": 25.699044200009666
+      },
+      {
+        "db_write": 0.8190943999798037,
+        "fetch": 32.214248900010716,
+        "item_id": "gfs_20260615_12z_f009",
+        "normalize": 9.68485859996872,
+        "source": "gfs",
+        "total": 42.71820189995924
+      },
+      {
+        "db_write": 4.147558299999218,
+        "fetch": 34.07756479998352,
+        "item_id": "gfs_20260615_12z_f012",
+        "normalize": 9.705358199949842,
+        "source": "gfs",
+        "total": 47.93048129993258
+      },
+      {
+        "db_write": 0.13782989996252581,
+        "fetch": 24.222305799950846,
+        "item_id": "gfs_20260615_12z_f021",
+        "normalize": 9.007994100044016,
+        "source": "gfs",
+        "total": 33.36812979995739
+      },
+      {
+        "db_write": 0.641785699990578,
+        "fetch": 32.00414059998002,
+        "item_id": "gfs_20260615_12z_f015",
+        "normalize": 7.929829399974551,
+        "source": "gfs",
+        "total": 40.57575569994515
+      },
+      {
+        "db_write": 1.7229891000315547,
+        "fetch": 30.68577780004125,
+        "item_id": "gfs_20260615_12z_f024",
+        "normalize": 7.9533769999979995,
+        "source": "gfs",
+        "total": 40.362143900070805
+      },
+      {
+        "db_write": 0.31141660001594573,
+        "fetch": 32.114742400008254,
+        "item_id": "gfs_20260615_12z_f027",
+        "normalize": 8.123665699968114,
+        "source": "gfs",
+        "total": 40.549824699992314
+      },
+      {
+        "db_write": 1.8634739000117406,
+        "fetch": 25.30400850001024,
+        "item_id": "gfs_20260615_12z_f033",
+        "normalize": 7.602267100010067,
+        "source": "gfs",
+        "total": 34.76974950003205
+      },
+      {
+        "db_write": 0.10218990000430495,
+        "fetch": 30.59461079997709,
+        "item_id": "gfs_20260615_12z_f030",
+        "normalize": 7.884935699985363,
+        "source": "gfs",
+        "total": 38.58173639996676
+      },
+      {
+        "db_write": 0.23387700004968792,
+        "fetch": 21.00601240003016,
+        "item_id": "gfs_20260615_12z_f036",
+        "normalize": 14.597531900042668,
+        "source": "gfs",
+        "total": 35.837421300122514
+      },
+      {
+        "db_write": 0.4285593999666162,
+        "fetch": 19.393797800003085,
+        "item_id": "gfs_20260615_12z_f039",
+        "normalize": 13.981210900004953,
+        "source": "gfs",
+        "total": 33.803568099974655
+      },
+      {
+        "db_write": 1.0026286000502296,
+        "fetch": 16.78131759999087,
+        "item_id": "gfs_20260615_18z_f000",
+        "normalize": 4.023500900017098,
+        "source": "gfs",
+        "total": 21.807447100058198
+      },
+      {
+        "db_write": 0.1449821999995038,
+        "fetch": 27.301989900006447,
+        "item_id": "gfs_20260615_12z_f042",
+        "normalize": 8.168223200016655,
+        "source": "gfs",
+        "total": 35.615195300022606
+      },
+      {
+        "db_write": 0.6874868999584578,
+        "fetch": 27.481539600004908,
+        "item_id": "gfs_20260615_12z_f045",
+        "normalize": 8.783435399993323,
+        "source": "gfs",
+        "total": 36.95246189995669
+      },
+      {
+        "db_write": 0.42932159994961694,
+        "fetch": 25.011819600011222,
+        "item_id": "gfs_20260615_12z_f048",
+        "normalize": 9.532000699953642,
+        "source": "gfs",
+        "total": 34.97314189991448
+      },
+      {
+        "db_write": 0.3759213999728672,
+        "fetch": 24.41847669996787,
+        "item_id": "gfs_20260615_18z_f003",
+        "normalize": 9.03802460001316,
+        "source": "gfs",
+        "total": 33.832422699953895
+      },
+      {
+        "db_write": 0.17248720000497997,
+        "fetch": 32.465301599993836,
+        "item_id": "gfs_20260615_18z_f006",
+        "normalize": 8.980087200005073,
+        "source": "gfs",
+        "total": 41.61787600000389
+      },
+      {
+        "db_write": 0.41066049999790266,
+        "fetch": 18.40563719999045,
+        "item_id": "gfs_20260615_18z_f018",
+        "normalize": 8.612085099972319,
+        "source": "gfs",
+        "total": 27.428382799960673
+      },
+      {
+        "db_write": 0.18732859997544438,
+        "fetch": 30.880244400002994,
+        "item_id": "gfs_20260615_18z_f012",
+        "normalize": 9.474478500022087,
+        "source": "gfs",
+        "total": 40.542051500000525
+      },
+      {
+        "db_write": 1.3606177999754436,
+        "fetch": 32.16336140001658,
+        "item_id": "gfs_20260615_18z_f009",
+        "normalize": 10.95621440000832,
+        "source": "gfs",
+        "total": 44.48019360000035
+      },
+      {
+        "db_write": 0.1646156000206247,
+        "fetch": 14.645848400017712,
+        "item_id": "gfs_20260615_18z_f027",
+        "normalize": 9.314035099989269,
+        "source": "gfs",
+        "total": 24.124499100027606
+      },
+      {
+        "db_write": 0.20864799997070804,
+        "fetch": 27.240063600009307,
+        "item_id": "gfs_20260615_18z_f015",
+        "normalize": 9.050534499983769,
+        "source": "gfs",
+        "total": 36.499246099963784
+      },
+      {
+        "db_write": 0.33551689999876544,
+        "fetch": 17.05957879999187,
+        "item_id": "gfs_20260615_18z_f024",
+        "normalize": 10.614225400029682,
+        "source": "gfs",
+        "total": 28.009321100020315
+      },
+      {
+        "db_write": 0.24230250000255182,
+        "fetch": 24.62879889999749,
+        "item_id": "gfs_20260615_18z_f021",
+        "normalize": 8.84085400000913,
+        "source": "gfs",
+        "total": 33.711955400009174
+      },
+      {
+        "db_write": 0.6962613000068814,
+        "fetch": 10.011462200025562,
+        "item_id": "gfs_20260615_18z_f033",
+        "normalize": 9.027712100010831,
+        "source": "gfs",
+        "total": 19.735435600043274
+      },
+      {
+        "db_write": 2.6547672000015154,
+        "fetch": 12.69800660002511,
+        "item_id": "gfs_20260615_18z_f030",
+        "normalize": 10.963253699999768,
+        "source": "gfs",
+        "total": 26.316027500026394
+      },
+      {
+        "db_write": 2.4647440999979153,
+        "fetch": 26.53945040004328,
+        "item_id": "gfs_20260615_18z_f039",
+        "normalize": 9.449288100004196,
+        "source": "gfs",
+        "total": 38.45348260004539
+      },
+      {
+        "db_write": 0.3894230999867432,
+        "fetch": 25.085086199978832,
+        "item_id": "gfs_20260615_18z_f048",
+        "normalize": 9.587044599989895,
+        "source": "gfs",
+        "total": 35.06155389995547
+      },
+      {
+        "db_write": 1.3656650999910198,
+        "fetch": 24.129407399974298,
+        "item_id": "gefs_control_20260615_00z_f000",
+        "normalize": 6.593398900004104,
+        "source": "gefs_control",
+        "total": 32.08847139996942
+      },
+      {
+        "db_write": 0.37613589997636154,
+        "fetch": 28.874829299980775,
+        "item_id": "gfs_20260615_18z_f036",
+        "normalize": 10.921181300014723,
+        "source": "gfs",
+        "total": 40.17214649997186
+      },
+      {
+        "db_write": 0.36126440000953153,
+        "fetch": 29.104686399979983,
+        "item_id": "gfs_20260615_18z_f042",
+        "normalize": 10.692173399962485,
+        "source": "gfs",
+        "total": 40.158124199952
+      },
+      {
+        "db_write": 0.2353791000205092,
+        "fetch": 21.060671199986245,
+        "item_id": "gefs_control_20260615_00z_f006",
+        "normalize": 7.499630199978128,
+        "source": "gefs_control",
+        "total": 28.795680499984883
+      },
+      {
+        "db_write": 0.15649969998048618,
+        "fetch": 24.674077300005592,
+        "item_id": "gefs_control_20260615_00z_f003",
+        "normalize": 9.474721999955364,
+        "source": "gefs_control",
+        "total": 34.30529899994144
+      },
+      {
+        "db_write": 0.10479960002703592,
+        "fetch": 10.847722800041083,
+        "item_id": "gefs_control_20260615_00z_f009",
+        "normalize": 8.808053300017491,
+        "source": "gefs_control",
+        "total": 19.76057570008561
+      },
+      {
+        "db_write": 0.4455704999854788,
+        "fetch": 39.7790873000049,
+        "item_id": "gfs_20260615_18z_f045",
+        "normalize": 10.30844980000984,
+        "source": "gfs",
+        "total": 50.53310760000022
+      },
+      {
+        "db_write": 0.2917393999523483,
+        "fetch": 15.61680439999327,
+        "item_id": "gefs_control_20260615_00z_f012",
+        "normalize": 7.919264899974223,
+        "source": "gefs_control",
+        "total": 23.827808699919842
+      },
+      {
+        "db_write": 0.11602150002727285,
+        "fetch": 16.10218420001911,
+        "item_id": "gefs_control_20260615_00z_f015",
+        "normalize": 7.289577100018505,
+        "source": "gefs_control",
+        "total": 23.507782800064888
+      },
+      {
+        "db_write": 0.11465679999673739,
+        "fetch": 15.121096700022463,
+        "item_id": "gefs_control_20260615_00z_f018",
+        "normalize": 5.920480100030545,
+        "source": "gefs_control",
+        "total": 21.156233600049745
+      },
+      {
+        "db_write": 0.25518119998741895,
+        "fetch": 11.337663800048176,
+        "item_id": "gefs_control_20260615_00z_f024",
+        "normalize": 6.1004756999900565,
+        "source": "gefs_control",
+        "total": 17.69332070002565
+      },
+      {
+        "db_write": 0.3020881999982521,
+        "fetch": 8.52073940000264,
+        "item_id": "gefs_control_20260615_00z_f030",
+        "normalize": 5.103557900001761,
+        "source": "gefs_control",
+        "total": 13.926385500002652
+      },
+      {
+        "db_write": 2.2783766000065953,
+        "fetch": 15.985109800007194,
+        "item_id": "gefs_control_20260615_00z_f021",
+        "normalize": 6.174065199971665,
+        "source": "gefs_control",
+        "total": 24.437551599985454
+      },
+      {
+        "db_write": 2.9908179999911226,
+        "fetch": 9.614260700007435,
+        "item_id": "gefs_control_20260615_00z_f027",
+        "normalize": 8.166978599969298,
+        "source": "gefs_control",
+        "total": 20.772057299967855
+      },
+      {
+        "db_write": 0.9874931999947876,
+        "fetch": 17.282087299972773,
+        "item_id": "gefs_control_20260615_00z_f033",
+        "normalize": 9.132441899972036,
+        "source": "gefs_control",
+        "total": 27.402022399939597
+      },
+      {
+        "db_write": 0.15831549995345995,
+        "fetch": 18.552987700037193,
+        "item_id": "gefs_control_20260615_00z_f036",
+        "normalize": 9.275545499986038,
+        "source": "gefs_control",
+        "total": 27.98684869997669
+      },
+      {
+        "db_write": 0.515111299988348,
+        "fetch": 19.445979200012516,
+        "item_id": "gefs_control_20260615_00z_f045",
+        "normalize": 7.229209200013429,
+        "source": "gefs_control",
+        "total": 27.190299700014293
+      },
+      {
+        "db_write": 0.1516970000229776,
+        "fetch": 20.219805900007486,
+        "item_id": "gefs_control_20260615_00z_f042",
+        "normalize": 6.652651899959892,
+        "source": "gefs_control",
+        "total": 27.024154799990356
+      },
+      {
+        "db_write": 0.4297806000104174,
+        "fetch": 20.742148799996357,
+        "item_id": "gefs_control_20260615_00z_f039",
+        "normalize": 6.618096300051548,
+        "source": "gefs_control",
+        "total": 27.790025700058322
+      },
+      {
+        "db_write": 0.624280699994415,
+        "fetch": 22.04193020000821,
+        "item_id": "gefs_control_20260615_00z_f048",
+        "normalize": 6.2048467000131495,
+        "source": "gefs_control",
+        "total": 28.871057600015774
+      },
+      {
+        "db_write": 0.07549709995510057,
+        "fetch": 19.903591600013897,
+        "item_id": "gefs_control_20260615_06z_f000",
+        "normalize": 5.377481299976353,
+        "source": "gefs_control",
+        "total": 25.35656999994535
+      },
+      {
+        "db_write": 0.5471560999867506,
+        "fetch": 22.164450599986594,
+        "item_id": "gefs_control_20260615_06z_f003",
+        "normalize": 6.061250300030224,
+        "source": "gefs_control",
+        "total": 28.77285700000357
+      },
+      {
+        "db_write": 0.4223710999940522,
+        "fetch": 18.73567159997765,
+        "item_id": "gefs_control_20260615_06z_f006",
+        "normalize": 6.557319900020957,
+        "source": "gefs_control",
+        "total": 25.71536259999266
+      },
+      {
+        "db_write": 0.6145878999959677,
+        "fetch": 17.181516699958593,
+        "item_id": "gefs_control_20260615_06z_f009",
+        "normalize": 7.326907800044864,
+        "source": "gefs_control",
+        "total": 25.123012399999425
+      },
+      {
+        "db_write": 0.28465119999600574,
+        "fetch": 10.049440400034655,
+        "item_id": "gefs_control_20260615_06z_f024",
+        "normalize": 7.162491400027648,
+        "source": "gefs_control",
+        "total": 17.49658300005831
+      },
+      {
+        "db_write": 0.32061009999597445,
+        "fetch": 18.301243799971417,
+        "item_id": "gefs_control_20260615_06z_f018",
+        "normalize": 6.667540499998722,
+        "source": "gefs_control",
+        "total": 25.289394399966113
+      },
+      {
+        "db_write": 0.7854959000251256,
+        "fetch": 18.495681200001854,
+        "item_id": "gefs_control_20260615_06z_f015",
+        "normalize": 6.15220400004182,
+        "source": "gefs_control",
+        "total": 25.4333811000688
+      },
+      {
+        "db_write": 0.14280550001421943,
+        "fetch": 12.959913300001062,
+        "item_id": "gefs_control_20260615_06z_f021",
+        "normalize": 6.382320500037167,
+        "source": "gefs_control",
+        "total": 19.48503930005245
+      },
+      {
+        "db_write": 0.1595509999897331,
+        "fetch": 18.678214200015645,
+        "item_id": "gefs_control_20260615_06z_f012",
+        "normalize": 6.748817400017288,
+        "source": "gefs_control",
+        "total": 25.586582600022666
+      },
+      {
+        "db_write": 0.6171147000277415,
+        "fetch": 7.228159999998752,
+        "item_id": "gefs_control_20260615_06z_f030",
+        "normalize": 7.6185844000428915,
+        "source": "gefs_control",
+        "total": 15.463859100069385
+      },
+      {
+        "db_write": 0.492151600017678,
+        "fetch": 11.23173170001246,
+        "item_id": "gefs_control_20260615_06z_f027",
+        "normalize": 7.044517300033476,
+        "source": "gefs_control",
+        "total": 18.768400600063615
+      },
+      {
+        "db_write": 0.3497967000002973,
+        "fetch": 10.865153799997643,
+        "item_id": "gefs_control_20260615_06z_f033",
+        "normalize": 7.322807800024748,
+        "source": "gefs_control",
+        "total": 18.537758300022688
+      },
+      {
+        "db_write": 0.32223450002493337,
+        "fetch": 7.221090100007132,
+        "item_id": "gefs_control_20260615_06z_f036",
+        "normalize": 7.063216699985787,
+        "source": "gefs_control",
+        "total": 14.606541300017852
+      },
+      {
+        "db_write": 0.14120489999186248,
+        "fetch": 18.956676699977834,
+        "item_id": "gefs_control_20260615_06z_f039",
+        "normalize": 6.873742599971592,
+        "source": "gefs_control",
+        "total": 25.97162419994129
+      },
+      {
+        "db_write": 0.2973014000453986,
+        "fetch": 21.144471799954772,
+        "item_id": "gefs_control_20260615_06z_f045",
+        "normalize": 6.600201499997638,
+        "source": "gefs_control",
+        "total": 28.04197469999781
+      },
+      {
+        "db_write": 0.8006761000142433,
+        "fetch": 23.844815200020093,
+        "item_id": "gefs_control_20260615_06z_f042",
+        "normalize": 10.236538400000427,
+        "source": "gefs_control",
+        "total": 34.882029700034764
+      },
+      {
+        "db_write": 1.9800995999830775,
+        "fetch": 30.455861399997957,
+        "item_id": "gefs_control_20260615_06z_f048",
+        "normalize": 9.279514900001232,
+        "source": "gefs_control",
+        "total": 41.715475899982266
+      },
+      {
+        "db_write": 0.09268539998447523,
+        "fetch": 22.48533380002482,
+        "item_id": "gefs_control_20260615_12z_f006",
+        "normalize": 8.496661800018046,
+        "source": "gefs_control",
+        "total": 31.07468100002734
+      },
+      {
+        "db_write": 0.29066709999460727,
+        "fetch": 10.176656700030435,
+        "item_id": "gefs_control_20260615_12z_f015",
+        "normalize": 7.084903700044379,
+        "source": "gefs_control",
+        "total": 17.55222750006942
+      },
+      {
+        "db_write": 0.36322759999893606,
+        "fetch": 13.519942099985201,
+        "item_id": "gefs_control_20260615_12z_f012",
+        "normalize": 5.8771848999895155,
+        "source": "gefs_control",
+        "total": 19.760354599973653
+      },
+      {
+        "db_write": 0.6416221999679692,
+        "fetch": 31.582222800003365,
+        "item_id": "gefs_control_20260615_12z_f003",
+        "normalize": 7.157243499998003,
+        "source": "gefs_control",
+        "total": 39.38108849996934
+      },
+      {
+        "db_write": 0.1095255000400357,
+        "fetch": 36.43920269998489,
+        "item_id": "gefs_control_20260615_12z_f000",
+        "normalize": 4.231777300010435,
+        "source": "gefs_control",
+        "total": 40.78050550003536
+      },
+      {
+        "db_write": 0.13369829999282956,
+        "fetch": 14.040938800026197,
+        "item_id": "gefs_control_20260615_12z_f018",
+        "normalize": 7.232561999990139,
+        "source": "gefs_control",
+        "total": 21.407199100009166
+      },
+      {
+        "db_write": 0.21829520002938807,
+        "fetch": 28.843021500040777,
+        "item_id": "gefs_control_20260615_12z_f009",
+        "normalize": 6.0741177999880165,
+        "source": "gefs_control",
+        "total": 35.13543450005818
+      },
+      {
+        "db_write": 0.08904390002135187,
+        "fetch": 13.518688899988774,
+        "item_id": "gefs_control_20260615_12z_f021",
+        "normalize": 6.652510000043549,
+        "source": "gefs_control",
+        "total": 20.260242800053675
+      },
+      {
+        "db_write": 0.24567809997824952,
+        "fetch": 11.291229900030885,
+        "item_id": "gefs_control_20260615_12z_f030",
+        "normalize": 6.777583600021899,
+        "source": "gefs_control",
+        "total": 18.314491600031033
+      },
+      {
+        "db_write": 2.596582500031218,
+        "fetch": 14.602004499989562,
+        "item_id": "gefs_control_20260615_12z_f027",
+        "normalize": 5.865404600044712,
+        "source": "gefs_control",
+        "total": 23.063991600065492
+      },
+      {
+        "db_write": 0.1308576999581419,
+        "fetch": 18.196816799987573,
+        "item_id": "gefs_control_20260615_12z_f024",
+        "normalize": 6.2539104000316,
+        "source": "gefs_control",
+        "total": 24.581584899977315
+      },
+      {
+        "db_write": 0.28053349995752797,
+        "fetch": 12.195607599976938,
+        "item_id": "gefs_control_20260615_12z_f036",
+        "normalize": 6.384730999998283,
+        "source": "gefs_control",
+        "total": 18.86087209993275
+      },
+      {
+        "db_write": 0.9126897999667563,
+        "fetch": 11.60763639997458,
+        "item_id": "gefs_control_20260615_12z_f039",
+        "normalize": 5.911096900003031,
+        "source": "gefs_control",
+        "total": 18.431423099944368
+      },
+      {
+        "db_write": 0.34938359999796376,
+        "fetch": 8.302418400009628,
+        "item_id": "gefs_control_20260615_12z_f042",
+        "normalize": 6.492650300031528,
+        "source": "gefs_control",
+        "total": 15.14445230003912
+      },
+      {
+        "db_write": 0.12093969999114051,
+        "fetch": 8.818491599988192,
+        "item_id": "gefs_control_20260615_12z_f045",
+        "normalize": 5.251103599963244,
+        "source": "gefs_control",
+        "total": 14.190534899942577
+      },
+      {
+        "db_write": 0.09857530001318082,
+        "fetch": 13.93075660004979,
+        "item_id": "gefs_control_20260615_12z_f033",
+        "normalize": 6.349336999992374,
+        "source": "gefs_control",
+        "total": 20.378668900055345
+      },
+      {
+        "db_write": 0.4420473999925889,
+        "fetch": 11.639248999999836,
+        "item_id": "gefs_control_20260615_18z_f000",
+        "normalize": 5.087767399963923,
+        "source": "gefs_control",
+        "total": 17.169063799956348
+      },
+      {
+        "db_write": 2.2711837999522686,
+        "fetch": 10.526773499965202,
+        "item_id": "gefs_control_20260615_18z_f015",
+        "normalize": 6.917427800013684,
+        "source": "gefs_control",
+        "total": 19.715385099931154
+      },
+      {
+        "db_write": 1.242971200030297,
+        "fetch": 17.903975400025956,
+        "item_id": "gefs_control_20260615_12z_f048",
+        "normalize": 6.587962299992796,
+        "source": "gefs_control",
+        "total": 25.73490890004905
+      },
+      {
+        "db_write": 0.15124120004475117,
+        "fetch": 17.386635400005616,
+        "item_id": "gefs_control_20260615_18z_f006",
+        "normalize": 6.5917053000302985,
+        "source": "gefs_control",
+        "total": 24.129581900080666
+      },
+      {
+        "db_write": 0.22353419999126345,
+        "fetch": 17.450406300020404,
+        "item_id": "gefs_control_20260615_18z_f009",
+        "normalize": 5.549269100010861,
+        "source": "gefs_control",
+        "total": 23.22320960002253
+      },
+      {
+        "db_write": 0.22125549998600036,
+        "fetch": 19.790212300023995,
+        "item_id": "gefs_control_20260615_18z_f003",
+        "normalize": 5.9575606000144035,
+        "source": "gefs_control",
+        "total": 25.9690284000244
+      },
+      {
+        "db_write": 0.12720539997098967,
+        "fetch": 11.466359900019597,
+        "item_id": "gefs_control_20260615_18z_f018",
+        "normalize": 6.599920200009365,
+        "source": "gefs_control",
+        "total": 18.19348549999995
+      },
+      {
+        "db_write": 0.5044096999918111,
+        "fetch": 19.163191900006495,
+        "item_id": "gefs_control_20260615_18z_f012",
+        "normalize": 5.82715070003178,
+        "source": "gefs_control",
+        "total": 25.494752300030086
+      },
+      {
+        "db_write": 0.18386140000075102,
+        "fetch": 8.006064899964258,
+        "item_id": "gefs_control_20260615_18z_f021",
+        "normalize": 6.189347000035923,
+        "source": "gefs_control",
+        "total": 14.379273300000932
+      },
+      {
+        "db_write": 0.08853629999794066,
+        "fetch": 11.628157800005283,
+        "item_id": "gefs_control_20260615_18z_f024",
+        "normalize": 6.4493898000218906,
+        "source": "gefs_control",
+        "total": 18.166083900025114
+      },
+      {
+        "db_write": 0.13559830002486706,
+        "fetch": 18.50830629997654,
+        "item_id": "gefs_control_20260615_18z_f027",
+        "normalize": 6.389074600010645,
+        "source": "gefs_control",
+        "total": 25.03297920001205
+      },
+      {
+        "db_write": 0.2357540000230074,
+        "fetch": 17.508790599997155,
+        "item_id": "gefs_control_20260615_18z_f039",
+        "normalize": 6.116770999971777,
+        "source": "gefs_control",
+        "total": 23.86131559999194
+      },
+      {
+        "db_write": 0.13489190000109375,
+        "fetch": 11.768035899964161,
+        "item_id": "gefs_control_20260615_18z_f045",
+        "normalize": 5.982076899963431,
+        "source": "gefs_control",
+        "total": 17.885004699928686
+      },
+      {
+        "db_write": 0.2248610999668017,
+        "fetch": 23.033293800021056,
+        "item_id": "gefs_control_20260615_18z_f030",
+        "normalize": 5.7061646999791265,
+        "source": "gefs_control",
+        "total": 28.964319599966984
+      },
+      {
+        "db_write": 0.11694989999523386,
+        "fetch": 15.025233199994545,
+        "item_id": "gefs_control_20260615_18z_f042",
+        "normalize": 5.708017500001006,
+        "source": "gefs_control",
+        "total": 20.850200599990785
+      },
+      {
+        "db_write": 0.2526695000124164,
+        "fetch": 24.02706459996989,
+        "item_id": "gefs_control_20260615_18z_f033",
+        "normalize": 5.802965100039728,
+        "source": "gefs_control",
+        "total": 30.082699200022034
+      },
+      {
+        "db_write": 0.09794740000506863,
+        "fetch": 23.850465700030327,
+        "item_id": "gefs_control_20260615_18z_f036",
+        "normalize": 6.305937199969776,
+        "source": "gefs_control",
+        "total": 30.25435030000517
+      },
+      {
+        "db_write": 0.16366379999089986,
+        "fetch": 14.718245399999432,
+        "item_id": "gefs_control_20260615_18z_f048",
+        "normalize": 7.69533339998452,
+        "source": "gefs_control",
+        "total": 22.577242599974852
+      },
+      {
+        "db_write": 0.20382310001878068,
+        "fetch": 3.194399899977725,
+        "item_id": "himawari9_B13_S0510_20260615_0010",
+        "normalize": 2.3022455999744125,
+        "source": "himawari9_b13_s0510",
+        "total": 5.700468599970918
+      },
+      {
+        "db_write": 0.38381090003531426,
+        "fetch": 3.6001098999986425,
+        "item_id": "himawari9_B13_S0510_20260615_0000",
+        "normalize": 2.4643063999828883,
+        "source": "himawari9_b13_s0510",
+        "total": 6.448227200016845
+      },
+      {
+        "db_write": 0.24717170000076294,
+        "fetch": 4.860166799975559,
+        "item_id": "himawari9_B13_S0510_20260615_0020",
+        "normalize": 2.9173511000117287,
+        "source": "himawari9_b13_s0510",
+        "total": 8.02468959998805
+      },
+      {
+        "db_write": 0.0707399999955669,
+        "fetch": 3.975713000050746,
+        "item_id": "himawari9_B13_S0510_20260615_0100",
+        "normalize": 3.0309989000088535,
+        "source": "himawari9_b13_s0510",
+        "total": 7.077451900055166
+      },
+      {
+        "db_write": 0.29612379998434335,
+        "fetch": 4.346836799988523,
+        "item_id": "himawari9_B13_S0510_20260615_0050",
+        "normalize": 4.678235600003973,
+        "source": "himawari9_b13_s0510",
+        "total": 9.32119619997684
+      },
+      {
+        "db_write": 0.29528310004388914,
+        "fetch": 5.378908600017894,
+        "item_id": "himawari9_B13_S0510_20260615_0040",
+        "normalize": 4.3791527999565005,
+        "source": "himawari9_b13_s0510",
+        "total": 10.053344500018284
+      },
+      {
+        "db_write": 0.39073450001887977,
+        "fetch": 3.466374400013592,
+        "item_id": "himawari9_B13_S0510_20260615_0130",
+        "normalize": 3.0348588000051677,
+        "source": "himawari9_b13_s0510",
+        "total": 6.89196770003764
+      },
+      {
+        "db_write": 0.28034940001089126,
+        "fetch": 8.096435400017072,
+        "item_id": "himawari9_B13_S0510_20260615_0110",
+        "normalize": 3.2554275000002235,
+        "source": "himawari9_b13_s0510",
+        "total": 11.632212300028186
+      },
+      {
+        "db_write": 0.4351528999977745,
+        "fetch": 10.377163800003473,
+        "item_id": "himawari9_B13_S0510_20260615_0030",
+        "normalize": 2.7396159999771044,
+        "source": "himawari9_b13_s0510",
+        "total": 13.551932699978352
+      },
+      {
+        "db_write": 0.08509840001352131,
+        "fetch": 2.6368655000114813,
+        "item_id": "himawari9_B13_S0510_20260615_0140",
+        "normalize": 3.457958900020458,
+        "source": "himawari9_b13_s0510",
+        "total": 6.1799228000454605
+      },
+      {
+        "db_write": 0.004441500001121312,
+        "fetch": 0.872145899978932,
+        "item_id": "himawari9_B13_S0510_20260615_0240",
+        "normalize": 0.00012959999730810523,
+        "source": "himawari9_b13_s0510",
+        "total": 0.8767169999773614
+      },
+      {
+        "db_write": 0.4077853999915533,
+        "fetch": 5.814279899990652,
+        "item_id": "himawari9_B13_S0510_20260615_0120",
+        "normalize": 3.414800400030799,
+        "source": "himawari9_b13_s0510",
+        "total": 9.636865700013004
+      },
+      {
+        "db_write": 0.12601359997643158,
+        "fetch": 3.123450600018259,
+        "item_id": "himawari9_B13_S0510_20260615_0150",
+        "normalize": 3.5744375999784097,
+        "source": "himawari9_b13_s0510",
+        "total": 6.8239017999731
+      },
+      {
+        "db_write": 0.049287900037597865,
+        "fetch": 2.9147805999964476,
+        "item_id": "himawari9_B13_S0510_20260615_0220",
+        "normalize": 1.8275832000072114,
+        "source": "himawari9_b13_s0510",
+        "total": 4.791651700041257
+      },
+      {
+        "db_write": 1.1092754999990575,
+        "fetch": 1.9464386000181548,
+        "item_id": "himawari9_B13_S0510_20260615_0200",
+        "normalize": 7.518027400015853,
+        "source": "himawari9_b13_s0510",
+        "total": 10.573741500033066
+      },
+      {
+        "db_write": 0.3210759999928996,
+        "fetch": 2.8878423999994993,
+        "item_id": "himawari9_B13_S0510_20260615_0300",
+        "normalize": 3.3872318000067025,
+        "source": "himawari9_b13_s0510",
+        "total": 6.5961501999991015
+      },
+      {
+        "db_write": 0.3734062000294216,
+        "fetch": 3.602001300023403,
+        "item_id": "himawari9_B13_S0510_20260615_0250",
+        "normalize": 3.9778761999914423,
+        "source": "himawari9_b13_s0510",
+        "total": 7.953283700044267
+      },
+      {
+        "db_write": 0.5763116999878548,
+        "fetch": 2.2690567999961786,
+        "item_id": "himawari9_B13_S0510_20260615_0210",
+        "normalize": 10.090013700013515,
+        "source": "himawari9_b13_s0510",
+        "total": 12.935382199997548
+      },
+      {
+        "db_write": 0.5629820000031032,
+        "fetch": 7.569569600047544,
+        "item_id": "himawari9_B13_S0510_20260615_0230",
+        "normalize": 3.3023038000101224,
+        "source": "himawari9_b13_s0510",
+        "total": 11.43485540006077
+      },
+      {
+        "db_write": 0.35148320003645495,
+        "fetch": 4.425170800008345,
+        "item_id": "himawari9_B13_S0510_20260615_0310",
+        "normalize": 4.872503499966115,
+        "source": "himawari9_b13_s0510",
+        "total": 9.649157500010915
+      },
+      {
+        "db_write": 0.20476339996093884,
+        "fetch": 3.3887676000013016,
+        "item_id": "himawari9_B13_S0510_20260615_0330",
+        "normalize": 4.024743699992541,
+        "source": "himawari9_b13_s0510",
+        "total": 7.618274699954782
+      },
+      {
+        "db_write": 0.19822819996625185,
+        "fetch": 3.3910067999968305,
+        "item_id": "himawari9_B13_S0510_20260615_0350",
+        "normalize": 2.3424927999731153,
+        "source": "himawari9_b13_s0510",
+        "total": 5.931727799936198
+      },
+      {
+        "db_write": 0.3240106000448577,
+        "fetch": 11.047244999965187,
+        "item_id": "himawari9_B13_S0510_20260615_0320",
+        "normalize": 1.6454965999582782,
+        "source": "himawari9_b13_s0510",
+        "total": 13.016752199968323
+      },
+      {
+        "db_write": 0.5021469999919645,
+        "fetch": 3.1084077999694273,
+        "item_id": "himawari9_B13_S0510_20260615_0340",
+        "normalize": 5.9430420999997295,
+        "source": "himawari9_b13_s0510",
+        "total": 9.553596899961121
+      },
+      {
+        "db_write": 0.05310920003103092,
+        "fetch": 2.200106500007678,
+        "item_id": "himawari9_B13_S0510_20260615_0440",
+        "normalize": 2.247517599957064,
+        "source": "himawari9_b13_s0510",
+        "total": 4.5007332999957725
+      },
+      {
+        "db_write": 0.10647500003688037,
+        "fetch": 5.336420500010718,
+        "item_id": "himawari9_B13_S0510_20260615_0400",
+        "normalize": 2.3079125999938697,
+        "source": "himawari9_b13_s0510",
+        "total": 7.750808100041468
+      },
+      {
+        "db_write": 0.4696249000262469,
+        "fetch": 3.3575089999940246,
+        "item_id": "himawari9_B13_S0510_20260615_0430",
+        "normalize": 3.07311940001091,
+        "source": "himawari9_b13_s0510",
+        "total": 6.900253300031181
+      },
+      {
+        "db_write": 0.07991450000554323,
+        "fetch": 3.51267349999398,
+        "item_id": "himawari9_B13_S0510_20260615_0410",
+        "normalize": 4.311266600037925,
+        "source": "himawari9_b13_s0510",
+        "total": 7.903854600037448
+      },
+      {
+        "db_write": 0.21117160003632307,
+        "fetch": 2.3673697000485845,
+        "item_id": "himawari9_B13_S0510_20260615_0450",
+        "normalize": 2.522698799963109,
+        "source": "himawari9_b13_s0510",
+        "total": 5.101240100048017
+      },
+      {
+        "db_write": 0.3474407999892719,
+        "fetch": 7.719434500031639,
+        "item_id": "himawari9_B13_S0510_20260615_0420",
+        "normalize": 1.9947071999777108,
+        "source": "himawari9_b13_s0510",
+        "total": 10.061582499998622
+      },
+      {
+        "db_write": 0.37799680000171065,
+        "fetch": 4.9722927999682724,
+        "item_id": "himawari9_B13_S0510_20260615_0500",
+        "normalize": 2.5018780999816954,
+        "source": "himawari9_b13_s0510",
+        "total": 7.8521676999516785
+      },
+      {
+        "db_write": 0.5452453999896534,
+        "fetch": 4.941747400036547,
+        "item_id": "himawari9_B13_S0510_20260615_0520",
+        "normalize": 2.4481242999900132,
+        "source": "himawari9_b13_s0510",
+        "total": 7.935117100016214
+      },
+      {
+        "db_write": 0.09611470001982525,
+        "fetch": 4.203093099989928,
+        "item_id": "himawari9_B13_S0510_20260615_0510",
+        "normalize": 3.7917585000395775,
+        "source": "himawari9_b13_s0510",
+        "total": 8.090966300049331
+      },
+      {
+        "db_write": 0.40655259997583926,
+        "fetch": 4.8203984999563545,
+        "item_id": "himawari9_B13_S0510_20260615_0600",
+        "normalize": 2.7185016000294127,
+        "source": "himawari9_b13_s0510",
+        "total": 7.945452699961606
+      },
+      {
+        "db_write": 0.06163360003847629,
+        "fetch": 3.3611505000153556,
+        "item_id": "himawari9_B13_S0510_20260615_0610",
+        "normalize": 2.308968500001356,
+        "source": "himawari9_b13_s0510",
+        "total": 5.731752600055188
+      },
+      {
+        "db_write": 0.06818000000203028,
+        "fetch": 6.080478199990466,
+        "item_id": "himawari9_B13_S0510_20260615_0540",
+        "normalize": 2.785133400000632,
+        "source": "himawari9_b13_s0510",
+        "total": 8.933791599993128
+      },
+      {
+        "db_write": 0.2737164000282064,
+        "fetch": 6.71758159995079,
+        "item_id": "himawari9_B13_S0510_20260615_0550",
+        "normalize": 3.485666399996262,
+        "source": "himawari9_b13_s0510",
+        "total": 10.476964399975259
+      },
+      {
+        "db_write": 0.2788841999717988,
+        "fetch": 3.184705399966333,
+        "item_id": "himawari9_B13_S0510_20260615_0630",
+        "normalize": 2.806462900014594,
+        "source": "himawari9_b13_s0510",
+        "total": 6.270052499952726
+      },
+      {
+        "db_write": 0.6812799000181258,
+        "fetch": 14.1579413000145,
+        "item_id": "himawari9_B13_S0510_20260615_0530",
+        "normalize": 2.0578444999991916,
+        "source": "himawari9_b13_s0510",
+        "total": 16.897065700031817
+      },
+      {
+        "db_write": 0.1543322000070475,
+        "fetch": 4.04987779998919,
+        "item_id": "himawari9_B13_S0510_20260615_0700",
+        "normalize": 2.498086699983105,
+        "source": "himawari9_b13_s0510",
+        "total": 6.7022966999793425
+      },
+      {
+        "db_write": 0.2868437999859452,
+        "fetch": 8.36158919997979,
+        "item_id": "himawari9_B13_S0510_20260615_0620",
+        "normalize": 2.5128907000180334,
+        "source": "himawari9_b13_s0510",
+        "total": 11.161323699983768
+      },
+      {
+        "db_write": 0.05413900001440197,
+        "fetch": 2.4644266999675892,
+        "item_id": "himawari9_B13_S0510_20260615_0720",
+        "normalize": 3.188291200029198,
+        "source": "himawari9_b13_s0510",
+        "total": 5.706856900011189
+      },
+      {
+        "db_write": 0.11553820001427084,
+        "fetch": 6.636929300031625,
+        "item_id": "himawari9_B13_S0510_20260615_0640",
+        "normalize": 3.7896786999772303,
+        "source": "himawari9_b13_s0510",
+        "total": 10.542146200023126
+      },
+      {
+        "db_write": 0.18703719996847212,
+        "fetch": 5.582640099979471,
+        "item_id": "himawari9_B13_S0510_20260615_0710",
+        "normalize": 3.074134700000286,
+        "source": "himawari9_b13_s0510",
+        "total": 8.84381199994823
+      },
+      {
+        "db_write": 0.23385570000391454,
+        "fetch": 6.495681900007185,
+        "item_id": "himawari9_B13_S0510_20260615_0650",
+        "normalize": 3.142984099977184,
+        "source": "himawari9_b13_s0510",
+        "total": 9.872521699988283
+      },
+      {
+        "db_write": 0.25067029998172075,
+        "fetch": 3.596261399972718,
+        "item_id": "himawari9_B13_S0510_20260615_0730",
+        "normalize": 3.006011600024067,
+        "source": "himawari9_b13_s0510",
+        "total": 6.852943299978506
+      },
+      {
+        "db_write": 0.6271200000192039,
+        "fetch": 3.400379400001839,
+        "item_id": "himawari9_B13_S0510_20260615_0810",
+        "normalize": 2.2249438000144437,
+        "source": "himawari9_b13_s0510",
+        "total": 6.252443200035486
+      },
+      {
+        "db_write": 0.3270913999876939,
+        "fetch": 4.854847699985839,
+        "item_id": "himawari9_B13_S0510_20260615_0740",
+        "normalize": 2.1868266999954358,
+        "source": "himawari9_b13_s0510",
+        "total": 7.368765799968969
+      },
+      {
+        "db_write": 0.13142220000736415,
+        "fetch": 4.366671100025997,
+        "item_id": "himawari9_B13_S0510_20260615_0800",
+        "normalize": 2.548450200003572,
+        "source": "himawari9_b13_s0510",
+        "total": 7.0465435000369325
+      },
+      {
+        "db_write": 0.31690550001803786,
+        "fetch": 5.262759300007019,
+        "item_id": "himawari9_B13_S0510_20260615_0750",
+        "normalize": 2.955205299949739,
+        "source": "himawari9_b13_s0510",
+        "total": 8.534870099974796
+      },
+      {
+        "db_write": 0.3033997999737039,
+        "fetch": 4.823128199961502,
+        "item_id": "himawari9_B13_S0510_20260615_0840",
+        "normalize": 2.6974011000129394,
+        "source": "himawari9_b13_s0510",
+        "total": 7.8239290999481454
+      },
+      {
+        "db_write": 0.09195620001992211,
+        "fetch": 3.858092799957376,
+        "item_id": "himawari9_B13_S0510_20260615_0850",
+        "normalize": 3.4071271999855526,
+        "source": "himawari9_b13_s0510",
+        "total": 7.357176199962851
+      },
+      {
+        "db_write": 0.2553848000243306,
+        "fetch": 6.675606499949936,
+        "item_id": "himawari9_B13_S0510_20260615_0830",
+        "normalize": 2.693322699982673,
+        "source": "himawari9_b13_s0510",
+        "total": 9.62431399995694
+      },
+      {
+        "db_write": 0.5360964999999851,
+        "fetch": 2.6177871999680065,
+        "item_id": "himawari9_B13_S0510_20260615_0900",
+        "normalize": 3.944587300007697,
+        "source": "himawari9_b13_s0510",
+        "total": 7.098470999975689
+      },
+      {
+        "db_write": 0.22177890001330525,
+        "fetch": 3.3876310999621637,
+        "item_id": "himawari9_B13_S0510_20260615_0930",
+        "normalize": 2.6954382000258192,
+        "source": "himawari9_b13_s0510",
+        "total": 6.304848200001288
+      },
+      {
+        "db_write": 0.05443689995445311,
+        "fetch": 5.107963700022083,
+        "item_id": "himawari9_B13_S0510_20260615_0910",
+        "normalize": 2.658459300000686,
+        "source": "himawari9_b13_s0510",
+        "total": 7.820859899977222
+      },
+      {
+        "db_write": 0.2888148999772966,
+        "fetch": 5.028633299982175,
+        "item_id": "himawari9_B13_S0510_20260615_0950",
+        "normalize": 2.132888099993579,
+        "source": "himawari9_b13_s0510",
+        "total": 7.450336299953051
+      },
+      {
+        "db_write": 0.24025849997997284,
+        "fetch": 8.886427399993408,
+        "item_id": "himawari9_B13_S0510_20260615_0920",
+        "normalize": 2.2164192000054754,
+        "source": "himawari9_b13_s0510",
+        "total": 11.343105099978857
+      },
+      {
+        "db_write": 0.29670209996402264,
+        "fetch": 5.790646500012372,
+        "item_id": "himawari9_B13_S0510_20260615_1000",
+        "normalize": 2.4136638999916613,
+        "source": "himawari9_b13_s0510",
+        "total": 8.501012499968056
+      },
+      {
+        "db_write": 0.15838640002766624,
+        "fetch": 3.0016030000406317,
+        "item_id": "himawari9_B13_S0510_20260615_1020",
+        "normalize": 2.942332400009036,
+        "source": "himawari9_b13_s0510",
+        "total": 6.102321800077334
+      },
+      {
+        "db_write": 0.0806200000224635,
+        "fetch": 3.4896699999808334,
+        "item_id": "himawari9_B13_S0510_20260615_1030",
+        "normalize": 2.386977999994997,
+        "source": "himawari9_b13_s0510",
+        "total": 5.957267999998294
+      },
+      {
+        "db_write": 0.24771160003729165,
+        "fetch": 8.55218669999158,
+        "item_id": "himawari9_B13_S0510_20260615_0940",
+        "normalize": 2.4773459999705665,
+        "source": "himawari9_b13_s0510",
+        "total": 11.277244299999438
+      },
+      {
+        "db_write": 0.6220337999984622,
+        "fetch": 2.787725700007286,
+        "item_id": "himawari9_B13_S0510_20260615_1040",
+        "normalize": 2.7273999000317417,
+        "source": "himawari9_b13_s0510",
+        "total": 6.13715940003749
+      },
+      {
+        "db_write": 0.061569000012241304,
+        "fetch": 2.597777599992696,
+        "item_id": "himawari9_B13_S0510_20260615_1050",
+        "normalize": 2.5659209999721497,
+        "source": "himawari9_b13_s0510",
+        "total": 5.225267599977087
+      },
+      {
+        "db_write": 0.055981500016059726,
+        "fetch": 18.098870899993926,
+        "item_id": "himawari9_B13_S0510_20260615_0820",
+        "normalize": 4.36442449997412,
+        "source": "himawari9_b13_s0510",
+        "total": 22.519276899984106
+      },
+      {
+        "db_write": 0.0652004000148736,
+        "fetch": 2.747170199989341,
+        "item_id": "himawari9_B13_S0510_20260615_1110",
+        "normalize": 2.511743600014597,
+        "source": "himawari9_b13_s0510",
+        "total": 5.324114200018812
+      },
+      {
+        "db_write": 0.20374639995861799,
+        "fetch": 3.525099999969825,
+        "item_id": "himawari9_B13_S0510_20260615_1120",
+        "normalize": 2.1242599999532104,
+        "source": "himawari9_b13_s0510",
+        "total": 5.8531063998816535
+      },
+      {
+        "db_write": 0.4628136999672279,
+        "fetch": 11.562884699960705,
+        "item_id": "himawari9_B13_S0510_20260615_1010",
+        "normalize": 3.3223378999973647,
+        "source": "himawari9_b13_s0510",
+        "total": 15.348036299925297
+      },
+      {
+        "db_write": 0.27863209997303784,
+        "fetch": 3.149026300001424,
+        "item_id": "himawari9_B13_S0510_20260615_1140",
+        "normalize": 2.832772699999623,
+        "source": "himawari9_b13_s0510",
+        "total": 6.260431099974085
+      },
+      {
+        "db_write": 0.2860003999667242,
+        "fetch": 6.883588400029112,
+        "item_id": "himawari9_B13_S0510_20260615_1100",
+        "normalize": 2.7928888999740593,
+        "source": "himawari9_b13_s0510",
+        "total": 9.962477699969895
+      },
+      {
+        "db_write": 0.28838169999653473,
+        "fetch": 6.4258822000119835,
+        "item_id": "himawari9_B13_S0510_20260615_1130",
+        "normalize": 2.442374899983406,
+        "source": "himawari9_b13_s0510",
+        "total": 9.156638799991924
+      },
+      {
+        "db_write": 1.5833226999966428,
+        "fetch": 5.159683900012169,
+        "item_id": "himawari9_B13_S0510_20260615_1150",
+        "normalize": 2.806318500021007,
+        "source": "himawari9_b13_s0510",
+        "total": 9.549325100029819
+      },
+      {
+        "db_write": 0.10785600001690909,
+        "fetch": 3.256595400045626,
+        "item_id": "himawari9_B13_S0510_20260615_1210",
+        "normalize": 2.988414100022055,
+        "source": "himawari9_b13_s0510",
+        "total": 6.35286550008459
+      },
+      {
+        "db_write": 0.36512869998114184,
+        "fetch": 3.054942399961874,
+        "item_id": "himawari9_B13_S0510_20260615_1240",
+        "normalize": 2.1152360000414774,
+        "source": "himawari9_b13_s0510",
+        "total": 5.535307099984493
+      },
+      {
+        "db_write": 0.2731344999629073,
+        "fetch": 2.3868838000344113,
+        "item_id": "himawari9_B13_S0510_20260615_1300",
+        "normalize": 2.5446400999790058,
+        "source": "himawari9_b13_s0510",
+        "total": 5.204658399976324
+      },
+      {
+        "db_write": 0.392917400051374,
+        "fetch": 2.8899992000078782,
+        "item_id": "himawari9_B13_S0510_20260615_1230",
+        "normalize": 4.901349699997809,
+        "source": "himawari9_b13_s0510",
+        "total": 8.184266300057061
+      },
+      {
+        "db_write": 0.27886159997433424,
+        "fetch": 9.261786100047175,
+        "item_id": "himawari9_B13_S0510_20260615_1220",
+        "normalize": 2.2606245999922976,
+        "source": "himawari9_b13_s0510",
+        "total": 11.801272300013807
+      },
+      {
+        "db_write": 0.2524799000239,
+        "fetch": 3.104373700043652,
+        "item_id": "himawari9_B13_S0510_20260615_1320",
+        "normalize": 3.045651499996893,
+        "source": "himawari9_b13_s0510",
+        "total": 6.402505100064445
+      },
+      {
+        "db_write": 0.04848300002049655,
+        "fetch": 3.8530866999644786,
+        "item_id": "himawari9_B13_S0510_20260615_1310",
+        "normalize": 2.957003099960275,
+        "source": "himawari9_b13_s0510",
+        "total": 6.85857279994525
+      },
+      {
+        "db_write": 0.3083007999812253,
+        "fetch": 10.386903300008271,
+        "item_id": "himawari9_B13_S0510_20260615_1200",
+        "normalize": 4.53536440001335,
+        "source": "himawari9_b13_s0510",
+        "total": 15.230568500002846
+      },
+      {
+        "db_write": 0.19446570001309738,
+        "fetch": 4.125026300025638,
+        "item_id": "himawari9_B13_S0510_20260615_1340",
+        "normalize": 1.931361700000707,
+        "source": "himawari9_b13_s0510",
+        "total": 6.250853700039443
+      },
+      {
+        "db_write": 0.005818000005092472,
+        "fetch": 0.7329508000402711,
+        "item_id": "himawari9_B13_S0510_20260615_1440",
+        "normalize": 0.00012699997751042247,
+        "source": "himawari9_b13_s0510",
+        "total": 0.738895800022874
+      },
+      {
+        "db_write": 0.2843346999725327,
+        "fetch": 6.539718399988487,
+        "item_id": "himawari9_B13_S0510_20260615_1350",
+        "normalize": 3.4490727999946102,
+        "source": "himawari9_b13_s0510",
+        "total": 10.27312589995563
+      },
+      {
+        "db_write": 0.24563359998865053,
+        "fetch": 5.608852300036233,
+        "item_id": "himawari9_B13_S0510_20260615_1410",
+        "normalize": 2.526577000040561,
+        "source": "himawari9_b13_s0510",
+        "total": 8.381062900065444
+      },
+      {
+        "db_write": 0.11666429997421801,
+        "fetch": 9.68981349997921,
+        "item_id": "himawari9_B13_S0510_20260615_1330",
+        "normalize": 2.5411888999515213,
+        "source": "himawari9_b13_s0510",
+        "total": 12.347666699904948
+      },
+      {
+        "db_write": 0.32693030004156753,
+        "fetch": 4.579818999976851,
+        "item_id": "himawari9_B13_S0510_20260615_1430",
+        "normalize": 4.079771900025662,
+        "source": "himawari9_b13_s0510",
+        "total": 8.98652120004408
+      },
+      {
+        "db_write": 0.22234340000431985,
+        "fetch": 3.46049079997465,
+        "item_id": "himawari9_B13_S0510_20260615_1450",
+        "normalize": 2.691375499998685,
+        "source": "himawari9_b13_s0510",
+        "total": 6.374209699977655
+      },
+      {
+        "db_write": 0.22574289998738095,
+        "fetch": 8.521136800001841,
+        "item_id": "himawari9_B13_S0510_20260615_1420",
+        "normalize": 2.2231491000275128,
+        "source": "himawari9_b13_s0510",
+        "total": 10.970028800016735
+      },
+      {
+        "db_write": 0.06601479998789728,
+        "fetch": 17.612751299981028,
+        "item_id": "himawari9_B13_S0510_20260615_1250",
+        "normalize": 2.400649399962276,
+        "source": "himawari9_b13_s0510",
+        "total": 20.0794154999312
+      },
+      {
+        "db_write": 0.18942070001503453,
+        "fetch": 0.7247797999880277,
+        "item_id": "himawari9_B13_S0510_20260615_1600",
+        "normalize": 0.00013999996008351445,
+        "source": "himawari9_b13_s0510",
+        "total": 0.9143404999631457
+      },
+      {
+        "db_write": 0.26731799996923655,
+        "fetch": 11.500941500009503,
+        "item_id": "himawari9_B13_S0510_20260615_1400",
+        "normalize": 2.35695470002247,
+        "source": "himawari9_b13_s0510",
+        "total": 14.12521420000121
+      },
+      {
+        "db_write": 0.7315819000359625,
+        "fetch": 7.764532800007146,
+        "item_id": "himawari9_B13_S0510_20260615_1500",
+        "normalize": 2.58157450001454,
+        "source": "himawari9_b13_s0510",
+        "total": 11.077689200057648
+      },
+      {
+        "db_write": 0.08211180003127083,
+        "fetch": 3.9460538999992423,
+        "item_id": "himawari9_B13_S0510_20260615_1610",
+        "normalize": 2.2817869000136852,
+        "source": "himawari9_b13_s0510",
+        "total": 6.309952600044198
+      },
+      {
+        "db_write": 0.36198919999878854,
+        "fetch": 3.4069329000194557,
+        "item_id": "himawari9_B13_S0510_20260615_1620",
+        "normalize": 2.6596667999983765,
+        "source": "himawari9_b13_s0510",
+        "total": 6.428588900016621
+      },
+      {
+        "db_write": 0.310008900007233,
+        "fetch": 8.934617699997034,
+        "item_id": "himawari9_B13_S0510_20260615_1510",
+        "normalize": 3.2010149999987334,
+        "source": "himawari9_b13_s0510",
+        "total": 12.445641600003
+      },
+      {
+        "db_write": 0.31739999999990687,
+        "fetch": 7.754208900034428,
+        "item_id": "himawari9_B13_S0510_20260615_1540",
+        "normalize": 3.2282649999833666,
+        "source": "himawari9_b13_s0510",
+        "total": 11.299873900017701
+      },
+      {
+        "db_write": 0.11617889994522557,
+        "fetch": 10.826516699977219,
+        "item_id": "himawari9_B13_S0510_20260615_1520",
+        "normalize": 2.7037273999885656,
+        "source": "himawari9_b13_s0510",
+        "total": 13.64642299991101
+      },
+      {
+        "db_write": 0.2795687000034377,
+        "fetch": 9.514357099949848,
+        "item_id": "himawari9_B13_S0510_20260615_1550",
+        "normalize": 2.9192880999762565,
+        "source": "himawari9_b13_s0510",
+        "total": 12.713213899929542
+      },
+      {
+        "db_write": 0.30437510000774637,
+        "fetch": 3.3850151000078768,
+        "item_id": "himawari9_B13_S0510_20260615_1640",
+        "normalize": 2.547097600006964,
+        "source": "himawari9_b13_s0510",
+        "total": 6.236487800022587
+      },
+      {
+        "db_write": 0.09352730005048215,
+        "fetch": 11.30148540000664,
+        "item_id": "himawari9_B13_S0510_20260615_1530",
+        "normalize": 4.133184100035578,
+        "source": "himawari9_b13_s0510",
+        "total": 15.5281968000927
+      },
+      {
+        "db_write": 0.37538250000216067,
+        "fetch": 2.923417000041809,
+        "item_id": "himawari9_B13_S0510_20260615_1630",
+        "normalize": 4.366109599999618,
+        "source": "himawari9_b13_s0510",
+        "total": 7.664909100043587
+      },
+      {
+        "db_write": 0.20916810003109276,
+        "fetch": 3.1226065999944694,
+        "item_id": "himawari9_B13_S0510_20260615_1650",
+        "normalize": 3.0221090000122786,
+        "source": "himawari9_b13_s0510",
+        "total": 6.353883700037841
+      },
+      {
+        "db_write": 0.6369157999870367,
+        "fetch": 3.6867033999878913,
+        "item_id": "himawari9_B13_S0510_20260615_1700",
+        "normalize": 3.87341490003746,
+        "source": "himawari9_b13_s0510",
+        "total": 8.197034100012388
+      },
+      {
+        "db_write": 0.09752419998403639,
+        "fetch": 3.8928692000336014,
+        "item_id": "himawari9_B13_S0510_20260615_1710",
+        "normalize": 3.2496097999974154,
+        "source": "himawari9_b13_s0510",
+        "total": 7.240003200015053
+      },
+      {
+        "db_write": 0.1580940000130795,
+        "fetch": 4.679584599973168,
+        "item_id": "himawari9_B13_S0510_20260615_1720",
+        "normalize": 2.7237661000108346,
+        "source": "himawari9_b13_s0510",
+        "total": 7.561444699997082
+      },
+      {
+        "db_write": 0.09798670001327991,
+        "fetch": 2.76020239997888,
+        "item_id": "himawari9_B13_S0510_20260615_1730",
+        "normalize": 3.6142029000329785,
+        "source": "himawari9_b13_s0510",
+        "total": 6.472392000025138
+      },
+      {
+        "db_write": 0.2312917000381276,
+        "fetch": 2.7430059000034817,
+        "item_id": "himawari9_B13_S0510_20260615_1810",
+        "normalize": 2.4050376000232063,
+        "source": "himawari9_b13_s0510",
+        "total": 5.379335200064816
+      },
+      {
+        "db_write": 0.26431130000855774,
+        "fetch": 3.384901000012178,
+        "item_id": "himawari9_B13_S0510_20260615_1750",
+        "normalize": 3.388105300022289,
+        "source": "himawari9_b13_s0510",
+        "total": 7.037317600043025
+      },
+      {
+        "db_write": 0.3090323000214994,
+        "fetch": 3.8614727000240237,
+        "item_id": "himawari9_B13_S0510_20260615_1800",
+        "normalize": 3.6510458000120707,
+        "source": "himawari9_b13_s0510",
+        "total": 7.821550800057594
+      },
+      {
+        "db_write": 0.24658129998715594,
+        "fetch": 6.280834299977869,
+        "item_id": "himawari9_B13_S0510_20260615_1740",
+        "normalize": 2.5956920000026003,
+        "source": "himawari9_b13_s0510",
+        "total": 9.123107599967625
+      },
+      {
+        "db_write": 0.4036315000266768,
+        "fetch": 3.505232800031081,
+        "item_id": "himawari9_B13_S0510_20260615_1830",
+        "normalize": 2.46042859996669,
+        "source": "himawari9_b13_s0510",
+        "total": 6.369292900024448
+      },
+      {
+        "db_write": 0.06634479999775067,
+        "fetch": 4.051089100015815,
+        "item_id": "himawari9_B13_S0510_20260615_1820",
+        "normalize": 2.7014032999868505,
+        "source": "himawari9_b13_s0510",
+        "total": 6.8188372000004165
+      },
+      {
+        "db_write": 0.2587644000304863,
+        "fetch": 2.5938033999991603,
+        "item_id": "himawari9_B13_S0510_20260615_1900",
+        "normalize": 2.324954500014428,
+        "source": "himawari9_b13_s0510",
+        "total": 5.177522300044075
+      },
+      {
+        "db_write": 0.12446760002058,
+        "fetch": 5.377386200008914,
+        "item_id": "himawari9_B13_S0510_20260615_1850",
+        "normalize": 1.9417734000016935,
+        "source": "himawari9_b13_s0510",
+        "total": 7.443627200031187
+      },
+      {
+        "db_write": 0.06915550003759563,
+        "fetch": 4.516594499989878,
+        "item_id": "himawari9_B13_S0510_20260615_1910",
+        "normalize": 3.9628484999993816,
+        "source": "himawari9_b13_s0510",
+        "total": 8.548598500026856
+      },
+      {
+        "db_write": 0.8059509000158869,
+        "fetch": 3.375304099987261,
+        "item_id": "himawari9_B13_S0510_20260615_1950",
+        "normalize": 2.692885699972976,
+        "source": "himawari9_b13_s0510",
+        "total": 6.874140699976124
+      },
+      {
+        "db_write": 0.05420750001212582,
+        "fetch": 3.4614619000349194,
+        "item_id": "himawari9_B13_S0510_20260615_1920",
+        "normalize": 4.710166000004392,
+        "source": "himawari9_b13_s0510",
+        "total": 8.225835400051437
+      },
+      {
+        "db_write": 0.08597930002724752,
+        "fetch": 3.3754182999837212,
+        "item_id": "himawari9_B13_S0510_20260615_2000",
+        "normalize": 3.4847667000140063,
+        "source": "himawari9_b13_s0510",
+        "total": 6.946164300024975
+      },
+      {
+        "db_write": 0.08005579997552559,
+        "fetch": 7.5429126000381075,
+        "item_id": "himawari9_B13_S0510_20260615_1930",
+        "normalize": 2.752208400052041,
+        "source": "himawari9_b13_s0510",
+        "total": 10.375176800065674
+      },
+      {
+        "db_write": 0.26338440005201846,
+        "fetch": 12.852069100015797,
+        "item_id": "himawari9_B13_S0510_20260615_1840",
+        "normalize": 2.469822099956218,
+        "source": "himawari9_b13_s0510",
+        "total": 15.585275600024033
+      },
+      {
+        "db_write": 0.26767069997731596,
+        "fetch": 5.260261600022204,
+        "item_id": "himawari9_B13_S0510_20260615_2010",
+        "normalize": 2.9079781000036746,
+        "source": "himawari9_b13_s0510",
+        "total": 8.435910400003195
+      },
+      {
+        "db_write": 0.3019909000140615,
+        "fetch": 2.425256000016816,
+        "item_id": "himawari9_B13_S0510_20260615_2020",
+        "normalize": 3.478410999989137,
+        "source": "himawari9_b13_s0510",
+        "total": 6.2056579000200145
+      },
+      {
+        "db_write": 0.26377930003218353,
+        "fetch": 3.280146599980071,
+        "item_id": "himawari9_B13_S0510_20260615_2030",
+        "normalize": 2.63077930000145,
+        "source": "himawari9_b13_s0510",
+        "total": 6.174705200013705
+      },
+      {
+        "db_write": 0.2239079999853857,
+        "fetch": 2.5979468000005,
+        "item_id": "himawari9_B13_S0510_20260615_2110",
+        "normalize": 2.029025699943304,
+        "source": "himawari9_b13_s0510",
+        "total": 4.85088049992919
+      },
+      {
+        "db_write": 0.21903089998522773,
+        "fetch": 13.635972400021274,
+        "item_id": "himawari9_B13_S0510_20260615_1940",
+        "normalize": 2.0695295999757946,
+        "source": "himawari9_b13_s0510",
+        "total": 15.924532899982296
+      },
+      {
+        "db_write": 0.5988800999475643,
+        "fetch": 5.903201899956912,
+        "item_id": "himawari9_B13_S0510_20260615_2040",
+        "normalize": 4.0196444999892265,
+        "source": "himawari9_b13_s0510",
+        "total": 10.521726499893703
+      },
+      {
+        "db_write": 0.21658780000871047,
+        "fetch": 6.4685445000068285,
+        "item_id": "himawari9_B13_S0510_20260615_2100",
+        "normalize": 2.226280799950473,
+        "source": "himawari9_b13_s0510",
+        "total": 8.911413099966012
+      },
+      {
+        "db_write": 0.07062300003599375,
+        "fetch": 2.80786200001603,
+        "item_id": "himawari9_B13_S0510_20260615_2130",
+        "normalize": 4.320819000015035,
+        "source": "himawari9_b13_s0510",
+        "total": 7.199304000067059
+      },
+      {
+        "db_write": 0.3265895000076853,
+        "fetch": 9.039881800010335,
+        "item_id": "himawari9_B13_S0510_20260615_2050",
+        "normalize": 2.3545674000051804,
+        "source": "himawari9_b13_s0510",
+        "total": 11.7210387000232
+      },
+      {
+        "db_write": 0.20089069998357445,
+        "fetch": 4.1532527999952435,
+        "item_id": "himawari9_B13_S0510_20260615_2200",
+        "normalize": 1.985108199995011,
+        "source": "himawari9_b13_s0510",
+        "total": 6.339251699973829
+      },
+      {
+        "db_write": 0.07417310000164434,
+        "fetch": 7.899552499991842,
+        "item_id": "himawari9_B13_S0510_20260615_2140",
+        "normalize": 1.9081645000260323,
+        "source": "himawari9_b13_s0510",
+        "total": 9.881890100019518
+      },
+      {
+        "db_write": 0.23955619998741895,
+        "fetch": 5.438399699982256,
+        "item_id": "himawari9_B13_S0510_20260615_2150",
+        "normalize": 2.1363387999590486,
+        "source": "himawari9_b13_s0510",
+        "total": 7.814294699928723
+      },
+      {
+        "db_write": 0.2788582000066526,
+        "fetch": 2.871994099987205,
+        "item_id": "himawari9_B13_S0510_20260615_2210",
+        "normalize": 4.175110600015614,
+        "source": "himawari9_b13_s0510",
+        "total": 7.325962900009472
+      },
+      {
+        "db_write": 0.21519700001226738,
+        "fetch": 2.42135280004004,
+        "item_id": "himawari9_B13_S0510_20260615_2240",
+        "normalize": 2.1404077999759465,
+        "source": "himawari9_b13_s0510",
+        "total": 4.776957600028254
+      },
+      {
+        "db_write": 0.05209950002608821,
+        "fetch": 11.206513600016478,
+        "item_id": "himawari9_B13_S0510_20260615_2120",
+        "normalize": 2.3761091000051238,
+        "source": "himawari9_b13_s0510",
+        "total": 13.63472220004769
+      },
+      {
+        "db_write": 0.36249240004690364,
+        "fetch": 3.848848399997223,
+        "item_id": "himawari9_B13_S0510_20260615_2230",
+        "normalize": 3.296315100044012,
+        "source": "himawari9_b13_s0510",
+        "total": 7.507655900088139
+      },
+      {
+        "db_write": 0.10820619994774461,
+        "fetch": 1.8479836999904364,
+        "item_id": "himawari9_B13_S0510_20260615_2250",
+        "normalize": 2.662768199981656,
+        "source": "himawari9_b13_s0510",
+        "total": 4.618958099919837
+      },
+      {
+        "db_write": 0.1139907999895513,
+        "fetch": 2.5766226000268944,
+        "item_id": "himawari9_B13_S0510_20260615_2310",
+        "normalize": 2.2256311999517493,
+        "source": "himawari9_b13_s0510",
+        "total": 4.916244599968195
+      },
+      {
+        "db_write": 0.051714800007175654,
+        "fetch": 4.366933699988294,
+        "item_id": "himawari9_B13_S0510_20260615_2300",
+        "normalize": 2.0135059999884106,
+        "source": "himawari9_b13_s0510",
+        "total": 6.432154499983881
+      },
+      {
+        "db_write": 0.09009889996377751,
+        "fetch": 2.607132899982389,
+        "item_id": "himawari9_B13_S0510_20260615_2330",
+        "normalize": 2.000994100002572,
+        "source": "himawari9_b13_s0510",
+        "total": 4.6982258999487385
+      },
+      {
+        "db_write": 0.14594010001746938,
+        "fetch": 9.251438500010408,
+        "item_id": "himawari9_B13_S0510_20260615_2220",
+        "normalize": 2.2542811000021175,
+        "source": "himawari9_b13_s0510",
+        "total": 11.651659700029995
+      },
+      {
+        "db_write": 0.08318990003317595,
+        "fetch": 2.0677168000256643,
+        "item_id": "himawari9_B13_S0510_20260615_2350",
+        "normalize": 3.2331570999813266,
+        "source": "himawari9_b13_s0510",
+        "total": 5.384063800040167
+      },
+      {
+        "db_write": 0.04710319999139756,
+        "fetch": 4.440073799982201,
+        "item_id": "himawari9_B13_S0510_20260615_2340",
+        "normalize": 2.2407129000057466,
+        "source": "himawari9_b13_s0510",
+        "total": 6.7278898999793455
+      },
+      {
+        "db_write": 0.04707779997261241,
+        "fetch": 4.588983699970413,
+        "item_id": "himawari9_B13_S0510_20260615_2320",
+        "normalize": 3.212497500004247,
+        "source": "himawari9_b13_s0510",
+        "total": 7.848558999947272
+      }
+    ],
+    "phase_summary": {
+      "db_write": {
+        "count": 280,
+        "max_seconds": 8.033841900003608,
+        "mean_seconds": 0.45874592857206675,
+        "p50_seconds": 0.26431130000855774,
+        "p90_seconds": 0.8059509000158869
+      },
+      "fetch": {
+        "count": 280,
+        "max_seconds": 41.01019619998988,
+        "mean_seconds": 13.312524138928607,
+        "p50_seconds": 9.68981349997921,
+        "p90_seconds": 30.574529900040943
+      },
+      "normalize": {
+        "count": 280,
+        "max_seconds": 14.597531900042668,
+        "mean_seconds": 5.2260174700000785,
+        "p50_seconds": 4.3791527999565005,
+        "p90_seconds": 9.027712100010831
+      },
+      "total": {
+        "count": 280,
+        "max_seconds": 50.53310760000022,
+        "mean_seconds": 18.997287537500753,
+        "p50_seconds": 14.379273300000932,
+        "p90_seconds": 40.17214649997186
+      }
+    },
+    "raw_bytes_deleted": 1786039424,
+    "raw_files_deleted": 277,
+    "run_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260615_20260615_20260709T152141Z_109836",
+    "source_issues_touched": 280,
+    "sources": [
+      "gefs_control",
+      "gfs",
+      "himawari_b13_s0510"
+    ],
+    "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-15\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260615_20260615_20260709T152141Z_109836\\staging",
+    "start_date": "2026-06-15",
+    "started_at_utc": "2026-07-09T15:21:41.489252Z",
+    "station_features_upserted": 15743,
+    "status": "complete_with_failures",
+    "task_base_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-15\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260615_20260615_20260709T152141Z_109836",
+    "total_seconds_total": 5319.240510500211
+  },
+  "updated_at_utc": "2026-07-09T15:33:40.185221Z"
+}

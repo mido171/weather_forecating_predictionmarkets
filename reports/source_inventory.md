@@ -52,6 +52,14 @@ Generated from `config/data_sources.yaml`. Endpoint implementation and source-co
 | hko_tropical_cyclone_best_track | Hong Kong Observatory | P2 | RETROSPECTIVE_ONLY | retrospective_regime_label | annual_or_event_update | official_download |
 | hong_kong_air_quality | Hong Kong Environmental Protection Department | P3 | PROXY_WITH_LIMITATIONS | exploratory_aerosol_haze_proxy | hourly_or_subhourly | open_data_discovery |
 | terrain_land_cover_coastline | multiple_official_or_open_geospatial_sources | P2 | STATIC_METADATA | static_station_and_flow_context | static_versioned | source_selection_required |
+| noaa_ghcnh_hko | NOAA NCEI | P0 | PROXY_WITH_LIMITATIONS | exact_or_nearest_hourly_station_history_for_hko_headquarters | archive_release | official_archive_discovery |
+| noaa_oisst_v21 | NOAA | P0 | PROXY_WITH_LIMITATIONS | daily_gridded_sea_surface_temperature | daily | official_ocean_archive_subset_required |
+| himawari_ahi_noaa_aws | JMA / NOAA Open Data Registry | P0 | OPERATIONAL_POINT_IN_TIME | geostationary_satellite_cloud_and_radiation_context | scan_product_specific | official_open_archive_subset_required |
+| gpm_imerg_final | NASA GPM | P0 | RETROSPECTIVE_ONLY | historical_gridded_precipitation_final_run | half_hourly | official_api_credentials_subset_required |
+| gpm_imerg_early_late | NASA GPM | P0 | OPERATIONAL_POINT_IN_TIME | near_real_time_gridded_precipitation | half_hourly | official_api_credentials_subset_required |
+| cams_eac4_reanalysis | Copernicus Atmosphere Monitoring Service | P1 | RETROSPECTIVE_ONLY | retrospective_aerosol_haze_reanalysis | product_specific | ads_api_credentials_subset_required |
+| cams_global_composition_forecasts | Copernicus Atmosphere Monitoring Service | P1 | OPERATIONAL_POINT_IN_TIME | operational_aerosol_haze_forecasts | forecast_cycle_specific | ads_api_credentials_subset_required |
+| hong_kong_epd_air_quality_observations | Hong Kong Environmental Protection Department | P1 | PROXY_WITH_LIMITATIONS | official_local_air_quality_observations | hourly_or_subhourly | official_open_data_discovery |
 | polymarket_gamma_event_by_slug | Polymarket | P0 | MARKET_ONLY | event_market_rules_metadata | poll_on_change | http_json_template |
 | polymarket_clob_book | Polymarket | P0 | MARKET_ONLY | executable_order_book_snapshot | on_demand_or_websocket | http_json_template |
 | polymarket_market_websocket | Polymarket | P0 | MARKET_ONLY | live_order_book_deltas_and_trades | event_driven | websocket |
@@ -62,10 +70,10 @@ Generated from `config/data_sources.yaml`. Endpoint implementation and source-co
 
 - **MARKET_ONLY:** 5
 - **METADATA:** 4
-- **OPERATIONAL_POINT_IN_TIME:** 32
+- **OPERATIONAL_POINT_IN_TIME:** 35
 - **POTENTIAL_POINT_IN_TIME_ARCHIVE:** 1
-- **PROXY_WITH_LIMITATIONS:** 5
-- **RETROSPECTIVE_ONLY:** 3
+- **PROXY_WITH_LIMITATIONS:** 8
+- **RETROSPECTIVE_ONLY:** 5
 - **STATIC_METADATA:** 1
 - **TARGET_ONLY:** 2
 

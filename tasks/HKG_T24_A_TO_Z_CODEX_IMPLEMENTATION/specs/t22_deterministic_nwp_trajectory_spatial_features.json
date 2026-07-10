@@ -1,0 +1,53 @@
+{
+  "id": "T22",
+  "suffix": "deterministic_nwp_trajectory_spatial_features",
+  "title": "Deterministic NWP Trajectory, Vertical, and Spatial Feature Store",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T16",
+    "T18"
+  ],
+  "mission": "Convert eligible deterministic GFS/IFS/AI/CWA runs into physically meaningful target-day features without target outcomes.",
+  "inputs": [
+    "Eligible deterministic run values",
+    "semantic variable map",
+    "locations/domains",
+    "target snapshots"
+  ],
+  "steps": [
+    "Build target-day local-hour trajectories.",
+    "Derive direct Tmax, peak hour, heating/cooling slopes, plateau and diurnal range.",
+    "Integrate shortwave/cloud/rain over the heating window.",
+    "Derive moisture, T\u2212Td, wind/onshore, pressure, ridge/subsidence and vertical-stability indices.",
+    "Derive HKO/inland/coastal/marine and synoptic gradients.",
+    "Derive run-age and run-to-run revision features from earlier eligible cycles.",
+    "Handle model-specific missing variables through availability masks, not cross-model imputation.",
+    "Record model version and selector era."
+  ],
+  "db_objects": [
+    "feature_store deterministic_nwp features"
+  ],
+  "outputs": [
+    "feature_definitions_nwp_deterministic.csv",
+    "trajectory_examples.parquet",
+    "spatial_summary_manifest.csv",
+    "model_feature_coverage.csv"
+  ],
+  "tests": [
+    "Local-day hour mapping",
+    "unit conversions",
+    "run selection",
+    "spatial aggregation",
+    "no future cycle"
+  ],
+  "acceptance": [
+    "GFS P0 feature coverage sufficient for core frame",
+    "Each model family separately versioned"
+  ],
+  "failure": [
+    "Variable absent: feature unavailable for that model; do not substitute a different semantic silently"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t22_deterministic_nwp_trajectory_spatial_features.md"
+}

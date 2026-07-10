@@ -1,0 +1,14 @@
+dataset_id,db_inclusion,recommended_layer,current_operational_predictor_value_0_100,diagnostic_research_value_0_100,future_potential_0_100,verdict
+01_hko_daily_tmax_target,YES—canonical labels plus audit raw,label_core / raw_audit,95,100,100,Use canonical labels; derive only prior-day/older target-memory features. Never use target T.
+02_hko_daily_climate_all_elements,YES—diagnostic schema,diagnostic_physics,0,90,75,"Store all 21 variables, but do not promote as operational predictors until publication timing is proven."
+03_noaa_igra_upper_air_hkm00045004,YES—raw quarantine + rebuilt clean diagnostic,diagnostic_physics,0,95,85,Very valuable mechanism data; current sentinels/scales and release timing block deployment.
+04_noaa_isd_regional_surface,YES—raw quarantine + rebuilt station schema,diagnostic_station_network,0,98,92,"Highest-value non-forecast research source, but wind parser, coordinates and operational-vintage contract must be repaired."
+05_hko_historical_rss_forecasts,YES—highest priority canonical operational source,operational_archive / anchor / research_supervised,100,100,100,Primary official anchor and text/residual source. Quarantine invalid press rows and load Parquet once.
+06_hko_tropical_cyclone_best_track,YES—diagnostic only,diagnostic_regime_labels,0,75,65,Useful for TC mechanism labels and proxy discovery; retrospective best track is forbidden live.
+07_hko_radar_satellite_lightning_nowcast,YES—live exact-vintage collection/object catalog,live_exact_vintage / live_object_catalog,5,45,92,"Potentially valuable cloud/rain/convection layer, but present history is only days and imagery is not feature-extracted."
+08_hko_marine_tide_coastal_waters,YES—live exact-vintage collection,live_exact_vintage,5,40,60,Secondary marine-regime source; current sample is tiny and tide likely indirect.
+09_hko_arwf_station_forecasts,YES—critical live collection,live_nwp_anchor,5,35,98,"Potentially one of the best future independent anchors; only one cycle now, timestamps/station mapping need normalization."
+10_ncep_operational_grib_inventory,YES—object metadata only until decoded,nwp_object_catalog,0,15,100,Very high future potential; current table is only an incomplete inventory with empty cycle fields.
+11_static_geospatial_inventory,"YES—object metadata, then derived feature dimension",static_object_catalog / station_context,20,70,85,Terrain/coast/exposure features are valuable; inventory rows themselves are not predictors.
+12_hkg_t24_robust_experiment_outputs,YES—research registry/artifact store only,research_artifacts / research_metrics / research_oof,0,100,80,Essential institutional memory and OOF evidence; never use as canonical live feature source.
+[root],YES—catalog/provenance only; archive bytes outside DB,catalog / acquisition_provenance / object_catalog,0,45,50,Manifests support reproducibility; ZIP bytes and local paths are not model inputs.

@@ -1,0 +1,86 @@
+{
+  "tminus1_2359": {
+    "D4_stack": {
+      "weights": {
+        "resid_D0_zero": 0.00031591026707346185,
+        "resid_D0_a7": 0.8705468274152727,
+        "resid_D1_memory": 0.0036256903213066393,
+        "resid_D2_lgbm_a3_memory": 0.06990683587067545,
+        "resid_D3_lgbm_pruned_memory": 1.7078854031233013e-18,
+        "resid_D_linear_memory": 0.05560473612567171
+      },
+      "lambda": 1.0,
+      "status": "fit",
+      "validation_mae": 0.8923810649924548,
+      "validation_raw_official_mae": 0.9252676126462535
+    },
+    "D5_conservative_blend": {
+      "scalar": 1.0,
+      "cap_abs_c": 0.75,
+      "mae": 0.8925082255705858,
+      "rmse": 1.1493709620819421,
+      "p90_absolute_error": 1.9072659538731047,
+      "rmse_delta_vs_a7": 4.50540642686903e-05,
+      "p90_delta_vs_a7": 0.0034553471668070657,
+      "passes_no_harm": true,
+      "n_scored": 4017,
+      "status": "selected_on_rolling_validation"
+    }
+  },
+  "tminus1_2100": {
+    "D4_stack": {
+      "weights": {
+        "resid_D0_zero": 0.0,
+        "resid_D0_a7": 0.7951449127311182,
+        "resid_D1_memory": 0.0,
+        "resid_D2_lgbm_a3_memory": 0.014045828875758028,
+        "resid_D3_lgbm_pruned_memory": 0.037040759535089826,
+        "resid_D_linear_memory": 0.15376849885803404
+      },
+      "lambda": 1.0,
+      "status": "fit",
+      "validation_mae": 0.9141058884273058,
+      "validation_raw_official_mae": 0.9564313081554462
+    },
+    "D5_conservative_blend": {
+      "scalar": 1.0,
+      "cap_abs_c": 0.75,
+      "mae": 0.9147642805928021,
+      "rmse": 1.1774515856325984,
+      "p90_absolute_error": 1.9588279514764568,
+      "rmse_delta_vs_a7": -2.6228821875307062e-05,
+      "p90_delta_vs_a7": 0.00788246841406215,
+      "passes_no_harm": true,
+      "n_scored": 3654,
+      "status": "selected_on_rolling_validation"
+    }
+  },
+  "tminus1_1800": {
+    "D4_stack": {
+      "weights": {
+        "resid_D0_zero": 0.022459517030412275,
+        "resid_D0_a7": 0.5054999766950583,
+        "resid_D1_memory": 0.00023970541077176298,
+        "resid_D2_lgbm_a3_memory": 0.11211703224550464,
+        "resid_D3_lgbm_pruned_memory": 0.10962603521921001,
+        "resid_D_linear_memory": 0.2500577333990431
+      },
+      "lambda": 1.0,
+      "status": "fit",
+      "validation_mae": 0.9309608417000209,
+      "validation_raw_official_mae": 0.963621308308032
+    },
+    "D5_conservative_blend": {
+      "scalar": 1.0,
+      "cap_abs_c": 0.75,
+      "mae": 0.9308789134807407,
+      "rmse": 1.194307960667597,
+      "p90_absolute_error": 1.993417164479877,
+      "rmse_delta_vs_a7": -0.00176477218043547,
+      "p90_delta_vs_a7": 0.00672023479914774,
+      "passes_no_harm": true,
+      "n_scored": 3623,
+      "status": "selected_on_rolling_validation"
+    }
+  }
+}

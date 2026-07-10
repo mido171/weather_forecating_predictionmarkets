@@ -1,0 +1,3296 @@
+[
+  {
+    "window": "fold1",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.042164836849135516,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04258283774750746
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04244691223854469
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04234573441521041
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.0422522459335244
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.042188788577320634
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0425819344271964
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04244533557189135
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04234335500306239
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.042248912048954354
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04218447798132446
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04258049312657964
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04244281172954005
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.042339543233397677
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04224357513200732
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.042177590211743325
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0425778312774453
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.042438122704555666
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04233245148703599
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04223365942919435
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.042164836849135516
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2356166382562621,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2356166382562621,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.033934965828528896,
+          "B2_month_residual_pmf": 0.019627585928362445,
+          "B3_forecast_level_residual_pmf": 0.022180453659340457,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03166917173287108,
+          "C1_multinomial_ridge": 0.042587822850897204
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold2",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.040507758905662036,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0408610689002462
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04074529188133176
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040651950164116615
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04056597531504039
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.040510557111136485
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0408609789195798
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.040745080728013215
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.0406516104167312
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04056551269791091
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04051003795868659
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04086083290423389
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0407447392022927
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040651063278311764
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04056477362645281
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04050922167438879
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04086055487336658
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04074409281734553
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04065003609100115
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04056340704539908
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.040507758905662036
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2318013619532977,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2318013619532977,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.008824554220868506,
+          "B1_global_residual_pmf": 0.02453935512561036,
+          "B2_month_residual_pmf": 0.026631392896351892,
+          "B3_forecast_level_residual_pmf": 0.028185089602046517,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.02853161534280555,
+          "C1_multinomial_ridge": 0.033287992812317264
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold3",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04173418440006774,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04209759021692406
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04190609228254199
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.041801803032511825
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04174514173998771
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.041742707737987654
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.042097333060220836
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04190567657371172
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.041801191453778114
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04174418646276158
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.041741222997306204
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04209691244487276
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04190499743624662
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04180019357531634
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04174262987670745
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.041738807046418365
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04209609991888819
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.041903688380796444
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04179827456039518
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.041739643808308406
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04173418440006774
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2257151972671863,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2257151972671863,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.00010425323192756617,
+          "B1_global_residual_pmf": 0.034725288311302276,
+          "B2_month_residual_pmf": 0.02236062032680578,
+          "B3_forecast_level_residual_pmf": 0.03545375965018379,
+          "B4_hierarchical_residual_pmf": 0.8500000000000001,
+          "P1_normal_mos": 0.032684153310714004,
+          "C1_multinomial_ridge": 0.02467192516906654
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold4",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04066698161242448,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04158021528230787
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.041183394528715965
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040924598892744295
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04075333582888937
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04067798612606077
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.041579770005294885
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.041182728830521306
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040923638735954476
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04075194757373774
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04067608720130409
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04157903982292796
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04118163759714015
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040922065635310784
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.040749674729890134
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04067298123599571
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04157762268518425
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.041179521173034694
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.040919017562114586
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.040745276694606786
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04066698161242448
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2131427748096937,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2131427748096937,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.038360736117266946,
+          "B2_month_residual_pmf": 0.02619712999562083,
+          "B3_forecast_level_residual_pmf": 0.03262013936197463,
+          "B4_hierarchical_residual_pmf": 0.8500000000000001,
+          "P1_normal_mos": 0.03249044303515907,
+          "C1_multinomial_ridge": 0.0203315514899785
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "presealed_2022_2023",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.043838747606918915,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04456957571418427
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04420871677814965
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.044003021244793473
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04388008361376692
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043843390535680975
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04456942572304089
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044208535734915747
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04400274162123103
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043879601033352394
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043842587629697095
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.044569179836082023
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0442082394899845
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04400228445132853
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.0438788123205897
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04384127587222869
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04456870290062532
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04420766684247953
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04400140211316793
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043877291114948785
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043838747606918915
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2107099949645568,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2107099949645568,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.033603836112963595,
+          "B2_month_residual_pmf": 0.023472725198156533,
+          "B3_forecast_level_residual_pmf": 0.025971277455983294,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.029531221042599982,
+          "C1_multinomial_ridge": 0.0374209401902966
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "sealed_2024_2026_05",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.042120905782226166,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04295044100122365
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.042722913369634165
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04252416056999606
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04231845063672927
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04212435792870708
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04295035977068696
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04272275533002532
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.042523898317904846
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.042318041812463396
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04212376296614653
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04295022715622551
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04272249659751024
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04252346862973479
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.042317372075809635
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04212278913401368
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.042949971928721346
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.042721996023718525
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04252263605414715
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.042316074749907846
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.042120905782226166
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2082706834540302,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2082706834540302,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.03557003713387744,
+          "B2_month_residual_pmf": 0.02908639903806193,
+          "B3_forecast_level_residual_pmf": 0.026262961282401097,
+          "B4_hierarchical_residual_pmf": 0.8500000000000001,
+          "P1_normal_mos": 0.030916113864666354,
+          "C1_multinomial_ridge": 0.02816448868099324
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold1__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04703382052014616,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04843672216546904
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.047928174498736056
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.047579862677383
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04729046008672854
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.047074630764390626
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.048435006083813535
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04792517392843685
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.047575523074540264
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04728460049735632
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.047067195043375094
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04843227992363538
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.047920397741547334
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04756861664477511
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.047275286234432765
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04705539717731122
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04842728138419145
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0479116093737318
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04755591327562665
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04725819271442187
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04703382052014616
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2916768649913128,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2916768649913128,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.04273188351163377,
+          "B2_month_residual_pmf": 0.02247273915672559,
+          "B3_forecast_level_residual_pmf": 0.023643531242081014,
+          "B4_hierarchical_residual_pmf": 0.8500000000000001,
+          "P1_normal_mos": 0.03274940743468078,
+          "C1_multinomial_ridge": 0.02840243865487882
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold2__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04370929756287346,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04445206155021244
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044102919393046926
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04389520782671648
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043760862028336726
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043713415756120914
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04445182449472439
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04410255326819932
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04389468934309909
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043760176598048706
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04371263022206967
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04445144060396992
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04410196435911426
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04389386174936683
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043759094862760556
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04371141375586817
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04445071225487248
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04410086079226069
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.043892333035116075
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04375713984134772
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04370929756287346
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.286589532612272,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.286589532612272,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.007698158437872514,
+          "B1_global_residual_pmf": 0.023451199524034766,
+          "B2_month_residual_pmf": 0.025898996359242157,
+          "B3_forecast_level_residual_pmf": 0.03268637842498219,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.02590880621352007,
+          "C1_multinomial_ridge": 0.034356461040348375
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold3__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04529973132527585,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04582980966023263
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04562018058249485
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.045480517845223986
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.045369141782118524
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.045314173947238474
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.045829315516498104
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04561936700554889
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04547932447712983
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04536737159673496
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04531163624104976
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04582851121566722
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.045618044945017124
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04547738740602977
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.045364501293976525
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04530752667211394
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04582697111023329
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.045615520979145084
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.045473696882614933
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.045359043633670354
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04529973132527585
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2750966972632625,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2750966972632625,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.03797876677164689,
+          "B2_month_residual_pmf": 0.023418752495637535,
+          "B3_forecast_level_residual_pmf": 0.03797228541849502,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03215154370242826,
+          "C1_multinomial_ridge": 0.018478651611792272
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold4__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04328808219630059,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.043965971344068155
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04365014673788087
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04344740152868192
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04332996118144316
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04330149836232815
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04396537259463721
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04364930263020587
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.043446203024755735
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04332824871971033
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04329917103637502
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04396439213516073
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04364792082252892
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04344424288193873
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.0433254516310928
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04329537538801983
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04396249416814177
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.043645247440174666
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04344045700386945
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04332006210349315
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04328808219630059
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2610644996362423,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2610644996362423,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.03618483588021011,
+          "B2_month_residual_pmf": 0.02280464985857447,
+          "B3_forecast_level_residual_pmf": 0.03198123144798288,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03199830328935501,
+          "C1_multinomial_ridge": 0.02703097952387761
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "presealed_2022_2023__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04608581884743064,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04654335928999304
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.046302071964666534
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04616892282183247
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.046095094837101766
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04609505893325981
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.046543083799595555
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04630164801912818
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04616824879361239
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.0460940244074529
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046093455787556435
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04654263355940516
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.046300955548108674
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04616714820551275
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.046092277480327626
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046090841378369725
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04654176513641445
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04629962130473796
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04616502891165408
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.046088916904051626
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04608581884743064
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 1.0,
+        "scale_c": 1.2560925209808211,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 1.0,
+        "scale_c": 1.2560925209808211,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.036567234638247556,
+          "B2_month_residual_pmf": 0.022268552051334878,
+          "B3_forecast_level_residual_pmf": 0.02746497660986984,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03204716184710861,
+          "C1_multinomial_ridge": 0.03165207485343916
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "sealed_2024_2026_05__t_minus_1_1800_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04376248929915038,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.044492915606456546
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04428792766951191
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04411424047645397
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04393580116376438
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043768600969424455
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04449284073334462
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044287705156878486
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.044113814583906515
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04393509272401468
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04376754468012302
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04449271932258232
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0442873416689763
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.044113117998082464
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043933934092394565
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043765818438308526
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04449248858888221
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044286641203853706
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04411177252819685
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04393169649336561
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04376248929915038
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2516464160533112,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2516464160533112,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.037078300868307615,
+          "B2_month_residual_pmf": 0.027508406908546928,
+          "B3_forecast_level_residual_pmf": 0.0256104918461535,
+          "B4_hierarchical_residual_pmf": 0.8500000000000002,
+          "P1_normal_mos": 0.03147140144663327,
+          "C1_multinomial_ridge": 0.028331398930358583
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold1__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04596974481944549,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04736534961258982
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.046829366373943276
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04647411434201294
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.046194179246740144
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04600229155532595
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04736379744574069
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04682668822436439
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04647038287293991
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04618934203855504
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.045996351100229184
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04736132887346278
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0468224215177526
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.0464644415082477
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04618165416009541
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04598693462993046
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04735679366901702
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04681455865799523
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04645350466556271
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.046167550548186984
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04596974481944549
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2718804769175713,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2718804769175713,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.040796146280770045,
+          "B2_month_residual_pmf": 0.02460849155213183,
+          "B3_forecast_level_residual_pmf": 0.02362176154145451,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03507109230167532,
+          "C1_multinomial_ridge": 0.025902508323968353
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold2__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04328223688506771,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04370791749055925
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04351532531981528
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04338951851535684
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043306172035616534
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.0432866469053506
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04370769260388381
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04351496193431764
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.0433889813589892
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04330544919555358
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043285811647693274
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.043707328879226605
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04351437810711113
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04338812398446857
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.043304306669669834
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04328451323580086
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0437066403758709
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04351328641993772
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04338654038844266
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04330223569913335
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04328223688506771
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2682230745561214,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.2682230745561214,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.009735379710919586,
+          "B1_global_residual_pmf": 0.023411697275958696,
+          "B2_month_residual_pmf": 0.025559812767463448,
+          "B3_forecast_level_residual_pmf": 0.03258402838069374,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.026974402070388585,
+          "C1_multinomial_ridge": 0.03173467979457597
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold3__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04471611006482442,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.0451968950652875
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044998053177354516
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04487045282260024
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04477349695725619
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.044730941642337915
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04519640558693944
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04499724136392205
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04486924983788328
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.044771693659368575
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04472833944724234
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04519560856740326
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044995921537838775
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.044867296050251804
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04476876766970263
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04472412199765173
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.045194081344620475
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.044993399693727655
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04486356989735389
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04476319725307641
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04471611006482442
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2580325698710584,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2580325698710584,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 3.2397316166582486e-17,
+          "B1_global_residual_pmf": 0.03645500428072026,
+          "B2_month_residual_pmf": 0.021086495698456924,
+          "B3_forecast_level_residual_pmf": 0.03688213315601906,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.03368164812365149,
+          "C1_multinomial_ridge": 0.02189471874115225
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "fold4__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04288923139833323,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04344474504406047
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04317230675476526
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04300078002622743
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.0429113556598875
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04290228254955849
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04344416391615702
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04317149502300441
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.042999623276132604
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04290969356612138
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04290001891146674
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04344321235975946
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04317016641836131
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04299773167618981
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04290697883077419
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04289632679936848
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.043441370508373045
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04316759668319226
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.042994079085054704
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04290174829074849
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04288923139833323
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.245169739209966,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 10.0,
+        "scale_c": 1.245169739209966,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.03592058004571412,
+          "B2_month_residual_pmf": 0.023170580855316054,
+          "B3_forecast_level_residual_pmf": 0.03244344059779596,
+          "B4_hierarchical_residual_pmf": 0.8500000000000002,
+          "P1_normal_mos": 0.03389307988315365,
+          "C1_multinomial_ridge": 0.02457231861802009
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "presealed_2022_2023__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 20.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.04610747107777828,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04655899721837784
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0463127519640253
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.046180285181462236
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04611318754287036
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046123496626194596
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04655873636004503
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04631237104948362
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04617967583202162
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04611219718396181
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046121987864329535
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04655830997407771
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.046311748950087835
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04617868096134447
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04611058082732173
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046119526792248455
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.046557487353522886
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04631055060780236
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04617676562849065
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04610747107777828
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.046114796779842704
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2421802159744384,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2421802159744384,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 0.0,
+          "B1_global_residual_pmf": 0.03477192701434697,
+          "B2_month_residual_pmf": 0.02130704385133527,
+          "B3_forecast_level_residual_pmf": 0.027133324976649782,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.02998965649027773,
+          "C1_multinomial_ridge": 0.03679804766739023
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  },
+  {
+    "window": "sealed_2024_2026_05__t_minus_1_2100_hkt",
+    "method_details": {
+      "B0_climatology": {},
+      "B1_global_residual_pmf": {},
+      "B2_month_residual_pmf": {
+        "shrink_alpha": 10.0
+      },
+      "B3_forecast_level_residual_pmf": {
+        "shrink_alpha": 12.0
+      },
+      "B4_hierarchical_residual_pmf": {
+        "month_alpha": 20.0,
+        "cell_alpha": 40.0,
+        "selection": "inner_chronological",
+        "best_inner_rps": 0.043442812751974626,
+        "tried": [
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04418530229650986
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.0439746428994005
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04379680667225805
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04361563964967501
+          },
+          {
+            "month_alpha": 2.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04344745497636562
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04418527813340447
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04397451865754644
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.04379652991495561
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04361513490813114
+          },
+          {
+            "month_alpha": 5.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04344665027492392
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.044185240141203216
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04397431678690348
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.043796078533123874
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04361431106541909
+          },
+          {
+            "month_alpha": 10.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.04344533729769529
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 2.0,
+            "inner_rps": 0.04418517225040602
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 5.0,
+            "inner_rps": 0.04397393167459974
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 10.0,
+            "inner_rps": 0.0437952112783629
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 20.0,
+            "inner_rps": 0.04361272594760057
+          },
+          {
+            "month_alpha": 20.0,
+            "cell_alpha": 40.0,
+            "inner_rps": 0.043442812751974626
+          }
+        ]
+      },
+      "B5_kernel_analog_pmf": {},
+      "B6_month_climatology_diagnostic": {},
+      "P1_normal_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2386613767673598,
+        "student_t_df": null
+      },
+      "P2_student_t_mos": {
+        "ridge_alpha": 0.01,
+        "scale_c": 1.2386613767673598,
+        "student_t_df": 12.0
+      },
+      "C1_multinomial_ridge": {
+        "C": 1.0
+      },
+      "C2_ordinal_cdf_logistic": {
+        "C": 0.1,
+        "constant_thresholds": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "K0_B4_identity": {
+        "base": "B4_hierarchical_residual_pmf"
+      },
+      "K1_B4_power_calibrated": {
+        "base": "B4_hierarchical_residual_pmf",
+        "gamma": 0.95
+      },
+      "K2_B4_monotone_cdf_projected": {
+        "base": "B4_hierarchical_residual_pmf",
+        "projection": "monotone_cdf"
+      },
+      "S1_conservative_simplex_stack": {
+        "weights": {
+          "B0_climatology": 5.637851296924623e-18,
+          "B1_global_residual_pmf": 0.03648457575975939,
+          "B2_month_residual_pmf": 0.02880301516685684,
+          "B3_forecast_level_residual_pmf": 0.023692192057416822,
+          "B4_hierarchical_residual_pmf": 0.85,
+          "P1_normal_mos": 0.031118938800074027,
+          "C1_multinomial_ridge": 0.029901278215892956
+        },
+        "selection": "inner_chronological_simplex",
+        "base_methods": [
+          "B0_climatology",
+          "B1_global_residual_pmf",
+          "B2_month_residual_pmf",
+          "B3_forecast_level_residual_pmf",
+          "B4_hierarchical_residual_pmf",
+          "P1_normal_mos",
+          "C1_multinomial_ridge"
+        ]
+      }
+    }
+  }
+]

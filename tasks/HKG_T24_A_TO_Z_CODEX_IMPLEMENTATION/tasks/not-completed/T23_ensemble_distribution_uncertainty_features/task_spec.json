@@ -1,0 +1,52 @@
+{
+  "id": "T23",
+  "suffix": "ensemble_distribution_uncertainty_features",
+  "title": "Ensemble Distribution and Uncertainty Feature Store",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T08",
+    "T09",
+    "T10",
+    "T16",
+    "T18"
+  ],
+  "mission": "Convert GEFS/IFS/AI ensemble members into calibrated-ready distributions, clusters, probabilities and disagreement features.",
+  "inputs": [
+    "Eligible ensemble member values",
+    "target snapshots",
+    "threshold definitions"
+  ],
+  "steps": [
+    "Compute member target-day Tmax from each trajectory.",
+    "Compute mean/median/quantiles/IQR/std/skew/kurtosis and threshold probabilities.",
+    "Compute spread in cloud/rain/radiation/moisture trajectories.",
+    "Detect member clusters/multimodality using fold-independent unsupervised algorithms fitted within training periods.",
+    "Create control-minus-mean, deterministic-minus-ensemble and cross-ensemble disagreement.",
+    "Retain member completeness and model-change flags."
+  ],
+  "db_objects": [
+    "feature_store ensemble features/member derived tables"
+  ],
+  "outputs": [
+    "ensemble_feature_definitions.csv",
+    "member_completeness.csv",
+    "distribution_examples.parquet",
+    "cluster_contract.md"
+  ],
+  "tests": [
+    "Quantile ordering",
+    "member count",
+    "missing-member sensitivity",
+    "no target-informed clustering"
+  ],
+  "acceptance": [
+    "GEFS distribution features complete on core frame",
+    "Short ensembles marked challenger"
+  ],
+  "failure": [
+    "Insufficient members: set distribution unavailable; do not fake with interpolation"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t23_ensemble_distribution_uncertainty_features.md"
+}

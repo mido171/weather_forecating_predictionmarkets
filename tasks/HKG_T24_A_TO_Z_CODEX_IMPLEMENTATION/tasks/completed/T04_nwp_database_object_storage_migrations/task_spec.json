@@ -1,0 +1,58 @@
+{
+  "id": "T04",
+  "suffix": "nwp_database_object_storage_migrations",
+  "title": "NWP Database, Object Storage, and Lineage Migrations",
+  "phase": "A Foundation",
+  "deps": [
+    "T00",
+    "T01",
+    "T02",
+    "T03"
+  ],
+  "mission": "Implement the production storage architecture for raw requests/responses, model runs, values, availability contracts, features, research predictions and live forecasts.",
+  "inputs": [
+    "REFERENCE_POSTGRES_SCHEMA.sql",
+    "existing migration framework",
+    "T02 registry",
+    "T03 sizing"
+  ],
+  "steps": [
+    "Adapt schemas to repository conventions.",
+    "Create source/model/location/selector/run/request/response/value/feature/prediction/live/quarantine objects.",
+    "Partition high-volume values by month/model.",
+    "Create deterministic natural keys and conflict-safe upserts.",
+    "Integrate object storage or repository data lake for raw NDJSON/Parquet.",
+    "Implement retention and checksum verification.",
+    "Create development/live/diagnostic roles and sealed label permissions.",
+    "Add backup and rollback documentation."
+  ],
+  "db_objects": [
+    "catalog.*, governance.*, raw_audit.*, nwp_core.*, feature_store.*, research.*, live.*, quarantine.*"
+  ],
+  "outputs": [
+    "versioned migrations",
+    "schema diagram",
+    "index/partition plan",
+    "rollback plan",
+    "migration test log"
+  ],
+  "tests": [
+    "Apply/rollback on isolated DB",
+    "duplicate insert idempotency",
+    "permission tests",
+    "partition routing tests",
+    "foreign-key lineage tests"
+  ],
+  "acceptance": [
+    "Migrations execute cleanly twice",
+    "No raw data overwritten",
+    "Live role isolated",
+    "Expected query plans use indexes"
+  ],
+  "failure": [
+    "Production DB unavailable: execute against isolated PostgreSQL and leave exact production command"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t04_nwp_database_object_storage_migrations.md"
+}

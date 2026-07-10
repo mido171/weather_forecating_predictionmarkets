@@ -1,29 +1,20 @@
-# Data Directory
+# Data Folder
 
-Raw and derived data are intentionally absent from this bootstrap ZIP. Third-party data may have licensing and redistribution constraints, and current data should be fetched directly from authoritative providers.
+Use `datasets/` for normal browsing.
 
-## Layers
+The old pipeline folders are now hidden compatibility junctions that point to
+`_pipeline_internal/`. They remain in place so existing scripts, tests, and
+reports can keep using paths like `data/silver/...` and `data/gold/...`.
 
-- `raw/` — exact immutable payloads plus sidecars;
-- `bronze/` — source-native parsed data;
-- `silver/` — quality-controlled, normalized, point-in-time data;
-- `gold/` — targets, forecast examples, predictions, evaluation tables;
-- `cache/` — disposable download/compute cache.
+## Human-Facing Layout
 
-Do not commit bulk data to Git. Preserve it in durable storage and commit manifests/hashes.
+- `datasets/` - clean dataset-by-dataset folders.
+- `datasets/MANIFEST.csv` - every organized file, source path, size, and link/copy method.
 
-## Raw invariant
+## Internal Layout
 
-Never edit a raw payload. If a source changes, archive a new payload.
+- `_pipeline_internal/` - hidden physical storage for pipeline-owned folders.
+- hidden junctions: `raw/`, `bronze/`, `silver/`, `gold/`, `metadata/`, `logs/`, `state/`, `cache/`, and `quarantine/`.
 
-## Derived invariant
-
-Every derived dataset must identify:
-
-- raw input hashes;
-- parser/transform version;
-- config hash;
-- schema;
-- build time;
-- row count;
-- quality summary.
+Do not delete the hidden junctions unless the code has first been migrated away
+from the old internal paths.

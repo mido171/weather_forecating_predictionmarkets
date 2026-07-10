@@ -1,0 +1,52 @@
+{
+  "id": "T39",
+  "suffix": "final_system_audit_handoff_research_loop",
+  "title": "Final Audit, Handoff, and Controlled Research Continuation Loop",
+  "phase": "F Production",
+  "deps": [
+    "T36",
+    "T37"
+  ],
+  "mission": "Produce the complete implementation and results dossier, archive all artifacts, and define the next research loop if 0.45\u00b0C has not been achieved.",
+  "inputs": [
+    "All task folders and manifests",
+    "confirmation results",
+    "live pipeline status"
+  ],
+  "steps": [
+    "Validate every task acceptance criterion and dependency.",
+    "Generate final data/model/feature/source cards.",
+    "Summarize proven, proxy, diagnostic, rejected and pending findings.",
+    "Report current best MAE by frame without cross-frame confusion.",
+    "Archive hashes, migrations, configs, models and commands.",
+    "If confirmed MAE > 0.45, invoke Research Director to propose a new pre-registered lane using accumulated evidence, while preserving remaining holdouts.",
+    "Never claim inevitable convergence to 0.45."
+  ],
+  "db_objects": [
+    "research master registry and archive"
+  ],
+  "outputs": [
+    "FINAL_IMPLEMENTATION_REPORT.md",
+    "FINAL_SCOREBOARD.csv",
+    "PROVENANCE_INDEX.csv",
+    "OPEN_BLOCKERS.csv",
+    "NEXT_RESEARCH_BRIEF.md",
+    "HANDOFF_RUNBOOK.md"
+  ],
+  "tests": [
+    "Bundle hash verification",
+    "all task acceptance aggregation",
+    "reproduction from clean environment"
+  ],
+  "acceptance": [
+    "Complete truthful A-to-Z handoff",
+    "Best score and uncertainty stated on exact frame",
+    "Next loop has no holdout leakage"
+  ],
+  "failure": [
+    "Any incomplete task remains explicit blocker; final report cannot mark system complete"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t39_final_system_audit_handoff_research_loop.md"
+}

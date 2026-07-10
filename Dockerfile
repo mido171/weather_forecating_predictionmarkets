@@ -10,11 +10,11 @@ RUN apt-get update \
 
 WORKDIR /workspace
 COPY pyproject.toml README.md ./
-COPY src ./src
+COPY code ./code
 RUN python -m pip install --upgrade pip \
     && python -m pip install ".[research,dev]"
 
 COPY . .
-ENV PYTHONPATH=/workspace/src
+ENV PYTHONPATH=/workspace/code/src:/workspace
 
 CMD ["bash"]

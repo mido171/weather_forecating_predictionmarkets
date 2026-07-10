@@ -1,0 +1,664 @@
+{
+  "trials": [
+    {
+      "completed_at_utc": "2026-07-09T13:12:45.922205Z",
+      "returncode": null,
+      "started_at_utc": "2026-07-09T13:12:45.828708Z",
+      "stderr": null,
+      "stdout": null,
+      "trial_name": "wgrib2_probe",
+      "trial_type": "environment_probe",
+      "wall_seconds": 0.09440950001589954,
+      "wgrib2_available": false,
+      "wgrib2_path": null
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 559003347,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        },
+        "gfs": {
+          "bytes": 808312537,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        }
+      },
+      "bytes_ok": 1367315884,
+      "completed_at_utc": "2026-07-09T13:20:08.047051Z",
+      "config": {
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": false,
+        "range_workers": 4,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 8
+      },
+      "failure_count": 0,
+      "fetch_ok": 136,
+      "fetch_seconds_p50": 25.131426300038584,
+      "fetch_seconds_p90": 36.815610100049525,
+      "first_failures": [],
+      "mb_per_second_wall": 3.092967125429782,
+      "normalization_seconds_p50": null,
+      "normalization_seconds_p90": null,
+      "normalize_ok": 0,
+      "normalized_row_count": 0,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "original_sampled_staging_end_bytes": 16451858,
+        "staging_end_bytes": 0,
+        "staging_end_bytes_correction_note": "Corrected after long-path cleanup patch and postrun audit; original value was a stale sampler read before final trial cleanup.",
+        "staging_max_bytes": 34184649
+      },
+      "started_at_utc": "2026-07-09T13:12:45.957170Z",
+      "tasks_per_minute_wall": 18.45850840968291,
+      "tasks_total": 136,
+      "trial_name": "model_fetch_s3_w8_r4",
+      "trial_type": "parallel_fetch_only",
+      "wall_seconds": 442.0725564000313
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 559003347,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        },
+        "gfs": {
+          "bytes": 808312537,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        }
+      },
+      "bytes_ok": 1367315884,
+      "completed_at_utc": "2026-07-09T14:01:00.948565Z",
+      "config": {
+        "coalesce_gap_bytes": 0,
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": false,
+        "range_workers": 4,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 8
+      },
+      "failure_count": 0,
+      "fetch_ok": 136,
+      "fetch_seconds_p50": 17.526602199999616,
+      "fetch_seconds_p90": 25.262379799969494,
+      "first_failures": [],
+      "mb_per_second_wall": 4.232760058660643,
+      "normalization_seconds_p50": null,
+      "normalization_seconds_p90": null,
+      "normalize_ok": 0,
+      "normalized_row_count": 0,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 24603411
+      },
+      "started_at_utc": "2026-07-09T13:55:37.897401Z",
+      "tasks_per_minute_wall": 25.260674934623115,
+      "tasks_total": 136,
+      "trial_name": "model_fetch_s3_w8_c0",
+      "trial_type": "parallel_fetch_only",
+      "wall_seconds": 323.0317488000146
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 598736157,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        },
+        "gfs": {
+          "bytes": 846795995,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        }
+      },
+      "bytes_ok": 1445532152,
+      "completed_at_utc": "2026-07-09T14:06:45.815061Z",
+      "config": {
+        "coalesce_gap_bytes": 1000000,
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": false,
+        "range_workers": 4,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 8
+      },
+      "failure_count": 0,
+      "fetch_ok": 136,
+      "fetch_seconds_p50": 13.25060480000684,
+      "fetch_seconds_p90": 23.99333890003618,
+      "first_failures": [],
+      "mb_per_second_wall": 5.639378336171875,
+      "normalization_seconds_p50": null,
+      "normalization_seconds_p90": null,
+      "normalize_ok": 0,
+      "normalized_row_count": 0,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 37411978
+      },
+      "started_at_utc": "2026-07-09T14:02:29.465260Z",
+      "tasks_per_minute_wall": 31.83417757916636,
+      "tasks_total": 136,
+      "trial_name": "model_fetch_s3_w8_c1m",
+      "trial_type": "parallel_fetch_only",
+      "wall_seconds": 256.3282805000199
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 559003347,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        },
+        "gfs": {
+          "bytes": 808312537,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        }
+      },
+      "bytes_ok": 1367315884,
+      "completed_at_utc": "2026-07-09T13:27:58.246830Z",
+      "config": {
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": false,
+        "range_workers": 4,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 16
+      },
+      "failure_count": 0,
+      "fetch_ok": 136,
+      "fetch_seconds_p50": 49.636764299997594,
+      "fetch_seconds_p90": 72.72268859995529,
+      "first_failures": [],
+      "mb_per_second_wall": 2.9107756340627455,
+      "normalization_seconds_p50": null,
+      "normalization_seconds_p90": null,
+      "normalize_ok": 0,
+      "normalized_row_count": 0,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 36458904
+      },
+      "started_at_utc": "2026-07-09T13:20:08.485303Z",
+      "tasks_per_minute_wall": 17.3712084031871,
+      "tasks_total": 136,
+      "trial_name": "model_fetch_s3_w16_r4",
+      "trial_type": "parallel_fetch_only",
+      "wall_seconds": 469.7427956999745
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 559003347,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        },
+        "gfs": {
+          "bytes": 808312537,
+          "fetch_ok": 68,
+          "norm_ok": 0,
+          "tasks": 68
+        }
+      },
+      "bytes_ok": 1367315884,
+      "completed_at_utc": "2026-07-09T13:37:15.684737Z",
+      "config": {
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": false,
+        "range_workers": 8,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 16
+      },
+      "failure_count": 0,
+      "fetch_ok": 136,
+      "fetch_seconds_p50": 59.699369200039655,
+      "fetch_seconds_p90": 84.03980909998063,
+      "first_failures": [],
+      "mb_per_second_wall": 2.453510049770765,
+      "normalization_seconds_p50": null,
+      "normalization_seconds_p90": null,
+      "normalize_ok": 0,
+      "normalized_row_count": 0,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 45927641
+      },
+      "started_at_utc": "2026-07-09T13:27:58.375102Z",
+      "tasks_per_minute_wall": 14.642294615608693,
+      "tasks_total": 136,
+      "trial_name": "model_fetch_s3_w16_r8",
+      "trial_type": "parallel_fetch_only",
+      "wall_seconds": 557.2897017999785
+    },
+    {
+      "by_source": {
+        "himawari9_b13_s0510": {
+          "bytes": 456907779,
+          "fetch_ok": 142,
+          "norm_ok": 142,
+          "tasks": 144
+        }
+      },
+      "bytes_ok": 456907779,
+      "completed_at_utc": "2026-07-09T13:40:48.043837Z",
+      "config": {
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": true,
+        "range_workers": 1,
+        "sources": [
+          "himawari_b13_s0510"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 4
+      },
+      "failure_count": 2,
+      "fetch_ok": 142,
+      "fetch_seconds_p50": 2.7157248000148684,
+      "fetch_seconds_p90": 4.412010800035205,
+      "first_failures": [
+        {
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "item_id": "himawari9_B13_S0510_20260621_0240",
+          "source": "himawari9_b13_s0510",
+          "status": "error"
+        },
+        {
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "item_id": "himawari9_B13_S0510_20260621_1440",
+          "source": "himawari9_b13_s0510",
+          "status": "error"
+        }
+      ],
+      "mb_per_second_wall": 2.1528744439036593,
+      "normalization_seconds_p50": 2.715405000024475,
+      "normalization_seconds_p90": 3.961164899985306,
+      "normalize_ok": 142,
+      "normalized_row_count": 142,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 0
+      },
+      "started_at_utc": "2026-07-09T13:37:15.800802Z",
+      "tasks_per_minute_wall": 40.71026156752656,
+      "tasks_total": 144,
+      "trial_name": "himawari_fetch_normalize_w4",
+      "trial_type": "parallel_fetch_normalize",
+      "wall_seconds": 212.23150300001726
+    },
+    {
+      "by_source": {
+        "himawari9_b13_s0510": {
+          "bytes": 456907779,
+          "fetch_ok": 142,
+          "norm_ok": 142,
+          "tasks": 144
+        }
+      },
+      "bytes_ok": 456907779,
+      "completed_at_utc": "2026-07-09T13:42:42.370960Z",
+      "config": {
+        "cycles": [
+          0,
+          6,
+          12,
+          18
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39,
+          42,
+          45,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": true,
+        "range_workers": 1,
+        "sources": [
+          "himawari_b13_s0510"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": false,
+        "workers": 8
+      },
+      "failure_count": 2,
+      "fetch_ok": 142,
+      "fetch_seconds_p50": 2.8362219000118785,
+      "fetch_seconds_p90": 4.604239900014363,
+      "first_failures": [
+        {
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "item_id": "himawari9_B13_S0510_20260621_0240",
+          "source": "himawari9_b13_s0510",
+          "status": "error"
+        },
+        {
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "item_id": "himawari9_B13_S0510_20260621_1440",
+          "source": "himawari9_b13_s0510",
+          "status": "error"
+        }
+      ],
+      "mb_per_second_wall": 3.9998795539377348,
+      "normalization_seconds_p50": 3.043774800025858,
+      "normalization_seconds_p90": 4.069340599991847,
+      "normalize_ok": 142,
+      "normalized_row_count": 142,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 0
+      },
+      "started_at_utc": "2026-07-09T13:40:48.128160Z",
+      "tasks_per_minute_wall": 75.63661844772844,
+      "tasks_total": 144,
+      "trial_name": "himawari_fetch_normalize_w8",
+      "trial_type": "parallel_fetch_normalize",
+      "wall_seconds": 114.230384399998
+    },
+    {
+      "by_source": {
+        "gefs_control": {
+          "bytes": 46144915,
+          "fetch_ok": 6,
+          "norm_ok": 6,
+          "tasks": 6
+        },
+        "gfs": {
+          "bytes": 65797938,
+          "fetch_ok": 6,
+          "norm_ok": 6,
+          "tasks": 6
+        }
+      },
+      "bytes_ok": 111942853,
+      "completed_at_utc": "2026-07-09T13:44:19.439778Z",
+      "config": {
+        "cycles": [
+          0,
+          12
+        ],
+        "day": "2026-06-21",
+        "leads": [
+          0,
+          24,
+          48
+        ],
+        "max_attempts": 3,
+        "max_tasks": null,
+        "normalize": true,
+        "range_workers": 4,
+        "sources": [
+          "gefs_control",
+          "gfs"
+        ],
+        "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+        "timeout": 120,
+        "use_processes": true,
+        "workers": 2
+      },
+      "failure_count": 0,
+      "fetch_ok": 12,
+      "fetch_seconds_p50": 7.2941954000270925,
+      "fetch_seconds_p90": 8.984675399959087,
+      "first_failures": [],
+      "mb_per_second_wall": 1.1539341390616913,
+      "normalization_seconds_p50": 5.434908399998676,
+      "normalization_seconds_p90": 11.35226249997504,
+      "normalize_ok": 12,
+      "normalized_row_count": 182,
+      "resources": {
+        "cpu_max_percent": null,
+        "cpu_mean_percent": null,
+        "cpu_sampler_available": false,
+        "staging_end_bytes": 0,
+        "staging_max_bytes": 24523817
+      },
+      "started_at_utc": "2026-07-09T13:42:42.421336Z",
+      "tasks_per_minute_wall": 7.421935012898212,
+      "tasks_total": 12,
+      "trial_name": "model_fetch_normalize_sample_w2",
+      "trial_type": "parallel_fetch_normalize",
+      "wall_seconds": 97.00974190002307
+    }
+  ]
+}

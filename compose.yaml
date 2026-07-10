@@ -9,3 +9,38 @@ services:
     command: bash
     stdin_open: true
     tty: true
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hkg_tmax_research
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: hkg_tmax_ingest
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: hkg_tmax_research
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hkg_tmax_ingest -d hkg_tmax_research"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  postgres_data:

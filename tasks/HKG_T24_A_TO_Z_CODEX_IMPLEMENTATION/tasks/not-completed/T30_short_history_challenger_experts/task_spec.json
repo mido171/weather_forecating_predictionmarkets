@@ -1,0 +1,54 @@
+{
+  "id": "T30",
+  "suffix": "short_history_challenger_experts",
+  "title": "IFS, AI, CWA WRF, and ARWF Short-History Challenger Experts",
+  "phase": "D Modelling",
+  "deps": [
+    "T09",
+    "T10",
+    "T11",
+    "T13",
+    "T27"
+  ],
+  "mission": "Build shadow/challenger experts for sources that begin after the pre-2024 development window, without contaminating the core model selection.",
+  "inputs": [
+    "IFS/AI/CWA/ARWF feature-ready data",
+    "core frozen expert predictions",
+    "sealed protocol"
+  ],
+  "steps": [
+    "Create direct and lightly calibrated challenger forecasts.",
+    "Use predeclared 2024/2025/2026 sequencing only after core freeze.",
+    "Start with intercept/seasonal bias and strong shrinkage; compare more flexible MOS only when sample supports.",
+    "Train expected-error adapters.",
+    "Keep CWA/ARWF prospective shadow until minimum seasonal coverage.",
+    "Calculate incremental benefit versus core forecast, not standalone vanity scores.",
+    "Define initial rho caps and promotion gates."
+  ],
+  "db_objects": [
+    "research challenger registry",
+    "shadow live outputs"
+  ],
+  "outputs": [
+    "challenger_scoreboards.csv",
+    "incremental_lift.csv",
+    "weight_cap_recommendations.csv",
+    "history_sufficiency.md"
+  ],
+  "tests": [
+    "No pre-existence backfill",
+    "sealed sequencing",
+    "cap enforcement",
+    "sample-size gates"
+  ],
+  "acceptance": [
+    "Each challenger has explicit shadow/capped/promoted/rejected status",
+    "Core router remains reproducible without challengers"
+  ],
+  "failure": [
+    "Insufficient history: collect and shadow only; no flexible model"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t30_short_history_challenger_experts.md"
+}

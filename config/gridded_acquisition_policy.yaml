@@ -1,0 +1,278 @@
+schema_version: 1
+scope: HKG Tmax gridded meteorological acquisition only; Polymarket and modelling excluded.
+timezone: Asia/Hong_Kong
+bulk_safety:
+  use_hkg_tmax_data_root: true
+  detect_disk_before_download: true
+  require_server_side_subset_when_available: true
+  forbid_full_global_archives_without_explicit_approval: true
+  current_free_bytes_observed_at_runtime: filled_by_reports
+domains:
+  local_hk:
+    south: 20.0
+    north: 25.0
+    west: 111.0
+    east: 117.5
+    purpose: Hong Kong local and Pearl River Delta thermal/ocean/precipitation context
+  regional_schina:
+    south: 12.0
+    north: 32.0
+    west: 102.0
+    east: 128.0
+    purpose: southern China and upstream monsoon/synoptic context
+  synoptic_asia:
+    south: 5.0
+    north: 45.0
+    west: 90.0
+    east: 140.0
+    purpose: broader synoptic steering and air-mass context
+families:
+  - family_id: gfs_operational
+    provider: NOAA NCEP
+    product: GFS deterministic forecasts and GDAS context
+    priority: P0
+    status: partial
+    historical_period: earliest official NCEI/NOMADS/cloud archive available through present
+    domains: [local_hk, regional_schina, synoptic_asia]
+    variables:
+      surface: [TMP_2m, DPT_2m, RH_2m, TMAX_2m, TMIN_2m, UGRD_10m, VGRD_10m, GUST, PRMSL, PRES_surface, TCDC, APCP, CPRAT, DSWRF, DLWRF, HPBL, CAPE, CIN, soil_temperature, soil_moisture]
+      pressure_levels: [TMP, RH, UGRD, VGRD, HGT, VVEL]
+    pressure_levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+    cycles: ["00", "06", "12", "18"]
+    members: [deterministic]
+    leads: f006-f120 every 6h minimum; retain to f120 where available
+    temporal_cadence: every operational cycle
+    estimated_bytes: requires per-archive byte estimator before historical bulk
+    actual_bytes: current NOMADS subset already in ledger; reports compute exact bytes
+    server_side_subset_method: NOMADS filter query with leftlon/rightlon/toplat/bottomlat and variable/level filters
+    live_retention_policy: archive every cycle/lead subset once; never overwrite or substitute cycles
+    credential_status: none
+    bulk_download_allowed: false
+    blocker: historical multi-year archive is byte_budget_required until estimator and date-range chunking are implemented
+
+  - family_id: gefs_operational_and_reforecast
+    provider: NOAA NCEP / NOAA Open Data
+    product: GEFS operational ensembles and GEFSv12 reforecasts
+    priority: P0
+    status: partial
+    historical_period: GEFSv12 2000-2019 plus operational GEFS recoverable from official archives
+    domains: [local_hk, regional_schina, synoptic_asia]
+    variables:
+      surface: [TMP_2m, DPT_2m, RH_2m, TMAX_2m, TMIN_2m, UGRD_10m, VGRD_10m, GUST, PRMSL, TCDC, APCP, DSWRF, DLWRF, HPBL, CAPE, CIN, soil_temperature, soil_moisture]
+      pressure_levels: [TMP, RH, UGRD, VGRD, HGT, VVEL]
+      ensemble_diagnostics: [mean, spread]
+    pressure_levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+    cycles: ["00", "06", "12", "18"]
+    members: [c00, p01-p30, geavg, gespr]
+    leads: f006-f120 every 6h minimum
+    temporal_cadence: every operational cycle; reforecast cadence per archive
+    estimated_bytes: requires GEFSv12/Open Data inventory estimator before historical bulk
+    actual_bytes: current NOMADS subset already in ledger; reports compute exact bytes
+    server_side_subset_method: NOMADS filters for live/current; AWS/object subset strategy required for reforecast archives
+    live_retention_policy: archive every cycle/member/lead subset once with member completeness report
+    credential_status: none
+    bulk_download_allowed: false
+    blocker: GEFSv12 reforecast and multi-year operational history require byte_budget_required implementation
+
+  - family_id: ecmwf_open_and_tigge
+    provider: ECMWF
+    product: Open IFS/ENS/AIFS/AIFS-ENS plus TIGGE/ECDS historical ensembles
+    priority: P0
+    status: credential_blocked
+    historical_period: TIGGE from 2006-10 where accessible; open-data rolling current prospectively
+    domains: [local_hk, regional_schina, synoptic_asia]
+    variables:
+      surface: [2t, 2d, 10u, 10v, msl, tcc, tp, cp, ssrd, strd, blh, cape, cin]
+      pressure_levels: [t, r, u, v, z, w]
+      ai_products: [AIFS, AIFS-ENS]
+    pressure_levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+    cycles: product-specific
+    members: maximum lawful/free open detail; TIGGE centre/member metadata preserved
+    leads: 6h to 120h minimum where available
+    temporal_cadence: every accessible cycle
+    estimated_bytes: requires ECMWF/TIGGE request estimator and terms confirmation
+    actual_bytes: 0
+    server_side_subset_method: ECMWF open-data object selection and TIGGE/ECDS area/parameter request
+    live_retention_policy: self-archive every rolling open-data run immediately; no ERA5 substitution
+    credential_status: terms_or_credentials_required_for_historical_TIGGE_ECDS
+    bulk_download_allowed: false
+    blocker: historical/TIGGE terms and request tooling not activated; live open-data subset adapter still pending
+
+  - family_id: dwd_icon_icon_eps
+    provider: Deutscher Wetterdienst
+    product: ICON global and ICON-EPS
+    priority: P0
+    status: byte_budget_required
+    historical_period: official DWD archives where available plus TIGGE for ensemble periods
+    domains: [local_hk, regional_schina]
+    variables:
+      surface: [T_2M, TD_2M, RELHUM_2M, U_10M, V_10M, PMSL, CLCT, TOT_PREC, ASOB_S, ATHB_S, CAPE_ML, HPBL]
+      pressure_levels: [T, RELHUM, U, V, FI, W]
+    pressure_levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+    cycles: provider metadata discovered
+    members: deterministic and EPS members where lawful/open
+    leads: 6h to 120h where available
+    temporal_cadence: every accessible cycle
+    estimated_bytes: current files can be multi-MB per variable/lead; exact estimate pending
+    actual_bytes: 0
+    server_side_subset_method: no tested spatial subset; must use file-level variable/lead selection or GRIB crop after download
+    live_retention_policy: archive only approved variable/lead files; document if full-file download is unavoidable
+    credential_status: none
+    bulk_download_allowed: false
+    blocker: no server-side spatial subset verified; exact byte/retention plan required before bulk
+
+  - family_id: era5
+    provider: Copernicus Climate Change Service
+    product: ERA5 single levels and pressure levels
+    priority: P0
+    status: credential_blocked
+    historical_period: 1940-present with release lag
+    domains: [local_hk, regional_schina, synoptic_asia]
+    variables:
+      single_levels: [2m_temperature, 2m_dewpoint_temperature, 10m_u_component_of_wind, 10m_v_component_of_wind, mean_sea_level_pressure, total_cloud_cover, low_cloud_cover, medium_cloud_cover, high_cloud_cover, total_precipitation, convective_precipitation, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, boundary_layer_height, convective_available_potential_energy, sea_surface_temperature, soil_temperature_level_1, volumetric_soil_water_layer_1]
+      pressure_levels: [temperature, relative_humidity, u_component_of_wind, v_component_of_wind, geopotential, vertical_velocity]
+    pressure_levels_hpa: [1000, 975, 950, 925, 900, 850, 700, 500]
+    cycles: not_applicable_reanalysis
+    members: [reanalysis]
+    leads: not_applicable
+    temporal_cadence: hourly; scientifically justified aggregation can be derived after raw preservation
+    estimated_bytes: requires CDS byte estimator by domain/variable/level/year before request
+    actual_bytes: 0
+    server_side_subset_method: CDS area/time/variable/pressure-level request
+    live_retention_policy: not live; variable-level mapping to operational forecast fields required
+    credential_status: CDS_API_KEY missing_or_unconfirmed
+    bulk_download_allowed: false
+    blocker: CDS credentials and terms acceptance required
+
+  - family_id: era5_land
+    provider: Copernicus Climate Change Service
+    product: ERA5-Land hourly
+    priority: P0
+    status: credential_blocked
+    historical_period: 1950-present with release lag
+    domains: [local_hk, regional_schina]
+    variables:
+      land: [2m_temperature, 2m_dewpoint_temperature, skin_temperature, soil_temperature_level_1, soil_temperature_level_2, volumetric_soil_water_layer_1, volumetric_soil_water_layer_2, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, total_precipitation]
+    pressure_levels_hpa: []
+    cycles: not_applicable_reanalysis
+    members: [reanalysis]
+    leads: not_applicable
+    temporal_cadence: hourly
+    estimated_bytes: requires CDS byte estimator by domain/variable/year before request
+    actual_bytes: 0
+    server_side_subset_method: CDS area/time/variable request
+    live_retention_policy: not live; map to operational land/surface fields if used later
+    credential_status: CDS_API_KEY missing_or_unconfirmed
+    bulk_download_allowed: false
+    blocker: CDS credentials and terms acceptance required
+
+  - family_id: oisst_v21
+    provider: NOAA
+    product: OISST v2.1 daily 0.25 degree
+    priority: P0
+    status: byte_budget_required
+    historical_period: 1981-09-present
+    domains: [local_hk, regional_schina]
+    variables:
+      ocean: [sst, anomaly, ice, error]
+    pressure_levels_hpa: []
+    cycles: daily
+    members: [analysis]
+    leads: not_applicable
+    temporal_cadence: daily
+    estimated_bytes: likely manageable for regional subset but exact URL/subset strategy pending
+    actual_bytes: 0
+    server_side_subset_method: NOAA/OPeNDAP or file-level regional subset if verified; never download unnecessary global files blindly
+    live_retention_policy: daily updater preserving preliminary/revised status if exposed
+    credential_status: none
+    bulk_download_allowed: false
+    blocker: implement regional subset/downloader and byte estimate before 1981-present bulk
+
+  - family_id: himawari_ahi
+    provider: JMA / NOAA Open Data Registry
+    product: Himawari-8/9 AHI
+    priority: P0
+    status: byte_budget_required
+    historical_period: 2015-07-present
+    domains: [local_hk, regional_schina]
+    variables:
+      channels: [visible, near_infrared, water_vapour_upper, water_vapour_mid, water_vapour_lower, clean_longwave_ir, split_window_ir]
+    pressure_levels_hpa: []
+    cycles: scan/product specific
+    members: [observation]
+    leads: not_applicable
+    temporal_cadence: recent/live high cadence; historical cadence to be explicitly downsampled if storage requires
+    estimated_bytes: very large without crop/downsampling
+    actual_bytes: HKO current satellite bytes are in ledger; Himawari historical bytes 0
+    server_side_subset_method: source object selection plus Hong Kong/upstream crop while preserving object keys/checksums
+    live_retention_policy: self-archive new scans according to approved channel/cadence/crop policy
+    credential_status: none_or_provider_specific
+    bulk_download_allowed: false
+    blocker: volume/crop implementation required before 2015-present bulk
+
+  - family_id: hko_current_satellite
+    provider: Hong Kong Observatory
+    product: HKO current H8/FY4B/GK2B satellite image windows
+    priority: P0
+    status: partial
+    historical_period: current rolling provider windows from acquisition start
+    domains: [local_hk, regional_schina]
+    variables:
+      images: [infrared, true_colour, all_day_visible, deep_convection, aerosol_optical_depth]
+    pressure_levels_hpa: []
+    cycles: product-specific frame timestamps
+    members: [observation]
+    leads: not_applicable
+    temporal_cadence: product-specific
+    estimated_bytes: current rolling image windows; manageable through skip-existing-successes
+    actual_bytes: reports compute exact bytes from ledger
+    server_side_subset_method: official manifest-discovered image URLs with HEAD preflight
+    live_retention_policy: archive each changed resolvable image once by content hash
+    credential_status: none
+    bulk_download_allowed: true
+    blocker: ""
+
+  - family_id: gpm_imerg
+    provider: NASA GPM
+    product: IMERG V07 Final/Early/Late
+    priority: P0
+    status: credential_blocked
+    historical_period: about 2000-present
+    domains: [local_hk, regional_schina]
+    variables:
+      precipitation: [precipitationCal, precipitationUncal, probabilityLiquidPrecipitation, randomError, gaugeRelativeWeighting]
+    pressure_levels_hpa: []
+    cycles: half-hour observation windows
+    members: [Final, Early, Late]
+    leads: not_applicable
+    temporal_cadence: half-hourly
+    estimated_bytes: requires NASA/Earthdata regional subset estimator before bulk
+    actual_bytes: 0
+    server_side_subset_method: NASA/GES DISC subset or OPeNDAP if available; otherwise bounded regional extraction after approved download
+    live_retention_policy: archive Early and Late live runs with run type, issue time, and revision relationship
+    credential_status: Earthdata credentials/terms may be required
+    bulk_download_allowed: false
+    blocker: credentials/terms and regional subset implementation required
+
+  - family_id: cams_eac4_and_forecasts
+    provider: Copernicus Atmosphere Monitoring Service
+    product: CAMS EAC4 reanalysis and global composition forecasts
+    priority: P1
+    status: credential_blocked
+    historical_period: maximum available EAC4 history through present release lag
+    domains: [local_hk, regional_schina, synoptic_asia]
+    variables:
+      aerosol: [aerosol_optical_depth, dust_aerosol_optical_depth, organic_matter_aerosol_optical_depth, black_carbon_aerosol_optical_depth, sulphate_aerosol_optical_depth]
+      composition: [pm2p5, pm10]
+    pressure_levels_hpa: []
+    cycles: forecast-cycle specific
+    members: [analysis, forecast]
+    leads: forecast product specific
+    temporal_cadence: product specific
+    estimated_bytes: requires ADS request estimator by variable/domain/period
+    actual_bytes: 0
+    server_side_subset_method: ADS area/variable/time request
+    live_retention_policy: archive every live forecast cycle/lead subset once
+    credential_status: ADS credentials/terms required
+    bulk_download_allowed: false
+    blocker: ADS credentials/terms and byte-budgeted subset required

@@ -1,0 +1,70 @@
+{
+  "table": "public.hko_historical_forecasts_2000_2026",
+  "clean_filter": "row_quality_status = 'usable_local_minmax'",
+  "clean_rows": 115795,
+  "product_type": "local only",
+  "issue_range_as_reported": [
+    "2000-01-01 16:22:00",
+    "2026-06-20 23:45:00"
+  ],
+  "target_date_range": [
+    "2000-01-02",
+    "2026-06-21"
+  ],
+  "distinct_target_dates": 9667,
+  "missing_target_dates": [
+    "2003-02-02"
+  ],
+  "raw_rows": 324179,
+  "product_counts": {
+    "local": 264325,
+    "5day": 6193,
+    "7day": 23223,
+    "9day": 30438
+  },
+  "numeric_summary": {
+    "forecast_min_c": {
+      "non_null_rows": 115795,
+      "min": 1.0,
+      "median": 24.0,
+      "mean": 22.2375,
+      "max": 30.0
+    },
+    "forecast_max_c": {
+      "non_null_rows": 115795,
+      "min": 7.0,
+      "median": 28.0,
+      "mean": 26.601,
+      "max": 39.0
+    },
+    "forecast_range_c": {
+      "non_null_rows": 115795,
+      "min": 2.0,
+      "median": 4.0,
+      "mean": 4.3636,
+      "max": 16.0
+    },
+    "forecast_midpoint_c": {
+      "non_null_rows": 115795,
+      "min": 6.0,
+      "median": 26.0,
+      "mean": 24.4193,
+      "max": 33.0
+    },
+    "target_issue_lead_days": {
+      "non_null_rows": 115795,
+      "min": 0.0,
+      "median": 1.0,
+      "mean": 0.7643,
+      "max": 1.0
+    },
+    "stale_hours": {
+      "non_null_rows": 0,
+      "min": null,
+      "median": null,
+      "mean": null,
+      "max": null
+    }
+  },
+  "governance_note": "These user-supplied direct Postgres facts supersede earlier sparse-archive assumptions. Codex must independently verify them before modelling and report any discrepancy."
+}

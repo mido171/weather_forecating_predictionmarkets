@@ -1,0 +1,22 @@
+{
+  "long_history": {
+    "available_days": 51134,
+    "available_years": 139.997,
+    "end_date": "2023-12-31",
+    "reason": "target/daily climate development history before validation 2024: 140.00 years available",
+    "required_days": 1461,
+    "start_date": "1884-01-01",
+    "status": "PASS"
+  },
+  "modern_high_frequency": {
+    "available_days": 1279,
+    "available_years": 3.502,
+    "end_date": "2023-12-31",
+    "reason": "modern HKO high-frequency development history before validation 2024: 3.50 years available, requires at least 4.0 years",
+    "required_days": 1461,
+    "start_date": "2020-07-01",
+    "status": "BLOCKED"
+  },
+  "policy": "Modern high-frequency experiments are blocked under the strict four-year rule unless the evaluation design is explicitly revised without using locked-test data.",
+  "requirement": "at least four years of OOF test data for all experiments"
+}

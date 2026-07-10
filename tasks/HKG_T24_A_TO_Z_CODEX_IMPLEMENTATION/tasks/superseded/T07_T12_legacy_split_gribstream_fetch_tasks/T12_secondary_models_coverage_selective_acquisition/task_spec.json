@@ -1,0 +1,51 @@
+{
+  "id": "T12",
+  "suffix": "secondary_models_coverage_selective_acquisition",
+  "title": "Secondary Model Coverage Tests and Selective Acquisition",
+  "phase": "B Acquisition",
+  "deps": [
+    "T03",
+    "T06"
+  ],
+  "mission": "Probe and selectively acquire only secondary sources with a plausible HKG mechanism while formally excluding irrelevant domains.",
+  "inputs": [
+    "Final model disposition matrix",
+    "T05 coordinates",
+    "T06 client"
+  ],
+  "steps": [
+    "Run HKO/marine coverage probes for nbmoc and nbmparoc.",
+    "Probe GDAS/CDAS analysis usefulness and exact variables.",
+    "Acquire small targeted GEFS chemistry aerosol subset for haze/radiation hypotheses.",
+    "Acquire targeted wave/sea-state variables only at marine points.",
+    "Evaluate UVI short-window collection.",
+    "Evaluate CFS fields only as slow background features.",
+    "Write explicit no-query exclusions for every US-only product.",
+    "Promote a source to backfill only when coverage, variable relevance, retention and quota criteria pass."
+  ],
+  "db_objects": [
+    "catalog model dispositions",
+    "targeted nwp values where approved"
+  ],
+  "outputs": [
+    "coverage_and_value_tests.csv",
+    "secondary_acquisition_manifests",
+    "excluded_models.md",
+    "promotion_decisions.md"
+  ],
+  "tests": [
+    "HKG coordinate return tests",
+    "information redundancy screening without sealed outcomes",
+    "quota checks"
+  ],
+  "acceptance": [
+    "Every listed secondary model has explicit acquire/probe/exclude result",
+    "No geographic assumption left implicit"
+  ],
+  "failure": [
+    "No coverage or no plausible mechanism: create rejection folder; do not force inclusion"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t12_secondary_models_coverage_selective_acquisition.md"
+}

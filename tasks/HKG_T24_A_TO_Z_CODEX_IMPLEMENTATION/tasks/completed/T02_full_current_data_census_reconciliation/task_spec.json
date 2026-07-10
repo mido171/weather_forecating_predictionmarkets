@@ -1,0 +1,59 @@
+{
+  "id": "T02",
+  "suffix": "full_current_data_census_reconciliation",
+  "title": "Full Current Data and Experiment Census Reconciliation",
+  "phase": "A Foundation",
+  "deps": [
+    "T00",
+    "T01"
+  ],
+  "mission": "Reconcile every existing dataset, database table, file, attribute, station, experiment output and quality issue into a machine-readable source registry.",
+  "inputs": [
+    "13-dataset audit evidence",
+    "52 table decisions",
+    "1,869 attribute decisions",
+    "36-station dossier",
+    "quality issues",
+    "current DB inventory",
+    "experiments evidence registry"
+  ],
+  "steps": [
+    "Read every supplied evidence file completely.",
+    "Reconcile audit records against actual files and database objects.",
+    "Update the official forecast disposition using the corrected near-continuous archive.",
+    "Assign each source/table/attribute to label, operational, diagnostic, live, object, research or quarantine layer.",
+    "Record date coverage, cadence, stations, variables, unit, timestamp fields, availability proof and blocker.",
+    "Preserve full free text from source tables, not profile examples.",
+    "Register all experiment outputs as evidence, never as canonical live feature sources."
+  ],
+  "db_objects": [
+    "catalog.dataset_registry",
+    "catalog.source_registry",
+    "governance.attribute_contract",
+    "governance.quality_issue"
+  ],
+  "outputs": [
+    "source_eligibility_matrix.csv",
+    "table_reconciliation.csv",
+    "attribute_reconciliation.csv",
+    "station_reconciliation.csv",
+    "experiment_evidence_linkage.csv",
+    "updated_quality_blockers.csv"
+  ],
+  "tests": [
+    "Expected count reconciliation",
+    "unmapped-object zero check",
+    "duplicate physical representation check"
+  ],
+  "acceptance": [
+    "Every actual source has exactly one disposition",
+    "Every attribute has a contract",
+    "No source silently omitted"
+  ],
+  "failure": [
+    "Unprofiled/new source: register as UNREVIEWED and block production promotion until audited"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t02_full_current_data_census_reconciliation.md"
+}

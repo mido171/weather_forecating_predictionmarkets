@@ -1,0 +1,834 @@
+{
+  "status": "pass",
+  "violations": 0,
+  "by_method": [
+    {
+      "validation_split": "fold1",
+      "method": "B0_climatology",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B1_global_residual_pmf",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B2_month_residual_pmf",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "C1_multinomial_ridge",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "E1_normal_emos",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "E2_student_t_emos",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "K0_B4_identity",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "P1_normal_mos",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "P2_student_t_mos",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold1",
+      "method": "T1_time_decay_b4",
+      "row_count": 1096,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B0_climatology",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B1_global_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B2_month_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "C1_multinomial_ridge",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "E1_normal_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "E2_student_t_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "K0_B4_identity",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "P1_normal_mos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "P2_student_t_mos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold2",
+      "method": "T1_time_decay_b4",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B0_climatology",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B1_global_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B2_month_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "C1_multinomial_ridge",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "E1_normal_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "E2_student_t_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "K0_B4_identity",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "P1_normal_mos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "P2_student_t_mos",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold3",
+      "method": "T1_time_decay_b4",
+      "row_count": 1095,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B0_climatology",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B1_global_residual_pmf",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B2_month_residual_pmf",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "C1_multinomial_ridge",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "E1_normal_emos",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "E2_student_t_emos",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "K0_B4_identity",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "P1_normal_mos",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "P2_student_t_mos",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "fold4",
+      "method": "T1_time_decay_b4",
+      "row_count": 731,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B0_climatology",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B1_global_residual_pmf",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B2_month_residual_pmf",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "C1_multinomial_ridge",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "E1_normal_emos",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "E2_student_t_emos",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "K0_B4_identity",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "P1_normal_mos",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "P2_student_t_mos",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "presealed_2022_2023",
+      "method": "T1_time_decay_b4",
+      "row_count": 730,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B0_climatology",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B1_global_residual_pmf",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B2_month_residual_pmf",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B3_forecast_level_residual_pmf",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B4_hierarchical_residual_pmf",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B5_kernel_analog_pmf",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "B6_month_climatology_diagnostic",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "C1_multinomial_ridge",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "C2_ordinal_cdf_logistic",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "E1_normal_emos",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "E2_student_t_emos",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "E3_two_piece_normal_emos",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "G1_gamlss_tree_location_scale",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "H1_b4_challenger_linear_pool",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "K0_B4_identity",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "K1_B4_power_calibrated",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "K2_B4_monotone_cdf_projected",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "P1_normal_mos",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "P2_student_t_mos",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "Q1_quantile_cdf_gb",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "Q2_threshold_cdf_gb",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "S1_conservative_simplex_stack",
+      "row_count": 882,
+      "identical_to_split_first": true
+    },
+    {
+      "validation_split": "sealed_2024_2026_05",
+      "method": "T1_time_decay_b4",
+      "row_count": 882,
+      "identical_to_split_first": true
+    }
+  ]
+}

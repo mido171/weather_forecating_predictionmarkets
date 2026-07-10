@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-07-04T13:19:12Z",
+  "experiment_id": "0215",
+  "slug": "gpt_pro_point_forecast_strategy",
+  "database_url_redacted": "postgresql://postgres:***@127.0.0.1:5432/hkg_tmax_research",
+  "target_rows": 8765,
+  "lead1_forecast_rows": 80089,
+  "lead0_forecast_rows": 24565,
+  "climate_rows": 187025,
+  "feature_rows": 35060,
+  "feature_columns": 1166,
+  "prediction_rows": 265888,
+  "ablation_prediction_rows": 227904,
+  "selected_cutoff": "23:59",
+  "selected_model_id": "B3_grouped_residual_shrinkage",
+  "selected_mae": 0.9216066007226759,
+  "selected_rmse": 1.1826760995241477,
+  "selected_bias": 0.012704769322469249,
+  "raw_official_mae_same_cutoff": 0.9274910469770383,
+  "raw_official_rmse_same_cutoff": 1.1915190793489194,
+  "leakage_row_audit_failures": 0,
+  "promotion_gates": {
+    "improves_mae_vs_raw_by_0_035": false,
+    "improves_rmse_vs_raw_by_0_035": false,
+    "abs_bias_lte_0_040": true,
+    "has_at_least_4500_official_rows": true
+  },
+  "all_hard_gates_passed": false
+}

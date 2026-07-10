@@ -1,0 +1,26 @@
+{
+  "status": "pass",
+  "total_violations": 0,
+  "min_lag_days": 2,
+  "lag1_enabled": false,
+  "checks": [
+    {
+      "check_name": "residual_memory_max_source_date_lag2_or_older",
+      "status": "pass",
+      "violation_count": 0,
+      "sample_target_dates": []
+    },
+    {
+      "check_name": "residual_memory_min_lag_days_floor",
+      "status": "pass",
+      "violation_count": 0,
+      "minimum_lag_days": 2
+    },
+    {
+      "check_name": "lag1_residual_memory_disabled",
+      "status": "pass",
+      "violation_count": 0,
+      "columns": []
+    }
+  ]
+}

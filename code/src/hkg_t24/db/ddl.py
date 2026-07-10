@@ -180,6 +180,267 @@ CREATE TABLE IF NOT EXISTS model_features.feature_matrix (
   matrix_status text NOT NULL DEFAULT 'active' CHECK (matrix_status IN ('active','superseded','failed_closed')),
   PRIMARY KEY (target_date_hkt, cutoff_id, feature_scope, schema_version)
 );
+ALTER TABLE model_features.feature_matrix ADD COLUMN IF NOT EXISTS target_tmax_c numeric;
+ALTER TABLE model_features.feature_matrix ADD COLUMN IF NOT EXISTS feature_names_jsonb jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE model_features.feature_matrix ADD COLUMN IF NOT EXISTS availability_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+CREATE TABLE IF NOT EXISTS model_features.official_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  feature_schema_version text NOT NULL,
+  official__forecast_min_c numeric,
+  official__forecast_max_c numeric,
+  official__forecast_range_c numeric,
+  official__forecast_midpoint_c numeric,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  selected_issue_at_utc timestamptz,
+  source_row_count integer NOT NULL DEFAULT 0,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.official_revision_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  feature_schema_version text NOT NULL,
+  revision_count integer NOT NULL DEFAULT 0,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.target_memory_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  feature_count integer NOT NULL DEFAULT 0,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.online_residual_state (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  source_key text NOT NULL,
+  state_scope text NOT NULL,
+  n_prior_rows integer NOT NULL,
+  warmup_status text NOT NULL CHECK (warmup_status IN ('NO_HISTORY','COLD_START','WARMING','READY')),
+  state_available boolean NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  state_asof_target_date_hkt date NOT NULL,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, source_key, state_scope)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.nwp_daily_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  dataset_code text NOT NULL,
+  feature_prefix text NOT NULL,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  safe_row_count integer NOT NULL DEFAULT 0,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, dataset_code, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.nwp_ensemble_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  dataset_code text NOT NULL,
+  feature_prefix text NOT NULL,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  member_count integer NOT NULL DEFAULT 0,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, dataset_code, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.station_proxy_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  station_count integer NOT NULL DEFAULT 0,
+  proxy_only boolean NOT NULL DEFAULT true,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.diagnostic_proxy_features (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  proxy_only boolean NOT NULL DEFAULT true,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  generated_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, feature_schema_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_features.static_geospatial_features (
+  feature_id text PRIMARY KEY,
+  station_id text,
+  feature_schema_version text NOT NULL,
+  features_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  source_priority text NOT NULL,
+  role_confidence numeric,
+  generated_at_utc timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS model_oof.expert_prediction (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  expert_id text NOT NULL,
+  expert_scope text NOT NULL CHECK (expert_scope IN ('strict','proxy','live_shadow')),
+  fold_id text NOT NULL,
+  prediction_tmax_c double precision,
+  prediction_residual_c double precision,
+  raw_anchor_tmax_c double precision,
+  prediction_status text NOT NULL CHECK (
+    prediction_status IN ('active','placeholder','unavailable','failed_closed')
+  ),
+  placeholder_reason text,
+  train_end_date date,
+  test_start_date date,
+  router_weight_cap double precision NOT NULL DEFAULT 0,
+  feature_schema_version text NOT NULL,
+  created_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, expert_id, fold_id),
+  CONSTRAINT expert_prediction_oof_chronology CHECK (
+    train_end_date IS NULL OR test_start_date IS NULL OR train_end_date < test_start_date
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_expert_prediction_date
+  ON model_oof.expert_prediction(target_date_hkt);
+CREATE INDEX IF NOT EXISTS idx_expert_prediction_expert
+  ON model_oof.expert_prediction(expert_id, fold_id);
+
+CREATE TABLE IF NOT EXISTS model_oof.expert_artifact (
+  artifact_id text PRIMARY KEY,
+  expert_id text NOT NULL,
+  artifact_kind text NOT NULL,
+  artifact_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  artifact_sha256 text NOT NULL,
+  feature_schema_version text NOT NULL,
+  created_at_utc timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS model_router.router_prediction (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  router_version text NOT NULL,
+  router_scope text NOT NULL,
+  fold_id text NOT NULL,
+  base_forecast_c double precision,
+  static_weights_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  dynamic_weights_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  final_weights_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  expected_error_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  availability_mask_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  selected_tau double precision NOT NULL,
+  selected_lambda double precision NOT NULL,
+  promotion_status text NOT NULL CHECK (promotion_status IN ('candidate','promoted','demoted')),
+  demotion_reason text,
+  expert_mask_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  cap_trace_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  created_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, router_version, router_scope)
+);
+CREATE INDEX IF NOT EXISTS router_prediction_scope_idx
+  ON model_router.router_prediction(router_version, router_scope);
+
+CREATE TABLE IF NOT EXISTS model_router.router_scoreboard (
+  router_version text NOT NULL,
+  router_scope text NOT NULL,
+  promotion_status text NOT NULL,
+  promotion_gate_passed boolean NOT NULL,
+  demotion_reason text,
+  included_experts_jsonb jsonb NOT NULL DEFAULT '[]'::jsonb,
+  excluded_experts_jsonb jsonb NOT NULL DEFAULT '[]'::jsonb,
+  mae double precision,
+  baseline_mae double precision,
+  mae_delta_vs_baseline double precision,
+  mae_delta_vs_r0 double precision,
+  p90_abs_error_delta double precision,
+  row_count integer NOT NULL,
+  first_date date,
+  last_date date,
+  created_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (router_version, router_scope)
+);
+
+CREATE TABLE IF NOT EXISTS model_router.specialist_prediction (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  specialist_id text NOT NULL,
+  specialist_version text NOT NULL,
+  fold_id text NOT NULL,
+  prior_score double precision,
+  score_available boolean NOT NULL,
+  fold_p60 double precision,
+  regime_probability double precision,
+  raw_correction_c double precision NOT NULL,
+  shrunk_correction_c double precision NOT NULL,
+  applied_correction_c double precision NOT NULL,
+  expected_benefit_c double precision NOT NULL,
+  activated boolean NOT NULL,
+  activation_reason text NOT NULL,
+  support_count integer NOT NULL,
+  active_year_count integer NOT NULL,
+  no_harm_pass boolean NOT NULL,
+  promotion_status text NOT NULL CHECK (promotion_status IN ('promoted','demoted')),
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  created_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, specialist_id, specialist_version)
+);
+
+CREATE TABLE IF NOT EXISTS model_oof.system_prediction (
+  target_date_hkt date NOT NULL,
+  cutoff_id text NOT NULL CHECK (cutoff_id = 'H24N'),
+  snapshot_id text NOT NULL,
+  system_version text NOT NULL,
+  router_selected text,
+  router_selection_reason text NOT NULL,
+  base_forecast_c double precision,
+  specialist_total_correction_c double precision NOT NULL,
+  final_pre_distribution_c double precision,
+  final_point_tmax_c double precision,
+  p10_c double precision,
+  p25_c double precision,
+  p50_c double precision,
+  p75_c double precision,
+  p90_c double precision,
+  expected_abs_error_c double precision,
+  threshold_probabilities_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  confidence_state text NOT NULL CHECK (confidence_state IN ('HIGH','MEDIUM','LOW')),
+  no_trade_flag boolean NOT NULL,
+  distribution_status text NOT NULL,
+  quantile_monotonic_repair boolean NOT NULL DEFAULT false,
+  component_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
+  leakage_status text NOT NULL CHECK (leakage_status IN ('passed','failed_closed')),
+  created_at_utc timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (target_date_hkt, cutoff_id, system_version)
+);
 
 CREATE TABLE IF NOT EXISTS model_validation.leakage_audit_event (
   event_id bigserial PRIMARY KEY,
@@ -288,6 +549,8 @@ CREATE TABLE IF NOT EXISTS model_eval.system_prediction_component (
     CHECK (component_status IN ('active','placeholder','failed_closed')),
   created_at_utc timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE model_eval.system_prediction_component
+  ADD COLUMN IF NOT EXISTS details_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb;
 """
 
 SNAPSHOT_COMPAT_VIEW_SQL = """
@@ -361,6 +624,26 @@ EXPECTED_COLUMNS = (
     ExpectedColumn("model_features", "h24n_snapshot", "target_date_hkt", ("date",)),
     ExpectedColumn("model_features", "feature_matrix", "features_jsonb", ("jsonb",)),
     ExpectedColumn("model_features", "feature_matrix", "feature_count", ("integer",)),
+    ExpectedColumn("model_features", "official_features", "features_jsonb", ("jsonb",)),
+    ExpectedColumn("model_features", "official_revision_features", "features_jsonb", ("jsonb",)),
+    ExpectedColumn("model_features", "target_memory_features", "features_jsonb", ("jsonb",)),
+    ExpectedColumn("model_features", "online_residual_state", "source_key", ("text",)),
+    ExpectedColumn("model_features", "online_residual_state", "n_prior_rows", ("integer",)),
+    ExpectedColumn("model_features", "nwp_daily_features", "dataset_code", ("text",)),
+    ExpectedColumn("model_features", "nwp_ensemble_features", "member_count", ("integer",)),
+    ExpectedColumn("model_features", "station_proxy_features", "proxy_only", ("boolean",)),
+    ExpectedColumn("model_features", "diagnostic_proxy_features", "proxy_only", ("boolean",)),
+    ExpectedColumn("model_oof", "expert_prediction", "expert_id", ("text",)),
+    ExpectedColumn("model_oof", "expert_prediction", "prediction_tmax_c", ("double precision",)),
+    ExpectedColumn("model_oof", "expert_artifact", "artifact_jsonb", ("jsonb",)),
+    ExpectedColumn("model_router", "router_prediction", "final_weights_jsonb", ("jsonb",)),
+    ExpectedColumn("model_router", "router_prediction", "expected_error_jsonb", ("jsonb",)),
+    ExpectedColumn("model_router", "router_scoreboard", "router_version", ("text",)),
+    ExpectedColumn("model_router", "router_scoreboard", "promotion_gate_passed", ("boolean",)),
+    ExpectedColumn("model_router", "router_scoreboard", "mae_delta_vs_r0", ("double precision",)),
+    ExpectedColumn("model_router", "specialist_prediction", "applied_correction_c", ("double precision",)),
+    ExpectedColumn("model_oof", "system_prediction", "threshold_probabilities_jsonb", ("jsonb",)),
+    ExpectedColumn("model_oof", "system_prediction", "no_trade_flag", ("boolean",)),
     ExpectedColumn("model_validation", "scoreboard", "scoreboard_id", ("text",)),
     ExpectedColumn("model_validation", "scoreboard", "first_target_date_hkt", ("date",)),
     ExpectedColumn("model_validation", "negative_control_result", "control_id", ("text",)),

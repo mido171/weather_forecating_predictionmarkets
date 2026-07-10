@@ -1,0 +1,210 @@
+{
+  "generated_at_utc": "2026-07-08T08:04:15.373043Z",
+  "header": {
+    "area": "FLDK",
+    "band": "B13",
+    "bits_per_pixel": 16,
+    "calibration": {
+      "band_number": 13,
+      "boltzmann_constant_j_k": 1.3806488e-23,
+      "bt_to_radiance_C0": 0.118211645089097,
+      "bt_to_radiance_C1": 0.998989021775474,
+      "bt_to_radiance_C2": 1.80702978762378e-06,
+      "central_wavelength_um": 10.4074,
+      "count_to_radiance_intercept": 15.197657722429469,
+      "count_to_radiance_slope": -0.0037525074318633814,
+      "error_count": 65535,
+      "outside_scan_count": 65534,
+      "planck_constant_j_s": 6.62606957e-34,
+      "radiance_to_bt_c0": -0.118260812197365,
+      "radiance_to_bt_c1": 1.00101143081895,
+      "radiance_to_bt_c2": -1.80800453227613e-06,
+      "speed_of_light_m_s": 299792458.0,
+      "valid_bits_per_pixel": 12
+    },
+    "columns": 5500,
+    "data_block_compression_flag": 0,
+    "data_total_bytes": 6050000,
+    "file_creation_mjd": 61229.269733796296,
+    "file_creation_utc": "2026-07-08T06:28:25.000000008Z",
+    "format_version": "1.3",
+    "header_blocks": [
+      {
+        "block_number": 1,
+        "length_bytes": 282,
+        "offset": 0
+      },
+      {
+        "block_number": 2,
+        "length_bytes": 50,
+        "offset": 282
+      },
+      {
+        "block_number": 3,
+        "length_bytes": 127,
+        "offset": 332
+      },
+      {
+        "block_number": 4,
+        "length_bytes": 139,
+        "offset": 459
+      },
+      {
+        "block_number": 5,
+        "length_bytes": 147,
+        "offset": 598
+      },
+      {
+        "block_number": 6,
+        "length_bytes": 259,
+        "offset": 745
+      },
+      {
+        "block_number": 7,
+        "length_bytes": 47,
+        "offset": 1004
+      },
+      {
+        "block_number": 8,
+        "length_bytes": 81,
+        "offset": 1051
+      },
+      {
+        "block_number": 9,
+        "length_bytes": 85,
+        "offset": 1132
+      },
+      {
+        "block_number": 10,
+        "length_bytes": 47,
+        "offset": 1217
+      },
+      {
+        "block_number": 11,
+        "length_bytes": 259,
+        "offset": 1264
+      }
+    ],
+    "header_total_bytes": 1523,
+    "hsd_file_name": "HS_H09_20260708_0620_B13_FLDK_R20_S0510.DAT",
+    "lines_in_segment": 550,
+    "observation_area": "FLDK",
+    "observation_end_mjd": 61229.26742258064,
+    "observation_end_utc": "2026-07-08T06:25:05.310967330Z",
+    "observation_start_mjd": 61229.2667199452,
+    "observation_start_utc": "2026-07-08T06:24:04.603265029Z",
+    "observation_timeline_hhmm": 620,
+    "observation_times": [
+      {
+        "line_number": 2201,
+        "mjd": 61229.2667199452,
+        "utc": "2026-07-08T06:24:04.603265029Z"
+      },
+      {
+        "line_number": 2390,
+        "mjd": 61229.267058279496,
+        "utc": "2026-07-08T06:24:33.835348480Z"
+      },
+      {
+        "line_number": 2633,
+        "mjd": 61229.26742258064,
+        "utc": "2026-07-08T06:25:05.310967330Z"
+      },
+      {
+        "line_number": 2750,
+        "mjd": 61229.26742258064,
+        "utc": "2026-07-08T06:25:05.310967330Z"
+      }
+    ],
+    "observed_at_utc": "2026-07-08T06:20:00Z",
+    "processing_center": "MSC",
+    "projection": {
+      "cfac": 20466275,
+      "coff": 2750.5,
+      "earth_equatorial_radius_km": 6378.137,
+      "earth_flattening": 0.0066943844,
+      "earth_polar_radius_km": 6356.7523,
+      "lfac": 20466275,
+      "loff": 2750.5,
+      "req2_over_rpol2": 1.006739501,
+      "rpol2_over_req2": 0.993305616,
+      "satellite_distance_km": 42164.0,
+      "sd_coefficient": 1737122264.0,
+      "sub_satellite_longitude_deg": 140.7
+    },
+    "resolution_code": "R20",
+    "satellite_code": "H09",
+    "satellite_name": "Himawari-9",
+    "segment": {
+      "first_global_line_number": 2201,
+      "last_global_line_number": 2750,
+      "segment_sequence_number": 5,
+      "total_segments": 10
+    },
+    "segment_code": "S0510",
+    "segment_count": 10,
+    "segment_number": 5,
+    "source": "himawari9",
+    "source_record": {
+      "compressed_bytes": 3240438,
+      "content_type": null,
+      "fetched_now": false,
+      "path": "raw\\himawari_hko_candidate\\HS_H09_20260708_0620_B13_FLDK_R20_S0510.DAT.bz2",
+      "sha256": "c9010d2cbb428d823f20d1a05d06bb498f22b8daac7aa8a61a8bb205c6b1cca5",
+      "url": "https://noaa-himawari9.s3.amazonaws.com/AHI-L1b-FLDK/2026/07/08/0620/HS_H09_20260708_0620_B13_FLDK_R20_S0510.DAT.bz2"
+    }
+  },
+  "hko_21x21_window_summary": {
+    "brightness_temp_c_max": 24.286579132080078,
+    "brightness_temp_c_mean": 23.495744705200195,
+    "brightness_temp_c_median": 23.65459632873535,
+    "brightness_temp_c_min": 17.010778427124023,
+    "pixel_count": 441,
+    "window_radius_pixels": 10
+  },
+  "hko_projected_pixel": {
+    "brightness_temp_c": 23.882535934448242,
+    "count_uint16": 1552,
+    "global_column_float": 2772.7878518055027,
+    "global_line_float": 2730.2131653283996,
+    "inside_this_segment": true,
+    "local_col_0based": 2772,
+    "local_row_0based": 529,
+    "quality_code": 0,
+    "radiance_w_m2_sr_um": 9.37376594543457,
+    "target_station": {
+      "latitude": 22.301944,
+      "longitude": 114.174167,
+      "metadata_source": "config/stations_hko.yaml target_station",
+      "station_id": "hko:HKO",
+      "station_name": "Hong Kong Observatory"
+    }
+  },
+  "outputs": {
+    "all_pixels_csv_gz": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_all_pixels.csv.gz",
+    "all_pixels_first_5000_csv": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_all_pixels_first_5000_rows.csv",
+    "all_pixels_parquet": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_all_pixels.parquet",
+    "brightness_temp_c_matrix_npy": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_brightness_temp_c_matrix_float32.npy",
+    "count_matrix_npy": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_count_matrix_uint16.npy",
+    "histogram_csv": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_brightness_temp_c_histogram.csv",
+    "hko_21x21_window_csv": "normalized\\himawari_hko_b13_s0510_item\\hko_b13_s0510_hko_21x21_window.csv"
+  },
+  "purpose": "One complete readable Himawari HKG item: B13 HSD segment containing the projected HKO pixel.",
+  "segment_pixel_summary": {
+    "brightness_temp_c_max": 27.00007438659668,
+    "brightness_temp_c_mean": -3.505702257156372,
+    "brightness_temp_c_median": 5.475036144256592,
+    "brightness_temp_c_min": -203.15174865722656,
+    "brightness_temp_c_p05": -51.089866638183594,
+    "brightness_temp_c_p95": 22.096813201904297,
+    "columns": 5500,
+    "count_max_valid": 4052,
+    "count_median_valid": 2218.0,
+    "count_min_valid": 1427,
+    "error_pixel_count": 0,
+    "outside_scan_pixel_count": 11000,
+    "pixel_count": 3025000,
+    "rows": 550,
+    "valid_pixel_count": 3014000
+  }
+}

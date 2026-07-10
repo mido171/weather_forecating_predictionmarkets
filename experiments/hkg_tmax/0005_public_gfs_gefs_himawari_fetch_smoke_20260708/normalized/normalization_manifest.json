@@ -1,0 +1,44 @@
+{
+  "combined_outputs": {
+    "bbox_source_comparison_csv": "normalized/model_bbox_comparison_features.csv",
+    "bbox_summary_csv": "normalized/model_hkg_bbox_summary_features.csv",
+    "grid_all_csv": "normalized/hkg_bbox_grid_long_all_sources.csv",
+    "grid_all_parquet": "normalized/hkg_bbox_grid_long_all_sources.parquet",
+    "himawari_header_summary_json": "normalized/himawari_b13_header_summary.json",
+    "snapshot_json": "normalized/feature_snapshot.json",
+    "station_features_csv": "normalized/model_target_station_features.csv",
+    "station_source_comparison_csv": "normalized/model_source_comparison_features.csv"
+  },
+  "decoder": {
+    "grib": "cfgrib/eccodes",
+    "himawari": "custom Standard Data header parser; pixel values not calibrated in this smoke"
+  },
+  "experiment_id": "0005_public_gfs_gefs_himawari_fetch_smoke_20260708",
+  "generated_at_utc": "2026-07-08T07:53:09.863891Z",
+  "normalization_status": "complete_for_gfs_gefs_model_fields_partial_metadata_for_himawari",
+  "row_counts": {
+    "bbox_source_comparison": 7,
+    "bbox_summary": 14,
+    "grid_all": 1386,
+    "station_features": 2,
+    "station_source_comparison": 1
+  },
+  "source_outputs": [
+    {
+      "bbox_summary_csv": "normalized\\gfs_hkg_bbox_summary_features.csv",
+      "grid_csv": "normalized\\gfs_hkg_bbox_grid_long.csv",
+      "grid_rows": 693,
+      "input_path": "raw/gfs/gfs_20260708_00z_f024_hkg_bbox.grib2",
+      "source": "gfs",
+      "station_feature_csv": "normalized\\gfs_target_station_nearest_features.csv"
+    },
+    {
+      "bbox_summary_csv": "normalized\\gefs_hkg_bbox_summary_features.csv",
+      "grid_csv": "normalized\\gefs_hkg_bbox_grid_long.csv",
+      "grid_rows": 693,
+      "input_path": "raw/gefs/gefs_control_20260708_00z_f024_hkg_bbox.grib2",
+      "source": "gefs_control",
+      "station_feature_csv": "normalized\\gefs_target_station_nearest_features.csv"
+    }
+  ]
+}

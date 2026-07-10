@@ -1,0 +1,58 @@
+{
+  "id": "T05",
+  "suffix": "canonical_location_station_geospatial_registry",
+  "title": "Canonical Location, Station, and Geospatial Registry",
+  "phase": "A Foundation",
+  "deps": [
+    "T02",
+    "T04"
+  ],
+  "mission": "Build a date-effective registry for the HKO target, all current HKO stations, all 36 ISD stations, ARWF stations, and designed inland/coastal/marine/synoptic reference points.",
+  "inputs": [
+    "ISD station dossier",
+    "static geospatial inventory",
+    "source station metadata",
+    "HKO target metadata",
+    "ARWF station payloads when available"
+  ],
+  "steps": [
+    "Resolve station IDs to authoritative names and date-effective coordinates.",
+    "Reject impossible row-level coordinates and use authoritative station history.",
+    "Calculate distance/bearing to HKO, elevation difference, coast distance, terrain, urban/coastal/inland/island/hill roles.",
+    "Define HKO target coordinate and reference point sets.",
+    "Define local and synoptic grid domains and upwind candidate points.",
+    "Do not fabricate unknown station identities; mark unresolved.",
+    "Version the registry and hash all geospatial inputs."
+  ],
+  "db_objects": [
+    "catalog.location",
+    "catalog.station",
+    "catalog.station_metadata_history",
+    "catalog.location_group"
+  ],
+  "outputs": [
+    "location_registry.csv",
+    "station_dossier_complete.csv",
+    "location_groups.csv",
+    "local_domain.geojson",
+    "synoptic_domain.geojson",
+    "unresolved_station_blockers.csv"
+  ],
+  "tests": [
+    "Coordinate bounds",
+    "duplicate station identity",
+    "distance/bearing recomputation",
+    "date-effective metadata tests"
+  ],
+  "acceptance": [
+    "Every station used by any feature is registered",
+    "All NWP coordinates have stable codes",
+    "No impossible coordinates remain in clean views"
+  ],
+  "failure": [
+    "Unresolved station metadata blocks physical interpretation but not raw storage"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t05_canonical_location_station_geospatial_registry.md"
+}

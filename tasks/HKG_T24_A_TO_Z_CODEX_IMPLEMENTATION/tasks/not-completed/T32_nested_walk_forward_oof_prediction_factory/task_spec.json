@@ -1,0 +1,54 @@
+{
+  "id": "T32",
+  "suffix": "nested_walk_forward_oof_prediction_factory",
+  "title": "Nested Walk-Forward OOF Prediction Factory",
+  "phase": "D Modelling",
+  "deps": [
+    "T28",
+    "T29",
+    "T31"
+  ],
+  "mission": "Create the authoritative out-of-fold prediction factory for every expert, specialist and baseline across long and modern frames.",
+  "inputs": [
+    "All expert training pipelines",
+    "frame registry",
+    "feature manifests"
+  ],
+  "steps": [
+    "Define expanding outer folds and inner tuning folds per frame.",
+    "Recompute all fold-fitted transformations inside folds.",
+    "Train/predict every expert for every eligible test date.",
+    "Store model/config/data hashes and support counts.",
+    "Verify one prediction per expert/date/frame.",
+    "Create common-row meta-training tables with availability masks.",
+    "Prevent any final/sealed outcomes from hyperparameter selection."
+  ],
+  "db_objects": [
+    "research.expert_oof_prediction",
+    "research.fold_registry"
+  ],
+  "outputs": [
+    "fold_definitions.csv",
+    "oof_prediction_matrix.parquet",
+    "fold_model_manifest.csv",
+    "missing_expert_matrix.csv",
+    "OOF_integrity_report.md"
+  ],
+  "tests": [
+    "No train/test date overlap",
+    "preprocessing fit dates",
+    "prediction uniqueness",
+    "recompute sample folds"
+  ],
+  "acceptance": [
+    "Router-ready OOF table exists",
+    "Every prediction traceable to fold artifact",
+    "No in-sample fallback"
+  ],
+  "failure": [
+    "Expert missing on date: availability mask; never substitute its fitted full-sample prediction"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t32_nested_walk_forward_oof_prediction_factory.md"
+}

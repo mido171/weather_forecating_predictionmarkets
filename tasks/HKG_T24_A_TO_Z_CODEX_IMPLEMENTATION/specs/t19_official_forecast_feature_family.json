@@ -1,0 +1,50 @@
+{
+  "id": "T19",
+  "suffix": "official_forecast_feature_family",
+  "title": "Official Forecast, Revision, Text, and Trust Feature Family",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T14",
+    "T18"
+  ],
+  "mission": "Create the complete official-anchor feature family from all eligible forecast vintages and text, without outcomes.",
+  "inputs": [
+    "Official vintage store",
+    "target snapshots",
+    "full source text"
+  ],
+  "steps": [
+    "Generate max/min/range/midpoint and issue-age features.",
+    "Generate first-to-latest revisions, count, velocity, sign, volatility and staleness.",
+    "Generate source/product/parser era and issue-hour features.",
+    "Tokenize/normalize weather, wind, RH and rain-probability text; preserve raw.",
+    "Define fold-local text models/embeddings; no full-history target-informed vocabulary selection.",
+    "Generate official-versus-causal-target-memory and official-versus-NWP disagreement only when counterpart features exist.",
+    "Generate missing/null/parser confidence indicators."
+  ],
+  "db_objects": [
+    "feature_store official feature tables/definitions"
+  ],
+  "outputs": [
+    "feature_definitions_official.csv",
+    "coverage_profile.csv",
+    "text_vocabulary_contract.md",
+    "feature_lineage_samples.csv"
+  ],
+  "tests": [
+    "Feature recomputation",
+    "post-cutoff vintage exclusion",
+    "no target/residual tokens",
+    "fold-local NLP tests"
+  ],
+  "acceptance": [
+    "All official features have eligibility and lineage",
+    "No outcome-derived field admitted"
+  ],
+  "failure": [
+    "Unparseable text preserved raw and flagged; never discarded silently"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t19_official_forecast_feature_family.md"
+}

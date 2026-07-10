@@ -1,0 +1,6 @@
+interface:
+  display_name: "HKG T+24 Experiment Executor"
+  short_description: "Execute one leakage-safe HKO Tmax experiment and produce a complete auditable folder."
+  default_prompt: "Execute the supplied HKG T+24 experiment specification exactly, using the canonical T-24 cutoff and complete experiment-folder contract."
+policy:
+  allow_implicit_invocation: false

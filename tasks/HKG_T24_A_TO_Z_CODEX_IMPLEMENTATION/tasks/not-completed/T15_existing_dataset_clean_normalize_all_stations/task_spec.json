@@ -1,0 +1,56 @@
+{
+  "id": "T15",
+  "suffix": "existing_dataset_clean_normalize_all_stations",
+  "title": "Clean and Normalize Every Existing Dataset and Station",
+  "phase": "B Acquisition",
+  "deps": [
+    "T02",
+    "T04",
+    "T05"
+  ],
+  "mission": "Implement all audit-driven repairs and create clean diagnostic/operational/live views for every current data family.",
+  "inputs": [
+    "Audit quality issues",
+    "current datasets and DB tables",
+    "station registry"
+  ],
+  "steps": [
+    "Use canonical target labels; reconcile payload duplicates.",
+    "Daily climate: preserve Trace flag, null missing values, quarantine invalid dates, remain diagnostic.",
+    "IGRA: map documented sentinels, correct proven scaling, deduplicate POR/YTD, regenerate sounding features, remain diagnostic until latency proof.",
+    "ISD: repair wind parser from raw fields, use date-effective station metadata, rebuild pre-cutoff summaries from observations only, separate proxy and live-safe status.",
+    "TC best track: diagnostic labels only.",
+    "Radar/satellite/lightning/nowcast: normalize issue/frame/first-seen and preserve imagery/object manifests.",
+    "Marine/tide: normalize station/time/unit and availability.",
+    "NCEP inventory: repair cycle/valid metadata from filenames/GRIB.",
+    "Static geospatial: derive reproducible station features.",
+    "Experiment outputs: register as research artifacts only."
+  ],
+  "db_objects": [
+    "normalized/diagnostic/live/object/quarantine tables"
+  ],
+  "outputs": [
+    "repair reports per dataset",
+    "before_after_ranges.csv",
+    "quarantine_counts.csv",
+    "clean_view_manifest.csv",
+    "station_coverage.csv"
+  ],
+  "tests": [
+    "Sentinel absence in clean views",
+    "ISD direction variance",
+    "pre-cutoff summary proof",
+    "timezone tests",
+    "duplicate tests"
+  ],
+  "acceptance": [
+    "All 13 families receive explicit completed disposition",
+    "Critical defects blocked from modelling"
+  ],
+  "failure": [
+    "Unrepairable field: set NULL/quarantine and record; never substitute fabricated values"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t15_existing_dataset_clean_normalize_all_stations.md"
+}

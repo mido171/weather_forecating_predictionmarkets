@@ -9,6 +9,8 @@ __pycache__/
 htmlcov/
 dist/
 build/
+apps/**/dist/
+apps/**/node_modules/
 *.egg-info/
 
 # Raw and derived data are deliberately excluded from Git.
@@ -29,6 +31,14 @@ data/cache/**
 !data/cache/**/
 !data/**/README.md
 
+# Large Info.gov hourly-reading backfill payloads.
+data/datasets/13_hko_info_gov_hourly_readings/raw_html/**
+data/datasets/13_hko_info_gov_hourly_readings/metadata/**
+data/datasets/13_hko_info_gov_hourly_readings/normalized/**
+data/datasets/13_hko_info_gov_hourly_readings/reports/**
+!data/datasets/13_hko_info_gov_hourly_readings/
+!data/datasets/13_hko_info_gov_hourly_readings/README.md
+
 # Experiment payloads may be large; documentation and small metrics stay versioned.
 experiments/**/artifacts/*
 experiments/**/logs/*
@@ -42,3 +52,7 @@ experiments/**/results/*.zarr/
 reports/generated/
 tmp/
 .DS_Store
+
+# Local credentials. Keep token values out of Git, docs, logs, and artifacts.
+secrets/local/*
+!secrets/local/README.md

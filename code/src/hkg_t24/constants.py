@@ -1,4 +1,4 @@
-"""Binding constants for the HKG-T24-001 foundation contract."""
+"""Binding constants for the HKG-T24 implementation contracts."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ END_TARGET_DATE = date(2026, 6, 21)
 STRICT_SCHEMA_VERSION = "hkg_t24_h24n_strict_v1_20260626_patch1"
 PROXY_SCHEMA_VERSION = "hkg_t24_h24n_proxy_v1_20260626_patch1"
 SHADOW_SCHEMA_VERSION = "hkg_t24_h24n_shadow_v1_20260626_patch1"
-CODE_VERSION = "hkg-t24-001-foundation-v1"
+CODE_VERSION = "hkg-t24-003-router-specialists-distribution-v1"
 
 DATABASE_URL_ENV = "HKG_TMAX_DATABASE_URL"
 DATABASE_DSN_ENV = "HKG_TMAX_DB_DSN"
@@ -56,6 +56,21 @@ REPORT_NAMES = (
     "live_shadow_availability_report.md",
     "leakage_audit_report.md",
     "jira_001_contract_coverage.md",
+    "official_anchor_coverage.md",
+    "online_state_audit_report.md",
+    "feature_dictionary.md",
+    "feature_matrix_coverage_report.md",
+    "expert_oof_scoreboard.md",
+    "expert_factory_report.md",
+    "oof_integrity_report.md",
+    "model_selection_report.md",
+    "jira_002_contract_coverage.md",
+    "router_report.md",
+    "specialist_report.md",
+    "distribution_calibration_report.md",
+    "calibration_report.md",
+    "system_replay_report.md",
+    "jira_003_contract_coverage.md",
 )
 
 PLACEHOLDER_REASON_CODES = (
@@ -129,19 +144,223 @@ TARGET_MEMORY_FEATURE_WHITELIST = (
     "target__lag2_tmax_c",
     "target__lag3_tmax_c",
     "target__lag7_tmax_c",
-    "target__roll7_lag2_mean_tmax_c",
-    "target__roll14_lag2_mean_tmax_c",
-    "target__roll30_lag2_mean_tmax_c",
-    "target__roll7_lag2_std0_tmax_c",
-    "target__roll14_lag2_std0_tmax_c",
-    "target__roll30_lag2_std0_tmax_c",
-    "target__slope7_lag2_tmax_c",
-    "target__slope30_lag2_tmax_c",
-    "target__hot_spell_lag2",
+    "target__lag14_tmax_c",
+    "target__lag30_tmax_c",
+    "target__lag60_tmax_c",
+    "target__lag365_tmax_c",
+    "target__roll7_mean_lag2_c",
+    "target__roll14_mean_lag2_c",
+    "target__roll30_mean_lag2_c",
+    "target__roll60_mean_lag2_c",
+    "target__roll365_mean_lag2_c",
+    "target__roll7_std_lag2_c",
+    "target__roll14_std_lag2_c",
+    "target__roll30_std_lag2_c",
+    "target__range7_lag2_c",
+    "target__range14_lag2_c",
+    "target__slope7_lag2_c_per_day",
+    "target__slope30_lag2_c_per_day",
+    "target__slope7_minus_slope30_lag2_c_per_day",
+    "target__lag2_minus_roll7_c",
+    "target__lag2_minus_roll30_c",
+    "target__roll7_minus_roll30_c",
+    "target__hot_spell_length_lag2_days",
+    "target__cool_spell_length_lag2_days",
+    "target__clim30_mean_c",
+    "target__clim30_std_c",
+    "target__lag2_minus_clim30_c",
+    "target__warming_trend_10y_c_per_year",
     "target__year_index",
 )
 
-FORBIDDEN_FINALIZED_TARGET_TERMS = ("target__lag1", "lag1_tmax")
+TARGET_MEMORY_MISSING_INDICATOR_FEATURES = tuple(
+    f"{feature_name}__is_missing"
+    for feature_name in TARGET_MEMORY_FEATURE_WHITELIST
+    if feature_name != "target__year_index"
+)
+
+FORBIDDEN_FINALIZED_TARGET_TERMS = ("target__lag1_", "lag1_tmax")
+
+OFFICIAL_FEATURE_WHITELIST = (
+    "official__forecast_min_c",
+    "official__forecast_max_c",
+    "official__forecast_range_c",
+    "official__forecast_midpoint_c",
+    "official__issue_hour_hkt",
+    "official__hours_before_cutoff",
+    "official__revision_count",
+    "official__revision_min_delta_c",
+    "official__revision_max_delta_c",
+    "official__revision_range_delta_c",
+    "official__text_hot_flag",
+    "official__text_very_hot_flag",
+    "official__text_showers_flag",
+    "official__text_thunderstorm_flag",
+    "official__text_cloudy_flag",
+    "official__text_fine_flag",
+    "official__text_mist_fog_flag",
+    "official__text_easterly_flag",
+    "official__text_light_wind_flag",
+    "official__psr_numeric_proxy",
+    "official__forecast_max_minus_gefs_median_c",
+    "official__forecast_max_minus_gfs_center_tmax_c",
+    "official__forecast_max_minus_target_roll7_c",
+)
+
+ONLINE_SOURCE_SCOPES = (
+    ("official_raw", "global"),
+    ("official_raw", "source_era"),
+    ("official_raw", "month"),
+    ("official_raw", "season"),
+    ("gfs_mos", "global"),
+    ("gefs_prob_mos", "global"),
+    ("r0_router", "global"),
+    ("r1_router", "global"),
+    ("final_system", "global"),
+)
+
+ONLINE_HALF_LIVES = (5, 10, 20, 40)
+
+STRICT_FEATURE_PREFIXES = (
+    "calendar__",
+    "official__",
+    "target__",
+    "online__",
+    "gfs__",
+    "gefsmean__",
+    "gefsens__",
+    "router__",
+)
+
+PROXY_FEATURE_PREFIXES = (
+    "calendar__",
+    "official__",
+    "target__",
+    "online__",
+    "station__",
+    "climate__",
+)
+
+SHADOW_FEATURE_PREFIXES = (
+    "ifsoper__",
+    "ifsens__",
+    "aifsoper__",
+    "aifsens__",
+    "aigfssfc__",
+    "graphcast__",
+    "fourcastnet__",
+    "cwawrf15__",
+    "arwf__",
+)
+
+STRICT_FORBIDDEN_FEATURE_PREFIXES = (
+    "ifsoper__",
+    "ifsens__",
+    "aifsoper__",
+    "aifsens__",
+    "aigfssfc__",
+    "graphcast__",
+    "fourcastnet__",
+    "cwawrf15__",
+    "arwf__",
+    "station__",
+    "climate__",
+    "igra__",
+    "tc__",
+)
+
+EXPERT_IDS = (
+    "E0_OFFICIAL_RAW_ANCHOR",
+    "E1_OFFICIAL_RESIDUAL",
+    "E2_TARGET_MEMORY",
+    "E3_STATION_PROXY",
+    "E4_GFS_MOS",
+    "E5_GEFS_ENSEMBLE",
+    "E6_IFS_OPER_SHADOW",
+    "E7_IFS_ENS_SHADOW",
+    "E8_AI_NWP_SHADOW",
+    "E9_CWA_WRF_LIVE_SHADOW",
+    "E10_DIAGNOSTIC_PROXY",
+    "E11_ARWF_LIVE_SHADOW",
+)
+
+ROUTER_IDS = (
+    "R0_OFFICIAL_LONG_HISTORY",
+    "R1_CORE_GFS_GEFS",
+    "R2_IFS_SHADOW_ADAPTER",
+    "R3_AI_SHADOW_ADAPTER",
+    "R4_LIVE_SHADOW_ADAPTER",
+)
+
+ROUTER_SHORT_IDS = {
+    "R0": "R0_OFFICIAL_LONG_HISTORY",
+    "R1": "R1_CORE_GFS_GEFS",
+    "R2": "R2_IFS_SHADOW_ADAPTER",
+    "R3": "R3_AI_SHADOW_ADAPTER",
+    "R4": "R4_LIVE_SHADOW_ADAPTER",
+}
+
+ROUTER_EXPERTS = {
+    "R0_OFFICIAL_LONG_HISTORY": (
+        "E0_OFFICIAL_RAW_ANCHOR",
+        "E1_OFFICIAL_RESIDUAL",
+        "E2_TARGET_MEMORY",
+    ),
+    "R1_CORE_GFS_GEFS": (
+        "E0_OFFICIAL_RAW_ANCHOR",
+        "E1_OFFICIAL_RESIDUAL",
+        "E2_TARGET_MEMORY",
+        "E4_GFS_MOS",
+        "E5_GEFS_ENSEMBLE",
+    ),
+    "R2_IFS_SHADOW_ADAPTER": ("E6_IFS_OPER_SHADOW", "E7_IFS_ENS_SHADOW"),
+    "R3_AI_SHADOW_ADAPTER": ("E8_AI_NWP_SHADOW", "E10_DIAGNOSTIC_PROXY"),
+    "R4_LIVE_SHADOW_ADAPTER": ("E9_CWA_WRF_LIVE_SHADOW", "E11_ARWF_LIVE_SHADOW"),
+}
+
+EXPERT_STRICT_WEIGHT_CAPS = {
+    "E0_OFFICIAL_RAW_ANCHOR": 0.80,
+    "E1_OFFICIAL_RESIDUAL": 0.80,
+    "E2_TARGET_MEMORY": 0.40,
+    "E3_STATION_PROXY": 0.0,
+    "E4_GFS_MOS": 0.70,
+    "E5_GEFS_ENSEMBLE": 0.70,
+    "E6_IFS_OPER_SHADOW": 0.0,
+    "E7_IFS_ENS_SHADOW": 0.0,
+    "E8_AI_NWP_SHADOW": 0.0,
+    "E9_CWA_WRF_LIVE_SHADOW": 0.0,
+    "E10_DIAGNOSTIC_PROXY": 0.0,
+    "E11_ARWF_LIVE_SHADOW": 0.0,
+}
+
+ROUTER_TAU_GRID = (0.25, 0.35, 0.50, 0.75, 1.00)
+ROUTER_LAMBDA_GRID = (0.0, 0.25, 0.50)
+
+SPECIALIST_IDS = (
+    "S1_MARINE_SUPPRESSION",
+    "S2_WEAK_WIND_HEAT",
+    "S3_MAM_TRANSITION",
+    "S4_CLOUD_RAIN_SUPPRESSION",
+    "S5_DRY_RIDGE_HEAT",
+    "S6_HIGH_ERROR_TAIL",
+)
+
+DISTRIBUTION_THRESHOLDS_C = tuple(step / 2.0 for step in range(40, 81))
+
+ROUTER_DERIVED_FEATURE_WHITELIST = (
+    "router__expert_prediction_spread_c",
+    "router__missing_expert_count",
+    "router__expected_abs_error_c",
+)
+
+PLACEHOLDER_EXPERT_IDS = (
+    "E6_IFS_OPER_SHADOW",
+    "E7_IFS_ENS_SHADOW",
+    "E8_AI_NWP_SHADOW",
+    "E9_CWA_WRF_LIVE_SHADOW",
+    "E10_DIAGNOSTIC_PROXY",
+    "E11_ARWF_LIVE_SHADOW",
+)
 
 ARWF_WARNING = (
     "WARNING: ARWF source table absent. E11_ARWF_LIVE_SHADOW will emit placeholder rows "

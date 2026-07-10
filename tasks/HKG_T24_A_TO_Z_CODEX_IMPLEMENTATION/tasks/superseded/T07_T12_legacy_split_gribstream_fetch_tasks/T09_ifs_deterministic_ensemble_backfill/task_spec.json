@@ -1,0 +1,50 @@
+{
+  "id": "T09",
+  "suffix": "ifs_deterministic_ensemble_backfill",
+  "title": "IFS Deterministic and Ensemble Backfill",
+  "phase": "B Acquisition",
+  "deps": [
+    "T06"
+  ],
+  "mission": "Backfill IFS operational and IFS ensemble data, preserving ECMWF attribution, as independent short-history challengers.",
+  "inputs": [
+    "T03 IFS selectors/licence",
+    "T05 locations",
+    "T06 client"
+  ],
+  "steps": [
+    "Backfill ifsoper from 2024-02-28 and ifsenfo from 2024-03-01 subject to selector dates.",
+    "Acquire all relevant cycles and 0\u201384h leads.",
+    "Acquire deterministic points/patches and ensemble members at selected locations.",
+    "Record model/parameter changes and ECMWF attribution in metadata.",
+    "Do not allow IFS to influence pre-2024 core development.",
+    "Persist raw and normalized manifests."
+  ],
+  "db_objects": [
+    "nwp_core values",
+    "catalog.source_license attribution"
+  ],
+  "outputs": [
+    "ifsoper_manifest.csv",
+    "ifsenfo_manifest.csv",
+    "member_coverage.csv",
+    "attribution_notice.md",
+    "quality_summary.md"
+  ],
+  "tests": [
+    "Selector/unit checks",
+    "cycle coverage",
+    "member checks",
+    "license metadata presence"
+  ],
+  "acceptance": [
+    "Complete short-history backfill",
+    "Every IFS-derived artifact includes attribution metadata"
+  ],
+  "failure": [
+    "Missing selector/member: record and adjust only through approved semantic mapping"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t09_ifs_deterministic_ensemble_backfill.md"
+}

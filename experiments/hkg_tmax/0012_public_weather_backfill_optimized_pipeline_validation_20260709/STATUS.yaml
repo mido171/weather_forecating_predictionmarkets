@@ -1,0 +1,43 @@
+state: ACCEPTED_WITH_NOTES
+updated_at_utc: "2026-07-09T20:20:00Z"
+experiment_id: "0012_public_weather_backfill_optimized_pipeline_validation_20260709"
+score_1_to_100: 89
+final_db_audit:
+  expected_source_issues: 8120
+  source_issue_rows_present: 8120
+  gfs_ok: 1972
+  gefs_control_ok: 1972
+  himawari_ok: 4111
+  himawari_404: 65
+  model_bad_count: 0
+  source_issue_available_at_nulls: 0
+  station_feature_available_at_nulls: 0
+  area_feature_available_at_nulls: 0
+  duplicate_station_feature_pk_groups: 0
+  duplicate_area_feature_pk_groups: 0
+  successful_issues_without_features: 0
+runtime:
+  one_day_smoke_seconds: 780.8856843000394
+  seven_day_rehearsal_seconds: 2894.153261
+  seven_day_p50_day_seconds: 675.992928599997
+  seven_day_p90_day_seconds: 714.0818481199909
+  full_robustness_seconds: 6637.310574
+  targeted_gfs_retry_seconds: 125.86055340000894
+disk:
+  full_run_peak_aggregate_staging_bytes: 241375243
+  full_run_peak_worker_staging_bytes: 156263623
+  targeted_retry_peak_staging_bytes: 23659243
+  final_staging_bytes: 0
+  staging_root_removed: true
+database_capacity_estimate:
+  range_start: "2017-01-01"
+  range_end: "2026-07-10"
+  inclusive_days: 3478
+  projected_retained_bytes: 121367536477
+  projected_retained_gb_decimal: 121.368
+  projected_retained_gib: 113.032
+  conservative_range_gb_decimal: "100-150"
+  recommended_free_space_before_start_gib: "180-200"
+notes:
+  - "CPU telemetry unavailable because psutil was not installed in the active venv."
+  - "Remaining Himawari failures are source-side 404s recorded in Postgres."

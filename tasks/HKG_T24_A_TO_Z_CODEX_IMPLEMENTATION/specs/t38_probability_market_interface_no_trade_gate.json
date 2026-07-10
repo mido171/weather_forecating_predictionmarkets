@@ -1,0 +1,49 @@
+{
+  "id": "T38",
+  "suffix": "probability_market_interface_no_trade_gate",
+  "title": "Probability and Market-Threshold Interface with No-Trade Gate",
+  "phase": "F Production",
+  "deps": [
+    "T34",
+    "T37"
+  ],
+  "mission": "Expose calibrated Tmax probabilities and a conservative decision interface without altering the forecasting model or leaking market outcomes.",
+  "inputs": [
+    "Live distribution forecast",
+    "market contract definitions supplied externally",
+    "fee/slippage policy"
+  ],
+  "steps": [
+    "Map continuous calibrated distribution to exact settlement buckets/thresholds.",
+    "Record market snapshot time separately from weather cutoff.",
+    "Calculate implied probability, model probability, uncertainty and margin of safety.",
+    "Implement no-trade when calibration, liquidity, spread, source freshness or edge thresholds fail.",
+    "Do not use future market prices or settlement to train weather features.",
+    "Backtest only after forecasting confirmation and with exact historical price vintages."
+  ],
+  "db_objects": [
+    "live probability outputs and decision logs"
+  ],
+  "outputs": [
+    "probability_api_schema.json",
+    "threshold_mapping_tests.csv",
+    "no_trade_rules.md",
+    "market_interface_runbook.md"
+  ],
+  "tests": [
+    "Bucket probabilities sum to one",
+    "settlement rule mapping",
+    "no future price",
+    "calibration drift"
+  ],
+  "acceptance": [
+    "Interface accurately maps forecast distribution",
+    "No automatic trade execution unless separately authorized"
+  ],
+  "failure": [
+    "Missing exact market history: do not fabricate trading backtest"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t38_probability_market_interface_no_trade_gate.md"
+}

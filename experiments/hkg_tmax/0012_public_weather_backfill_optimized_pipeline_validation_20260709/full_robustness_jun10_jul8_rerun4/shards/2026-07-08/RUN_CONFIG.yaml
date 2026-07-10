@@ -1,0 +1,19 @@
+experiment_id: 0012_public_weather_backfill_optimized_pipeline_validation_20260709
+run_id: 0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260708_20260708_20260709T195700Z_127596
+start_date: 2026-07-08
+end_date: 2026-07-08
+sources: ['gefs_control', 'gfs', 'himawari_b13_s0510']
+cycles: [0, 6, 12, 18]
+leads: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+execution_mode: optimized
+model_fetch_workers: 8
+model_range_workers: 4
+model_normalize_workers: 2
+himawari_workers: 8
+model_range_coalesce_gap_bytes: 0
+cpu_telemetry: False
+staging_root: C:\Users\ahmad\Desktop\generalFiles\git\weather_markets\weather_data_extraction\bootstrap\hkg_tmax_elite_codex_bootstrap\hkg_tmax_elite_codex\_weather_backfill_staging\day_shards\0012_public_weather_backfill_optimized_pipeline_validation_20260709\2026-07-08
+max_staging_gb: 1.0
+stop_free_gb: 50.0
+retain_failed_raw: False
+dry_run: False

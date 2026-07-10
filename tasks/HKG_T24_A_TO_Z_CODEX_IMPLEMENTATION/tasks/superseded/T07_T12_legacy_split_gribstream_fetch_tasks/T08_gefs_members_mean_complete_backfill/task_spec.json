@@ -1,0 +1,52 @@
+{
+  "id": "T08",
+  "suffix": "gefs_members_mean_complete_backfill",
+  "title": "GEFS Atmospheric Members and Mean Complete Backfill",
+  "phase": "B Acquisition",
+  "deps": [
+    "T06"
+  ],
+  "mission": "Backfill GEFS mean and all atmospheric members with enough variables and locations to build calibrated Tmax distributions and uncertainty features.",
+  "inputs": [
+    "T03 GEFS selector map",
+    "T05 locations",
+    "T06 client",
+    "ensemble member metadata"
+  ],
+  "steps": [
+    "Backfill GEFS from 2020-10-01 or selector introduction.",
+    "Acquire gefsatmosmean over broader spatial domains.",
+    "Acquire all available gefsatmos members at HKO/station/reference points for P0/P1 subset.",
+    "Collect all cycles and 0\u201384h leads.",
+    "Persist member number explicitly; member 0 must not be mistaken for full ensemble.",
+    "Calculate acquisition-only coverage summaries, not target-informed features.",
+    "Document member count/model changes by era."
+  ],
+  "db_objects": [
+    "nwp_core point/member tables",
+    "ensemble coverage registry"
+  ],
+  "outputs": [
+    "gefs_mean_manifest.csv",
+    "gefs_member_manifest.csv",
+    "member_completeness.csv",
+    "model_change_log.csv",
+    "quality_summary.md"
+  ],
+  "tests": [
+    "31-member expectation where applicable",
+    "member uniqueness",
+    "mean-versus-members sanity",
+    "run/lead coverage"
+  ],
+  "acceptance": [
+    "Member coverage sufficient for target-day distributions or exact gaps documented",
+    "No ensemble collapsed prematurely"
+  ],
+  "failure": [
+    "Quota constraint: prioritize all members at selected points before broad member grids"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t08_gefs_members_mean_complete_backfill.md"
+}

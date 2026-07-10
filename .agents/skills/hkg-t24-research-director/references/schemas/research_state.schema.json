@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/hkg-t24/research_state.schema.json",
+  "title": "HKG T+24 sequential research state",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project_root",
+    "experiments_root",
+    "target",
+    "target_mae_c",
+    "phase",
+    "iteration",
+    "confirmation",
+    "champions",
+    "open_experiment",
+    "completed_experiments",
+    "candidate_queue",
+    "stop_reason",
+    "updated_at_utc"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "project_root": {
+      "type": "string"
+    },
+    "experiments_root": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "target_mae_c": {
+      "type": "number",
+      "const": 0.45
+    },
+    "phase": {
+      "enum": [
+        "DISCOVERY",
+        "EXECUTING",
+        "DEVELOPMENT_GATE_REACHED",
+        "AWAITING_CONFIRMATION_AUTHORIZATION",
+        "CONFIRMED_TARGET_REACHED",
+        "BLOCKED",
+        "STOPPED"
+      ]
+    },
+    "iteration": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "confirmation": {
+      "type": "object",
+      "required": [
+        "locked",
+        "opened_once",
+        "authorized_by_owner",
+        "period_start"
+      ],
+      "properties": {
+        "locked": {
+          "type": "boolean"
+        },
+        "opened_once": {
+          "type": "boolean"
+        },
+        "authorized_by_owner": {
+          "type": "boolean"
+        },
+        "period_start": {
+          "const": "2024-01-01"
+        }
+      }
+    },
+    "champions": {
+      "type": "object"
+    },
+    "open_experiment": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "completed_experiments": {
+      "type": "array"
+    },
+    "candidate_queue": {
+      "type": "array"
+    },
+    "stop_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updated_at_utc": {
+      "type": "string"
+    }
+  }
+}

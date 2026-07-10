@@ -1,0 +1,697 @@
+feature,feature_family,asof_rule,production_allowed,diagnostic_only,leakage_status,null_percent_all_cutoffs,dtype
+analog_abs_resid_mean_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_abs_resid_mean_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_abs_resid_mean_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_available,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+analog_effective_sample_size_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_effective_sample_size_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_effective_sample_size_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_nearest_distance_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_nearest_distance_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_nearest_distance_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_negative_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_negative_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_negative_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_positive_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_positive_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_large_positive_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_positive_resid_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_positive_resid_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_prob_positive_resid_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_idw_mean_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_idw_mean_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_idw_mean_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_mean_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_mean_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_mean_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_median_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_median_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_median_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p25_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p25_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p25_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p75_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p75_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_p75_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_recency_weighted_mean_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_recency_weighted_mean_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_recency_weighted_mean_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_trimmed_mean_100,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_trimmed_mean_25,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+analog_resid_trimmed_mean_50,analog,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+bright_sunshine_duration_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+bright_sunshine_duration_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+cloud_to_cloud_lightning_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.818026240730177,float64
+cloud_to_cloud_lightning_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.863662293211636,float64
+cloud_to_cloud_lightning_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.94352538505419,float64
+cloud_to_cloud_lightning_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.806617227609813,float64
+cloud_to_cloud_lightning_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.818026240730177,float64
+cloud_to_cloud_lightning_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,23.126069594980034,float64
+cloud_to_cloud_lightning_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.840844266970908,float64
+cloud_to_cloud_lightning_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.863662293211636,float64
+cloud_to_cloud_lightning_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_cloud_lightning_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.818026240730177,float64
+cloud_to_ground_lightning_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.863662293211636,float64
+cloud_to_ground_lightning_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.94352538505419,float64
+cloud_to_ground_lightning_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.806617227609813,float64
+cloud_to_ground_lightning_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.818026240730177,float64
+cloud_to_ground_lightning_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,23.126069594980034,float64
+cloud_to_ground_lightning_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.840844266970908,float64
+cloud_to_ground_lightning_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.863662293211636,float64
+cloud_to_ground_lightning_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+cloud_to_ground_lightning_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,22.82943525385054,float64
+daily_maximum_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_maximum_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_minimum_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_rainfall_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,33.90758699372504,float64
+daily_rainfall_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.767256132344556,float64
+daily_rainfall_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.171135196805476,float64
+daily_rainfall_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.193953223046208,float64
+daily_rainfall_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.193953223046208,float64
+daily_rainfall_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.14831717056475,float64
+daily_rainfall_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.18254420992584,float64
+daily_rainfall_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.171135196805476,float64
+daily_rainfall_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.18254420992584,float64
+daily_rainfall_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+daily_rainfall_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_rainfall_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+daily_rainfall_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,45.008556759840275,float64
+daily_rainfall_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+daily_rainfall_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+daily_rainfall_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+daily_rainfall_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+daily_rainfall_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.8824871648602397,float64
+diurnal_range_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.414717626925271,float64
+evaporation_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.5516257843696522,float64
+evaporation_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7986309184255562,float64
+evaporation_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.9623502567027953,float64
+evaporation_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+evaporation_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+global_solar_radiation_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+grass_minimum_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.4489446662863663,float64
+grass_minimum_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.6086708499714775,float64
+grass_minimum_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.8100399315459212,float64
+grass_minimum_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+grass_minimum_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+grass_minimum_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+grass_minimum_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,2.087849401026811,float64
+grass_minimum_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+grass_minimum_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+grass_minimum_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+grass_minimum_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+grass_minimum_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+humidity_heat_index_proxy_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+lightning_any_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,bool
+mean_cloud_amount_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_cloud_amount_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_dew_point_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_relative_humidity_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_sea_level_pressure_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wet_bulb_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wind_speed_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.9811751283513976,float64
+mean_wind_speed_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.4603536794067313,float64
+mean_wind_speed_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+mean_wind_speed_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+mean_wind_speed_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wind_speed_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+mean_wind_speed_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.186537364517969,float64
+mean_wind_speed_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+mean_wind_speed_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+mean_wind_speed_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+mean_wind_speed_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+mean_wind_speed_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+pressure_tendency_2_to_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+prevailing_wind_direction_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+prevailing_wind_direction_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.3080433542498574,float64
+prevailing_wind_direction_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.011409013120365089,float64
+prevailing_wind_direction_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.825442099258414,float64
+prevailing_wind_direction_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.7758128921848261,float64
+rainfall_any_3d,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,bool
+rainfall_log1p_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,20.193953223046208,float64
+rainfall_log1p_rolling_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,45.008556759840275,float64
+reduced_visibility_hours_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.06845407872219053,float64
+reduced_visibility_hours_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.06845407872219053,float64
+reduced_visibility_hours_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.034227039361095266,float64
+reduced_visibility_hours_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+reduced_visibility_hours_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+reduced_visibility_hours_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sea_temp_am_pm_mean_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.14831717056474614,float64
+sea_temp_diurnal_diff_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2966343411294923,float64
+sea_temperature_am_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.33086138049058755,float64
+sea_temperature_am_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.38790644609241304,float64
+sea_temperature_am_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.22818026240730174,float64
+sea_temperature_am_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_am_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sea_temperature_am_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sea_temperature_am_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.4335424985738734,float64
+sea_temperature_am_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_am_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_am_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_am_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_am_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,38.74500855675984,float64
+sea_temperature_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,41.448944666286366,float64
+sea_temperature_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.752424415288075,float64
+sea_temperature_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,37.718197375926984,float64
+sea_temperature_pm_delta_lag2_minus_lag3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.3194523673702225,float64
+sea_temperature_pm_delta_lag2_minus_lag7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.36508841985168283,float64
+sea_temperature_pm_lag_14,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_3,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_4,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_5,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_lag_7,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.2167712492869367,float64
+sea_temperature_pm_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_pm_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sea_temperature_pm_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sea_temperature_pm_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.42213348545350826,float64
+sea_temperature_pm_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_pm_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_pm_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_pm_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_pm_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.10268111808328578,float64
+sea_temperature_rolling_max_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+sea_temperature_rolling_mean_14_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,31.70564746149458,float64
+sea_temperature_rolling_mean_30_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,26.811180832857957,float64
+sea_temperature_rolling_mean_3_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,39.76041072447234,float64
+sea_temperature_rolling_mean_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+sea_temperature_rolling_median_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+sea_temperature_rolling_min_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+sea_temperature_rolling_std_7_ending_tminus2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+sea_temperature_trend_7_minus_30,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,35.71021106674272,float64
+solar_cloud_contrast_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+sun_cloud_contrast_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+wet_bulb_heat_storage_proxy,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,0.0,float64
+wind_dir_cos_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+wind_dir_sin_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+wind_vector_u_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+wind_vector_v_lag2,climate|no_official,HKO daily climate variables only through T-2,True,False,pass,1.27780946948089,float64
+analog_resid_idw50_x_effective_sample_size,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+analog_resid_idw50_x_high_uncertainty,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+bright_sunshine_duration_lag_2_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+daily_rainfall_rolling_mean_3_ending_tminus2_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,50.63605248146036,float64
+forecast_max_x_cloud_rain_suppressed,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_hot_humid_persistence,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_is_hot_season,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_marine_moderation_regime,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_season_autumn_transition,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_season_cool_dry,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_season_hot_wet,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_season_spring_transition,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_max_x_upward_revised_heat_regime,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_range_x_high_uncertainty,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_range_x_n_issues,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+forecast_range_x_resid_std_by_range,interaction,derived from already as-of-safe source features,True,False,pass,13.63091842555619,float64
+late_downward_x_cloud_rain_suppressed,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+late_upward_x_recent_heat_count,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+max_delta_first_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+max_delta_first_x_hot_humid,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+mean_cloud_amount_lag_2_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+mean_dew_point_temperature_lag_2_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+mean_wet_bulb_temperature_lag_2_x_forecast_max,interaction,derived from already as-of-safe source features,True,False,pass,10.051340559041643,float64
+mean_wind_speed_lag2_x_onshore,interaction,derived from already as-of-safe source features,True,False,pass,0.7758128921848261,float64
+pressure_falling_x_showers,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+pressure_rising_x_dry_clear,interaction,derived from already as-of-safe source features,True,False,pass,0.0,float64
+resid_mean_by_month_x_forecast_range,interaction,derived from already as-of-safe source features,True,False,pass,13.63091842555619,float64
+resid_mean_by_season_maxbin_x_official_high,interaction,derived from already as-of-safe source features,True,False,pass,4.1642897889332575,float64
+sea_temp_anomaly_lag2_x_onshore,interaction,derived from already as-of-safe source features,True,False,pass,4.312606959498003,float64
+forecast_max_bin,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,object
+forecast_max_c_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_ceil,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_decimal_part,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_floor,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_half_degree,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_round_int,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_midpoint_c_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_min_c_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_min_round_int,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_range_bin,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,object
+forecast_range_c_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+hours_latest_issue_to_target_noon,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+is_1615_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_1645_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_1745_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_1845_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_2145_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_2245_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_2315_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+is_2345_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+latest_issue_decimal_hour,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+latest_issue_family,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,object
+latest_issue_hour,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+latest_issue_minute,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+minutes_latest_issue_to_cutoff,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+minutes_latest_issue_to_target_midnight,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+parse_status_latest_is_ok,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+stale_hours_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+stale_snapshot_flag_latest,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_cloudy,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_dry,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_fine,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_heavy_showers,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_hot,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_humid,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_mainly_cloudy,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_monsoon,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_showers,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_sunny,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_sunny_periods,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_thunderstorms,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_tropical_cyclone,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_very_hot,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+txt_windy,latest,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+cloud_rain_suppressed,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+convective_suppression_risk,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+downward_cloud_revision_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+dry_clear_radiative,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+extreme_heat_setup,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+high_forecast_uncertainty_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+hot_humid_persistence,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+late_upward_heat_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+marine_moderation_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+monsoon_transition_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+northerly_dry_flow_flag,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+onshore_marine_flow_flag,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+pressure_falling_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+pressure_rising_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+rainfall_heavy_3d,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+strong_wind_mixing_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+tropical_cyclone_proxy_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+upward_revised_heat_regime,regime|no_official,derived from already as-of-safe source features,True,False,pass,0.0,bool
+expected_abs_resid_by_forecast_max_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+expected_abs_resid_by_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+expected_abs_resid_by_season_x_range,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+issue_sequence_completeness,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_abs_p80_by_forecast_range_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_abs_p80_by_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_global_abs_p80,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_global_abs_p90,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_global_mean,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_global_median,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_global_std,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_high_bias_probability,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_low_bias_probability,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_doy_band_15d,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_forecast_max_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_forecast_max_half_degree,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_forecast_max_int,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_forecast_range_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_issue_hour_family,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_latest_issue_family_x_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_month_x_forecast_max_int,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_month_x_forecast_range_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_season_hko,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_season_x_forecast_max_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_season_x_forecast_range_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_cloudy,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_hot,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_monsoon,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_showers,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_thunderstorms,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_tropical_cyclone,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_mean_by_txt_very_hot,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_median_by_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_median_by_season_hko,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_recent_120_prior_training_days_same_season,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_recent_30_prior_training_days_same_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_recent_365_prior_training_days_all,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_recent_60_prior_training_days_same_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_std_by_forecast_range_bin,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_std_by_month,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_std_by_month_x_range,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+resid_std_by_season_hko,residual_history,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+forecast_max_first_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_max_prev_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,11.046776953793497,float64
+forecast_min_first_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_min_prev_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,11.046776953793497,float64
+forecast_range_first_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+forecast_range_prev_c,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,11.046776953793497,float64
+has_1645_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_1745_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_1845_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_2145_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_2245_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_2315_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+has_2345_issue_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+large_downward_revision_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+large_upward_revision_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+last2_max_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last2_max_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last2_min_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last2_min_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last2_range_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last2_range_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_max_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_max_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_min_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_min_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_range_mean,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+last3_range_std,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+late_downward_revision,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+late_upward_revision,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+latest_is_stale,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+max_delta_latest_minus_first,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_delta_latest_minus_prev,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_monotone_down,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+max_monotone_up,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+max_reversal,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+max_revision_abs_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_revision_count,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_revision_signed_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_slope_c_per_hour,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+max_stale_hours_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_delta_latest_minus_first,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_delta_latest_minus_prev,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_revision_abs_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_revision_count,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_revision_signed_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_side_downward_revision,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+min_side_revision_abs_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+min_side_upward_revision,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+min_slope_c_per_hour,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+minutes_first_to_latest,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+minutes_prev_to_latest,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,11.046776953793497,float64
+n_issues_before_cutoff,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,int64
+range_delta_latest_minus_first,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_delta_latest_minus_prev,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_narrowing,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+range_revision_abs_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_revision_count,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_revision_signed_path,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_slope_c_per_hour,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+range_widening,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,0.0,bool
+stale_issue_count,revision,lead-1 HKO local forecast rows with issue_at_hkt <= cutoff,True,False,pass,10.051340559041643,float64
+day_of_year,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,int64
+doy_clim_mean_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_median_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_p10_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_p25_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_p75_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_p90_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_clim_std_31d,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+doy_cos_1,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+doy_cos_2,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+doy_cos_3,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+doy_sin_1,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+doy_sin_2,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+doy_sin_3,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,float64
+forecast_minus_doy_clim,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,13.63091842555619,float64
+forecast_minus_month_clim,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,13.63091842555619,float64
+is_autumn_clear_transition,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+is_hot_season,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+is_spring_fog_transition,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+is_typhoon_season_calendar,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+is_winter_monsoon_season,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+month,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,int64
+month_clim_mean,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_median,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_p10,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_p20,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_p75,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_p80,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_p90,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+month_clim_std,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+official_forecast_high_for_season,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+official_forecast_low_for_season,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,bool
+season_clim_mean,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+season_clim_std,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,4.1642897889332575,float64
+season_hko,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,object
+year,seasonal|no_official,prior calendar years only inside each cutoff family,True,False,pass,0.0,int64
+heat_acceleration_flag,target_history|no_official,target station history only through T-2,True,False,pass,0.0,bool
+heat_persistence_flag,target_history|no_official,target station history only through T-2,True,False,pass,0.0,bool
+recent_cool_count_3d,target_history|no_official,target station history only through T-2,True,False,pass,0.0,int64
+recent_extreme_heat_count_7d,target_history|no_official,target station history only through T-2,True,False,pass,0.0,int64
+recent_heat_count_3d,target_history|no_official,target station history only through T-2,True,False,pass,0.0,int64
+target_tmax_acceleration,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_lag2_anomaly_vs_doy_train_clim,target_history|no_official,target station history only through T-2,True,False,pass,4.1642897889332575,float64
+target_tmax_lag2_anomaly_vs_month_train_clim,target_history|no_official,target station history only through T-2,True,False,pass,4.1642897889332575,float64
+target_tmax_lag_10,target_history|no_official,target station history only through T-2,True,False,pass,0.11409013120365087,float64
+target_tmax_lag_14,target_history|no_official,target station history only through T-2,True,False,pass,0.15972618368511124,float64
+target_tmax_lag_2,target_history|no_official,target station history only through T-2,True,False,pass,0.022818026240730177,float64
+target_tmax_lag_21,target_history|no_official,target station history only through T-2,True,False,pass,0.23958927552766687,float64
+target_tmax_lag_3,target_history|no_official,target station history only through T-2,True,False,pass,0.034227039361095266,float64
+target_tmax_lag_30,target_history|no_official,target station history only through T-2,True,False,pass,0.3422703936109527,float64
+target_tmax_lag_4,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_lag_45,target_history|no_official,target station history only through T-2,True,False,pass,0.513405590416429,float64
+target_tmax_lag_5,target_history|no_official,target station history only through T-2,True,False,pass,0.057045065601825436,float64
+target_tmax_lag_60,target_history|no_official,target station history only through T-2,True,False,pass,0.6845407872219054,float64
+target_tmax_lag_7,target_history|no_official,target station history only through T-2,True,False,pass,0.07986309184255562,float64
+target_tmax_rolling_iqr_14_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.06845407872219053,float64
+target_tmax_rolling_max_3_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.034227039361095266,float64
+target_tmax_rolling_max_7_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.034227039361095266,float64
+target_tmax_rolling_mean_14_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_mean_30_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_mean_3_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_mean_5_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_mean_60_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_mean_7_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_median_14_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_median_7_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_min_7_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_std_14_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_rolling_std_7_ending_tminus2,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_trend_14,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_trend_3,target_history|no_official,target station history only through T-2,True,False,pass,0.057045065601825436,float64
+target_tmax_trend_30,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64
+target_tmax_trend_7,target_history|no_official,target station history only through T-2,True,False,pass,0.045636052481460354,float64

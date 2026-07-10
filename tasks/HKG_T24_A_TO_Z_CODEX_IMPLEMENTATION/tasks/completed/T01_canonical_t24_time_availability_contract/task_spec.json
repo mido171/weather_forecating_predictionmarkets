@@ -1,0 +1,55 @@
+{
+  "id": "T01",
+  "suffix": "canonical_t24_time_availability_contract",
+  "title": "Canonical T\u221224 Time and Availability Contract",
+  "phase": "A Foundation",
+  "deps": [
+    "T00"
+  ],
+  "mission": "Implement the single operational cutoff function, timestamp normalization policy, availability-proof grades, sealed-period controls, and eligibility predicate used by every subsequent task.",
+  "inputs": [
+    "T00 inventories",
+    "operational_contract.yaml",
+    "T24_POINT_IN_TIME_CONSTITUTION.md"
+  ],
+  "steps": [
+    "Implement governance.hkg_t24_cutoff_utc(target_date) or repository equivalent.",
+    "Store canonical UTC timestamptz and derive HKT explicitly.",
+    "Implement availability grades A\u2013E and an eligibility function that requires available_at <= cutoff.",
+    "Create sealed-period metadata and development/live roles.",
+    "Implement a conservative target-label availability contract; forbid casual T\u22121 daily Tmax use.",
+    "Add database constraints/views and application helpers.",
+    "Document conflict resolution if an existing cutoff differs."
+  ],
+  "db_objects": [
+    "governance.operational_contract",
+    "governance.availability_grade",
+    "governance.sealed_period",
+    "cutoff/eligibility functions"
+  ],
+  "outputs": [
+    "migration files",
+    "time_contract.md",
+    "availability_grade_contract.md",
+    "role_permissions.sql",
+    "test evidence"
+  ],
+  "tests": [
+    "Leap day and year-boundary tests",
+    "UTC/HKT conversion tests",
+    "no-DST tests",
+    "sealed-role access tests",
+    "eligible/ineligible row tests"
+  ],
+  "acceptance": [
+    "One canonical cutoff version used everywhere",
+    "Live role cannot read labels/residuals/sealed outcomes",
+    "Rows without proof cannot appear in strict views"
+  ],
+  "failure": [
+    "Existing incompatible contract: preserve it, document, and require owner decision; never silently switch"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t01_canonical_t24_time_availability_contract.md"
+}

@@ -1,0 +1,157 @@
+{
+  "archive_db": "C:\\hko_press_2000_2026\\metadata\\archive.sqlite3",
+  "bulletin_coverage_by_product": [
+    {
+      "bulletins": 6193,
+      "first_index_date": "2000-01-01",
+      "first_issue_at_hkt": "2000-01-01 11:48:00+08:00",
+      "last_index_date": "2003-12-30",
+      "last_issue_at_hkt": "2003-12-30 09:47:00+08:00",
+      "product_type": "5day"
+    },
+    {
+      "bulletins": 22274,
+      "first_index_date": "2003-12-30",
+      "first_issue_at_hkt": "2003-12-30 11:30:00+08:00",
+      "last_index_date": "2013-11-15",
+      "last_issue_at_hkt": "2013-11-15 16:31:00+08:00",
+      "product_type": "7day"
+    },
+    {
+      "bulletins": 137595,
+      "first_index_date": "2000-01-01",
+      "first_issue_at_hkt": "2000-01-01 01:46:00+08:00",
+      "last_index_date": "2013-11-15",
+      "last_issue_at_hkt": "2013-11-15 19:45:00+08:00",
+      "product_type": "local"
+    }
+  ],
+  "bulletins": 166062,
+  "candidate_raw_coverage_by_product": [
+    {
+      "candidate_urls": 6196,
+      "first_index_date": "2000-01-01",
+      "last_index_date": "2003-12-30",
+      "product_type": "5day"
+    },
+    {
+      "candidate_urls": 23223,
+      "first_index_date": "2003-12-30",
+      "last_index_date": "2014-04-01",
+      "product_type": "7day"
+    },
+    {
+      "candidate_urls": 30440,
+      "first_index_date": "2014-04-01",
+      "last_index_date": "2026-06-20",
+      "product_type": "9day"
+    },
+    {
+      "candidate_urls": 264366,
+      "first_index_date": "2000-01-01",
+      "last_index_date": "2026-06-20",
+      "product_type": "local"
+    }
+  ],
+  "candidate_raw_missing_urls": 158161,
+  "candidate_raw_missing_years": [
+    2001,
+    2002,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "candidate_urls": 324225,
+  "combined_selected_target_coverage": {
+    "complete": false,
+    "expected_target_days": 8765,
+    "first_observed_target_date": "2000-01-02",
+    "last_observed_target_date": "2023-12-31",
+    "missing_target_days": 2699,
+    "observed_target_days": 6066,
+    "segment_count": 2
+  },
+  "completion_status": "incomplete_gap_remaining",
+  "first_missing_scored_gap": {
+    "gap_id": 1,
+    "missing_days": 2699,
+    "missing_end": "2021-04-13",
+    "missing_start": "2013-11-23"
+  },
+  "forecast_day_rows": 292997,
+  "generated_at_utc": "2026-06-21T23:04:38.625238Z",
+  "largest_missing_scored_gap": {
+    "gap_id": 1,
+    "missing_days": 2699,
+    "missing_end": "2021-04-13",
+    "missing_start": "2013-11-23"
+  },
+  "last_press_selected_issue_utc": "2013-11-15 08:31:00+00:00",
+  "last_press_selected_target_date": "2013-11-22",
+  "press_selected_target_coverage": {
+    "complete": false,
+    "expected_target_days": 8765,
+    "first_observed_target_date": "2000-01-02",
+    "last_observed_target_date": "2013-11-22",
+    "missing_target_days": 3691,
+    "observed_target_days": 5074,
+    "segment_count": 1
+  },
+  "retrieval_status": [
+    {
+      "error_rows": 2,
+      "last_attempted_at_utc": "2026-06-21T14:55:06.936480+00:00",
+      "retrieval_rows": 2,
+      "source": "info_gov_bulletin",
+      "status_code": 0,
+      "unique_urls": 2
+    },
+    {
+      "error_rows": 0,
+      "last_attempted_at_utc": "2026-06-21T22:57:16.748210+00:00",
+      "retrieval_rows": 166064,
+      "source": "info_gov_bulletin",
+      "status_code": 200,
+      "unique_urls": 166064
+    },
+    {
+      "error_rows": 28,
+      "last_attempted_at_utc": "2026-06-20T23:20:08.280099+00:00",
+      "retrieval_rows": 28,
+      "source": "info_gov_bulletin",
+      "status_code": 404,
+      "unique_urls": 28
+    },
+    {
+      "error_rows": 0,
+      "last_attempted_at_utc": "2026-06-20T17:32:00.321527+00:00",
+      "retrieval_rows": 9668,
+      "source": "info_gov_index",
+      "status_code": 200,
+      "unique_urls": 9668
+    }
+  ],
+  "rss_selected_target_coverage": {
+    "complete": false,
+    "expected_target_days": 8765,
+    "first_observed_target_date": "2021-04-14",
+    "last_observed_target_date": "2023-12-31",
+    "missing_target_days": 7773,
+    "observed_target_days": 992,
+    "segment_count": 1
+  },
+  "scoreable_archive_forecast_day_rows": 276487,
+  "target_window_end": "2023-12-31",
+  "target_window_start": "2000-01-02"
+}

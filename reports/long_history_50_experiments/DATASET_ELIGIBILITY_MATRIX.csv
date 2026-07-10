@@ -1,0 +1,7 @@
+coverage,dataset,role,status
+1884-01-01 to 2023-12-31 loaded for research,Official HKO Headquarters daily Tmax,target and T-7+ lags,downloaded
+1884-01-01 to 2023-12-24 loaded with T-7 lag,HKO daily climate elements,strict lag predictors / mechanism teachers,downloaded
+1949-06-01 to 2023-12-30 filtered to nominal 00 UTC,IGRA HKM00045004,SILVER_OPERATIONAL_REPLAY,downloaded
+1945-12-01 to 2023-12-30 filtered to <=13:30 HKT,NOAA ISD eligible regional stations,SILVER_OPERATIONAL_REPLAY,downloaded
+1985-2024 on disk,HKO TC best track,"teacher/mechanism only, not loaded as inference feature",mechanism_only
+short-history/live only,RSS/radar/satellite/lightning/current feeds,excluded by 39-year rule,excluded

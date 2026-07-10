@@ -1,0 +1,54 @@
+{
+  "id": "T21",
+  "suffix": "all_station_spatiotemporal_graph_features",
+  "title": "All-Station Spatiotemporal and Graph Feature Store",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T05",
+    "T15",
+    "T18"
+  ],
+  "mission": "Use every valid station as a spatial sensor array, generating causal anomalies, gradients, group modes, propagation and disagreement features.",
+  "inputs": [
+    "Clean station observations/summaries",
+    "station registry/groups",
+    "target snapshots"
+  ],
+  "steps": [
+    "For each station create latest-before-cutoff levels, changes, slopes and prior-only anomalies.",
+    "Generate T\u2212Td, pressure tendency, repaired u/v wind and circular shifts.",
+    "Generate pairwise/group gradients: coastal-inland, north-south, east-west, urban-airport-marine, upwind-downwind.",
+    "Generate station ranks, rank reversals, disagreement and missingness.",
+    "Create graph adjacency from distance/elevation/coast role; fit graph/PCA modes inside each fold only.",
+    "Separate historical proxy features from exact-vintage live features.",
+    "Produce station contribution coverage and dropout profiles."
+  ],
+  "db_objects": [
+    "feature_store station features",
+    "station graph version registry"
+  ],
+  "outputs": [
+    "station_feature_definitions.csv",
+    "pair_group_registry.csv",
+    "graph_edges.csv",
+    "coverage_by_station_year.csv",
+    "proxy_vs_live_status.csv"
+  ],
+  "tests": [
+    "Wind parser variance",
+    "as-of cutoff",
+    "fold-local PCA",
+    "station identity mapping",
+    "missing station robustness"
+  ],
+  "acceptance": [
+    "All 36 ISD stations explicitly included or rejected with reason",
+    "No post-cutoff observation in summaries"
+  ],
+  "failure": [
+    "Historical availability unproven: features remain research-proxy while live-safe pipeline still built"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t21_all_station_spatiotemporal_graph_features.md"
+}

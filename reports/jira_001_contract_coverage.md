@@ -6,7 +6,7 @@ PASS
 
 ## Command
 
-`build-h24n-snapshots`
+`generate-oof`
 
 ## Binding Precedence
 
@@ -34,8 +34,7 @@ Final consistency patch, final clarifications, completion specification, origina
 ## Details
 
 - database=postgresql://***:***@127.0.0.1:5432/hkg_tmax_research
-- built snapshots for 2000-01-02..2026-06-21
-- WARNING: ARWF source table absent. E11_ARWF_LIVE_SHADOW will emit placeholder rows with SOURCE_TABLE_ABSENT.
+- expert factory rows=26292, active=4015, placeholders=22277, artifacts=1
 
 ## Required Reports
 
@@ -54,3 +53,18 @@ Final consistency patch, final clarifications, completion specification, origina
 - `live_shadow_availability_report.md`: present
 - `leakage_audit_report.md`: present
 - `jira_001_contract_coverage.md`: present
+- `official_anchor_coverage.md`: present
+- `online_state_audit_report.md`: present
+- `feature_dictionary.md`: present
+- `feature_matrix_coverage_report.md`: present
+- `expert_oof_scoreboard.md`: present
+- `expert_factory_report.md`: present
+- `oof_integrity_report.md`: present
+- `model_selection_report.md`: present
+- `jira_002_contract_coverage.md`: present
+- `router_report.md`: present
+- `specialist_report.md`: present
+- `distribution_calibration_report.md`: present
+- `calibration_report.md`: present
+- `system_replay_report.md`: present
+- `jira_003_contract_coverage.md`: present

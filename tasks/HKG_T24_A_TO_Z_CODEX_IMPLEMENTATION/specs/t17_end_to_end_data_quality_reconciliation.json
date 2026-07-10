@@ -1,0 +1,62 @@
+{
+  "id": "T17",
+  "suffix": "end_to_end_data_quality_reconciliation",
+  "title": "End-to-End Data Quality, Completeness, and Idempotency Gate",
+  "phase": "B Acquisition",
+  "deps": [
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16"
+  ],
+  "mission": "Run full integrity checks across raw objects, database rows, coverage, units, timestamps, stations, members, variables, runs and eligibility before feature engineering.",
+  "inputs": [
+    "All acquisition manifests",
+    "normalized tables",
+    "quality rules"
+  ],
+  "steps": [
+    "Reconcile request/response/value counts and hashes.",
+    "Detect missing cycles, variable gaps, member gaps, duplicate keys and impossible leads.",
+    "Validate physical ranges and units by variable/model.",
+    "Audit UTC/HKT semantics and target-date mapping.",
+    "Validate station/location coverage and date-effective metadata.",
+    "Compare rerun idempotency.",
+    "Produce model/source readiness statuses.",
+    "Block failed source families from downstream strict tasks."
+  ],
+  "db_objects": [
+    "governance quality status tables",
+    "quarantine issues"
+  ],
+  "outputs": [
+    "data_quality_scorecard.csv",
+    "coverage_heatmaps data",
+    "missing_cycles.csv",
+    "unit_range_violations.csv",
+    "readiness_matrix.csv"
+  ],
+  "tests": [
+    "Full rerun",
+    "checksum verification",
+    "physical-range rules",
+    "coverage thresholds"
+  ],
+  "acceptance": [
+    "Core GFS/GEFS/official data pass",
+    "Any gaps explicitly represented, never silently imputed",
+    "Downstream readiness matrix approved"
+  ],
+  "failure": [
+    "Critical failure blocks dependent feature tasks but not unrelated sources"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t17_end_to_end_data_quality_reconciliation.md"
+}

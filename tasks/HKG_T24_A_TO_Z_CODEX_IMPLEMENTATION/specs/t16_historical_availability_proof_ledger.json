@@ -1,0 +1,65 @@
+{
+  "id": "T16",
+  "suffix": "historical_availability_proof_ledger",
+  "title": "Historical Availability Proof and Eligibility Ledger",
+  "phase": "B Acquisition",
+  "deps": [
+    "T01",
+    "T03",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T13",
+    "T14",
+    "T15"
+  ],
+  "mission": "Build authoritative source/model release-latency contracts and row/run-level eligibility at the 15:00 HKT cutoff.",
+  "inputs": [
+    "Provider dissemination schedules",
+    "GribStream ToS/docs",
+    "prospective first-seen logs",
+    "official HKO timestamps",
+    "all source metadata"
+  ],
+  "steps": [
+    "Snapshot official NCEP/ECMWF/HKO release schedule evidence with hashes.",
+    "For each source/model/cycle/field group, define release rule and conservative buffer.",
+    "Use prospective first-seen distributions to audit/update buffers without backdating proof.",
+    "Grade each run A/B/C/D/E.",
+    "Implement row/run eligibility views at target cutoff.",
+    "For historical GribStream runs, permit strict use only when B proof is approved; otherwise diagnostic.",
+    "Record schedule/model-version eras and exceptions.",
+    "Create an audit explaining which cycles are normally eligible at 07:00 UTC without relying on assumption."
+  ],
+  "db_objects": [
+    "governance.availability_contract",
+    "nwp_core run availability grade",
+    "eligible model-run views"
+  ],
+  "outputs": [
+    "provider_evidence_archive/",
+    "availability_contracts.csv",
+    "eligible_cycle_matrix.csv",
+    "strict_vs_diagnostic_counts.csv",
+    "latency_buffer_rationale.md"
+  ],
+  "tests": [
+    "Boundary-time tests",
+    "late-run exclusion",
+    "schedule-era tests",
+    "prospective first-seen comparison"
+  ],
+  "acceptance": [
+    "Every source/run has explicit grade",
+    "Strict views contain only A/B rows",
+    "No asOf-only record promoted"
+  ],
+  "failure": [
+    "Cannot prove historical release: retain C diagnostic and continue prospective collection"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t16_historical_availability_proof_ledger.md"
+}

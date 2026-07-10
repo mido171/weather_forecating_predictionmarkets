@@ -1,0 +1,47 @@
+{
+  "id": "T10",
+  "suffix": "global_ai_models_backfill",
+  "title": "Global AI Weather Model Backfill",
+  "phase": "B Acquisition",
+  "deps": [
+    "T06"
+  ],
+  "mission": "Backfill available GraphCast, FourCastNet, AIFS, AIFS ensemble, AIGFS and AIGEFS surface/pressure sources as model-diversity challengers.",
+  "inputs": [
+    "T03 AI model catalog",
+    "T05 locations",
+    "T06 client"
+  ],
+  "steps": [
+    "Backfill each model only over its documented archive/window.",
+    "Keep surface and pressure products linked but separate.",
+    "Acquire all relevant cycles/leads and ensemble members where applicable.",
+    "Record historical-archive end dates for GraphCast/FourCastNet.",
+    "Record exact start dates and selector changes.",
+    "Classify outputs as challenger/shadow; no unrestricted router weight."
+  ],
+  "db_objects": [
+    "nwp_core values and model registry"
+  ],
+  "outputs": [
+    "ai_model_manifests/",
+    "cross_model_coverage.csv",
+    "short_history_limits.md",
+    "quality_summary.md"
+  ],
+  "tests": [
+    "Date-window enforcement",
+    "surface/pressure join tests",
+    "ensemble member tests"
+  ],
+  "acceptance": [
+    "Every AI model has complete or explicitly partial coverage manifest",
+    "No model represented outside its real archive"
+  ],
+  "failure": [
+    "Tiny sample models remain storage/shadow only"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t10_global_ai_models_backfill.md"
+}

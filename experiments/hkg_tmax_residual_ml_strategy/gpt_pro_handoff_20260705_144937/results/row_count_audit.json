@@ -1,0 +1,42 @@
+{
+  "target_rows_total": 9647,
+  "target_rows_by_source": {
+    "label_core": 8765,
+    "sealed_confirmation": 882
+  },
+  "forecast_rows_strict_eligible_total": 88277,
+  "forecast_target_dates_with_strict_rows": 9644,
+  "hourly_rows_loaded_total": 252644,
+  "joined_rows_total": 38588,
+  "joined_rows_with_anchor": 26407,
+  "joined_rows_without_anchor": 12181,
+  "scored_prediction_rows": 157670,
+  "joined_rows_by_cutoff": {
+    "tminus1_1500": 9647,
+    "tminus1_1800": 9647,
+    "tminus1_2100": 9647,
+    "tminus1_2359": 9647
+  },
+  "anchor_rows_by_cutoff": {
+    "tminus1_1800": 8335,
+    "tminus1_2100": 8428,
+    "tminus1_2359": 9644
+  },
+  "prediction_rows_by_model": {
+    "A0_raw_official": 15767,
+    "A1_grouped_residual": 15767,
+    "A2_revision_residual_lgbm": 15767,
+    "A3_hko_hourly_state_residual_lgbm": 15767,
+    "A4_network_gradients_residual_lgbm": 15767,
+    "A5_text_warning_residual_lgbm": 15767,
+    "A6_target_memory_residual_lgbm": 15767,
+    "A7_final_residual_ensemble": 15767,
+    "A8_direct_lgbm_absolute": 15767,
+    "B0_climatology_persistence": 15767
+  },
+  "prediction_rows_by_stage": {
+    "presealed_holdout": 20600,
+    "rolling_validation": 112940,
+    "sealed_confirmation": 24130
+  }
+}

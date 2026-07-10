@@ -1,0 +1,507 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/hkg-t24/experiment_spec.schema.json",
+  "title": "HKG T+24 experiment specification",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "title",
+    "slug",
+    "mode",
+    "hypothesis",
+    "rationale",
+    "expected_sign_and_falsification",
+    "novelty",
+    "target",
+    "frame",
+    "data_sources",
+    "stations",
+    "features",
+    "response",
+    "baseline",
+    "validation",
+    "metrics",
+    "sample_rules",
+    "acceptance_gates",
+    "rejection_conditions",
+    "required_outputs",
+    "owner_authorized_confirmation"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "experiment_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]{4}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 10
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,100}$"
+    },
+    "mode": {
+      "enum": [
+        "promotion_oriented",
+        "exploratory",
+        "diagnostic_only",
+        "data_quality",
+        "timestamp_unlock",
+        "frame_harmonization"
+      ]
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 40
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 80
+    },
+    "expected_sign_and_falsification": {
+      "type": "string",
+      "minLength": 40
+    },
+    "novelty": {
+      "type": "object",
+      "required": [
+        "prior_experiments",
+        "difference"
+      ],
+      "properties": {
+        "prior_experiments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "difference": {
+          "type": "string",
+          "minLength": 30
+        },
+        "similarity_audit_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "station",
+        "variable",
+        "horizon",
+        "timezone",
+        "cutoff_contract_path"
+      ],
+      "properties": {
+        "station": {
+          "type": "string",
+          "minLength": 3
+        },
+        "variable": {
+          "type": "string",
+          "const": "tmax_c"
+        },
+        "horizon": {
+          "type": "string",
+          "const": "T-24"
+        },
+        "timezone": {
+          "type": "string",
+          "const": "Asia/Hong_Kong"
+        },
+        "cutoff_contract_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cutoff_function": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "daily_boundary_contract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "required": [
+        "frame_id",
+        "development_end_exclusive",
+        "confirmation_locked"
+      ],
+      "properties": {
+        "frame_id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "development_start": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "development_end_exclusive": {
+          "type": "string",
+          "const": "2024-01-01"
+        },
+        "confirmation_locked": {
+          "type": "boolean",
+          "const": true
+        },
+        "row_universe_artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "data_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "paths",
+          "attributes",
+          "eligibility",
+          "availability_proof"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 2
+          },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "eligibility": {
+            "enum": [
+              "DEPLOYABLE_PROVEN",
+              "DEPLOYABLE_LAGGED_ONLY",
+              "DIAGNOSTIC_ONLY",
+              "PROSPECTIVE_ONLY",
+              "BLOCKED",
+              "REJECTED"
+            ]
+          },
+          "availability_proof": {
+            "type": "string",
+            "minLength": 10
+          },
+          "timestamp_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latency_contract": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "stations": {
+      "type": "object",
+      "required": [
+        "selection",
+        "ids",
+        "metadata_required"
+      ],
+      "properties": {
+        "selection": {
+          "enum": [
+            "explicit",
+            "all_inventory",
+            "explicit_or_all_inventory",
+            "role_groups"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "role_groups": {
+          "type": "object"
+        },
+        "metadata_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "unknown_identity_policy": {
+          "enum": [
+            "reject",
+            "quarantine",
+            "diagnostic_only"
+          ]
+        }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "formula",
+          "inputs",
+          "availability_rule",
+          "fit_scope"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "formula": {
+            "type": "string",
+            "minLength": 3
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "availability_rule": {
+            "type": "string",
+            "minLength": 10
+          },
+          "fit_scope": {
+            "enum": [
+              "none",
+              "prior_rows_only",
+              "fold_training_only",
+              "static_predeclared"
+            ]
+          },
+          "units": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "enum": [
+              "direct_tmax",
+              "residual_correction",
+              "uncertainty",
+              "routing",
+              "high_error_detection",
+              "diagnostic_physics",
+              "regime_label"
+            ]
+          },
+          "missingness_policy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "name",
+        "definition"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "definition": {
+          "type": "string",
+          "minLength": 5
+        },
+        "availability": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "id",
+        "identical_rows_required"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "artifact_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "definition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "identical_rows_required": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "type": "string"
+        },
+        "formula_or_algorithm": {
+          "type": "string"
+        },
+        "correction_cap_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "refit_cadence": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hyperparameter_selection": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "method",
+        "outer_folds",
+        "inner_selection",
+        "minimum_history_rows"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "expanding_walk_forward",
+            "rolling_walk_forward",
+            "prequential_online",
+            "diagnostic_temporal_folds"
+          ]
+        },
+        "outer_folds": {
+          "type": "array",
+          "minItems": 1
+        },
+        "inner_selection": {
+          "type": "object"
+        },
+        "minimum_history_rows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "refit_cadence": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "embargo_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "string"
+      }
+    },
+    "sample_rules": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "acceptance_gates": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "rejection_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "parameter_grid": {
+      "type": "object"
+    },
+    "required_outputs": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner_authorized_confirmation": {
+      "type": "boolean",
+      "const": false
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "T07",
+  "suffix": "gfs_complete_backfill",
+  "title": "GFS Complete HKG-Relevant Backfill",
+  "phase": "B Acquisition",
+  "deps": [
+    "T06"
+  ],
+  "mission": "Backfill all useful GFS cycles and variables from the verified GribStream start date through current availability at all target/station/reference locations and approved grids.",
+  "inputs": [
+    "T03 GFS selector map",
+    "T05 location/domain plan",
+    "T06 client",
+    "P0/P1 semantic variables"
+  ],
+  "steps": [
+    "Refresh GFS catalog introduction dates per selector.",
+    "Backfill from 2021-03-22 or later selector introduction date.",
+    "Collect all 00/06/12/18 cycles and 0\u201384h leads.",
+    "Collect point trajectories at HKO, all stations and reference points.",
+    "Collect local patch and compressed synoptic context fields.",
+    "Separate surface and pressure-level variable groups.",
+    "Persist raw responses, normalized values and coverage manifests.",
+    "Do not mark historical values strict until T16 approves availability."
+  ],
+  "db_objects": [
+    "nwp_core.model_run/point_value",
+    "raw object manifests",
+    "catalog selector versions"
+  ],
+  "outputs": [
+    "gfs_backfill_manifest.csv",
+    "coverage_by_run_variable_location.csv",
+    "missing_run_report.csv",
+    "volume_and_quota_report.csv",
+    "quality_summary.md"
+  ],
+  "tests": [
+    "Known-date spot checks",
+    "Kelvin/Celsius conversion tests",
+    "run/valid/lead consistency",
+    "duplicate check",
+    "expected cycle coverage"
+  ],
+  "acceptance": [
+    "All planned chunks terminal success/rejected state",
+    "Coverage gaps enumerated",
+    "No dates before selector introduction requested"
+  ],
+  "failure": [
+    "Quota exhaustion: checkpoint and resume; do not silently downsample variables"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t07_gfs_complete_backfill.md"
+}

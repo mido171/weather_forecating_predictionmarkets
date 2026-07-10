@@ -1,0 +1,83 @@
+{
+  "by_source": {
+    "gefs_control": {
+      "bytes": 559003347,
+      "fetch_ok": 68,
+      "norm_ok": 0,
+      "tasks": 68
+    },
+    "gfs": {
+      "bytes": 808312537,
+      "fetch_ok": 68,
+      "norm_ok": 0,
+      "tasks": 68
+    }
+  },
+  "bytes_ok": 1367315884,
+  "completed_at_utc": "2026-07-09T13:20:08.047051Z",
+  "config": {
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day": "2026-06-21",
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "max_attempts": 3,
+    "max_tasks": null,
+    "normalize": false,
+    "range_workers": 4,
+    "sources": [
+      "gefs_control",
+      "gfs"
+    ],
+    "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+    "timeout": 120,
+    "use_processes": false,
+    "workers": 8
+  },
+  "failure_count": 0,
+  "fetch_ok": 136,
+  "fetch_seconds_p50": 25.131426300038584,
+  "fetch_seconds_p90": 36.815610100049525,
+  "first_failures": [],
+  "mb_per_second_wall": 3.092967125429782,
+  "normalization_seconds_p50": null,
+  "normalization_seconds_p90": null,
+  "normalize_ok": 0,
+  "normalized_row_count": 0,
+  "resources": {
+    "cpu_max_percent": null,
+    "cpu_mean_percent": null,
+    "cpu_sampler_available": false,
+    "original_sampled_staging_end_bytes": 16451858,
+    "staging_end_bytes": 0,
+    "staging_end_bytes_correction_note": "Corrected after long-path cleanup patch and postrun audit; original value was a stale sampler read before final trial cleanup.",
+    "staging_max_bytes": 34184649
+  },
+  "started_at_utc": "2026-07-09T13:12:45.957170Z",
+  "tasks_per_minute_wall": 18.45850840968291,
+  "tasks_total": 136,
+  "trial_name": "model_fetch_s3_w8_r4",
+  "trial_type": "parallel_fetch_only",
+  "wall_seconds": 442.0725564000313
+}

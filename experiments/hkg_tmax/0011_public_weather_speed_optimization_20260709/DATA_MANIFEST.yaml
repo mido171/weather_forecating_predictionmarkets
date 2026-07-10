@@ -1,0 +1,22 @@
+experiment_id: 0011_public_weather_speed_optimization_20260709
+target_station:
+  station_id: HKO
+  station_name: Hong Kong Observatory
+sources:
+  gfs:
+    product: pgrb2.0p25
+    access: noaa-gfs-bdp-pds S3 idx plus byte ranges
+    cycles_utc: [0, 6, 12, 18]
+    leads_hours: "0..48 step 3"
+  gefs_control:
+    product: gec00 pgrb2s.0p25
+    access: noaa-gefs-pds S3 idx plus byte ranges
+    cycles_utc: [0, 6, 12, 18]
+    leads_hours: "0..48 step 3"
+  himawari:
+    satellite: Himawari-9
+    band: B13
+    segment: S0510
+    scans_per_day_expected: 144
+raw_retention: transient_delete_after_each_worker
+database_writes: false

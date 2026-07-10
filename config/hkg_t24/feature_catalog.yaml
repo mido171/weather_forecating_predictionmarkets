@@ -1,0 +1,174 @@
+schema_version: 1
+generated_at_utc: '2026-06-20T10:26:20.551301Z'
+feature_table: C:\hkg_tmax_data\silver\features\t24_cutoff_feature_candidates.parquet
+feature_count: 13
+features:
+- feature_name: target_tmax_c
+  role: TARGET_ONLY
+  availability_tier: TARGET_ONLY
+  operational_input_allowed_by_tier: false
+  target_derived: true
+  registered: true
+  has_available_at_column: false
+  has_observed_at_column: false
+  non_null_rows: 49459
+  first_non_null_date: '1884-01-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: after target day completion and publication
+  notes: Target label only. Never a predictor.
+- feature_name: hko_temp_at_tminus1_1500_c
+  role: OPERATIONAL_WITH_CONSERVATIVE_LATENCY
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  target_derived: false
+  registered: true
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1932
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: observed_at + 20 minutes
+  notes: Use latest observation available by cutoff.
+- feature_name: hko_rh_at_tminus1_1500_pct
+  role: OPERATIONAL_WITH_CONSERVATIVE_LATENCY
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  target_derived: false
+  registered: true
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1931
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: observed_at + 20 minutes
+  notes: Moisture state at cutoff.
+- feature_name: hko_mslp_at_tminus1_1500_hpa
+  role: OPERATIONAL_WITH_CONSERVATIVE_LATENCY
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  target_derived: false
+  registered: true
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1608
+  first_non_null_date: '2021-12-30'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: observed_at + 20 minutes
+  notes: Synoptic pressure state at cutoff.
+- feature_name: hko_tminus1_max_so_far_1500_c
+  role: OPERATIONAL_WITH_CONSERVATIVE_LATENCY
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  target_derived: false
+  registered: true
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 318
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2021-05-14'
+  available_at_rule: observed_at + 20 minutes
+  notes: Only valid for T-1, not target day T.
+- feature_name: hko_tminus1_min_so_far_1500_c
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1920
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_temp_tminus1_1200_c
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1930
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_temp_tminus1_0900_c
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1933
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_mslp_tminus1_1200_hpa
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: true
+  has_observed_at_column: true
+  non_null_rows: 1606
+  first_non_null_date: '2021-12-30'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_temp_3h_change_to_cutoff_c
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: false
+  has_observed_at_column: false
+  non_null_rows: 1930
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_temp_6h_change_to_cutoff_c
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: false
+  has_observed_at_column: false
+  non_null_rows: 1931
+  first_non_null_date: '2020-07-01'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_mslp_3h_change_to_cutoff_hpa
+  role: UNREGISTERED_FEATURE
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  target_derived: false
+  registered: false
+  has_available_at_column: false
+  has_observed_at_column: false
+  non_null_rows: 1606
+  first_non_null_date: '2021-12-30'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: ''
+  notes: ''
+- feature_name: hko_tminus2_official_tmax_c
+  role: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  target_derived: false
+  registered: true
+  has_available_at_column: false
+  has_observed_at_column: false
+  non_null_rows: 49455
+  first_non_null_date: '1884-01-03'
+  last_non_null_date: '2026-05-31'
+  available_at_rule: requires empirical publication-lag proof before production
+  notes: Useful benchmark feature, but publication timing must be proven before production.

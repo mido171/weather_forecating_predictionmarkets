@@ -1,0 +1,61 @@
+{
+  "id": "T03",
+  "suffix": "gribstream_catalog_coverage_licence_quota_audit",
+  "title": "GribStream Catalog, Coverage, Licence, and Quota Audit",
+  "phase": "A Foundation",
+  "deps": [
+    "T00",
+    "T01"
+  ],
+  "mission": "Snapshot the live GribStream catalog/OpenAPI/client metadata, verify every listed model, test geographic coverage, resolve selectors, estimate quota/storage, and document contractual constraints before bulk acquisition.",
+  "inputs": [
+    "GRIBSTREAM_MODEL_DISPOSITION_MATRIX.csv",
+    "SEMANTIC_VARIABLE_REQUIREMENTS.csv",
+    "GribStream public catalog/docs/terms",
+    "API key if available",
+    "HKO/reference coordinates from T05 when ready"
+  ],
+  "steps": [
+    "Fetch and hash current docs, OpenAPI YAML, model catalog and selector metadata.",
+    "Enumerate all current models, including user-listed and newly discovered entries.",
+    "For each model, record domain, resolution, cycles, lead range, ensemble members, archive/retention and selector introduction dates.",
+    "Run minimal coordinate probes at HKO, inland, coastal and marine points for coverage-probe models.",
+    "Resolve exact selector tuples for every P0/P1 semantic variable.",
+    "Estimate request rows, bytes, quota and storage by acquisition tier.",
+    "Record GribStream ToS constraints and request written clarification for long-term internal commercial retention if needed.",
+    "Record upstream attribution/licensing requirements, especially ECMWF CC BY 4.0.",
+    "Produce final acquire/probe/exclude decisions; no bulk download yet."
+  ],
+  "db_objects": [
+    "catalog.catalog_snapshot",
+    "catalog.model_registry",
+    "catalog.selector_snapshot",
+    "catalog.source_license"
+  ],
+  "outputs": [
+    "catalog_snapshot.json",
+    "selector_map.csv",
+    "coverage_probe_results.csv",
+    "quota_storage_estimate.csv",
+    "licence_register.md",
+    "final_model_disposition.csv"
+  ],
+  "tests": [
+    "Catalog hash repeatability",
+    "selector query smoke tests",
+    "geographic coverage assertions",
+    "no secret in logs"
+  ],
+  "acceptance": [
+    "Every user-listed model has an explicit disposition",
+    "Every core variable has exact selectors or a blocker",
+    "Bulk acquisition plan fits quota/storage or is staged"
+  ],
+  "failure": [
+    "No API key: complete public catalog work and emit authenticated probe command",
+    "Unclear retention rights: do not block code, but block bulk commercial ingestion pending written confirmation"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t03_gribstream_catalog_coverage_licence_quota_audit.md"
+}

@@ -1,0 +1,1265 @@
+ M .env.example
+ M .gitignore
+ M AGENTS.md
+ M CHANGELOG.md
+ M Dockerfile
+ M MILESTONES.md
+ M Makefile
+ M README.md
+ M code/src/hkg_t24/cli.py
+ M code/src/hkg_t24/constants.py
+ M code/src/hkg_t24/db/ddl.py
+ M code/src/hkg_t24/features/snapshot_builder.py
+ M code/tests/hkg_t24/test_schema_sql_contract.py
+ M code/tests/hkg_t24/test_snapshot_builder_synthetic.py
+ M compose.yaml
+ M config/collector_schedules.yaml
+ M config/data_source_catalog.yaml
+ M config/data_sources.yaml
+ M data/README.md
+ M docs/PROJECT_STRUCTURE_AND_CODE_MAP.md
+ M documentation/project_root_reference/CITATIONS_AND_VERIFICATION.md
+ D documentation/strategy_implementation_documentation/context/GRIBSTREAM_FETCHED_DATA_INVENTORY_20260626.md
+ D documentation/strategy_implementation_documentation/context/GRIBSTREAM_LEAKAGE_SAFE_DB_RETRIEVAL_LEDGER_20260626.md
+ D documentation/strategy_implementation_documentation/context/HKG_T24_001_FOUNDATION_DEEP_DIVE.md
+ D documentation/strategy_implementation_documentation/context/HKG_T24_001_SOURCE_SAFETY_AUDIT.md
+ D documentation/strategy_implementation_documentation/context/HKG_T24_001_VERIFICATION_GUIDE.md
+ D documentation/strategy_implementation_documentation/context/POSTGRES_STRATEGY_DATASET_INVENTORY_20260626.md
+ D experiments/AGENTS.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/ASOF_CONTRACT.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/CONCLUSION.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/DATA_MANIFEST.yaml
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/HYPOTHESIS.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/PROTOCOL.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/README.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/REPRODUCE.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/RESULTS.md
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/RUN_CONFIG.yaml
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/STATUS.yaml
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/artifacts/.gitkeep
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/logs/.gitkeep
+ D experiments/EXP-0001-g0-repository-and-archive-smoke-test/results/metrics.json
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/ASOF_CONTRACT.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/CONCLUSION.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/DATA_MANIFEST.yaml
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/HYPOTHESIS.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/PROTOCOL.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/README.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/REPRODUCE.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/RESULTS.md
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/RUN_CONFIG.yaml
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/STATUS.yaml
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/artifacts/.gitkeep
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/logs/.gitkeep
+ D experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/results/metrics.json
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/ASOF_CONTRACT.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/CONCLUSION.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/DATA_MANIFEST.yaml
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/HYPOTHESIS.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/PROTOCOL.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/README.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/REPRODUCE.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/RESULTS.md
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/RUN_CONFIG.yaml
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/STATUS.yaml
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/artifacts/.gitkeep
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/logs/.gitkeep
+ D experiments/EXP-0003-g1-daily-extract-first-publication-polling/results/metrics.json
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/ASOF_CONTRACT.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/CONCLUSION.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/DATA_MANIFEST.yaml
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/HYPOTHESIS.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/PROTOCOL.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/README.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/REPRODUCE.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/RESULTS.md
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/RUN_CONFIG.yaml
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/STATUS.yaml
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/artifacts/.gitkeep
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/logs/.gitkeep
+ D experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/results/metrics.json
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/ASOF_CONTRACT.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/CONCLUSION.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/DATA_MANIFEST.yaml
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/HYPOTHESIS.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/PROTOCOL.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/README.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/REPRODUCE.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/RESULTS.md
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/RUN_CONFIG.yaml
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/STATUS.yaml
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/artifacts/.gitkeep
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/logs/.gitkeep
+ D experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/results/metrics.json
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/ASOF_CONTRACT.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/CONCLUSION.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/DATA_MANIFEST.yaml
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/HYPOTHESIS.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/PROTOCOL.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/README.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/REPRODUCE.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/RESULTS.md
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/RUN_CONFIG.yaml
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/STATUS.yaml
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/artifacts/.gitkeep
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/logs/.gitkeep
+ D experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/results/metrics.json
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/ASOF_CONTRACT.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/CONCLUSION.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/DATA_MANIFEST.yaml
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/HYPOTHESIS.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/PROTOCOL.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/README.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/REPRODUCE.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/RESULTS.md
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/RUN_CONFIG.yaml
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/STATUS.yaml
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/artifacts/.gitkeep
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/logs/.gitkeep
+ D experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/results/metrics.json
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/ASOF_CONTRACT.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/CONCLUSION.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/DATA_MANIFEST.yaml
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/HYPOTHESIS.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/PROTOCOL.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/README.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/REPRODUCE.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/RESULTS.md
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/RUN_CONFIG.yaml
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/STATUS.yaml
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/artifacts/.gitkeep
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/logs/.gitkeep
+ D experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/results/metrics.json
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/ASOF_CONTRACT.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/CONCLUSION.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/DATA_MANIFEST.yaml
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/HYPOTHESIS.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/PROTOCOL.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/README.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/REPRODUCE.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RESULTS.md
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RUN_CONFIG.yaml
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/STATUS.yaml
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/artifacts/.gitkeep
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/logs/.gitkeep
+ D experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/results/metrics.json
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/ASOF_CONTRACT.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/CONCLUSION.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/DATA_MANIFEST.yaml
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/HYPOTHESIS.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/PROTOCOL.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/README.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/REPRODUCE.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/RESULTS.md
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/RUN_CONFIG.yaml
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/STATUS.yaml
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/artifacts/.gitkeep
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/logs/.gitkeep
+ D experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/results/metrics.json
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/ASOF_CONTRACT.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/CONCLUSION.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/DATA_MANIFEST.yaml
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/HYPOTHESIS.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/PROTOCOL.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/README.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/REPRODUCE.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/RESULTS.md
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/RUN_CONFIG.yaml
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/STATUS.yaml
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/artifacts/.gitkeep
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/logs/.gitkeep
+ D experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/results/metrics.json
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/ASOF_CONTRACT.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/CONCLUSION.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/DATA_MANIFEST.yaml
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/HYPOTHESIS.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/PROTOCOL.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/README.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/REPRODUCE.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RESULTS.md
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RUN_CONFIG.yaml
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/STATUS.yaml
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/artifacts/.gitkeep
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/logs/.gitkeep
+ D experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/results/metrics.json
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/ASOF_CONTRACT.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/CONCLUSION.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/DATA_MANIFEST.yaml
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/HYPOTHESIS.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/PROTOCOL.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/README.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/REPRODUCE.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RESULTS.md
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RUN_CONFIG.yaml
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/STATUS.yaml
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/artifacts/.gitkeep
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/logs/.gitkeep
+ D experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/results/metrics.json
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/ASOF_CONTRACT.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/CONCLUSION.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/DATA_MANIFEST.yaml
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/HYPOTHESIS.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/PROTOCOL.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/README.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/REPRODUCE.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/RESULTS.md
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/RUN_CONFIG.yaml
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/STATUS.yaml
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/artifacts/.gitkeep
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/logs/.gitkeep
+ D experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/results/metrics.json
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/ASOF_CONTRACT.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/CONCLUSION.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/DATA_MANIFEST.yaml
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/HYPOTHESIS.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/PROTOCOL.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/README.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/REPRODUCE.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/RESULTS.md
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/RUN_CONFIG.yaml
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/STATUS.yaml
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/artifacts/.gitkeep
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/logs/.gitkeep
+ D experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/results/metrics.json
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/ASOF_CONTRACT.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/CONCLUSION.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/DATA_MANIFEST.yaml
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/HYPOTHESIS.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/PROTOCOL.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/README.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/REPRODUCE.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/RESULTS.md
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/RUN_CONFIG.yaml
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/STATUS.yaml
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/artifacts/.gitkeep
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/logs/.gitkeep
+ D experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/results/metrics.json
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/ASOF_CONTRACT.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/CONCLUSION.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/DATA_MANIFEST.yaml
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/HYPOTHESIS.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/PROTOCOL.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/README.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/REPRODUCE.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/RESULTS.md
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/RUN_CONFIG.yaml
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/STATUS.yaml
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/artifacts/.gitkeep
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/logs/.gitkeep
+ D experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/results/metrics.json
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/ASOF_CONTRACT.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/CONCLUSION.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/DATA_MANIFEST.yaml
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/HYPOTHESIS.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/PROTOCOL.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/README.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/REPRODUCE.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/RESULTS.md
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/RUN_CONFIG.yaml
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/STATUS.yaml
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/artifacts/.gitkeep
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/logs/.gitkeep
+ D experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/results/metrics.json
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/ASOF_CONTRACT.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/CONCLUSION.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/DATA_MANIFEST.yaml
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/HYPOTHESIS.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/PROTOCOL.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/README.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/REPRODUCE.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RESULTS.md
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RUN_CONFIG.yaml
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/STATUS.yaml
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/artifacts/.gitkeep
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/logs/.gitkeep
+ D experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/results/metrics.json
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/ASOF_CONTRACT.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/CONCLUSION.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/DATA_MANIFEST.yaml
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/HYPOTHESIS.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/PROTOCOL.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/README.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/REPRODUCE.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/RESULTS.md
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/RUN_CONFIG.yaml
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/STATUS.yaml
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/artifacts/.gitkeep
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/logs/.gitkeep
+ D experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/results/metrics.json
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/ASOF_CONTRACT.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/CONCLUSION.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/DATA_MANIFEST.yaml
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/HYPOTHESIS.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/PROTOCOL.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/README.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/REPRODUCE.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/RESULTS.md
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/RUN_CONFIG.yaml
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/STATUS.yaml
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/artifacts/.gitkeep
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/logs/.gitkeep
+ D experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/results/metrics.json
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/ASOF_CONTRACT.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/CONCLUSION.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/DATA_MANIFEST.yaml
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/HYPOTHESIS.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/PROTOCOL.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/README.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/REPRODUCE.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RESULTS.md
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RUN_CONFIG.yaml
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/STATUS.yaml
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/artifacts/.gitkeep
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/logs/.gitkeep
+ D experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/results/metrics.json
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/ASOF_CONTRACT.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/CONCLUSION.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/DATA_MANIFEST.yaml
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/HYPOTHESIS.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/PROTOCOL.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/README.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/REPRODUCE.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RESULTS.md
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RUN_CONFIG.yaml
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/STATUS.yaml
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/artifacts/.gitkeep
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/logs/.gitkeep
+ D experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/results/metrics.json
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/ASOF_CONTRACT.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/CONCLUSION.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/DATA_MANIFEST.yaml
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/HYPOTHESIS.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/PROTOCOL.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/README.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/REPRODUCE.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/RESULTS.md
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/RUN_CONFIG.yaml
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/STATUS.yaml
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/artifacts/.gitkeep
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/logs/.gitkeep
+ D experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/results/metrics.json
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep
+ D experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json
+ D experiments/_template/ASOF_CONTRACT.md
+ D experiments/_template/CONCLUSION.md
+ D experiments/_template/DATA_MANIFEST.yaml
+ D experiments/_template/HYPOTHESIS.md
+ D experiments/_template/PROTOCOL.md
+ D experiments/_template/README.md
+ D experiments/_template/REPRODUCE.md
+ D experiments/_template/RESULTS.md
+ D experiments/_template/RUN_CONFIG.yaml
+ D experiments/_template/STATUS.yaml
+ D experiments/_template/artifacts/.gitkeep
+ D experiments/_template/logs/.gitkeep
+ D experiments/_template/results/metrics.json
+ D experiments/registry.yaml
+ M metadata/source_catalog.csv
+ M metadata/source_catalog.parquet
+ M pyproject.toml
+ M reports/acquisition_remaining_blockers.md
+ M reports/data_coverage.md
+ M reports/data_inventory.md
+ M reports/jira_001_contract_coverage.md
+ M reports/live_collector_health.md
+ M reports/schema_and_quality.md
+ M reports/source_blockers.md
+ M reports/source_inventory.md
+ M reports/storage_and_volume.md
+ M requirements.txt
+ M scripts/install_windows_collectors.ps1
+ M scripts/start_collectors.ps1
+ D src/hkg_tmax/__init__.py
+ D src/hkg_tmax/__main__.py
+ D src/hkg_tmax/acquisition.py
+ D src/hkg_tmax/asof.py
+ D src/hkg_tmax/bronze.py
+ D src/hkg_tmax/cli.py
+ D src/hkg_tmax/collector.py
+ D src/hkg_tmax/config.py
+ D src/hkg_tmax/distribution.py
+ D src/hkg_tmax/doctor.py
+ D src/hkg_tmax/experiments.py
+ D src/hkg_tmax/fetch.py
+ D src/hkg_tmax/hashing.py
+ D src/hkg_tmax/hko.py
+ D src/hkg_tmax/hko_backfill.py
+ D src/hkg_tmax/manifest.py
+ D src/hkg_tmax/market.py
+ D src/hkg_tmax/metrics.py
+ D src/hkg_tmax/milestones.py
+ D src/hkg_tmax/publication.py
+ D src/hkg_tmax/settlement.py
+ D src/hkg_tmax/sources.py
+ D src/hkg_tmax/statistics.py
+ D src/hkg_tmax/storage.py
+ D src/hkg_tmax/target.py
+ D src/hkg_tmax/timeutils.py
+ D src/hkg_tmax/validation.py
+ D tests/conftest.py
+ D tests/test_acquisition.py
+ D tests/test_asof.py
+ D tests/test_bronze.py
+ D tests/test_config_and_sources.py
+ D tests/test_distribution.py
+ D tests/test_experiments.py
+ D tests/test_fetch.py
+ D tests/test_hko.py
+ D tests/test_hko_backfill.py
+ D tests/test_manifest.py
+ D tests/test_market.py
+ D tests/test_metrics.py
+ D tests/test_publication.py
+ D tests/test_settlement.py
+ D tests/test_statistics.py
+ D tests/test_storage.py
+ D tests/test_target.py
+ D tests/test_timeutils.py
+ D tests/test_validation.py
+?? .agents/skills/hkg-t24-experiment-executor/
+?? .agents/skills/hkg-t24-research-director/
+?? .hkg_t24_research/
+?? .hkg_t24_skill_config/
+?? analysis/
+?? code/src/hkg_t24/features/calendar.py
+?? code/src/hkg_t24/features/db_feature_builders.py
+?? code/src/hkg_t24/features/diagnostic_proxy.py
+?? code/src/hkg_t24/features/feature_dictionary.py
+?? code/src/hkg_t24/features/matrix_builder.py
+?? code/src/hkg_t24/features/nwp_daily.py
+?? code/src/hkg_t24/features/official_anchor.py
+?? code/src/hkg_t24/features/official_text.py
+?? code/src/hkg_t24/features/online_state.py
+?? code/src/hkg_t24/features/station_proxy.py
+?? code/src/hkg_t24/features/target_memory.py
+?? code/src/hkg_t24/models/artifact_store.py
+?? code/src/hkg_t24/models/db_expert_factory.py
+?? code/src/hkg_t24/models/distribution.py
+?? code/src/hkg_t24/models/expected_error.py
+?? code/src/hkg_t24/models/experts.py
+?? code/src/hkg_t24/models/final_formula.py
+?? code/src/hkg_t24/models/folds.py
+?? code/src/hkg_t24/models/model_selection.py
+?? code/src/hkg_t24/models/oof.py
+?? code/src/hkg_t24/models/preprocessing.py
+?? code/src/hkg_t24/models/router.py
+?? code/src/hkg_t24/models/specialists.py
+?? code/src/hkg_t24/models/static_weights.py
+?? code/src/hkg_t24/models/system_replay.py
+?? code/src/hkg_t24/validation/ablation.py
+?? code/src/hkg_t24/validation/metrics.py
+?? code/src/hkg_t24/validation/slices.py
+?? code/src/hkg_tmax/
+?? code/src/hkg_tmax_db/
+?? code/tests/conftest.py
+?? code/tests/hkg_t24/fixtures/
+?? code/tests/hkg_t24/test_jira002_feature_builders.py
+?? code/tests/hkg_t24/test_jira002_online_and_experts.py
+?? code/tests/hkg_t24/test_jira002_real_db_smoke.py
+?? code/tests/hkg_t24/test_jira002_synthetic_integration.py
+?? code/tests/hkg_t24/test_jira003_router_specialists_distribution.py
+?? code/tests/test_acquisition.py
+?? code/tests/test_acquisition_contracts.py
+?? code/tests/test_analysis_contracts.py
+?? code/tests/test_asof.py
+?? code/tests/test_bronze.py
+?? code/tests/test_config_and_sources.py
+?? code/tests/test_distribution.py
+?? code/tests/test_experiments.py
+?? code/tests/test_fetch.py
+?? code/tests/test_hkg_t24_0078_prior_only_residual_specialists.py
+?? code/tests/test_hkg_t24_0079_guarded_specialist_combination.py
+?? code/tests/test_hkg_t24_0080_source_era_hardened_specialist_gate.py
+?? code/tests/test_hkg_t24_0081_rss_gate_stability_stress.py
+?? code/tests/test_hkg_t24_0082_refreshed_archive_replay_readiness_audit.py
+?? code/tests/test_hkg_t24_0083_expanded_frame_official_anchor_replay.py
+?? code/tests/test_hkg_t24_0084_expanded_frame_hardened_official_specialists.py
+?? code/tests/test_hkg_t24_0085_long_history_feature_station_residual_bridge.py
+?? code/tests/test_hkg_t24_0086_guarded_long_history_residual_specialists.py
+?? code/tests/test_hkg_t24_0087_long_history_signal_interaction_specialists.py
+?? code/tests/test_hkg_t24_0088_prior_gated_specialist_stack.py
+?? code/tests/test_hkg_t24_0089_remaining_error_regime_autopsy.py
+?? code/tests/test_hkg_t24_0090_guarded_specialists_from_error_autopsy.py
+?? code/tests/test_hkg_t24_0091_near_miss_specialist_failure_analysis.py
+?? code/tests/test_hkg_t24_0092_blocking_slice_guarded_specialists.py
+?? code/tests/test_hkg_t24_0093_guarded_champion_sensitivity_check.py
+?? code/tests/test_hkg_t24_0094_expanded_high_error_interaction_lab.py
+?? code/tests/test_hkg_t24_0095_mam_error_direction_split_lab.py
+?? code/tests/test_hkg_t24_0096_directional_cell_failure_audit.py
+?? code/tests/test_hkg_t24_0097_stable_directional_cell_specialist.py
+?? code/tests/test_hkg_t24_0098_source_submonth_stable_cell_specialist.py
+?? code/tests/test_hkg_t24_0099_mam_cell_policy_sensitivity.py
+?? code/tests/test_hkg_t24_0100_stable_mam_cell_feature_atlas.py
+?? code/tests/test_hkg_t24_0101_stable_mam_cell_feature_specialists.py
+?? code/tests/test_hkg_t24_0102_timestamp_proof_unlock_queue.py
+?? code/tests/test_hkg_t24_0103_current_rss_continuation_without_blocked_sources.py
+?? code/tests/test_hkg_t24_0104_canonical_frame_evidence_registry.py
+?? code/tests/test_hkg_t24_0105_0183_roadmap_execution.py
+?? code/tests/test_hkg_t24_0215_gpt_pro_point_forecast_strategy.py
+?? code/tests/test_hkg_t24_beastmode_signal_discovery.py
+?? code/tests/test_hkg_t24_candidate_residual_feature_design_notes.py
+?? code/tests/test_hkg_t24_candidate_timestamp_eligibility_audit.py
+?? code/tests/test_hkg_t24_cell_robustness_smooth_shrinkage.py
+?? code/tests/test_hkg_t24_cluster_centroid_soft_gating.py
+?? code/tests/test_hkg_t24_composite_expert_stack.py
+?? code/tests/test_hkg_t24_deep_signal_forensics.py
+?? code/tests/test_hkg_t24_era_source_aware_fusion_model.py
+?? code/tests/test_hkg_t24_failure_mode_specialists.py
+?? code/tests/test_hkg_t24_forecast_anchor_forensics.py
+?? code/tests/test_hkg_t24_forecast_archive_continuous_scored_export.py
+?? code/tests/test_hkg_t24_forecast_history_state_deepening.py
+?? code/tests/test_hkg_t24_forecast_revision_momentum_deep_dive.py
+?? code/tests/test_hkg_t24_gated_residual_specialist_screen.py
+?? code/tests/test_hkg_t24_governance.py
+?? code/tests/test_hkg_t24_guard.py
+?? code/tests/test_hkg_t24_long_history_50.py
+?? code/tests/test_hkg_t24_long_history_cross_family_interaction_atlas.py
+?? code/tests/test_hkg_t24_longhist_signal_atlas.py
+?? code/tests/test_hkg_t24_missing_press_raw_detail_backfill_or_blocker.py
+?? code/tests/test_hkg_t24_moisture.py
+?? code/tests/test_hkg_t24_multi_signal_local_residual_lab.py
+?? code/tests/test_hkg_t24_multistation_attribute_information_gain.py
+?? code/tests/test_hkg_t24_nonlinear_local_residual_fusion_lab.py
+?? code/tests/test_hkg_t24_official_anchor_analog_screen.py
+?? code/tests/test_hkg_t24_official_anchor_correction_ladder.py
+?? code/tests/test_hkg_t24_official_anchor_expert_blend_screen.py
+?? code/tests/test_hkg_t24_official_failure_mode_segmentation.py
+?? code/tests/test_hkg_t24_official_residual_source_text_range_dynamics.py
+?? code/tests/test_hkg_t24_online_no_regret_trust_router.py
+?? code/tests/test_hkg_t24_online_residual_memory_halflife.py
+?? code/tests/test_hkg_t24_online_residual_memory_refinement.py
+?? code/tests/test_hkg_t24_peak_anatomy.py
+?? code/tests/test_hkg_t24_press_archive_raw_detail_gap_audit.py
+?? code/tests/test_hkg_t24_press_archive_source_reporting.py
+?? code/tests/test_hkg_t24_pressure_gradient_experts.py
+?? code/tests/test_hkg_t24_pressure_regime_interaction_atlas.py
+?? code/tests/test_hkg_t24_prior_calibrated_fusion_screen.py
+?? code/tests/test_hkg_t24_r03_tmax_anatomy.py
+?? code/tests/test_hkg_t24_r04_thermal_trajectory.py
+?? code/tests/test_hkg_t24_r05_thermal_memory.py
+?? code/tests/test_hkg_t24_r06_moisture_state.py
+?? code/tests/test_hkg_t24_r07_transition_detection.py
+?? code/tests/test_hkg_t24_r08_wind_advection.py
+?? code/tests/test_hkg_t24_r09_station_temperature_gradient.py
+?? code/tests/test_hkg_t24_r10_latent_spatial_modes.py
+?? code/tests/test_hkg_t24_r11_r12_remaining_experiments.py
+?? code/tests/test_hkg_t24_r14_r17_robust_long_history.py
+?? code/tests/test_hkg_t24_regime_expert_factory.py
+?? code/tests/test_hkg_t24_regime_gated_specialist_selector.py
+?? code/tests/test_hkg_t24_remaining_0075_error_feature_mining.py
+?? code/tests/test_hkg_t24_residual_failure_cluster_discovery.py
+?? code/tests/test_hkg_t24_revision_centroid_stack_ablation.py
+?? code/tests/test_hkg_t24_router_gate_stack_screen.py
+?? code/tests/test_hkg_t24_router_simplification_or_archive_refresh_decision.py
+?? code/tests/test_hkg_t24_smooth_gated_pressure_experts.py
+?? code/tests/test_hkg_t24_smooth_residual_archetype_specialists.py
+?? code/tests/test_hkg_t24_source_era_specific_shrinkage.py
+?? code/tests/test_hkg_t24_sparse_specialist_delta_stack.py
+?? code/tests/test_hkg_t24_stack_trust_meta_features.py
+?? code/tests/test_hkg_t24_station_contribution_atlas.py
+?? code/tests/test_hkg_t24_station_feature_bucket_residual_mining.py
+?? code/tests/test_hkg_t24_station_feature_guarded_stack.py
+?? code/tests/test_hkg_t24_station_lag_slope_information_atlas.py
+?? code/tests/test_hkg_t24_station_network_forecast_residual_interaction_mining.py
+?? code/tests/test_hkg_t24_station_network_forecast_stack.py
+?? code/tests/test_hkg_t24_station_network_smooth_local_residual_models.py
+?? code/tests/test_hkg_t24_station_official_family_router.py
+?? code/tests/test_hkg_t24_station_only_failure_mode_analysis.py
+?? code/tests/test_hkg_t24_station_only_february_march_transition_specialist.py
+?? code/tests/test_hkg_t24_station_only_guarded_candidate_stack.py
+?? code/tests/test_hkg_t24_station_only_heat_proxy_specialist_validation.py
+?? code/tests/test_hkg_t24_station_only_late_period_bias_repair.py
+?? code/tests/test_hkg_t24_station_only_nearby_temperature_level_error_scale.py
+?? code/tests/test_hkg_t24_station_only_pressure_high_uncertainty_guard.py
+?? code/tests/test_hkg_t24_station_only_residual_specialist_design_queue.py
+?? code/tests/test_hkg_t24_station_only_spring_transition_pressure_dew_specialist.py
+?? code/tests/test_hkg_t24_station_only_walkforward_benchmark.py
+?? code/tests/test_hkg_t24_station_only_walkforward_matrix_audit.py
+?? code/tests/test_hkg_t24_station_regime_interaction_atlas.py
+?? code/tests/test_hkg_t24_time_availability_contract.py
+?? code/tests/test_hkg_t24_trust_router_sensitivity.py
+?? code/tests/test_hkg_tmax_db_audit_ingestion.py
+?? code/tests/test_hkg_tmax_residual_ml_strategy.py
+?? code/tests/test_hko.py
+?? code/tests/test_hko_archive_official_details_filters.py
+?? code/tests/test_hko_backfill.py
+?? code/tests/test_hko_info_gov_hourly_readings_backfill.py
+?? code/tests/test_hko_press_archive_offline_export.py
+?? code/tests/test_load_datasets_to_mysql.py
+?? code/tests/test_manifest.py
+?? code/tests/test_market.py
+?? code/tests/test_metrics.py
+?? code/tests/test_monitor_hko_official_backfill.py
+?? code/tests/test_profile_dataset_attributes_for_gpt_pro.py
+?? code/tests/test_publication.py
+?? code/tests/test_run_hko_official_remaining_backfill.py
+?? code/tests/test_settlement.py
+?? code/tests/test_source_normalization.py
+?? code/tests/test_static_context.py
+?? code/tests/test_statistics.py
+?? code/tests/test_storage.py
+?? code/tests/test_t02_full_current_data_census_reconciliation.py
+?? code/tests/test_t03_t05_foundation_tasks.py
+?? code/tests/test_t06_gribstream_resumable_runs_client.py
+?? code/tests/test_t07_t13_gribstream_backfill.py
+?? code/tests/test_tactical_gribstream_h24n.py
+?? code/tests/test_target.py
+?? code/tests/test_timeutils.py
+?? code/tests/test_validation.py
+?? config/acquisition_policy.yaml
+?? config/gridded_acquisition_policy.yaml
+?? config/historical_live_pairs.yaml
+?? config/hkg_t24/asof_t24_1500.yaml
+?? config/hkg_t24/availability_tiers.yaml
+?? config/hkg_t24/evaluation_design.yaml
+?? config/hkg_t24/feature_catalog.yaml
+?? config/hkg_t24/source_contracts.yaml
+?? config/hkg_t24/station_registry.csv
+?? config/hkg_t24/station_registry.parquet
+?? configs/
+?? data/_pipeline_internal/
+?? data/catalog/
+?? data/datasets/
+?? data/metadata/
+?? data/work/
+?? documentation/GRIBSTREAM_CREDENTIAL_LOCATION.md
+?? documentation/GRIBSTREAM_SUPPORT_BACKFILL_ALLOWANCE_EMAIL_DRAFT.md
+?? documentation/GRIBSTREAM_TMAX_LEAKAGE_SAFETY.md
+?? documentation/T03_T05_GRIBSTREAM_AND_NWP_FOUNDATION_RUNBOOK.md
+?? documentation/T06_GRIBSTREAM_RESUMABLE_RUNS_CLIENT_RUNBOOK.md
+?? documentation/T07_T12_CONSOLIDATED_TACTICAL_GRIBSTREAM_BACKFILL_RUNBOOK.md
+?? documentation/T07_T12_DEEP_SANITY_AUDIT_20260625.md
+?? documentation/T07_T12_FULL_TACTICAL_BACKFILL_20260625_RESULT.md
+?? documentation/T07_T13_GRIBSTREAM_BACKFILL_RUNBOOK.md
+?? documentation/strategy_implementation_documentation/actual_strategy_implementation_contract/HKG_T24_FULL_STRATEGY_IMPLEMENTATION_BLUEPRINT.md
+?? documentation/strategy_implementation_documentation/actual_strategy_implementation_contract/HKG_T24_FULL_STRATEGY_IMPLEMENTATION_BLUEPRINT_COMPLETION_SPEC.md
+?? documentation/strategy_implementation_documentation/actual_strategy_implementation_contract/HKG_T24_FULL_STRATEGY_IMPLEMENTATION_BLUEPRINT_COMPLETION_SPEC_FINAL_CLARIFICATIONS.md
+?? documentation/strategy_implementation_documentation/actual_strategy_implementation_contract/HKG_T24_FULL_STRATEGY_IMPLEMENTATION_BLUEPRINT_FINAL_CONSISTENCY_PATCH.md
+?? documentation/strategy_implementation_documentation/context/GPT_PRO_HKG_TMAX_ML_STRATEGY_ENQUIRY_20260705.md
+?? documentation/strategy_implementation_documentation/context/live_trading/
+?? documentation/strategy_implementation_documentation/context/live_trading_context_for_gpt_pro_ml_strategy_20260705.zip
+?? experiments/0000_research_state_and_data_contract/
+?? experiments/0001_official_forecast_pre_cutoff_bias/
+?? experiments/0002_feature_correlation_atlas/
+?? experiments/0003_station_network_information_gain/
+?? experiments/0004_slope_trend_regime_signals/
+?? experiments/0005_champion_error_autopsy/
+?? experiments/0006_press_archive_offline_export/
+?? experiments/0007_long_history_signal_stability/
+?? experiments/0008_station_network_forensics/
+?? experiments/0009_nonlinear_threshold_lifts/
+?? experiments/0010_cross_feature_interaction_screens/
+?? experiments/0011_past_only_residual_correction_screen/
+?? experiments/0012_official_forecast_residual_anatomy/
+?? experiments/0013_official_forecast_feature_conditioning/
+?? experiments/0014_official_anchor_blend_sensitivity/
+?? experiments/0015_official_forecast_archive_coverage_gap/
+?? experiments/0016_past_only_official_anchor_correction_ladder/
+?? experiments/0017_past_only_official_residual_analog_screen/
+?? experiments/0018_past_only_official_expert_blend_screen/
+?? experiments/0019_multistation_info_gain/
+?? experiments/0020_regime_experts/
+?? experiments/0021_failure_modes/
+?? experiments/0022_failure_specialists/
+?? experiments/0023_composite_expert_stack/
+?? experiments/0024_press_archive_raw_detail_gap_audit/
+?? experiments/0025_longhist_signal_atlas/
+?? experiments/0026_pressure_gradient_experts/
+?? experiments/0027_pressure_regime_interaction_atlas/
+?? experiments/0028_smooth_gated_pressure_experts/
+?? experiments/0029_official_residual_source_text_range_dynamics/
+?? experiments/0030_multi_signal_local_residual_lab/
+?? experiments/0031_regime_gated_specialist_selector/
+?? experiments/0032_residual_failure_cluster_discovery/
+?? experiments/0033_smooth_residual_archetype_specialists/
+?? experiments/0034_cluster_centroid_soft_gating/
+?? experiments/0035_forecast_revision_momentum_deep_dive/
+?? experiments/0036_revision_centroid_stack_ablation/
+?? experiments/0037_stack_trust_meta_features/
+?? experiments/0038_forecast_history_state_deepening/
+?? experiments/0039_station_network_residuals/
+?? experiments/0040_station_network_smooth_residuals/
+?? experiments/0041_station_network_forecast_stack/
+?? experiments/0042_trust_router_sensitivity/
+?? experiments/0043_router_simplification_or_archive_refresh_decision/
+?? experiments/0044_forecast_archive_continuous_scored_export/
+?? experiments/0045_missing_press_raw_detail_backfill_or_blocker/
+?? experiments/0046_long_history_cross_family_interaction_atlas/
+?? experiments/0047_station_contribution_atlas/
+?? experiments/0048_gated_residual_specialist_screen/
+?? experiments/0049_router_gate_stack_screen/
+?? experiments/0050_station_lag_slope_information_atlas/
+?? experiments/0051_station_regime_interaction_atlas/
+?? experiments/0052_candidate_residual_feature_design_notes/
+?? experiments/0053_candidate_timestamp_eligibility_audit/
+?? experiments/0054_station_only_walkforward_matrix_audit/
+?? experiments/0055_station_only_walkforward_benchmark/
+?? experiments/0056_station_only_failure_mode_analysis/
+?? experiments/0057_station_only_residual_specialist_design_queue/
+?? experiments/0058_station_only_late_period_bias_repair/
+?? experiments/0059_station_only_february_march_transition_specialist/
+?? experiments/0060_station_only_spring_transition_pressure_dew_specialist/
+?? experiments/0061_station_only_pressure_high_uncertainty_guard/
+?? experiments/0062_station_only_nearby_temperature_level_error_scale/
+?? experiments/0063_station_only_guarded_candidate_stack/
+?? experiments/0064_station_only_heat_proxy_specialist_validation/
+?? experiments/0065_station_feature_bucket_residual_mining/
+?? experiments/0066_station_feature_guarded_stack/
+?? experiments/0067_station_official_family_router/
+?? experiments/0068_prior_calibrated_fusion_screen/
+?? experiments/0069_era_source_aware_fusion_model/
+?? experiments/0070_nonlinear_local_residual_fusion_lab/
+?? experiments/0071_sparse_specialist_delta_stack/
+?? experiments/0072_cell_robustness_smooth_shrinkage/
+?? experiments/0073_source_era_specific_shrinkage/
+?? experiments/0074_online_residual_memory_halflife/
+?? experiments/0075_online_residual_memory_refinement/
+?? experiments/0076_online_no_regret_trust_router/
+?? experiments/0077_remaining_0075_error_feature_mining/
+?? experiments/0078_prior_only_residual_specialists/
+?? experiments/0079_guarded_specialist_combination/
+?? experiments/0080_source_era_hardened_specialist_gate/
+?? experiments/0081_rss_gate_stability_stress/
+?? experiments/0082_refreshed_archive_replay_readiness_audit/
+?? experiments/0083_expanded_frame_official_anchor_replay/
+?? experiments/0084_expanded_frame_hardened_official_specialists/
+?? experiments/0085_long_history_feature_station_residual_bridge/
+?? experiments/0086_guarded_long_history_residual_specialists/
+?? experiments/0087_long_history_signal_interaction_specialists/
+?? experiments/0088_prior_gated_specialist_stack/
+?? experiments/0089_remaining_error_regime_autopsy/
+?? experiments/0090_guarded_specialists_from_error_autopsy/
+?? experiments/0091_near_miss_specialist_failure_analysis/
+?? experiments/0092_blocking_slice_guarded_specialists/
+?? experiments/0093_guarded_champion_sensitivity_check/
+?? experiments/0094_expanded_high_error_interaction_lab/
+?? experiments/0095_mam_error_direction_split_lab/
+?? experiments/0096_directional_cell_failure_audit/
+?? experiments/0097_stable_directional_cell_specialist/
+?? experiments/0098_source_submonth_stable_cell_specialist/
+?? experiments/0099_mam_cell_policy_sensitivity/
+?? experiments/0100_stable_mam_cell_feature_atlas/
+?? experiments/0101_stable_mam_cell_feature_specialists/
+?? experiments/0102_timestamp_proof_unlock_queue/
+?? experiments/0103_current_rss_safe_continuation/
+?? experiments/0104_canonical_frame_evidence_registry/
+?? experiments/0105_station_dossier_geography_coverage/
+?? experiments/0106_feature_availability_lineage_graph/
+?? experiments/0107_temporal_unit_qc_audit/
+?? experiments/0108_canonical_response_library/
+?? experiments/0109_temporal_multiplicity_stability_harness/
+?? experiments/0110_walkforward_replay_harness/
+?? experiments/0111_conditional_information_gain_atlas/
+?? experiments/0112_nonlinear_response_curve_atlas/
+?? experiments/0113_asymmetric_tail_dependence_atlas/
+?? experiments/0114_feature_redundancy_orthogonal_set/
+?? experiments/0115_hierarchical_interaction_anova/
+?? experiments/0116_information_gain_drift_lifetime/
+?? experiments/0117_correction_uplift_no_harm_atlas/
+?? experiments/0118_value_of_information_missingness/
+?? experiments/0119_target_level_slope_curvature_state/
+?? experiments/0120_target_derivative_reversal_exhaustion/
+?? experiments/0121_volatility_compression_expansion/
+?? experiments/0122_seasonal_phase_boundary_index/
+?? experiments/0123_target_station_coherence_atlas/
+?? experiments/0124_spell_termination_spatial_confirmation/
+?? experiments/0125_phase_aligned_year_analog_residuals/
+?? experiments/0126_thermal_constraint_envelope_breakout/
+?? experiments/0127_station_rank_reversal_motifs/
+?? experiments/0128_robust_spatial_interpolation_hko/
+?? experiments/0129_thermal_front_geometry/
+?? experiments/0130_dewpoint_front_geometry/
+?? experiments/0131_pressure_wave_propagation/
+?? experiments/0132_wind_field_kinematics/
+?? experiments/0133_moisture_flux_convergence/
+?? experiments/0134_flow_conditioned_transport_arrival/
+?? experiments/0135_sea_breeze_penetration/
+?? experiments/0136_cool_surge_propagation_breakdown/
+?? experiments/0137_spatial_field_topology/
+?? experiments/0138_station_contribution_shapley/
+?? experiments/0139_static_station_context_store/
+?? experiments/0140_station_role_clustering/
+?? experiments/0141_flow_relative_fetch_index/
+?? experiments/0142_elevation_downslope_realization/
+?? experiments/0143_coastline_orientation_exposure/
+?? experiments/0144_physics_graph_kernels/
+?? experiments/0145_surface_enthalpy_network/
+?? experiments/0146_dry_heating_potential/
+?? experiments/0147_dewpoint_tendency_wind_advection/
+?? experiments/0148_antecedent_wetness_recovery/
+?? experiments/0149_radiative_suppression_proxy/
+?? experiments/0150_solar_tmax_efficiency/
+?? experiments/0151_visibility_haze_proxy/
+?? experiments/0152_urban_heat_storage_hysteresis/
+?? experiments/0153_hgt1000_safe_proxy/
+?? experiments/0154_inversion_safe_proxy/
+?? experiments/0155_heat_content_safe_proxy/
+?? experiments/0156_moisture_profile_safe_proxy/
+?? experiments/0157_shear_veering_safe_proxy/
+?? experiments/0158_marine_temperature_safe_proxy/
+?? experiments/0159_tc_regime_safe_proxy/
+?? experiments/0160_timestamp_proof_shadow_latency/
+?? experiments/0161_expanded_online_memory_replay/
+?? experiments/0162_hierarchical_online_memory/
+?? experiments/0163_residual_streak_momentum/
+?? experiments/0164_forecast_revision_path/
+?? experiments/0165_forecast_text_ontology/
+?? experiments/0166_forecast_consistency_contradiction/
+?? experiments/0167_forecast_range_trust_calibration/
+?? experiments/0168_forecast_quality_state/
+?? experiments/0169_press_rss_invariant_calibration/
+?? experiments/0170_uplift_abstaining_router/
+?? experiments/0171_mam_transition_phase/
+?? experiments/0172_cool_surge_breakdown_specialist/
+?? experiments/0173_humid_maritime_cloudbreak_specialist/
+?? experiments/0174_weak_wind_heat_buildup/
+?? experiments/0175_marine_vs_inland_duel/
+?? experiments/0176_tc_quadrant_transition_specialist/
+?? experiments/0177_extreme_error_precursor/
+?? experiments/0178_signed_tail_action_specialists/
+?? experiments/0179_hf_morning_heating_curves/
+?? experiments/0180_hf_spatial_propagation/
+?? experiments/0181_hf_since_midnight_ceiling/
+?? experiments/0182_hf_radiative_proxy/
+?? experiments/0183_hf_teacher_long_history_distillation/
+?? experiments/0184_hf_teacher_proxy_causal_memory_router/
+?? experiments/0185_lag7_online_residual_memory_router/
+?? experiments/0186_lag7_memory_monthly_noharm_gate/
+?? experiments/0187_deployable_isd_memory_residual_fusion/
+?? experiments/0188_nested_expert_router_0185_0187/
+?? experiments/0189_t7_online_expert_weighting/
+?? experiments/0190_t7_post_ensemble_residual_calibration/
+?? experiments/0191_t7_sign_asymmetric_residual_calibration/
+?? experiments/0192_t7_tail_risk_trust_governor/
+?? experiments/0193_source_era_residual_bridge/
+?? experiments/0194_isd_role_compressed_regime_proxy/
+?? experiments/0195_june_warm_season_noharm_governor/
+?? experiments/0196_station_network_tail_conditioned_residual_expert/
+?? experiments/0197_correction_saturation_trust_governor/
+?? experiments/0198_source_era_online_expert_router/
+?? experiments/0199_station_role_feature_family_replay/
+?? experiments/0200_climatological_analogue_blend/
+?? experiments/0201_independent_feature_group_stacked_router/
+?? experiments/0202_operational_nwp_backfill_requirement_study/
+?? experiments/0203_july_october_micro_no_harm_governor/
+?? experiments/0204_external_forecast_vintage_acquisition_plan/
+?? experiments/0205_t7_mature_synoptic_trajectory_residual/
+?? experiments/0206_audit_driven_database_ingestion/
+?? experiments/0207_repository_database_preflight/
+?? experiments/0208_canonical_t24_time_availability_contract/
+?? experiments/0209_full_current_data_census_reconciliation/
+?? experiments/0210_gribstream_catalog_coverage_licence_quota_audit/
+?? experiments/0211_nwp_database_object_storage_migrations/
+?? experiments/0212_canonical_location_station_geospatial_registry/
+?? experiments/0213_gribstream_resumable_runs_client/
+?? experiments/0214_t07_t13_gribstream_backfill/
+?? experiments/0214_tactical_h24n_gribstream_backfill/
+?? experiments/0215_gpt_pro_point_forecast_strategy/
+?? experiments/hkg_tmax_residual_ml_strategy/
+?? metadata/historical_live_pairs.csv
+?? metadata/historical_live_pairs.parquet
+?? migrations/
+?? models/
+?? predictions/
+?? prompts/
+?? reports/BASELINE_CALIBRATION.md
+?? reports/BASELINE_FAILURE_CASES.md
+?? reports/BASELINE_SCOREBOARD.md
+?? reports/COVERAGE_MATRIX.md
+?? reports/COVERAGE_MATRIX.parquet
+?? reports/DATA_QUALITY_AND_ANOMALIES.md
+?? reports/DATA_READINESS.md
+?? reports/EDA_MASTER_REPORT.md
+?? reports/EVALUATION_DESIGN.md
+?? reports/FEATURE_IDEAS_AND_HYPOTHESES.md
+?? reports/FORECAST_ERROR_ANATOMY.md
+?? reports/NEGATIVE_AND_NULL_RESULTS.md
+?? reports/POINT_IN_TIME_ELIGIBILITY.md
+?? reports/RADIATION_CLOUD_RAIN.md
+?? reports/SOURCE_TIMESTAMP_CONTRACTS.md
+?? reports/SPLIT_FREEZE.md
+?? reports/STATION_HISTORY_DOSSIER.md
+?? reports/STATION_NETWORK_ANALYSIS.md
+?? reports/SYNOPTIC_REGIMES.md
+?? reports/TARGET_ANATOMY.md
+?? reports/UPPER_AIR_AND_BOUNDARY_LAYER.md
+?? reports/WIND_MARINE_TOPOGRAPHY.md
+?? reports/acquisition_progress_snapshot.md
+?? reports/acquisition_remaining_action_plan.md
+?? reports/calibration_report.md
+?? reports/distribution_calibration_report.csv
+?? reports/distribution_calibration_report.md
+?? reports/distribution_scoreboard.csv
+?? reports/expert_activation_report.csv
+?? reports/expert_activation_report.md
+?? reports/expert_factory_report.md
+?? reports/expert_oof_scoreboard.csv
+?? reports/expert_oof_scoreboard.md
+?? reports/expert_predictions_oof.csv
+?? reports/feature_dictionary.md
+?? reports/feature_dictionary_proxy.csv
+?? reports/feature_dictionary_shadow.csv
+?? reports/feature_dictionary_strict.csv
+?? reports/feature_matrix_coverage_report.md
+?? reports/gridded_precipitation_coverage.md
+?? reports/historical_live_pairing.md
+?? reports/hkg_t24/BASELINE_REPRODUCTION_R01.md
+?? reports/hkg_t24/LOCKED_TEST_GUARD.md
+?? reports/hkg_t24/OOF_FEASIBILITY.md
+?? reports/hkg_t24/R02_LONG_HISTORY_CLIMATOLOGY.md
+?? reports/hkg_t24/R03_TMAX_RECONSTRUCTION_AND_PEAK_ANATOMY.md
+?? reports/hkg_t24/R04_CUTOFF_THERMAL_TRAJECTORY.md
+?? reports/hkg_t24/R05_THERMAL_MEMORY.md
+?? reports/hkg_t24/R06_MOISTURE_STATE.md
+?? reports/hkg_t24/R07_TRANSITION_DETECTION.md
+?? reports/hkg_t24/R08_WIND_ADVECTION.md
+?? reports/hkg_t24/R09_STATION_TEMPERATURE_GRADIENT.md
+?? reports/hkg_t24/R10_LATENT_SPATIAL_MODES.md
+?? reports/hkg_t24/R11_DYNAMIC_UPWIND_STATION_SELECTION.md
+?? reports/hkg_t24/R12_SOLAR_RADIATION.md
+?? reports/hkg_t24/R13_CLOUD_RAIN_VISIBILITY_SURFACE_WETNESS.md
+?? reports/hkg_t24/R14_ELIGIBLE_UPPER_AIR_THERMAL_POTENTIAL.md
+?? reports/hkg_t24/R14_ONWARD_ROBUST_LONG_HISTORY_CONTINUATION.md
+?? reports/hkg_t24/R15_SURFACE_UPPER_AIR_COUPLING.md
+?? reports/hkg_t24/R16_FIFTY_YEAR_REGIONAL_ISD_SURFACE_CORE.md
+?? reports/hkg_t24/R17_METADATA_BREAKS_URBANIZATION_ERA_TRANSFER.md
+?? reports/hkg_t24/R18_OFFICIAL_FORECAST_MOS.md
+?? reports/hkg_t24/R19_ANALOGUE_SYSTEM_REDESIGN.md
+?? reports/hkg_t24/R20_PHYSICAL_REGIME_CLASSIFIER.md
+?? reports/hkg_t24/R21_DATA_DRIVEN_REGIME_DISCOVERY.md
+?? reports/hkg_t24/R22_ABRUPT_TRANSITION_CATASTROPHIC_ERROR_SPECIALIST.md
+?? reports/hkg_t24/R23_EXTREME_HEAT_TC_ADJACENT_SUBSIDENCE.md
+?? reports/hkg_t24/R24_MARINE_SEA_TEMPERATURE_COASTLINE_TERRAIN.md
+?? reports/hkg_t24/R25_PRIVILEGED_TEACHER_STUDENT_AUXILIARY_TARGETS.md
+?? reports/hkg_t24/R26_MULTI_ERA_HIERARCHICAL_CORE_MODERN_BOOSTER.md
+?? reports/hkg_t24/R27_OPERATIONAL_LATENCY_MISSING_STATION_OUTAGE.md
+?? reports/hkg_t24/R28_TRANSPARENT_NONLINEAR_MODEL_FAMILY_BENCHMARK.md
+?? reports/hkg_t24/R29_CONDITIONAL_DISTRIBUTION_OOF_EXPERT_ENSEMBLE.md
+?? reports/hkg_t24/R30_PREDECLARED_FINAL_CHALLENGER_FREEZE.md
+?? reports/hkg_t24/RESEARCH_LEDGER.md
+?? reports/hkg_t24/SOURCE_NORMALIZATION_NON_MINUTE.md
+?? reports/hkg_t24/VALIDATION_ACCESS_LEDGER.md
+?? reports/hkg_t24/VERIFIED_CURRENT_STATE.md
+?? reports/hkg_t24/baseline_reproduction_r01.json
+?? reports/hkg_t24/baseline_reproduction_r01_missing_dates.csv
+?? reports/hkg_t24/baseline_reproduction_r01_scoreboard.csv
+?? reports/hkg_t24/oof_feasibility.json
+?? reports/hkg_t24/point_in_time_eligibility.md
+?? reports/hkg_t24/publication_latency.md
+?? reports/hkg_t24/snapshot_build_summary.md
+?? reports/hkg_t24/source_coverage.md
+?? reports/hkg_t24/station_registry.md
+?? reports/hkg_t24/validation_access_ledger.json
+?? reports/hkg_t24/verified_current_state.json
+?? reports/hkg_tmax_data_inventory_and_gaps_handoff.md
+?? reports/jira004_readiness_blocker_report.csv
+?? reports/jira004_readiness_blocker_report.md
+?? reports/jira_002_contract_coverage.md
+?? reports/jira_003_contract_coverage.md
+?? reports/long_history_50_experiments/
+?? reports/model_selection_E1_OFFICIAL_RESIDUAL.json
+?? reports/model_selection_report.md
+?? reports/nwp_cycle_coverage.md
+?? reports/official_anchor_coverage.md
+?? reports/official_anchor_eligibility_report.csv
+?? reports/official_anchor_eligibility_report.md
+?? reports/official_request_gaps.md
+?? reports/online_state_audit.csv
+?? reports/online_state_audit_report.md
+?? reports/oof_integrity_report.md
+?? reports/post_official_diagnostic_report.md
+?? reports/post_official_diagnostic_scoreboard.csv
+?? reports/prediction_interval_coverage_report.csv
+?? reports/raw_archive_audit.md
+?? reports/router_promotion_decisions.csv
+?? reports/router_report.md
+?? reports/router_scoreboard_strict.csv
+?? reports/router_weight_diagnostics.csv
+?? reports/satellite_coverage.md
+?? reports/source_family_coverage.md
+?? reports/specialist_activation_report.csv
+?? reports/specialist_no_harm_report.csv
+?? reports/specialist_promotion_decisions.csv
+?? reports/specialist_report.md
+?? reports/specialist_scoreboard_strict.csv
+?? reports/static_context_derived.md
+?? reports/station_weather_coverage.md
+?? reports/system_ablation_matrix.csv
+?? reports/system_replay_coverage_report.csv
+?? reports/system_replay_coverage_report.md
+?? reports/system_replay_report.md
+?? reports/system_scoreboard_proxy.csv
+?? reports/system_scoreboard_strict.csv
+?? reports/system_slice_scoreboard.csv
+?? reports/target_memory_history_coverage.csv
+?? reports/target_memory_history_coverage_report.md
+?? reports/threshold_probability_scoreboard.csv
+?? research/
+?? run_logs/
+?? scripts/audit_hkg_t24_50_spec_fidelity.py
+?? scripts/audit_hkg_t24_baseline_reproduction.py
+?? scripts/audit_raw_archive.py
+?? scripts/audit_tactical_gribstream_deep_sanity.py
+?? scripts/backfill_hko_info_gov_hourly_readings.py
+?? scripts/build_hkg_t24_governance.py
+?? scripts/build_hkg_tmax_phase_ab_analysis.py
+?? scripts/check_t03_t05_status.py
+?? scripts/check_t06_gribstream_status.py
+?? scripts/check_t07_t13_gribstream_status.py
+?? scripts/export_hko_press_archive_offline.py
+?? scripts/finalize_hko_official_backfill.py
+?? scripts/hko_forecast_archive_downloader_rss/
+?? scripts/load_datasets_to_mysql.py
+?? scripts/load_hko_forecasts_2000_2026_to_postgres.py
+?? scripts/monitor_hko_official_backfill.py
+?? scripts/organize_human_dataset_folders.py
+?? scripts/profile_dataset_attributes_for_gpt_pro.py
+?? scripts/report_acquisition_progress.py
+?? scripts/report_source_family_coverage.py
+?? scripts/report_station_weather_coverage.py
+?? scripts/reset_tactical_gribstream_store.py
+?? scripts/resume_hko_official_backfill.py
+?? scripts/run_hkg_t24_0078_prior_only_residual_specialists.py
+?? scripts/run_hkg_t24_0079_guarded_specialist_combination.py
+?? scripts/run_hkg_t24_0080_source_era_hardened_specialist_gate.py
+?? scripts/run_hkg_t24_0081_rss_gate_stability_stress.py
+?? scripts/run_hkg_t24_0082_refreshed_archive_replay_readiness_audit.py
+?? scripts/run_hkg_t24_0083_expanded_frame_official_anchor_replay.py
+?? scripts/run_hkg_t24_0084_expanded_frame_hardened_official_specialists.py
+?? scripts/run_hkg_t24_0085_long_history_feature_station_residual_bridge.py
+?? scripts/run_hkg_t24_0086_guarded_long_history_residual_specialists.py
+?? scripts/run_hkg_t24_0087_long_history_signal_interaction_specialists.py
+?? scripts/run_hkg_t24_0088_prior_gated_specialist_stack.py
+?? scripts/run_hkg_t24_0089_remaining_error_regime_autopsy.py
+?? scripts/run_hkg_t24_0090_guarded_specialists_from_error_autopsy.py
+?? scripts/run_hkg_t24_0091_near_miss_specialist_failure_analysis.py
+?? scripts/run_hkg_t24_0092_blocking_slice_guarded_specialists.py
+?? scripts/run_hkg_t24_0093_guarded_champion_sensitivity_check.py
+?? scripts/run_hkg_t24_0094_expanded_high_error_interaction_lab.py
+?? scripts/run_hkg_t24_0095_mam_error_direction_split_lab.py
+?? scripts/run_hkg_t24_0096_directional_cell_failure_audit.py
+?? scripts/run_hkg_t24_0097_stable_directional_cell_specialist.py
+?? scripts/run_hkg_t24_0098_source_submonth_stable_cell_specialist.py
+?? scripts/run_hkg_t24_0099_mam_cell_policy_sensitivity.py
+?? scripts/run_hkg_t24_0100_stable_mam_cell_feature_atlas.py
+?? scripts/run_hkg_t24_0101_stable_mam_cell_feature_specialists.py
+?? scripts/run_hkg_t24_0102_timestamp_proof_unlock_queue.py
+?? scripts/run_hkg_t24_0103_current_rss_continuation_without_blocked_sources.py
+?? scripts/run_hkg_t24_0105_0183_beastmode_roadmap.py
+?? scripts/run_hkg_t24_0184_hf_teacher_proxy_causal_memory_router.py
+?? scripts/run_hkg_t24_0185_lag7_online_residual_memory_router.py
+?? scripts/run_hkg_t24_0186_lag7_memory_monthly_noharm_gate.py
+?? scripts/run_hkg_t24_0187_deployable_isd_memory_residual_fusion.py
+?? scripts/run_hkg_t24_0188_nested_expert_router_0185_0187.py
+?? scripts/run_hkg_t24_0189_t7_online_expert_weighting.py
+?? scripts/run_hkg_t24_0190_t7_post_ensemble_residual_calibration.py
+?? scripts/run_hkg_t24_0191_t7_sign_asymmetric_residual_calibration.py
+?? scripts/run_hkg_t24_0192_t7_tail_risk_trust_governor.py
+?? scripts/run_hkg_t24_0193_source_era_residual_bridge.py
+?? scripts/run_hkg_t24_0194_isd_role_compressed_regime_proxy.py
+?? scripts/run_hkg_t24_0195_june_warm_season_noharm_governor.py
+?? scripts/run_hkg_t24_0196_station_network_tail_conditioned_residual_expert.py
+?? scripts/run_hkg_t24_0197_correction_saturation_trust_governor.py
+?? scripts/run_hkg_t24_0198_source_era_online_expert_router.py
+?? scripts/run_hkg_t24_0199_station_role_feature_family_replay.py
+?? scripts/run_hkg_t24_0200_climatological_analogue_blend.py
+?? scripts/run_hkg_t24_0201_independent_feature_group_stacked_router.py
+?? scripts/run_hkg_t24_0202_operational_nwp_backfill_requirement_study.py
+?? scripts/run_hkg_t24_0203_july_october_micro_no_harm_governor.py
+?? scripts/run_hkg_t24_0204_external_forecast_vintage_acquisition_plan.py
+?? scripts/run_hkg_t24_0205_t7_mature_synoptic_trajectory_residual.py
+?? scripts/run_hkg_t24_0215_gpt_pro_point_forecast_strategy.py
+?? scripts/run_hkg_t24_50_long_history_experiments.py
+?? scripts/run_hkg_t24_beastmode_signal_discovery.py
+?? scripts/run_hkg_t24_candidate_residual_feature_design_notes.py
+?? scripts/run_hkg_t24_candidate_timestamp_eligibility_audit.py
+?? scripts/run_hkg_t24_cell_robustness_smooth_shrinkage.py
+?? scripts/run_hkg_t24_cluster_centroid_soft_gating.py
+?? scripts/run_hkg_t24_composite_expert_stack.py
+?? scripts/run_hkg_t24_deep_signal_forensics.py
+?? scripts/run_hkg_t24_era_source_aware_fusion_model.py
+?? scripts/run_hkg_t24_failure_mode_specialists.py
+?? scripts/run_hkg_t24_forecast_anchor_forensics.py
+?? scripts/run_hkg_t24_forecast_archive_continuous_scored_export.py
+?? scripts/run_hkg_t24_forecast_history_state_deepening.py
+?? scripts/run_hkg_t24_forecast_revision_momentum_deep_dive.py
+?? scripts/run_hkg_t24_gated_residual_specialist_screen.py
+?? scripts/run_hkg_t24_long_history_cross_family_interaction_atlas.py
+?? scripts/run_hkg_t24_longhist_signal_atlas.py
+?? scripts/run_hkg_t24_missing_press_raw_detail_backfill_or_blocker.py
+?? scripts/run_hkg_t24_multi_signal_local_residual_lab.py
+?? scripts/run_hkg_t24_multistation_attribute_information_gain.py
+?? scripts/run_hkg_t24_nonlinear_local_residual_fusion_lab.py
+?? scripts/run_hkg_t24_official_anchor_analog_screen.py
+?? scripts/run_hkg_t24_official_anchor_correction_ladder.py
+?? scripts/run_hkg_t24_official_anchor_expert_blend_screen.py
+?? scripts/run_hkg_t24_official_failure_mode_segmentation.py
+?? scripts/run_hkg_t24_official_residual_source_text_range_dynamics.py
+?? scripts/run_hkg_t24_online_no_regret_trust_router.py
+?? scripts/run_hkg_t24_online_residual_memory_halflife.py
+?? scripts/run_hkg_t24_online_residual_memory_refinement.py
+?? scripts/run_hkg_t24_press_archive_raw_detail_gap_audit.py
+?? scripts/run_hkg_t24_pressure_gradient_experts.py
+?? scripts/run_hkg_t24_pressure_regime_interaction_atlas.py
+?? scripts/run_hkg_t24_prior_calibrated_fusion_screen.py
+?? scripts/run_hkg_t24_r02_long_history.py
+?? scripts/run_hkg_t24_r03_tmax_anatomy.py
+?? scripts/run_hkg_t24_r04_thermal_trajectory.py
+?? scripts/run_hkg_t24_r05_thermal_memory.py
+?? scripts/run_hkg_t24_r06_moisture_state.py
+?? scripts/run_hkg_t24_r07_transition_detection.py
+?? scripts/run_hkg_t24_r08_wind_advection.py
+?? scripts/run_hkg_t24_r09_station_temperature_gradient.py
+?? scripts/run_hkg_t24_r10_latent_spatial_modes.py
+?? scripts/run_hkg_t24_r11_dynamic_upwind_station_selection.py
+?? scripts/run_hkg_t24_r12_solar_radiation.py
+?? scripts/run_hkg_t24_r13_to_r30_precondition_gates.py
+?? scripts/run_hkg_t24_r14_r17_robust_long_history.py
+?? scripts/run_hkg_t24_regime_expert_factory.py
+?? scripts/run_hkg_t24_regime_gated_specialist_selector.py
+?? scripts/run_hkg_t24_remaining_0075_error_feature_mining.py
+?? scripts/run_hkg_t24_residual_failure_cluster_discovery.py
+?? scripts/run_hkg_t24_revision_centroid_stack_ablation.py
+?? scripts/run_hkg_t24_router_gate_stack_screen.py
+?? scripts/run_hkg_t24_router_simplification_or_archive_refresh_decision.py
+?? scripts/run_hkg_t24_smooth_gated_pressure_experts.py
+?? scripts/run_hkg_t24_smooth_residual_archetype_specialists.py
+?? scripts/run_hkg_t24_source_era_specific_shrinkage.py
+?? scripts/run_hkg_t24_sparse_specialist_delta_stack.py
+?? scripts/run_hkg_t24_stack_trust_meta_features.py
+?? scripts/run_hkg_t24_station_contribution_atlas.py
+?? scripts/run_hkg_t24_station_feature_bucket_residual_mining.py
+?? scripts/run_hkg_t24_station_feature_guarded_stack.py
+?? scripts/run_hkg_t24_station_lag_slope_information_atlas.py
+?? scripts/run_hkg_t24_station_network_forecast_residual_interaction_mining.py
+?? scripts/run_hkg_t24_station_network_forecast_stack.py
+?? scripts/run_hkg_t24_station_network_smooth_local_residual_models.py
+?? scripts/run_hkg_t24_station_official_family_router.py
+?? scripts/run_hkg_t24_station_only_failure_mode_analysis.py
+?? scripts/run_hkg_t24_station_only_february_march_transition_specialist.py
+?? scripts/run_hkg_t24_station_only_guarded_candidate_stack.py
+?? scripts/run_hkg_t24_station_only_heat_proxy_specialist_validation.py
+?? scripts/run_hkg_t24_station_only_late_period_bias_repair.py
+?? scripts/run_hkg_t24_station_only_nearby_temperature_level_error_scale.py
+?? scripts/run_hkg_t24_station_only_pressure_high_uncertainty_guard.py
+?? scripts/run_hkg_t24_station_only_residual_specialist_design_queue.py
+?? scripts/run_hkg_t24_station_only_spring_transition_pressure_dew_specialist.py
+?? scripts/run_hkg_t24_station_only_walkforward_benchmark.py
+?? scripts/run_hkg_t24_station_only_walkforward_matrix_audit.py
+?? scripts/run_hkg_t24_station_regime_interaction_atlas.py
+?? scripts/run_hkg_t24_trust_router_sensitivity.py
+?? scripts/run_hkg_tmax_audit_database_ingestion.py
+?? scripts/run_hkg_tmax_baselines.py
+?? scripts/run_hkg_tmax_residual_ml_strategy.py
+?? scripts/run_hko_official_remaining_backfill.py
+?? scripts/run_t02_full_current_data_census_reconciliation.py
+?? scripts/run_t03_t05_foundation_tasks.py
+?? scripts/run_t06_gribstream_resumable_runs_client.py
+?? scripts/run_t07_t13_gribstream_backfill.py
+?? scripts/run_tactical_gribstream_batch_smoke.py
+?? scripts/run_tactical_gribstream_first_week.py
+?? scripts/run_tactical_gribstream_h24n_smoke.py
+?? secrets/
+?? tasks/

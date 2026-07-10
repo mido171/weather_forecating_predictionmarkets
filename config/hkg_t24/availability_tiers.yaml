@@ -1,0 +1,23 @@
+schema_version: 1
+generated_at_utc: '2026-06-20T10:26:20.566300Z'
+tiers:
+  GOLD_EXACT_VINTAGE:
+    operational_input_allowed: true
+    description: Exact historical payload/vintage is preserved and timestamp-proven.
+  SILVER_OPERATIONAL_REPLAY:
+    operational_input_allowed: true
+    description: Observation/report plausibly existed by cutoff; conservative latency
+      is used.
+  MECHANISM_ONLY:
+    operational_input_allowed: false
+    description: Retrospectively useful for physical analysis but forbidden as operational
+      input.
+  PROSPECTIVE_ONLY:
+    operational_input_allowed: false
+    description: Usable only for live-shadow forecasts after collection began.
+  TARGET_ONLY:
+    operational_input_allowed: false
+    description: Usable only as a label or label-side diagnostic.
+  FORBIDDEN:
+    operational_input_allowed: false
+    description: Known or unresolved leakage risk; do not use in model inputs.

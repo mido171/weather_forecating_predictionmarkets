@@ -1,0 +1,10 @@
+sources:
+  - noaa_gfs_public_nomads_or_s3_idx_range
+  - noaa_gefs_control_public_nomads_or_s3_idx_range
+  - noaa_himawari9_ahi_b13_s0510
+  - hkust_envf_hko_radar_image_proxy
+date_range_utc:
+  start: 2026-06-21
+  end: 2026-06-21
+raw_retention: deleted_after_db_commit
+database_schema: weather_backfill

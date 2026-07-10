@@ -1,0 +1,175 @@
+{
+  "area_features_upserted": 1183,
+  "by_source": {
+    "gfs": {
+      "area_features_upserted": 1183,
+      "db_write_seconds_total": 1.614508799975738,
+      "fetch_ok": 6,
+      "fetch_seconds_total": 45.71464749996085,
+      "max_raw_object_bytes": 12316106,
+      "max_staging_bytes_after_fetch": 23659243,
+      "normalize_ok": 6,
+      "normalize_seconds_total": 55.763059800025076,
+      "raw_bytes_deleted": 68556803,
+      "raw_files_deleted": 6,
+      "skipped_existing": 742,
+      "source_issues_touched": 6,
+      "station_features_upserted": 103,
+      "total_seconds_total": 103.09221609996166
+    }
+  },
+  "completed_at_utc": "2026-07-09T20:14:45.262578Z",
+  "cycles": [
+    0,
+    6,
+    12,
+    18
+  ],
+  "day_elapsed_seconds": {
+    "2026-06-27": 22.710451600025408,
+    "2026-06-28": 25.012308200006373,
+    "2026-06-29": 0.13300770003115758,
+    "2026-06-30": 0.10225920000812039,
+    "2026-07-01": 30.326430900022388,
+    "2026-07-02": 0.12599860003683716,
+    "2026-07-03": 20.29467710002791,
+    "2026-07-04": 0.12695330003043637,
+    "2026-07-05": 0.10382999997818843,
+    "2026-07-06": 0.10132059996249154,
+    "2026-07-07": 26.259723099996336
+  },
+  "db_write_seconds_total": 1.614508799975738,
+  "elapsed_seconds": 125.86055340000894,
+  "end_date": "2026-07-07",
+  "execution_mode": "optimized",
+  "expected": {
+    "days": 11,
+    "himawari_scans": 0,
+    "model_objects": 748,
+    "radar_expected_frames_approx": 0,
+    "total_static_tasks_without_radar_manifest": 748
+  },
+  "experiment_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709",
+  "fetch_ok": 6,
+  "fetch_seconds_total": 45.71464749996085,
+  "final_staging_bytes": 0,
+  "leads": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    30,
+    33,
+    36,
+    39,
+    42,
+    45,
+    48
+  ],
+  "max_raw_object_bytes": 12316106,
+  "max_staging_bytes": 23659243,
+  "min_free_disk_bytes": 232462237696,
+  "normalize_ok": 6,
+  "normalize_seconds_total": 55.763059800025076,
+  "phase_observations": [
+    {
+      "db_write": 0.8800498999771662,
+      "fetch": 6.526112399995327,
+      "item_id": "gfs_20260627_18z_f048",
+      "normalize": 7.857999200001359,
+      "source": "gfs",
+      "total": 15.264161499973852
+    },
+    {
+      "db_write": 0.1908570000086911,
+      "fetch": 6.509409699996468,
+      "item_id": "gfs_20260628_18z_f024",
+      "normalize": 9.430910400056746,
+      "source": "gfs",
+      "total": 16.131177100061905
+    },
+    {
+      "db_write": 0.20894640003098175,
+      "fetch": 8.389691699994728,
+      "item_id": "gfs_20260701_00z_f006",
+      "normalize": 9.898665999993682,
+      "source": "gfs",
+      "total": 18.49730410001939
+    },
+    {
+      "db_write": 0.10856469999998808,
+      "fetch": 11.684577799984254,
+      "item_id": "gfs_20260701_00z_f021",
+      "normalize": 10.446398800006136,
+      "source": "gfs",
+      "total": 22.23954129999038
+    },
+    {
+      "db_write": 0.09017819998553023,
+      "fetch": 5.900814900000114,
+      "item_id": "gfs_20260703_00z_f000",
+      "normalize": 6.359809799992945,
+      "source": "gfs",
+      "total": 12.35080289997859
+    },
+    {
+      "db_write": 0.13591259997338057,
+      "fetch": 6.704040999989957,
+      "item_id": "gfs_20260707_12z_f018",
+      "normalize": 11.769275599974208,
+      "source": "gfs",
+      "total": 18.609229199937545
+    }
+  ],
+  "phase_summary": {
+    "db_write": {
+      "count": 6,
+      "max_seconds": 0.8800498999771662,
+      "mean_seconds": 0.2690847999959563,
+      "p50_seconds": 0.13591259997338057,
+      "p90_seconds": 0.20894640003098175
+    },
+    "fetch": {
+      "count": 6,
+      "max_seconds": 11.684577799984254,
+      "mean_seconds": 7.619107916660141,
+      "p50_seconds": 6.526112399995327,
+      "p90_seconds": 8.389691699994728
+    },
+    "normalize": {
+      "count": 6,
+      "max_seconds": 11.769275599974208,
+      "mean_seconds": 9.293843300004179,
+      "p50_seconds": 9.430910400056746,
+      "p90_seconds": 10.446398800006136
+    },
+    "total": {
+      "count": 6,
+      "max_seconds": 22.23954129999038,
+      "mean_seconds": 17.182036016660277,
+      "p50_seconds": 16.131177100061905,
+      "p90_seconds": 18.609229199937545
+    }
+  },
+  "raw_bytes_deleted": 68556803,
+  "raw_files_deleted": 6,
+  "run_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260627_20260707_20260709T201239Z_119728",
+  "skipped_existing": 742,
+  "source_issues_touched": 6,
+  "sources": [
+    "gfs"
+  ],
+  "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260627_20260707_20260709T201239Z_119728\\staging",
+  "start_date": "2026-06-27",
+  "started_at_utc": "2026-07-09T20:12:39.395912Z",
+  "station_features_upserted": 103,
+  "status": "complete",
+  "task_base_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260627_20260707_20260709T201239Z_119728",
+  "total_seconds_total": 103.09221609996166
+}

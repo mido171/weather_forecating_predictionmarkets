@@ -1,0 +1,24 @@
+experiment_id: 0011_public_weather_speed_optimization_20260709
+default_command: "python .\\scripts\\benchmark_public_weather_speed_optimization.py --date 2026-06-21"
+default_date_utc: "2026-06-21"
+default_trials:
+  - wgrib2_probe
+  - model_fetch_s3_w8_r4
+  - model_fetch_s3_w8_c0
+  - model_fetch_s3_w16_r4
+  - model_fetch_s3_w16_r8
+  - himawari_fetch_normalize_w4
+  - himawari_fetch_normalize_w8
+  - model_fetch_normalize_sample_w2
+additional_trials_run:
+  - model_fetch_s3_w8_c1m
+cpu_policy:
+  model_normalization_workers: 2
+  himawari_workers_tested: [4, 8]
+  model_object_workers_tested: [8, 16]
+  model_s3_range_workers_tested: [4, 8]
+  model_coalesce_gap_bytes_tested: [0, 1000000]
+disk_policy:
+  raw_payloads: delete_in_worker_finally
+  trial_staging: short_repo_local_root_removed_after_trial
+  database_writes: false

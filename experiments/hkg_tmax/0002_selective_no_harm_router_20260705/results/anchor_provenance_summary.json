@@ -1,0 +1,66 @@
+{
+  "status": "pass",
+  "cutoffs": {
+    "tminus1_1500": {
+      "rows": 9647,
+      "selected_rows": 0,
+      "coverage_pct": 0.0,
+      "coverage_pct_2011_onward": 0.0,
+      "top_missing_reasons": {
+        "next_strict_eligible_after_cutoff": 9637,
+        "no_usable_local_minmax_before_cutoff": 5,
+        "no_forecast_rows_before_cutoff": 3,
+        "no_info_gov_local_lead1_rows_before_cutoff": 2
+      },
+      "eligible_for_future_modeling": false
+    },
+    "tminus1_1630": {
+      "rows": 9647,
+      "selected_rows": 7187,
+      "coverage_pct": 74.49984451124702,
+      "coverage_pct_2011_onward": 79.04085257548846,
+      "top_missing_reasons": {
+        "next_strict_eligible_after_cutoff": 1413,
+        "no_usable_local_minmax_before_cutoff": 1046,
+        "no_forecast_rows_before_cutoff": 1
+      },
+      "eligible_for_future_modeling": false
+    },
+    "tminus1_1800": {
+      "rows": 9647,
+      "selected_rows": 8335,
+      "coverage_pct": 86.39991707266508,
+      "coverage_pct_2011_onward": 89.69804618117229,
+      "top_missing_reasons": {
+        "no_usable_local_minmax_before_cutoff": 1301,
+        "next_strict_eligible_after_cutoff": 10,
+        "no_forecast_rows_before_cutoff": 1
+      },
+      "eligible_for_future_modeling": true
+    },
+    "tminus1_2100": {
+      "rows": 9647,
+      "selected_rows": 8428,
+      "coverage_pct": 87.36394734114232,
+      "coverage_pct_2011_onward": 90.37300177619893,
+      "top_missing_reasons": {
+        "no_usable_local_minmax_before_cutoff": 1215,
+        "next_strict_eligible_after_cutoff": 3,
+        "no_forecast_rows_before_cutoff": 1
+      },
+      "eligible_for_future_modeling": true
+    },
+    "tminus1_2359": {
+      "rows": 9647,
+      "selected_rows": 9644,
+      "coverage_pct": 99.96890224940395,
+      "coverage_pct_2011_onward": 99.9822380106572,
+      "top_missing_reasons": {
+        "no_usable_local_minmax_before_cutoff": 2,
+        "no_forecast_rows_before_cutoff": 1
+      },
+      "eligible_for_future_modeling": true
+    }
+  },
+  "primary_interpretation": "Earlier cutoffs may enter ML only when coverage from 2011 onward is at least 80 percent and source identity remains apples-to-apples."
+}

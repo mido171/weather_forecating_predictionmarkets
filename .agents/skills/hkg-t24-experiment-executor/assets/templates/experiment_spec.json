@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "title": "",
+  "slug": "",
+  "mode": "promotion_oriented",
+  "hypothesis": "",
+  "rationale": "",
+  "expected_sign_and_falsification": "",
+  "novelty": {
+    "prior_experiments": [],
+    "difference": ""
+  },
+  "target": {
+    "station": "Hong Kong Observatory",
+    "variable": "tmax_c",
+    "horizon": "T-24",
+    "timezone": "Asia/Hong_Kong",
+    "cutoff_contract_path": ""
+  },
+  "frame": {
+    "frame_id": "",
+    "development_end_exclusive": "2024-01-01",
+    "confirmation_locked": true
+  },
+  "data_sources": [],
+  "stations": {
+    "selection": "explicit_or_all_inventory",
+    "ids": [],
+    "metadata_required": true
+  },
+  "features": [],
+  "response": {
+    "name": "official_residual_c",
+    "definition": "target_tmax_c - official_tmax_c"
+  },
+  "baseline": {
+    "id": "",
+    "artifact_path": "",
+    "identical_rows_required": true
+  },
+  "validation": {
+    "method": "expanding_walk_forward",
+    "outer_folds": [],
+    "inner_selection": {},
+    "minimum_history_rows": null
+  },
+  "metrics": [
+    "mae_c",
+    "rmse_c",
+    "bias_c",
+    "median_ae_c",
+    "p90_ae_c",
+    "p95_ae_c"
+  ],
+  "sample_rules": {},
+  "acceptance_gates": {},
+  "rejection_conditions": [],
+  "parameter_grid": {},
+  "required_outputs": [],
+  "owner_authorized_confirmation": false
+}

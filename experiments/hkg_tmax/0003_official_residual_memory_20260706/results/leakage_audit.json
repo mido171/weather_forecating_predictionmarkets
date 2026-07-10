@@ -1,0 +1,130 @@
+{
+  "status": "pass",
+  "total_violations": 0,
+  "checks": [
+    {
+      "check_name": "forecast_anchor_issue_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "forecast_revision_issue_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "hourly_dispatch_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "hourly_observation_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "max_hourly_dispatch_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "max_hourly_observation_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "target_history_lag2_floor",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "raw_daily_extract_not_used_as_predictor",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "target_label_predictor_minimum_lag_days",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "forecast_anchor_apples_to_apples_info_gov_source",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_source_urls": []
+      }
+    },
+    {
+      "check_name": "one_selected_anchor_per_target_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {}
+    },
+    {
+      "check_name": "posthoc_raw_error_slices_not_used_as_features",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "tail_labels_not_used_as_features",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "sealed_rows_not_used_for_router_threshold_selection",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "selection_stage": "rolling_validation_fold1_to_fold4"
+      }
+    },
+    {
+      "check_name": "router_thresholds_selected_without_presealed_or_sealed_if_configured",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "threshold_id": null
+      }
+    },
+    {
+      "check_name": "router_oof_predictions_are_inner_fold_only",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {}
+    }
+  ]
+}

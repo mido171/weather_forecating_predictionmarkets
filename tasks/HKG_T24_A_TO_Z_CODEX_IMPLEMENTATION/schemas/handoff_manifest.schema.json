@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "task_id",
+    "status",
+    "git_commit",
+    "input_manifest_sha256",
+    "output_manifest_sha256",
+    "downstream_ready"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^T[0-9]{2}$"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "rejected",
+        "blocked",
+        "partial"
+      ]
+    },
+    "git_commit": {
+      "type": "string"
+    },
+    "database_migration_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "input_manifest_sha256": {
+      "type": "string"
+    },
+    "output_manifest_sha256": {
+      "type": "string"
+    },
+    "created_tables_or_views": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "downstream_ready": {
+      "type": "boolean"
+    }
+  }
+}

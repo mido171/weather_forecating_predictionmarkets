@@ -1,0 +1,108 @@
+{
+  "task_id": "T07_T12",
+  "title": "Consolidated Tactical H24N GribStream Backfill",
+  "status": "not-completed",
+  "supersedes": [
+    "T07_gfs_complete_backfill",
+    "T08_gefs_members_mean_complete_backfill",
+    "T09_ifs_deterministic_ensemble_backfill",
+    "T10_global_ai_models_backfill",
+    "T11_cwa_wrf_urgent_prospective_collector",
+    "T12_secondary_models_coverage_selective_acquisition"
+  ],
+  "depends_on": [
+    "T03",
+    "T04",
+    "T05",
+    "T06"
+  ],
+  "objective": "Acquire the compact exact-cycle H24N GribStream archive specified by the GPT-Pro tactical plan, without rebuilding a general NWP warehouse.",
+  "endpoint_policy": {
+    "endpoint": "runs",
+    "time_selector": "timesList",
+    "forbidden_fields": [
+      "forecastedFrom",
+      "forecastedUntil"
+    ],
+    "max_concurrent_requests": 1,
+    "rate_limit_policy": "few large requests, one worker, honor Retry-After, stop on 429/401 instead of hot-looping"
+  },
+  "location_policy": {
+    "deterministic_and_mean": "12-point HKO stencil",
+    "full_ensemble_members": "HKO center only",
+    "nbmoc_probe": "HKO center plus marine_s_far plus marine_e_far"
+  },
+  "core_models": [
+    "gfs",
+    "gefsatmosmean",
+    "gefsatmos",
+    "ifsoper",
+    "ifsenfo",
+    "cwawrf15"
+  ],
+  "optional_models": [
+    "aifsoper",
+    "aifsenfo",
+    "aigfssfc",
+    "aigfspres",
+    "aigefssfc",
+    "graphcast",
+    "fourcastnetgfs",
+    "nbmoc"
+  ],
+  "acceptance_criteria": [
+    "T07-T12 split task folders are archived under tasks/superseded and only this consolidated GribStream fetch task remains active.",
+    "Legacy broad GribStream DB rows and raw payloads are purged from the active store.",
+    "The tactical schema exists under nwp_tactical with model_plan, variable_plan, location_stencil, acquisition_chunk, raw_response_object, forecast_wide, and validation_issue.",
+    "Smoke payloads use /runs timesList and exact lead windows; they never use broad forecastedFrom/forecastedUntil ranges.",
+    "A small authenticated smoke proves the request shape with no more than three GribStream data calls.",
+    "All future backfill work records chunks, request hashes, raw object hashes, status, errors, and row counts before promotion into feature views."
+  ],
+  "documentation": [
+    "documentation/T07_T12_CONSOLIDATED_TACTICAL_GRIBSTREAM_BACKFILL_RUNBOOK.md",
+    "documentation/T07_T12_FULL_TACTICAL_BACKFILL_20260625_RESULT.md",
+    "documentation/T07_T12_DEEP_SANITY_AUDIT_20260625.md",
+    "docs/PROJECT_STRUCTURE_AND_CODE_MAP.md"
+  ],
+  "latest_progress": {
+    "updated_at": "2026-06-25",
+    "status": "not-completed",
+    "reason_not_completed": "Full tactical backfill ran API-clean, but data-quality flags remain unresolved: ifsenfo recent chunks missing member 0, fourcastnetgfs tail empty, and nbmoc empty.",
+    "batch_smoke_10w": {
+      "summary": "experiments/0214_tactical_h24n_gribstream_backfill/batch_smoke_10w/batch_summary.json",
+      "results_csv": "experiments/0214_tactical_h24n_gribstream_backfill/batch_smoke_10w/batch_results.csv",
+      "raw_root": "data/_pipeline_internal/raw/gribstream_tactical_batch_smoke_10w/",
+      "api_events": 96,
+      "http_4xx_5xx_429_events": 0,
+      "forecast_wide_rows": 123652,
+      "estimated_credits": 112047
+    },
+    "full_tactical_backfill_ok_tmax": {
+      "progress": "experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/progress.json",
+      "results_csv": "experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/batch_results.csv",
+      "raw_root": "data/_pipeline_internal/raw/gribstream_tactical_full_tactical_backfill_ok_tmax/",
+      "result_document": "documentation/T07_T12_FULL_TACTICAL_BACKFILL_20260625_RESULT.md",
+      "planned_chunks": 1163,
+      "completed_chunks": 1163,
+      "api_fetched_chunks": 946,
+      "raw_reused_chunks": 217,
+      "http_4xx_5xx_429_events": 0,
+      "forecast_wide_rows": 1964157,
+      "estimated_credits": 1889276,
+      "runner_status": "failed",
+      "runner_status_reason": "data_quality_flags_not_api_failure",
+      "deep_sanity_audit": {
+        "summary_document": "documentation/T07_T12_DEEP_SANITY_AUDIT_20260625.md",
+        "report_markdown": "experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/DEEP_SANITY_AUDIT_20260625.md",
+        "report_json": "experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/deep_sanity_audit_20260625.json",
+        "forecast_wide_total_rows": 1965090,
+        "forecast_wide_full_scope_rows": 1964157,
+        "forecast_wide_non_full_rows": 933,
+        "missing_full_raw_files": 0,
+        "raw_size_mismatches": 0,
+        "api_http_errors": 0,
+        "modeling_gate": "filter source_response_object_id to raw_response_object.object_uri LIKE '%full_tactical_backfill_ok_tmax%' and enforce H24N leakage cutoff"
+      }
+    }
+  }
+}

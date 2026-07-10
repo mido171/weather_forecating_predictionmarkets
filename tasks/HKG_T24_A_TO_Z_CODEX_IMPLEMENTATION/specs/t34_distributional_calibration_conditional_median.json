@@ -1,0 +1,50 @@
+{
+  "id": "T34",
+  "suffix": "distributional_calibration_conditional_median",
+  "title": "Distributional Calibration and Conditional-Median Point Forecast",
+  "phase": "D Modelling",
+  "deps": [
+    "T23",
+    "T33"
+  ],
+  "mission": "Calibrate the final residual distribution, quantiles and threshold probabilities; use the calibrated conditional median as the MAE-oriented point forecast.",
+  "inputs": [
+    "Router OOF forecast",
+    "ensemble distributions",
+    "actual labels in development frame"
+  ],
+  "steps": [
+    "Fit EMOS/GAMLSS/quantile and conformal candidates using OOF residuals.",
+    "Calibrate P10/P25/P50/P75/P90 and threshold probabilities.",
+    "Condition scale on ensemble spread, expert disagreement, regime and recent error.",
+    "Enforce quantile monotonicity.",
+    "Compare final P50 to router point and official baseline on MAE.",
+    "Report CRPS, pinball, Brier and calibration."
+  ],
+  "db_objects": [
+    "research distribution artifacts"
+  ],
+  "outputs": [
+    "quantile_oof_predictions.parquet",
+    "calibration_curves.csv",
+    "probability_metrics.csv",
+    "point_median_scoreboard.csv",
+    "distribution_model_card.md"
+  ],
+  "tests": [
+    "Quantile ordering",
+    "coverage by season",
+    "OOF calibration",
+    "no sealed tuning"
+  ],
+  "acceptance": [
+    "P50 point is no worse than router beyond tolerance and probabilities calibrated",
+    "Otherwise keep router point and distribution separately"
+  ],
+  "failure": [
+    "Small-sample regime scale models shrink to global"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t34_distributional_calibration_conditional_median.md"
+}

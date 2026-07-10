@@ -1,0 +1,25 @@
+id: HKG-PROB-V2
+title: HKG Tmax probability distribution methods V2
+status: ACCEPTED
+created: "2026-07-06"
+primary_conclusion: "B4_hierarchical_residual_pmf remains supreme; no EMOS, quantile/CDF, tree location-scale, time-decay, or hybrid challenger cleared the predeclared promotion gates."
+primary_metric: normalized_rps
+champion_method: B4_hierarchical_residual_pmf
+champion_rps: 0.041523572306252
+raw_lowest_rps_method: B5_kernel_analog_pmf
+raw_lowest_rps: 0.0412874816022434
+leakage: PASS
+row_identity: PASS
+reproducible: PASS
+scope:
+  weather_probability_only: true
+  trading_inputs_used: false
+  market_prices_used: false
+  ev_or_kelly_used: false
+primary_artifacts:
+  - results/supreme_method_summary.md
+  - results/scoreboard.csv
+  - results/final_probability_model_card.md
+  - results/leakage_audit.json
+  - results/row_identity_gate.json
+  - results/reproducibility_manifest.json

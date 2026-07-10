@@ -6,7 +6,6 @@ import math
 from collections.abc import Sequence
 from dataclasses import astuple
 from datetime import date
-from statistics import mean, pstdev
 from typing import Any
 
 from hkg_t24.artifacts.reports import ReportWriter
@@ -14,54 +13,16 @@ from hkg_t24.audit.schema_contracts import DiscoveredTable
 from hkg_t24.constants import (
     END_TARGET_DATE,
     START_TARGET_DATE,
-    TARGET_MEMORY_FEATURE_WHITELIST,
-    assert_no_forbidden_target_memory_names,
 )
+from hkg_t24.features import target_memory
 from hkg_t24.timeutils import calendar_row, iter_target_dates
 
 
 def build_target_memory_features(
     labels: Sequence[tuple[date, float | None]],
 ) -> dict[date, dict[str, float | int | None]]:
-    """Build leakage-safe target-memory features ending at T-2 or older."""
-    assert_no_forbidden_target_memory_names(TARGET_MEMORY_FEATURE_WHITELIST)
-    ordered = sorted(labels, key=lambda item: item[0])
-    values = [item[1] for item in ordered]
-    dates = [item[0] for item in ordered]
-    output: dict[date, dict[str, float | int | None]] = {}
-    for index, target_date in enumerate(dates):
-        features: dict[str, float | int | None] = {}
-        for lag in (2, 3, 7):
-            source_index = index - lag
-            if source_index >= 0 and values[source_index] is not None:
-                features[f"target__lag{lag}_tmax_c"] = values[source_index]
-        for window in (7, 14, 30):
-            start = index - (window + 1)
-            end = index - 1
-            if start >= 0:
-                window_values = values[start:end]
-                if len(window_values) == window and all(value is not None for value in window_values):
-                    non_null_values: list[float] = []
-                    for value in window_values:
-                        if value is not None:
-                            non_null_values.append(value)
-                    if len(non_null_values) != window:
-                        continue
-                    numeric_values = [float(value) for value in non_null_values]
-                    features[f"target__roll{window}_lag2_mean_tmax_c"] = mean(numeric_values)
-                    features[f"target__roll{window}_lag2_std0_tmax_c"] = pstdev(numeric_values)
-                    if window in {7, 30}:
-                        features[f"target__slope{window}_lag2_tmax_c"] = (
-                            numeric_values[-1] - numeric_values[0]
-                        ) / (window - 1)
-        if index >= 2:
-            lag2_value = values[index - 2]
-            if lag2_value is not None:
-                features["target__hot_spell_lag2"] = int(float(lag2_value) >= 32.0)
-        features["target__year_index"] = target_date.year - 2000
-        if features:
-            output[target_date] = features
-    return output
+    """Backward-compatible wrapper for the canonical Jira 002 target-memory builder."""
+    return target_memory.build_target_memory_features(labels)
 
 
 def calendar_rows(start_date: date = START_TARGET_DATE, end_date: date = END_TARGET_DATE) -> list[tuple[Any, ...]]:

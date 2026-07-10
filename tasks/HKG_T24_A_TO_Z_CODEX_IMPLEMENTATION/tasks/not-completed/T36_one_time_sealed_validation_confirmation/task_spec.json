@@ -1,0 +1,51 @@
+{
+  "id": "T36",
+  "suffix": "one_time_sealed_validation_confirmation",
+  "title": "One-Time 2024/2025/2026 Sealed Validation and Confirmation",
+  "phase": "E Validation",
+  "deps": [
+    "T35"
+  ],
+  "mission": "Execute the predeclared one-time temporal confirmation sequence without turning holdouts into tuning data.",
+  "inputs": [
+    "Frozen candidate manifest",
+    "sealed permissions",
+    "validation protocol",
+    "contamination register"
+  ],
+  "steps": [
+    "Audit whether 2024/2025/2026 outcomes have previously influenced choices.",
+    "Open 2024 exactly once and score frozen candidate/baselines.",
+    "Apply predeclared pass/fail criteria.",
+    "If passed, refit using unchanged architecture/hyperparameters through 2024 and open 2025 once.",
+    "If passed, optionally replay 2026 YTD as a second untouched holdout; never call it prospective unless live predictions existed.",
+    "Do not tune from failed slices; return findings to a new development cycle with remaining holdout policy revised."
+  ],
+  "db_objects": [
+    "governance confirmation runs",
+    "research locked scores"
+  ],
+  "outputs": [
+    "contamination_audit.md",
+    "2024_validation_scoreboard.csv",
+    "2025_final_test_scoreboard.csv",
+    "2026_holdout_scoreboard.csv if eligible",
+    "confirmation_conclusion.md"
+  ],
+  "tests": [
+    "Frozen hash verification",
+    "one-time access logs",
+    "baseline identical rows",
+    "no post-open mutation"
+  ],
+  "acceptance": [
+    "Truthful confirmed/rejected status",
+    "Holdout use fully logged"
+  ],
+  "failure": [
+    "Contaminated holdout: label exploratory and do not claim confirmation"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t36_one_time_sealed_validation_confirmation.md"
+}

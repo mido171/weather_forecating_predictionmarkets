@@ -329,12 +329,12 @@ sources:
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
     adapter: hko_arwf_current_portal_downloader
     backfill_status: IMPLEMENTED_INITIAL_FETCH
-    live_status: scheduled_required_not_installed
+    live_status: scheduled_batch_collector
     last_success: null
     coverage: "Archived ARWF portal and remark pages, map/station/parser scripts, latest AWS/RMN/lightning/status text files, rainfall and GeoJSON nowcast tarballs, radar KML overlays, nine animation CSVs, and 53 valid station/grid forecast JSON payloads discovered from official HKO station config/fallback rules."
-    blocker: older ARWF station forecast vintages are unavailable unless HKO or DATA.GOV.HK exposes historical versions; prospective collector still needs installation
+    blocker: older ARWF station forecast vintages are unavailable unless HKO or DATA.GOV.HK exposes historical versions; scheduled current collection exists for prospective vintages
     evidence: "retrieval_ledger source IDs hko_arwf_*; official station config yielded 78 candidate codes, 53 forecast endpoints resolved with non-HTML 200 payloads"
-    next_action: parse ARWF station/grid forecasts and install a prospective collector for changed vintages
+    next_action: parse ARWF station/grid forecasts and monitor scheduled collector for changed vintages
 
   - source_id: hko_historical_rss_forecast_warning_archives
     family: D_official_hko_forecast_vintages
@@ -473,13 +473,13 @@ sources:
     estimated_bytes: large
     raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
     adapter: hko_satellite_manifest_and_modis_downloader
-    backfill_status: PARTIAL_IMPLEMENTED_WITH_BLOCKER
-    live_status: scheduled_product_specific_after_blocker_resolution
+    backfill_status: PARTIAL_CURRENT_ARCHIVED
+    live_status: scheduled_product_specific
     last_success: null
-    coverage: "Archived HKO satellite page, Himawari/MODIS manifests, and resolvable MODIS true-colour and sea-surface-temperature images."
-    blocker: "HKO MODIS AOD manifest listed an image that returned HTTP 404; current Himawari manifest filenames did not resolve under tested HKO image paths, so unresolved image construction/provider availability must be fixed before marking complete."
-    evidence: "retrieval_ledger source IDs hko_satellite_* plus failed hko_satellite_modis_aod_image HTTP 404"
-    next_action: resolve HKO satellite image path rules or select another lawful official satellite archive before using cloud/aerosol context
+    coverage: "Archived HKO satellite page, legacy Himawari/MODIS manifests, current H8/FY4B/GK2B manifests, frontend path-rule scripts, resolvable MODIS true-colour and sea-surface-temperature images, and the resumed HKO current satellite batch through the latest audited run."
+    blocker: "Archive-scale historical Himawari/cloud/aerosol acquisition still requires crop/downsampling rules, provider terms confirmation, and byte budget approval. One legacy HKO MODIS AOD manifest image still returns HTTP 404 and is skipped by preflight."
+    evidence: "retrieval_ledger source IDs hko_satellite_current_*, hko_satellite_frontend_*, hko_satellite_modis_* plus failed hko_satellite_modis_aod_image HTTP 404"
+    next_action: keep scheduled HKO current satellite collection enabled; implement historical Himawari/archive-scale dry-run inventory and byte estimate before bulk acquisition
 
   - source_id: noaa_isd_nearby_surface_observations
     family: I_tropical_cyclone_monsoon_synoptic_information
@@ -568,6 +568,35 @@ sources:
     evidence: "retrieval_ledger source IDs hko_south_china_coastal_waters_bulletin, hko_latest_tidal_information, hko_daily_climate_sea_temp_*"
     next_action: decide whether a gridded SST/ocean product is worth a byte-budgeted acquisition plan
 
+  - source_id: noaa_oisst_v21
+    family: J_marine_ocean_surface_state
+    priority: P0_CRITICAL
+    provider: NOAA
+    authoritative_status: official_daily_gridded_sst
+    access_url: "https://www.ncei.noaa.gov/products/optimum-interpolation-sst"
+    documentation_url: "https://www.ncei.noaa.gov/products/optimum-interpolation-sst"
+    license_terms: NOAA public data terms apply
+    authentication: none
+    variables: [sst, anomaly, ice, error]
+    stations_domain: Hong_Kong_South_China_Sea_regional_domain
+    native_cadence: daily
+    forecast_cycles: []
+    historical_start_end: "1981-09-present"
+    archive_availability: official_NOAA_archive
+    expected_latency: provider_daily_publication_and_revision_lag
+    revision_behavior: preliminary_and_revised_status_must_be_preserved_if_exposed
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: requires_regional_subset_estimate
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: BYTE_BUDGET_REQUIRED
+    backfill_status: BYTE_BUDGET_REQUIRED
+    live_status: daily_updater_pending
+    last_success: null
+    coverage: not_started
+    blocker: regional subset/downloader and byte estimate required before 1981-present bulk acquisition
+    evidence: reset instruction P0-J and gridded_acquisition_policy.yaml
+    next_action: implement OISST regional subset dry-run and byte estimate, then run approved daily/history fetch
+
   - source_id: reanalysis_mechanism_datasets
     family: K_reanalysis_retrospective_mechanism_datasets
     priority: P1_HIGH_VALUE
@@ -597,6 +626,122 @@ sources:
     evidence: reset instruction section 5K and .env.example CDS fields
     next_action: configure CDS credentials and write subset requests only after deciding retrospective mechanism use
 
+  - source_id: gpm_imerg_precipitation
+    family: K_reanalysis_retrospective_mechanism_datasets
+    priority: P0_CRITICAL
+    provider: NASA_GPM
+    authoritative_status: official_gridded_precipitation_final_and_near_realtime
+    access_url: "https://gpm.nasa.gov/data/imerg"
+    documentation_url: "https://gpm.nasa.gov/data/imerg"
+    license_terms: NASA/Earthdata terms apply
+    authentication: Earthdata_or_provider_access_may_be_required
+    variables: [precipitation, precipitation_quality, run_type, issue_time, observation_window]
+    stations_domain: Hong_Kong_and_upstream_regional_domain
+    native_cadence: half_hourly
+    forecast_cycles: [Early, Late, Final]
+    historical_start_end: "about_2000-present"
+    archive_availability: official_NASA_archive
+    expected_latency: Early_fastest_Late_improved_Final_delayed
+    revision_behavior: Final, Early, and Late are distinct products and must not be silently substituted
+    point_in_time_class: MIXED_POINT_IN_TIME_AND_RETROSPECTIVE_ONLY
+    estimated_bytes: requires_regional_subset_estimate
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: CREDENTIAL_BLOCKED
+    backfill_status: CREDENTIAL_BLOCKED
+    live_status: live_collector_pending_credentials
+    last_success: null
+    coverage: not_started
+    blocker: Earthdata/NASA credentials or terms plus regional subset implementation required
+    evidence: reset instruction P0-L and gridded_acquisition_policy.yaml
+    next_action: implement credentials-gated dry-run requests and Early/Late collector activation instructions
+
+  - source_id: himawari_ahi_noaa_aws
+    family: H_satellite_cloud_aerosol_observations
+    priority: P0_CRITICAL
+    provider: JMA_NOAA_Open_Data
+    authoritative_status: official_geostationary_satellite_archive
+    access_url: "https://registry.opendata.aws/noaa-himawari/"
+    documentation_url: "https://registry.opendata.aws/noaa-himawari/"
+    license_terms: JMA/NOAA open archive terms apply
+    authentication: none_or_provider_specific
+    variables: [visible, near_infrared, water_vapour, infrared, split_window]
+    stations_domain: Hong_Kong_and_upstream_regional_crop
+    native_cadence: scan_product_specific
+    forecast_cycles: []
+    historical_start_end: "2015-07-present"
+    archive_availability: official_open_archive
+    expected_latency: scan_and_publication_latency
+    revision_behavior: preserve original source object keys and checksums
+    point_in_time_class: OPERATIONAL_POINT_IN_TIME
+    estimated_bytes: very_large_without_crop_or_downsampling
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: BYTE_BUDGET_REQUIRED
+    backfill_status: BYTE_BUDGET_REQUIRED
+    live_status: live_crop_collector_pending
+    last_success: null
+    coverage: not_started
+    blocker: crop/downsampling/volume plan required before July 2015-present archive acquisition
+    evidence: reset instruction P0-K and gridded_acquisition_policy.yaml
+    next_action: implement object inventory dry-run and regional crop volume estimate
+
+  - source_id: cams_aerosol_haze
+    family: M_frontier_context
+    priority: P1_HIGH_VALUE
+    provider: Copernicus_Atmosphere_Monitoring_Service
+    authoritative_status: aerosol_reanalysis_and_forecast_context
+    access_url: "https://ads.atmosphere.copernicus.eu/"
+    documentation_url: "https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts"
+    license_terms: Copernicus ADS terms apply
+    authentication: ADS_credentials_required
+    variables: [aerosol_optical_depth, aerosol_species, pm2p5, pm10]
+    stations_domain: Hong_Kong_regional_and_synoptic_domains
+    native_cadence: product_specific
+    forecast_cycles: forecast_cycle_specific
+    historical_start_end: maximum_available_EAC4_history_and_live_forecasts_from_collector_start
+    archive_availability: ADS_API_with_credentials
+    expected_latency: product_specific
+    revision_behavior: reanalysis retrospective; forecasts preserved by cycle and lead
+    point_in_time_class: MIXED_POINT_IN_TIME_AND_RETROSPECTIVE_ONLY
+    estimated_bytes: requires_ADS_subset_estimate
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: CREDENTIAL_BLOCKED
+    backfill_status: CREDENTIAL_BLOCKED
+    live_status: live_forecast_collector_pending_credentials
+    last_success: null
+    coverage: not_started
+    blocker: ADS credentials/terms and subset byte estimate required
+    evidence: reset instruction P1-C and gridded_acquisition_policy.yaml
+    next_action: write ADS request dry-runs and activation instructions
+
+  - source_id: hong_kong_epd_air_quality_observations
+    family: M_frontier_context
+    priority: P1_HIGH_VALUE
+    provider: Hong_Kong_Environmental_Protection_Department
+    authoritative_status: official_local_air_quality_observations
+    access_url: "https://www.epd.gov.hk/epd/english/environmentinhk/air/data/air_data.html"
+    documentation_url: "https://www.epd.gov.hk/epd/english/environmentinhk/air/data/air_data.html"
+    license_terms: EPD/DATA.GOV.HK terms apply
+    authentication: none_or_provider_specific
+    variables: [PM2_5, PM10, NO2, O3, SO2, CO, AQHI, station_metadata]
+    stations_domain: Hong_Kong_air_quality_station_network
+    native_cadence: hourly_or_subhourly
+    forecast_cycles: []
+    historical_start_end: dataset_specific
+    archive_availability: official_open_data_discovery_required
+    expected_latency: source_timestamp_plus_retrieval_latency
+    revision_behavior: provider_specific; station metadata and relocations must be versioned
+    point_in_time_class: PROXY_WITH_LIMITATIONS
+    estimated_bytes: small_to_medium
+    raw_path_template: "<HKG_TMAX_DATA_ROOT>/raw/objects/{sha256[0:2]}/{sha256}.{ext}"
+    adapter: DISCOVERY_REQUIRED
+    backfill_status: DISCOVERY_REQUIRED
+    live_status: collector_pending_endpoint_resolution
+    last_success: null
+    coverage: not_started
+    blocker: exact official historical/live endpoint and station metadata parsing still required
+    evidence: reset instruction P1-D
+    next_action: resolve official endpoint, acquire station metadata, and map stations to HKO Headquarters
+
   - source_id: static_geospatial_deterministic_context
     family: L_static_geospatial_deterministic_context
     priority: P1_HIGH_VALUE
@@ -622,9 +767,9 @@ sources:
     live_status: periodic_static_refresh_required
     last_success: null
     coverage: "Downloaded 60 official static-context raw objects totaling 215,229,122 bytes: LandsD 5 m DTM direct ASC zip and CSDI GeoTIFF package/docs; LandsD topographic GML/GeoTIFF packages and i-Series revision CSVs; LandsD iGeoCom CSV/GeoJSON packages; PlanD/CSDI LUHK 10 m land-utilization raster packages and metadata for 2018-2024; PlanD LUHK 2022-2024 English statistics; PlanD 3D photo-realistic model tile index CSVs."
-    blocker: deterministic derived station distance/bearing matrices, solar geometry tables, and parsed slope/aspect/land-water/station-context products are not generated yet; full PlanD 3D model tile payloads remain byte-budget/source-use dependent
+    blocker: deterministic station registry, distance/bearing matrices, and solar geometry tables are generated; parsed slope/aspect/terrain, coastline/land-water, LUHK station context, and any full PlanD 3D model tile payloads remain byte-budget/source-use dependent
     evidence: "retrieval_ledger source IDs landsd_*, csdi_landsd_*, csdi_pland_luhk_*, pland_*, data_gov_hk_landsd_dtm_dataset_page, data_gov_hk_pland_luhk_*; reports/static_context_inventory.md"
-    next_action: parse static rasters/vector packages and generate versioned station-distance, terrain, coastline/land-water, and solar-geometry metadata without model features
+    next_action: parse static rasters/vector packages and generate versioned terrain, coastline/land-water, and LUHK station context without model features
 
   - source_id: frontier_context_inventory
     family: M_frontier_context

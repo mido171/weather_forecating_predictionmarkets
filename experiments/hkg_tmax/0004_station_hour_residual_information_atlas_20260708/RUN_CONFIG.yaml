@@ -1,0 +1,20 @@
+seed: 20260708
+database_url_env_priority:
+  - HKG_TMAX_DATABASE_URL
+  - DATABASE_URL
+  - default_local_postgres_redacted
+date_window:
+  start: "2000-01-02"
+  end: "2023-12-31"
+confirmation_start: "2024-01-01"
+primary_cutoff_profile: "tminus1_2359"
+cutoff_hkt: "T-1 23:59"
+hourly_window_hours: 24
+station_temperature_plausibility_c: [-5, 45]
+correlation_min_rows: 500
+top_value_features: 220
+walk_forward_folds:
+  - ["fold1_2011_2013", "train<=2010-12-31", "valid=2011-01-01..2013-12-31"]
+  - ["fold2_2014_2016", "train<=2013-12-31", "valid=2014-01-01..2016-12-31"]
+  - ["fold3_2017_2019", "train<=2016-12-31", "valid=2017-01-01..2019-12-31"]
+  - ["fold4_2020_2023", "train<=2019-12-31", "valid=2020-01-01..2023-12-31"]

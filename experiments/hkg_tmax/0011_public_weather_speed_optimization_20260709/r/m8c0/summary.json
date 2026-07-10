@@ -1,0 +1,82 @@
+{
+  "by_source": {
+    "gefs_control": {
+      "bytes": 559003347,
+      "fetch_ok": 68,
+      "norm_ok": 0,
+      "tasks": 68
+    },
+    "gfs": {
+      "bytes": 808312537,
+      "fetch_ok": 68,
+      "norm_ok": 0,
+      "tasks": 68
+    }
+  },
+  "bytes_ok": 1367315884,
+  "completed_at_utc": "2026-07-09T14:01:00.948565Z",
+  "config": {
+    "coalesce_gap_bytes": 0,
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day": "2026-06-21",
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "max_attempts": 3,
+    "max_tasks": null,
+    "normalize": false,
+    "range_workers": 4,
+    "sources": [
+      "gefs_control",
+      "gfs"
+    ],
+    "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+    "timeout": 120,
+    "use_processes": false,
+    "workers": 8
+  },
+  "failure_count": 0,
+  "fetch_ok": 136,
+  "fetch_seconds_p50": 17.526602199999616,
+  "fetch_seconds_p90": 25.262379799969494,
+  "first_failures": [],
+  "mb_per_second_wall": 4.232760058660643,
+  "normalization_seconds_p50": null,
+  "normalization_seconds_p90": null,
+  "normalize_ok": 0,
+  "normalized_row_count": 0,
+  "resources": {
+    "cpu_max_percent": null,
+    "cpu_mean_percent": null,
+    "cpu_sampler_available": false,
+    "staging_end_bytes": 0,
+    "staging_max_bytes": 24603411
+  },
+  "started_at_utc": "2026-07-09T13:55:37.897401Z",
+  "tasks_per_minute_wall": 25.260674934623115,
+  "tasks_total": 136,
+  "trial_name": "model_fetch_s3_w8_c0",
+  "trial_type": "parallel_fetch_only",
+  "wall_seconds": 323.0317488000146
+}

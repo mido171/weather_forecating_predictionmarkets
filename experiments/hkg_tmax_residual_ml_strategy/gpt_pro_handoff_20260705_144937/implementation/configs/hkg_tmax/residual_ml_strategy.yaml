@@ -1,0 +1,21 @@
+seed: 20260705
+allow_leakage_failures: false
+
+dates:
+  start_date: "2000-01-02"
+  presealed_end_date: "2023-12-31"
+  sealed_start_date: "2024-01-01"
+  sealed_end_date: "2026-05-31"
+
+cutoff_profiles:
+  - tminus1_1500
+  - tminus1_1800
+  - tminus1_2100
+  - tminus1_2359
+
+primary_cutoff_profile: tminus1_2359
+anchor_source: public.hko_historical_forecasts_2000_2026
+hourly_source: public.hko_info_gov_hourly_readings_1998_2026
+target_history_source: feature_safe.hko_target_history_pre2024
+sealed_confirmation_mode: sealed_blind_mode
+

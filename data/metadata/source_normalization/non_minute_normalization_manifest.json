@@ -1,0 +1,239 @@
+{
+  "generated_at_utc": "2026-06-20T11:18:13.317143Z",
+  "input_data_root": "C:\\hkg_tmax_data",
+  "output_data_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data",
+  "schema_version": 1,
+  "skipped_sources": [
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_10min_wind_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 78
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_15min_uvindex_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 90
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_humidity_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 90
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_humidity_listing",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 1
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_pressure_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 78
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_pressure_listing",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 1
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_solar_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 78
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_solar_listing",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 1
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_temperature_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 90
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_1min_temperature_listing",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 1
+    },
+    {
+      "reason": "short 2020/2021-start minute/snapshot historical archive excluded from this normalization pass",
+      "source_id": "datagov_hko_historical_latest_since_midnight_maxmin_archive",
+      "status": "skipped_by_user_instruction",
+      "success_rows": 90
+    }
+  ],
+  "tables": [
+    {
+      "end": "2026-05-31",
+      "notes": "Long-history finalized daily HKO climate rows. Target-day daily elements are not operational predictors.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_daily_climate_elements.parquet",
+      "row_count": 556399,
+      "start": "1884-01-01",
+      "status": "parsed",
+      "table_id": "hko_daily_climate_elements"
+    },
+    {
+      "end": "2026-06-17",
+      "notes": "Annual/monthly Daily Extract payload rows normalized as target-side publication evidence.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_daily_extract_tmax_payload_rows.parquet",
+      "row_count": 49628,
+      "start": "1884-01-01",
+      "status": "parsed",
+      "table_id": "hko_daily_extract_tmax_payload_rows"
+    },
+    {
+      "end": "2026-06-17T18:00:00Z",
+      "notes": "Key pressure levels only; full level dump omitted to keep derived tables tractable.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\noaa_igra_hkm00045004_key_pressure_levels.parquet",
+      "row_count": 477514,
+      "start": "1949-06-01T22:00:00Z",
+      "status": "parsed_key_levels",
+      "table_id": "noaa_igra_hkm00045004_key_pressure_levels"
+    },
+    {
+      "end": "2026-06-17T18:00:00Z",
+      "notes": "Upper-air profile features parsed, but operational release latency remains unproven and fails closed.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\silver\\source_normalized_non_minute\\noaa_igra_hkm00045004_sounding_features.parquet",
+      "row_count": 88407,
+      "start": "1949-06-01T22:00:00Z",
+      "status": "parsed_proxy_features",
+      "table_id": "noaa_igra_hkm00045004_sounding_features"
+    },
+    {
+      "end": "2025-08-25",
+      "notes": "Core hourly observations parsed from NOAA ISD station-year gzip files.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\noaa_isd_core_observations.parquet",
+      "row_count": 4029291,
+      "start": "1945-12-01",
+      "status": "parsed_streaming",
+      "table_id": "noaa_isd_core_observations"
+    },
+    {
+      "end": "2025-08-25",
+      "notes": "Daily station summaries include latest observation before 15:00 HKT, but archive is proxy-limited.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\silver\\source_normalized_non_minute\\noaa_isd_station_day_cutoff_summary.parquet",
+      "row_count": 317489,
+      "start": "1945-12-01",
+      "status": "parsed_proxy_features",
+      "table_id": "noaa_isd_station_day_cutoff_summary"
+    },
+    {
+      "end": "2026-06-18T23:08:00+08:00",
+      "notes": "All downloaded HKO historical RSS XML archive entries normalized as forecast/warning vintages.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_historical_rss_items.parquet",
+      "row_count": 349206,
+      "start": "2020-06-01T00:03:00+08:00",
+      "status": "parsed_vintages",
+      "table_id": "hko_historical_rss_items"
+    },
+    {
+      "end": "2026-06-27",
+      "notes": "English local and 9-day RSS forecast temperature ranges extracted for MOS-style later experiments.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\silver\\source_normalized_non_minute\\hko_historical_rss_temperature_forecasts.parquet",
+      "row_count": 66612,
+      "start": "2020-06-01",
+      "status": "parsed_forecast_temperatures",
+      "table_id": "hko_historical_rss_temperature_forecasts"
+    },
+    {
+      "end": "2024-12-25T06:00:00Z",
+      "notes": "Best-track rows are parsed for mechanism/regime labels only, not operational inputs.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_tropical_cyclone_best_track.parquet",
+      "row_count": 26189,
+      "start": "1985-01-06T06:00:00Z",
+      "status": "parsed_retrospective",
+      "table_id": "hko_tropical_cyclone_best_track"
+    },
+    {
+      "end": "20260628",
+      "notes": "ARWF station forecast JSON snapshots normalized.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\silver\\source_normalized_non_minute\\hko_arwf_station_daily_forecasts.parquet",
+      "row_count": 530,
+      "start": "20260619",
+      "status": "parsed_live_vintages",
+      "table_id": "hko_arwf_station_daily_forecasts"
+    },
+    {
+      "end": "2026-06-20T15:36:00+08:00",
+      "notes": "Nowcast grid summarized by vintage; individual grid cells are not expanded.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\silver\\source_normalized_non_minute\\hko_gridded_rainfall_nowcast_summary.parquet",
+      "row_count": 41,
+      "start": "2026-06-19T12:36:00+08:00",
+      "status": "parsed_summary",
+      "table_id": "hko_gridded_rainfall_nowcast_summary"
+    },
+    {
+      "end": "202606201400-202606201459",
+      "notes": "Live lightning count snapshots normalized.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_lightning_counts_latest.parquet",
+      "row_count": 102,
+      "start": "202606191100-202606191159",
+      "status": "parsed_live_vintages",
+      "table_id": "hko_lightning_counts_latest"
+    },
+    {
+      "end": "2026-06-20T15:50:00+08:00",
+      "notes": "Latest tidal rows normalized.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_latest_tidal_information.parquet",
+      "row_count": 105,
+      "start": "2026-06-19T12:45:00+08:00",
+      "status": "parsed_live_vintages",
+      "table_id": "hko_latest_tidal_information"
+    },
+    {
+      "end": "2026-06-20T12:30:00+08:00",
+      "notes": "Marine bulletin area forecasts normalized.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_south_china_coastal_waters_bulletin.parquet",
+      "row_count": 30,
+      "start": "2026-06-19T12:30:00+08:00",
+      "status": "parsed_live_vintages",
+      "table_id": "hko_south_china_coastal_waters_bulletin"
+    },
+    {
+      "end": "2026-06-19T12:48:00+08:00",
+      "notes": "Radar manifest frame times normalized; image pixels are not decoded.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_radar_manifest_frames.parquet",
+      "row_count": 80,
+      "start": "2026-06-19T10:54:00+08:00",
+      "status": "parsed_metadata",
+      "table_id": "hko_radar_manifest_frames"
+    },
+    {
+      "end": "2026-06-20T07:30:00+08:00",
+      "notes": "Satellite raw imagery normalized to metadata inventory; pixels not decoded in this pass.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\hko_satellite_image_inventory.parquet",
+      "row_count": 4589,
+      "start": "2026-06-17T08:15:00+08:00",
+      "status": "metadata_only",
+      "table_id": "hko_satellite_image_inventory"
+    },
+    {
+      "end": "",
+      "notes": "NCEP GFS/GEFS GRIB2 subset inventory normalized; fields not decoded in this pass.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\ncep_operational_grib2_inventory.parquet",
+      "row_count": 3400,
+      "start": "",
+      "status": "metadata_only",
+      "table_id": "ncep_operational_grib2_inventory"
+    },
+    {
+      "end": "",
+      "notes": "Static geospatial raw packages inventoried; terrain/coast/LUHK station buffers still require geospatial decoding.",
+      "path": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\data\\bronze\\source_normalized_non_minute\\static_geospatial_package_inventory.parquet",
+      "row_count": 60,
+      "start": "",
+      "status": "metadata_only",
+      "table_id": "static_geospatial_package_inventory"
+    }
+  ],
+  "user_instruction": "parse raw unusable data, excluding short 2020/2021 HKO minute/snapshot archives; do not run experiments"
+}

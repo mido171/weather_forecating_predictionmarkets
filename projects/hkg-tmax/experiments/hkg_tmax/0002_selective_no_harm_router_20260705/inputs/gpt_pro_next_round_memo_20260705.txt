@@ -1,0 +1,1719 @@
+HKG Tmax Residual-ML Next-Round Research Memo
+Executive conclusion
+
+The 2026-07-05 run was a clean, leakage-safe calibration improvement, not a trading-grade breakthrough.
+
+The system did what it was supposed to do: it anchored on the latest eligible Info.gov local official forecast max, predicted a residual correction, passed the leakage audit with zero violations, improved MAE, improved RMSE, improved p90 error, and removed almost all average bias. But the gain was only:
+
+Raw official MAE: 0.9308580565°C
+Final residual ensemble MAE: 0.8986654294°C
+Improvement: 0.0321926271°C
+Decision: no_promote_cosmetic
+
+That is below the predeclared 0.035°C meaningful-edge threshold. The run should not be promoted.
+
+The main reason the gain was small is clear: the official forecast anchor is already strong, and the residual model mostly learned a conservative upward bias correction. It helped when the official forecast was too low, but it often harmed rows where the official forecast was already correct or too high. The next round should not be “more generic ML.” It should be a selective no-harm correction system: apply residual corrections only when the model has evidence that correcting is likely to beat leaving the official forecast untouched.
+
+One required file named in the prompt was missing:
+
+missing: evidence/scoped_git_diff.patch
+present substitute: evidence/tracked_git_diff.patch
+
+That limits the exact scoped-diff audit. It does not materially limit the numerical result audit because the required result artifacts, code files, config, logs, prediction rows, scoreboards, lineage, and audits were present.
+
+Public-source context is consistent with the package’s source contract: HKO’s climate page exposes Daily Extract resources and states data is updated up to the previous day, supporting the rule that Daily Extract is target/settlement truth, not a same-day predictor. HKO’s local forecast page states the bulletin has regular updates around 45 minutes past each hour plus 16:15 and 23:15 HKT, which matters for cutoff/issuance analysis. The HKO OpenData flw endpoint also shows the live local forecast structure, including forecastDesc, updateTime, and urban/New Territories temperature wording, but it should remain a cross-check rather than the primary historical anchor.
+
+1. Evidence audit
+1.1 Required package files
+Required item	Status	Audit conclusion
+handoff_docs/README_HANDOFF.md	Present	Confirms model target, result, counts, cutoffs, model ladder, caveats.
+source_docs/attached_spec/hkg_tmax_ml_strategy_codex_implementation_20260705.md	Present	Confirms intended residual strategy, leakage contract, feature families, folds, cutoff policy.
+source_docs/live_trading/HKG_TMAX_DAILY_TARGET_1884_DATA_CONTEXT_20260705.md	Present	Confirms target definition, canonical label tables, sealed handling, raw payload audit boundary.
+source_docs/live_trading/HKG_TMAX_INFO_GOV_HOURLY_READINGS_DATA_CONTEXT_20260705.md	Present	Confirms hourly readings source, station JSON contract, cutoff availability rules.
+source_docs/live_trading/HKG_TMAX_INFO_GOV_LIVE_FORECAST_SOURCE_CONTEXT_20260704.md	Present	Confirms Info.gov apples-to-apples forecast source contract.
+results/final_model_card.md	Present	Confirms final decision and primary score rows.
+results/summary.json	Present	Confirms run config, source counts, feature rows, feature count, promotion result.
+results/row_count_audit.json	Present	Confirms target, forecast, hourly, joined, anchor, and prediction counts.
+results/leakage_audit.json	Present	Confirms leakage status pass, total_violations: 0.
+results/scoreboard.csv	Present	Confirms overall model scores.
+results/scoreboard_by_split.csv	Present	Confirms rolling, presealed, sealed performance.
+results/scoreboard_by_month.csv	Present	Confirms month slices.
+results/scoreboard_by_regime.csv	Present	Confirms season, official max bin, range bin, issue bucket, thunderstorm/rainstorm slices.
+results/ablation_scoreboard.csv	Present	Confirms A0-A8 and B0 ablation ladder.
+results/cutoff_sensitivity_scoreboard.csv	Present	Confirms 18:00, 21:00, 23:59 cutoff comparison.
+results/model_selection_log.json	Present	Confirms selected ensemble weights and promotion decision.
+results/ensemble_weights.json	Present	Confirms nonnegative residual ensemble weights.
+results/feature_importance_lgbm.csv	Present	Confirms LightGBM feature importance.
+results/feature_importance_catboost.csv	Present	Confirms CatBoost feature importance.
+results/linear_coefficients.csv	Present	Confirms Huber/linear coefficient diagnostics.
+results/feature_lineage.json	Present	Confirms 323 feature lineage records and source eligibility metadata.
+results/source_eligibility_audit.csv	Present	Confirms row-level selected-anchor/cutoff/hourly/target-history eligibility.
+results/prediction_rows.parquet	Present	Row-level prediction artifact exists.
+results/prediction_rows.csv	Present	Used for row-level error autopsy.
+implementation/code/src/hkg_tmax/	Present	Full implementation package present.
+implementation/scripts/run_hkg_tmax_residual_ml_strategy.py	Present	Main runner present.
+implementation/configs/hkg_tmax/residual_ml_strategy.yaml	Present	Config present.
+implementation/code/tests/test_hkg_tmax_residual_ml_strategy.py	Present	Focused tests present.
+evidence/git_status_short.txt	Present	Shows substantial pre-existing/unrelated dirty repo state.
+evidence/git_diff_stat.txt	Present	Diff stat present but broad/noisy.
+evidence/scoped_git_diff.patch	Missing	Exact scoped patch unavailable.
+evidence/tracked_git_diff.patch	Present	Substitute patch evidence.
+run_logs/full.stdout.log	Present	Confirms full run and artifact write.
+run_logs/full.stderr.log	Present	Contains Huber convergence warnings.
+1.2 Target definition verified
+
+The target used was:
+
+HKO Daily Extract Absolute Daily Max (deg. C)
+target_date_hkt = local day T
+station = Hong Kong Observatory / HKO Headquarters
+
+Evidence:
+
+results/final_model_card.md
+source_docs/live_trading/HKG_TMAX_DAILY_TARGET_1884_DATA_CONTEXT_20260705.md
+implementation/code/src/hkg_tmax/data/forecast_anchor.py
+results/summary.json
+
+The code loads targets from:
+
+label_core.hko_daily_tmax
+sealed_confirmation.hko_daily_tmax
+
+and maps them into:
+
+target_date
+y_true_c
+label_source
+
+The target-side raw Daily Extract payload is not used as a predictor.
+
+1.3 Forecast anchor definition verified
+
+The forecast anchor was:
+
+latest eligible Info.gov local forecast max before cutoff
+
+The prediction formula was:
+
+prediction_c = anchor_forecast_max_c + residual_prediction_c
+
+The strict forecast SQL in forecast_anchor.py filters:
+
+source = 'info_gov'
+product_type = 'local'
+row_quality_status = 'usable_local_minmax'
+target_issue_lead_days = 1
+forecast_max_c IS NOT NULL
+forecast_min_c IS NOT NULL
+issue_at_utc IS NOT NULL
+
+The selector then chooses the latest eligible issue where:
+
+issue_at_utc <= cutoff_at_utc
+
+and records one selected anchor per target date and cutoff.
+
+1.4 Cutoff profiles verified
+
+Configured cutoff profiles:
+
+tminus1_1500
+tminus1_1800
+tminus1_2100
+tminus1_2359
+
+Primary cutoff:
+
+tminus1_2359
+
+Implemented in:
+
+implementation/configs/hkg_tmax/residual_ml_strategy.yaml
+implementation/code/src/hkg_tmax/data/forecast_anchor.py
+
+The test test_cutoff_timestamps_are_target_minus_one_hkt_and_utc verifies that for target date 2026-07-05, tminus1_2359 maps to:
+
+2026-07-04 23:59 HKT
+2026-07-04 15:59 UTC
+1.5 Strict Info.gov local forecast filter verified
+
+The strict anchor source is:
+
+public.hko_historical_forecasts_2000_2026
+
+with source/product/quality/lead filters as above. The leakage audit also verifies:
+
+forecast_anchor_apples_to_apples_info_gov_source: pass
+
+and checks that selected anchor URLs contain:
+
+info.gov.hk/gia/wr
+1.6 Lag2 target-history floor verified
+
+The implementation used a strict lag2 floor for target-history predictors.
+
+Evidence:
+
+implementation/code/src/hkg_tmax/data/target_history_features.py
+implementation/code/src/hkg_tmax/features/leakage_guards.py
+implementation/code/tests/test_hkg_tmax_residual_ml_strategy.py
+results/leakage_audit.json
+
+The test verifies:
+
+target_lag2_tmax_c exists
+target_lag3_tmax_c exists
+target_lag1_tmax_c does not exist
+target_history_max_source_date = target_date - 2 days
+
+Leakage audit check:
+
+target_history_lag2_floor: pass
+target_label_predictor_minimum_lag_days: pass
+
+Important caveat: the run used sealed_blind_mode. Because target-history source was feature_safe.hko_target_history_pre2024, most lagged target-history features were unavailable for sealed 2024+ rows. In feature_missingness_report.csv, sealed-confirmation missingness was approximately:
+
+target_lag2_tmax_c: 99.77% missing
+target_lag3_tmax_c: 99.66% missing
+target_roll30_anomaly_lag2_c: 99.77% missing
+
+So target memory was mostly a presealed feature, not a live-style sealed feature.
+
+1.7 Sealed-confirmation handling verified
+
+Configured sealed policy:
+
+sealed_start_date: 2024-01-01
+sealed_end_date: 2026-05-31
+sealed_confirmation_mode: sealed_blind_mode
+
+Code behavior:
+
+training rows require label_source == label_core
+sealed rows are validation/confirmation only
+
+In ablation_runner.py, every fold’s training set is restricted to:
+
+cutoff_frame["label_source"].eq("label_core")
+
+The model card states sealed confirmation rows were not used for model selection.
+
+1.8 No raw Daily Extract payload predictor rule verified
+
+The leakage audit includes:
+
+raw_daily_extract_not_used_as_predictor: pass
+
+The feature lineage includes no raw Daily Extract audit-table predictor features.
+
+1.9 No post-cutoff forecast/hourly rule verified
+
+Leakage audit checks all passed:
+
+forecast_anchor_issue_at_or_before_cutoff: pass
+forecast_revision_issue_at_or_before_cutoff: pass
+hourly_dispatch_at_or_before_cutoff: pass
+hourly_observation_at_or_before_cutoff: pass
+max_hourly_dispatch_at_or_before_cutoff: pass
+max_hourly_observation_at_or_before_cutoff: pass
+
+Total violations:
+
+0
+1.10 Model families actually run
+
+The run scored these models:
+
+ID	Model	Role
+A0_raw_official	Raw official forecast max	Primary baseline
+B0_climatology_persistence	Climatology/persistence	Sanity baseline
+A1_grouped_residual	Grouped residual shrinkage	Transparent bias correction
+A2_revision_residual_lgbm	LightGBM residual with official/revision/calendar features	Revision-stage ML
+A3_hko_hourly_state_residual_lgbm	LightGBM residual plus HKO hourly state	Main practical ML gain
+A4_network_gradients_residual_lgbm	LightGBM residual plus station-network gradients	Network ablation
+A5_text_warning_residual_lgbm	LightGBM residual plus text/warning features	Text ablation
+A6_target_memory_residual_lgbm	Full LightGBM residual with target memory	Full single LGBM
+A7_final_residual_ensemble	Nonnegative ensemble of zero, grouped, LGBM, CatBoost, Huber	Final candidate
+A8_direct_lgbm_absolute	Direct absolute Tmax LightGBM	Diagnostic only
+
+CatBoost was fitted. Huber was fitted but emitted convergence warnings.
+
+2. Result diagnosis: why the gain was small
+2.1 The raw official anchor was already strong
+
+At the primary cutoff tminus1_2359, the raw official forecast scored:
+
+n = 5,629
+MAE = 0.930858°C
+RMSE = 1.195757°C
+median absolute error = 0.700000°C
+p90 absolute error = 2.000000°C
+p95 absolute error = 2.400000°C
+bias = -0.122935°C
+
+That is already a strong public anchor. The official forecast is not a weak baseline. The residual model is trying to improve a relatively small remaining error, not solve the whole forecasting problem.
+
+2.2 Most improvement came from bias correction plus HKO hourly state
+
+Primary ablation ladder at tminus1_2359:
+
+Step	MAE	Gain vs previous	Gain vs raw official
+A0 raw official	0.930858	—	—
+A1 grouped residual	0.924794	+0.006064	+0.006064
+A2 revision residual LGBM	0.914367	+0.010427	+0.016491
+A3 HKO hourly-state residual LGBM	0.900754	+0.013613	+0.030104
+A4 network-gradients residual LGBM	0.901236	-0.000481	+0.029622
+A5 text-warning residual LGBM	0.901910	-0.000675	+0.028948
+A6 target-memory residual LGBM	0.900630	+0.001280	+0.030228
+A7 final residual ensemble	0.898665	+0.001965	+0.032193
+
+Interpretation:
+
+A1 grouped bias correction helped slightly.
+A2 revision path helped materially.
+A3 HKO hourly state added the largest incremental ML improvement.
+A4 station network did not improve MAE after A3.
+A5 text/warning did not improve MAE after A4.
+A6 target memory added almost nothing beyond A3.
+A7 ensemble added a very small final improvement.
+
+The core result was already achieved by A3. Everything after A3 was mostly marginal.
+
+2.3 The final ensemble fixed bias but did not discover a large weather edge
+
+Raw official bias:
+
+-0.122935°C
+
+Final ensemble bias:
+
+-0.000486°C
+
+So the final ensemble almost perfectly removed average underforecast bias.
+
+But its row-level correction was small:
+
+mean absolute correction: 0.204°C
+median absolute correction: 0.171°C
+p90 absolute correction: 0.426°C
+p95 absolute correction: 0.518°C
+correlation(true residual, final correction): 0.248
+
+That correlation is real but weak. The model had signal, but not enough to justify aggressive all-row corrections.
+
+2.4 The all-row correction helped 55% of rows and worsened 45%
+
+At the primary cutoff:
+
+rows: 5,629
+helped rows: 3,100 = 55.1%
+worsened rows: 2,529 = 44.9%
+mean absolute-error improvement: 0.0322°C
+median absolute-error improvement: 0.0301°C
+
+That is the central diagnosis.
+
+The model had enough edge to help slightly more rows than it harmed. But it was not discriminating enough. It corrected almost every row, including many rows where the official forecast was already correct or already too high.
+
+This is why the next round should be selective correction.
+
+2.5 The model mainly helped when the official forecast was too low
+
+Row-level sign autopsy:
+
+Raw official condition	Rows	Raw MAE	Final MAE	Gain	Mean correction
+Official forecast too low	2,960	1.001993	0.866067	+0.135926	+0.167715
+Official forecast too high	2,458	0.925102	0.998589	-0.073487	+0.067986
+Official forecast exactly right	211	0.000000	0.191931	-0.191931	+0.121879
+
+This is the most important finding in the package.
+
+The model learned an upward correction because the raw official anchor had a negative bias. That improved underforecast rows but harmed overforecast/exact rows. A promotion-quality next round must learn when not to apply the upward correction.
+
+2.6 Tail rows showed more potential edge
+
+Post-hoc high raw-official-error slices:
+
+Raw official absolute-error slice	Rows	Raw MAE	Final MAE	Gain
+Top 50% raw errors	2,878	1.484746	1.398519	+0.086228
+Top 20% raw errors	1,212	2.084571	1.970499	+0.114072
+Top 10% raw errors	591	2.525550	2.392742	+0.132808
+Top 5% raw errors	312	2.878526	2.717550	+0.160975
+Top 2.5% raw errors	156	3.229487	3.049852	+0.179635
+Top 1% raw errors	57	3.726316	3.506898	+0.219417
+
+This does not mean raw official error can be used as a feature. It cannot. It is target-derived. But it means the features contain more signal on difficult days than on ordinary days. The next round should explicitly train a tail-risk detector and only apply larger corrections when predicted residual risk is high.
+
+2.7 Direct absolute prediction underperformed residual prediction
+
+At tminus1_2359:
+
+A8 direct absolute LGBM MAE: 0.949068°C
+A0 raw official MAE: 0.930858°C
+A7 residual ensemble MAE: 0.898665°C
+
+Direct absolute prediction was worse than the official forecast and much worse than residual modeling.
+
+Reason:
+
+The official forecast already compresses a huge amount of meteorological information.
+Direct ML wastes capacity relearning the base temperature level.
+Residual ML focuses capacity on the smaller question: “When is the official max biased?”
+
+Direct absolute prediction should remain diagnostic only.
+
+2.8 Sealed behavior broadly matched the development behavior, but with one caveat
+
+By stage:
+
+Stage	Raw official MAE	Final MAE	Gain	RMSE delta	p90 delta
+Rolling validation	0.925268	0.892577	+0.032691	-0.043018	-0.096189
+Presealed holdout	0.939726	0.909717	+0.030009	-0.033176	-0.125738
+Sealed confirmation	0.948980	0.917248	+0.031732	-0.042545	+0.010475
+
+This is encouraging: the MAE improvement did not vanish on sealed confirmation. But sealed p90 was slightly worse than raw official:
+
+sealed raw p90: 1.900000°C
+sealed final p90: 1.910475°C
+
+That means the final system was not cleanly no-harm in the sealed tail.
+
+The second caveat is target memory: sealed target-history features were mostly missing because of sealed_blind_mode. So A6 target-memory importance in presealed data should not be overinterpreted for live sealed use.
+
+2.9 Improvements were broad but not powerful
+
+By season:
+
+Season	Raw MAE	Final MAE	Gain
+MAM	1.126495	1.087983	+0.038511
+SON	0.821041	0.782849	+0.038192
+DJF	0.903609	0.870217	+0.033392
+JJA	0.858623	0.840328	+0.018295
+
+By month, every month improved, but hot-season improvement was smaller. June improved only:
+
+0.006863°C
+
+This supports selective correction: the same all-row correction strength is not equally useful in all regimes.
+
+3. Feature-family diagnosis
+3.1 Feature count drifted high
+
+The final schema contained:
+
+323 features
+
+Feature family counts:
+
+Family	Count
+station_network	113
+forecast_revision	49
+hko_hourly_state	47
+target_history	41
+text_warning_regime	39
+official_anchor	14
+calendar	13
+target_history_normalized	7
+
+The original strategy wanted a compact high-signal phase-one matrix. The implementation was still controlled enough to run, but 323 features is large for a residual target where signal is weak. The next round should prune hard.
+
+3.2 Repeatedly important individual features
+
+Across LightGBM/CatBoost/linear diagnostics, the repeatedly important features were:
+
+Official anchor / forecast level
+official_max_c
+official_midpoint_c
+official_max_round_c
+official_max_minus_doy_clim30_c
+official_max_minus_month_clim10_c
+
+These are partly anchor proxies. They are useful for conditional bias, but they do not represent independent weather information.
+
+Forecast revision
+rev_path_min_c
+rev_first_max_c
+rev_path_max_c
+rev_last3_slope_c_per_hour
+
+Revision path mattered. A2 improved MAE by about 0.0165°C versus raw official, so revision features have real incremental value.
+
+HKO hourly state
+hko_latest_temp_minus_official_max_c
+hko_temp_trend_12h_c
+hko_temp_mean_6h_c
+hko_temp_mean_12h_c
+hko_latest_dewpoint_c
+hko_latest_dewpoint_depression_c
+hko_rh_trend_3h_pct
+
+This was the strongest non-anchor feature family. A3 added about 0.0136°C beyond A2 and explained most of the final improvement.
+
+Station network
+network_mean_trend_6h_c
+network_spread_mean_6h_c
+nt_heat_ceiling_index_c
+urban_core_mean_minus_coastal_marine_mean_c
+inland_coastal_spread_6h_max_c
+inland_nt_mean_minus_coastal_marine_mean_c
+west_nw_nt_mean_minus_coastal_marine_mean_c
+
+Feature importance says these were important. But ablation says adding the full station-network family after HKO hourly state did not improve MAE. The likely explanation is redundancy: many network features overlap with HKO latest state, official forecast level, seasonality, and broad thermal regime.
+
+Target history
+target_lag2_minus_doy30_clim_c
+target_roll30_anomaly_lag2_c
+target_lag60_tmax_c
+target_roll30_minus_doy30_clim_c
+target_roll7_minus_roll30_c
+target_lag365_tmax_c
+
+These features mattered in model importance, but A6 added only about 0.0001°C versus A3 and about 0.0013°C versus A5. Target history should be preserved only as a compact climatology/memory block, not as a large family.
+
+Text/warning
+hourly_warning_text_count_24h
+hours_since_latest_rainfall_text
+fcst_flag_thunderstorm
+hourly_any_thunderstorm_warning_24h
+hourly_any_rainstorm_warning_24h
+
+Text features had diagnostic value but weak incremental MAE value. A5 worsened MAE after A4. These features should not be dropped entirely, but they should move from “general residual regressor input” to “router/regime diagnostic input.”
+
+3.3 Which feature families actually moved MAE
+Family added	Evidence	Decision
+Grouped residual/bias correction	A1 improved +0.0061°C	Keep as transparent baseline.
+Forecast revision	A2 improved +0.0104°C over A1	Keep.
+HKO hourly state	A3 improved +0.0136°C over A2	Keep core.
+Station network	A4 worsened MAE by -0.0005°C vs A3	Prune aggressively; keep only top compact features.
+Text/warning	A5 worsened MAE by -0.0007°C vs A4	Keep only router/tail flags.
+Target history	A6 improved +0.0013°C vs A5 but only +0.0001°C vs A3	Keep compact climatology; challenge lag-heavy features.
+Ensemble	A7 improved +0.0020°C vs A6	Keep ensemble idea, but add abstention.
+3.4 Feature families redundant after A3
+
+After A3, the following looked redundant or unstable for all-row residual regression:
+
+full station-network feature family
+full text/warning feature family
+large target-history lag family
+
+This does not mean these features are useless. It means they should not be dumped into one broad all-row residual regressor. They are better suited for:
+
+selective correction router
+tail-risk model
+regime-specific no-harm checks
+3.5 Features that may be proxies for the official forecast itself
+
+The following features are useful but not independent:
+
+official_max_c
+official_midpoint_c
+official_max_round_c
+official_max_minus_doy_clim30_c
+official_max_minus_month_clim10_c
+rev_path_min_c
+rev_path_max_c
+rev_first_max_c
+
+They mostly describe forecast level, forecast range, and forecast history. They help learn conditional bias, but they cannot create a large new meteorological edge by themselves.
+
+3.6 Features that may be overfit or unstable
+
+Challenge in next round:
+
+high-cardinality station-specific latest temperature deltas
+large station-network block
+tropical cyclone position features with high missingness
+text-count features that changed prevalence by era
+sealed-unavailable target lag features
+Huber coefficients from non-converged fits
+
+The station-network family had large aggregate feature importance, but the A4 ablation did not improve MAE. That is the exact signature of a family that can look important inside a model but add little causal incremental value out of sample.
+
+4. Error-slice diagnosis
+4.1 Stage slices
+Stage	Raw MAE	Final MAE	Gain	Interpretation
+Rolling validation	0.925268	0.892577	+0.032691	Clean development improvement.
+Presealed holdout	0.939726	0.909717	+0.030009	Holds up out of sample, but below threshold.
+Sealed confirmation	0.948980	0.917248	+0.031732	MAE holds up, but p90 slightly worsens.
+
+Conclusion:
+
+The edge is real but small.
+It is not obviously just overfit.
+It is not strong enough to promote.
+4.2 Monthly slices
+Month	Raw MAE	Final MAE	Gain
+Jan	0.892339	0.848413	+0.043926
+Feb	1.071239	1.055138	+0.016101
+Mar	1.147782	1.109042	+0.038740
+Apr	1.171458	1.127685	+0.043773
+May	1.061694	1.028504	+0.033190
+Jun	0.820000	0.813137	+0.006863
+Jul	0.857634	0.833566	+0.024069
+Aug	0.896989	0.873404	+0.023585
+Sep	0.920000	0.884432	+0.035568
+Oct	0.766667	0.727473	+0.039194
+Nov	0.778174	0.738390	+0.039784
+Dec	0.752688	0.713724	+0.038964
+
+The model was weakest in June and generally weaker in JJA. This suggests hot-season residuals are harder, perhaps because the official forecast already handles very hot regimes well and because convective/cloud timing is hard from the available public features.
+
+4.3 Official max bins
+Official max bin	Rows	Raw MAE	Final MAE	Gain
+le20	966	0.935714	0.892841	+0.042873
+25_27	785	1.015287	0.973823	+0.041463
+21_24	1,034	1.010155	0.977104	+0.033051
+ge33	657	0.707002	0.674486	+0.032516
+31_32	1,018	0.850393	0.825583	+0.024810
+28_30	1,169	0.995894	0.973264	+0.022630
+
+The model helped most in cool/transition bins and less in common warm bins.
+
+4.4 Official range bins
+Range bin	Rows	Raw MAE	Final MAE	Gain
+ge3	5,535	0.932882	0.900063	+0.032819
+2	94	0.811702	0.816385	-0.004683
+
+Almost all rows had range ge3, so official range bins were not a major discriminator in this implementation.
+
+4.5 Issue-hour buckets
+
+At tminus1_2359, almost all selected anchors were 23_plus:
+
+Issue bucket	Rows	Raw MAE	Final MAE	Gain
+23_plus	5,616	0.930645	0.898320	+0.032325
+21_22	13	1.023077	1.048044	-0.024967
+
+The 23:59 cutoff mainly means the model has the 23:15/23:xx forecast family. Earlier issue buckets are too small at this cutoff to matter.
+
+4.6 Thunderstorm/rainstorm regimes
+
+Forecast thunderstorm flag:
+
+Flag	Rows	Raw MAE	Final MAE	Gain
+0	3,746	0.895969	0.857566	+0.038404
+1	1,883	1.000266	0.980429	+0.019837
+
+Hourly thunderstorm warning in prior 24h:
+
+Flag	Rows	Raw MAE	Final MAE	Gain
+0	4,120	0.911262	0.875198	+0.036064
+1	1,509	0.984361	0.962739	+0.021622
+
+Hourly rainstorm warning in prior 24h:
+
+Flag	Rows	Raw MAE	Final MAE	Gain
+0	5,265	0.915897	0.883171	+0.032726
+1	364	1.147253	1.122782	+0.024471
+
+The model helped storm/rain regimes, but less than non-storm rows. This means the text flags did not solve convective difficulty. They should become routing/tail diagnostics, not broad model fuel.
+
+4.7 Rows where final ensemble made error much better
+
+Top improvements show the model often added a positive correction when the official forecast was too low. Examples:
+
+Date	Stage	Actual	Official	Final	Improvement
+2012-02-07	rolling	20.8	18.0	19.142	+1.142
+2016-11-25	rolling	22.3	18.0	19.065	+1.065
+2012-01-04	rolling	16.0	15.0	16.022	+0.978
+2014-12-16	rolling	19.0	18.0	19.031	+0.969
+2016-05-03	rolling	30.8	28.0	28.965	+0.965
+4.8 Rows where final ensemble made error much worse
+
+Top worsening rows show the same problem: the model often applied a positive correction when the official forecast was already right or too high.
+
+Date	Stage	Actual	Official	Final	Worsening
+2014-12-19	rolling	14.7	15.0	15.871	-0.871
+2022-09-20	presealed	30.7	31.0	31.853	-0.853
+2012-03-11	rolling	14.4	15.0	15.813	-0.813
+2012-02-24	rolling	21.0	21.0	21.782	-0.782
+2016-11-10	rolling	19.0	19.0	19.762	-0.762
+
+This is the case for a no-harm router.
+
+4.9 Tail-error behavior
+
+Absolute-error quantiles:
+
+Quantile	Raw official	Final ensemble	Delta
+p50	0.700000	0.731252	+0.031252 worse
+p80	1.500000	1.451244	-0.048756
+p90	2.000000	1.904225	-0.095775
+p95	2.400000	2.315998	-0.084002
+p97.5	2.800000	2.708085	-0.091915
+p99	3.272000	3.191403	-0.080597
+max	8.600000	7.769879	-0.830121
+
+The final ensemble worsened the median but improved the tail. That again supports selective correction:
+
+Leave many ordinary rows alone.
+Correct rows that look more tail-risk-like.
+5. Cutoff diagnosis
+5.1 Cutoff result summary
+Cutoff	Best model	Best MAE	Rows
+tminus1_2359	A7 final residual ensemble	0.898665	5,629
+tminus1_2100	A7 final residual ensemble	0.921281	5,088
+tminus1_1800	A3 HKO hourly-state residual LGBM	0.934988	5,050
+tminus1_1500	none scored	—	0 strict selected-anchor rows
+5.2 Why T-1 23:59 won
+
+T-1 23:59 won because it had:
+
+9644 selected anchors out of 9647 target rows
+latest issue generally at 23 HKT
+more forecast revisions before cutoff
+more same-day hourly observations before cutoff
+best raw anchor coverage and best final MAE
+
+The selected-anchor issue-hour distribution at tminus1_2359 was:
+
+23 HKT: 9608 rows
+22 HKT: 27 rows
+21 HKT: 3 rows
+other: 6 rows
+missing: 3 rows
+
+This cutoff captures the late local forecast update path. HKO’s public forecast page confirms regular update cadence including 23:15 HKT.
+
+5.3 Whether T-1 21:00 is viable
+
+T-1 21:00 is viable but weaker:
+
+best MAE: 0.921281
+best rows: 5088
+anchor rows: 8428
+
+It is only about 0.0226°C worse than 23:59 final. It may be useful when an earlier operational decision is required. But it should not be the primary accuracy benchmark.
+
+5.4 Why T-1 18:00 was weaker
+
+T-1 18:00 was weaker because it had:
+
+fewer eligible forecast revisions
+more missing anchors
+less late-day hourly state
+best model was A3, not A7
+best MAE: 0.934988
+
+At 18:00, most selected issues were around 17 HKT. That likely captures the early next-day forecast but misses the late-night revision information that improved 23:59.
+
+5.5 Why T-1 15:00 produced no scored strict selected-anchor model
+
+The source eligibility audit shows:
+
+tminus1_1500 selected anchors: 0
+tminus1_1500 no_eligible_anchor: 9647
+eligible_forecast_count: always 0
+
+This is not a model failure. It is an anchor-selection/data-availability issue under the strict filter:
+
+source = info_gov
+product_type = local
+row_quality_status = usable_local_minmax
+target_issue_lead_days = 1
+issue_at_utc <= T-1 15:00 HKT
+
+Likely explanation:
+
+The strict lead-1 local min/max forecast source does not provide the eligible next-day anchor before 15:00 HKT under the implemented selector.
+
+Because HKO’s regular local forecast update schedule includes a 16:15 HKT update, it is plausible that the first reliable lead-1 next-day local max/min anchor often appears after 15:00 HKT.
+
+But Codex should not assume. It must audit.
+
+5.6 Exact earlier-cutoff viability experiment
+
+Add an anchor-provenance experiment, not a model experiment first.
+
+For every target date and cutoff 15:00, 16:30, 18:00, 21:00, 23:59, produce:
+
+all forecast rows by target_date
+all rows by source
+all rows by product_type
+all rows by target_issue_lead_days
+all rows by row_quality_status
+all rows by parse_status
+all rows by issue hour
+strict eligible count
+relaxed local lead1 count
+nearest pre-cutoff local forecast count
+reason no strict anchor was selected
+
+Promotion to ML is allowed only if a candidate 15:00/16:30 anchor policy has:
+
+>= 80% scored-row coverage from 2011 onward
+one unambiguous selected anchor per target_date/cutoff
+no source mixing outside documented Info.gov local forecast unless separately labeled
+raw anchor MAE reported honestly
+leakage audit pass
+6. Model diagnosis
+6.1 A0 raw official
+
+Status:
+
+Very strong baseline.
+Primary anchor remains mandatory.
+
+Raw official should stay the benchmark and also stay a zero-correction candidate.
+
+6.2 A1 grouped residual
+
+Status:
+
+Small useful bias correction.
+
+Gain was only 0.0061°C, but A1 is valuable as a transparent diagnostic. It should stay as a baseline and possible ensemble component.
+
+6.3 A2 revision residual LGBM
+
+Status:
+
+Useful.
+
+Revision features produced a meaningful incremental improvement:
+
+A0 → A2 gain: +0.0165°C
+A1 → A2 gain: +0.0104°C
+
+Keep revision path features.
+
+6.4 A3 hourly-state residual LGBM
+
+Status:
+
+Most important ML model in the run.
+
+A3 captured almost all practical gain:
+
+A0 → A3 gain: +0.0301°C
+A2 → A3 gain: +0.0136°C
+
+The next round should preserve A3-style features and use them in both the base residual model and router.
+
+6.5 A4 station-network residual LGBM
+
+Status:
+
+Feature importance high, ablation value weak.
+
+A4 slightly worsened MAE after A3:
+
+A3 MAE: 0.900754
+A4 MAE: 0.901236
+
+Do not keep the full 113-feature station-network block. Preserve only the top compact network features.
+
+6.6 A5 text-warning residual LGBM
+
+Status:
+
+Useful for regime diagnostics, weak for broad all-row residual regression.
+
+A5 worsened MAE after A4:
+
+A4 MAE: 0.901236
+A5 MAE: 0.901910
+
+Move text/warning features into router/tail models and no-harm slice reports.
+
+6.7 A6 target-memory residual LGBM
+
+Status:
+
+Small value, sealed limitation.
+
+A6 improved only slightly versus A5 and barely versus A3. In sealed confirmation, target lag features were mostly missing because of sealed-blind mode. Preserve only compact climatology/anomaly features until exact publication-time lag replay is proven.
+
+6.8 A7 final residual ensemble
+
+Status:
+
+Best overall, but not enough.
+
+A7 improved:
+
+MAE: -0.0322°C
+RMSE: -0.0417°C
+p90: -0.0958°C
+bias: almost eliminated
+
+But it also worsened 44.9% of rows. The ensemble needs abstention, not more all-row blending.
+
+6.9 A8 direct absolute LGBM
+
+Status:
+
+Reject for promotion.
+
+It underperformed raw official:
+
+A8 MAE: 0.949068
+A0 MAE: 0.930858
+
+Keep only as a diagnostic.
+
+6.10 B0 climatology/persistence
+
+Status:
+
+Sanity check only.
+
+It was not competitive:
+
+B0 MAE: 1.905100
+6.11 CatBoost residual role
+
+At tminus1_2359, final ensemble weights were:
+
+zero correction: 0.168214
+grouped residual: 0.000000
+LGBM residual: 0.561553
+CatBoost residual: 0.045332
+Huber residual: 0.224901
+lambda: 1.0
+
+CatBoost had low weight at 23:59 but high weight at 18:00. Keep CatBoost as a diversity model for one more round, but do not expand CatBoost complexity.
+
+6.12 Huber residual role and convergence warnings
+
+Huber received meaningful ensemble weight at 23:59, but stderr contained repeated sklearn convergence warnings:
+
+lbfgs failed to converge after 500 iterations
+
+Next round should either:
+
+increase max_iter and add convergence reporting
+
+or replace Huber with:
+
+Ridge/ElasticNet residual model
+
+My recommendation: keep a robust linear guardrail, but rename it and make convergence mandatory. If Huber does not converge, fall back to Ridge.
+
+7. Final next-round recommendation
+Hard recommendation
+
+Do not run a broader generic ML experiment.
+
+Run exactly these three next-round experiments:
+
+Experiment 1: Selective correction / abstention router
+Experiment 2: Tail-error specialist overlay
+Experiment 3: Forecast-anchor provenance and earlier-cutoff repair
+
+The primary promotion candidate is Experiment 1. Experiment 2 is an overlay that is promoted only if it improves tail behavior without damaging overall MAE. Experiment 3 is a data-source/cutoff audit, not a direct model promotion candidate.
+
+7.1 Experiment 1: Selective correction / abstention router
+Hypothesis
+
+The current A7 model has weak but real residual signal. Its problem is not lack of signal; its problem is applying corrections too broadly. A router can improve MAE by applying corrections only when predicted benefit is positive.
+
+Evidence supporting it
+
+The final ensemble:
+
+helped 55.1% of rows
+worsened 44.9% of rows
+improved official-too-low rows by +0.1359°C
+worsened official-too-high rows by -0.0735°C
+worsened exact official rows by -0.1919°C
+
+That is exactly the profile where abstention can help.
+
+Exact training data
+
+Use the same eligible rows and folds as the current primary run:
+
+start_date: 2000-01-02
+presealed_end_date: 2023-12-31
+sealed_start_date: 2024-01-01
+sealed_end_date: 2026-05-31
+primary_cutoff_profile: tminus1_2359
+
+Training rows:
+
+label_source == label_core
+
+Sealed rows:
+
+confirmation only
+no model selection
+Exact validation folds
+
+Outer folds unchanged:
+
+fold1: train 2000-01-02..2010-12-31, validate 2011-01-01..2013-12-31
+fold2: train 2000-01-02..2013-12-31, validate 2014-01-01..2016-12-31
+fold3: train 2000-01-02..2016-12-31, validate 2017-01-01..2019-12-31
+fold4: train 2000-01-02..2019-12-31, validate 2020-01-01..2021-12-31
+presealed: train 2000-01-02..2021-12-31, validate 2022-01-01..2023-12-31
+sealed: train 2000-01-02..2023-12-31, validate 2024-01-01..2026-05-31
+
+For router training inside each outer fold, Codex must create inner rolling folds from that outer fold’s training rows. The router must be trained only on out-of-fold candidate corrections, never on in-sample candidate predictions.
+
+Exact feature set
+
+Use a pruned feature list, target maximum 90 raw features.
+
+Keep:
+
+official_max_c
+official_min_c
+official_range_c
+official_midpoint_c
+official_max_bin
+official_range_bin
+issue_hour_bucket
+issue_age_minutes
+eligible_forecast_count
+rev_count
+rev_path_min_c
+rev_path_max_c
+rev_path_range_c
+rev_path_std_c
+rev_latest_minus_prev_max_c
+rev_latest_minus_first_max_c
+rev_last3_slope_c_per_hour
+rev_last_change_age_hours
+fcst_flag_thunderstorm
+fcst_flag_showers
+fcst_flag_heavy_showers
+fcst_flag_very_hot
+fcst_flag_nt_higher
+month
+season_bucket
+doy_sin
+doy_cos
+trend_years_since_2000
+hko_latest_temp_c
+hko_latest_temp_minus_official_max_c
+hko_latest_temp_minus_official_min_c
+hko_latest_dewpoint_c
+hko_latest_dewpoint_depression_c
+hko_latest_rh_pct
+hko_temp_trend_3h_c
+hko_temp_trend_6h_c
+hko_temp_trend_12h_c
+hko_temp_mean_6h_c
+hko_temp_mean_12h_c
+hko_temp_mean_24h_c
+hko_rh_trend_3h_pct
+hko_rh_mean_6h_pct
+hko_rh_mean_12h_pct
+network_mean_trend_6h_c
+network_spread_mean_6h_c
+network_spread_max_6h_c
+network_latest_temp_spread_c
+nt_heat_ceiling_index_c
+urban_core_mean_minus_coastal_marine_mean_c
+inland_nt_mean_minus_coastal_marine_mean_c
+west_nw_nt_mean_minus_coastal_marine_mean_c
+inland_coastal_spread_6h_max_c
+network_latest_hko_minus_mean_c
+hourly_any_thunderstorm_warning_24h
+hourly_any_rainstorm_warning_24h
+hourly_warning_text_count_24h
+hourly_rainfall_text_count_24h
+target_clim_doy_30yr_median_c
+target_clim_doy_10yr_median_c
+target_modern_warming_signal_c
+target_lag2_minus_doy30_clim_c
+target_roll30_anomaly_lag2_c
+target_roll30_minus_doy30_clim_c
+target_lag_2_missing_flag
+
+Add candidate-model meta-features:
+
+candidate_resid_lgbm_a3_c
+candidate_resid_lgbm_pruned_full_c
+candidate_resid_catboost_c
+candidate_resid_linear_c
+candidate_resid_ensemble_c
+candidate_abs_resid_ensemble_c
+candidate_resid_std_c
+candidate_resid_sign_agreement_count
+candidate_positive_correction_flag
+candidate_negative_correction_flag
+candidate_correction_magnitude_bin
+Exact models
+
+Base correction candidates:
+
+M2a_pruned_A3_LGBM_residual
+M2b_pruned_full_LGBM_residual
+M3_pruned_CatBoost_residual
+M4_robust_linear_residual
+
+Router models:
+
+R1_apply_classifier
+R2_sign_classifier
+R3_expected_benefit_regressor
+
+Labels for router OOF rows:
+
+true_residual_c = y_true_c - anchor_forecast_max_c
+candidate_residual_c = candidate final residual correction
+raw_abs_error_c = abs(true_residual_c)
+candidate_abs_error_c = abs(true_residual_c - candidate_residual_c)
+benefit_c = raw_abs_error_c - candidate_abs_error_c
+apply_label = 1 if benefit_c > 0 else 0
+strong_apply_label = 1 if benefit_c >= 0.10 else 0
+sign_label = sign(true_residual_c)
+candidate_sign_correct = 1 if sign(candidate_residual_c) == sign(true_residual_c)
+
+Routing rule candidates must be selected on rolling validation only:
+
+apply if:
+  predicted_expected_benefit_c >= threshold_benefit
+  and predicted_apply_probability >= threshold_apply
+  and predicted_sign_correct_probability >= threshold_sign
+else:
+  residual_prediction_c = 0
+
+Threshold grid:
+
+threshold_benefit: [0.00, 0.02, 0.04, 0.06, 0.08]
+threshold_apply: [0.52, 0.56, 0.60, 0.64]
+threshold_sign: [0.56, 0.60, 0.64, 0.68]
+
+Correction cap grid:
+
+abs_cap_c: [0.25, 0.35, 0.50, 0.75]
+positive_cap_c: [0.35, 0.50, 0.75]
+negative_cap_c: [0.25, 0.35, 0.50]
+
+Default no-harm starting point:
+
+positive_cap_c = 0.50
+negative_cap_c = 0.35
+hard_abs_cap_c = 0.75
+
+Reason: the current system’s p90 absolute correction is only 0.426°C; most useful corrections are small, while the worst harms were caused by wrong-sign corrections around 0.7-0.9°C.
+
+Exact metrics
+
+Report:
+
+MAE
+RMSE
+median absolute error
+p80 absolute error
+p90 absolute error
+p95 absolute error
+max absolute error
+bias
+apply_rate
+mean correction when applied
+wrong_sign_apply_rate
+mean benefit among applied rows
+mean harm among harmed rows
+helped/worsened/tied counts
+monthly MAE
+season MAE
+official max bin MAE
+official range bin MAE
+issue-hour bucket MAE
+thunderstorm/rainstorm regime MAE
+predicted-apply decile MAE
+predicted-benefit decile MAE
+Promotion gates
+
+Promote only if all are true on frozen presealed selection, before sealed inspection:
+
+primary tminus1_2359 MAE improvement vs raw official >= 0.045°C on rolling validation
+primary tminus1_2359 MAE improvement vs raw official >= 0.035°C on presealed holdout
+primary tminus1_2359 MAE improvement vs current A7 >= 0.010°C on presealed holdout
+RMSE no worse than current A7 by more than 0.005°C on presealed holdout
+p90 no worse than current A7 by more than 0.010°C on presealed holdout
+no month with n >= 100 is worse than raw official by more than 0.015°C
+no season is worse than raw official
+apply_rate between 15% and 70%
+wrong_sign_apply_rate lower than current all-row wrong-sign harm rate
+
+After those are frozen, sealed confirmation must be reported. Sealed rows cannot affect thresholds, features, hyperparameters, or model choice.
+
+Failure criteria
+
+Reject if:
+
+presealed MAE improvement over current A7 < 0.010°C
+or any no-harm gate fails
+or sealed confirmation reverses the sign of the edge
+or the router selects almost all rows, meaning it is not actually selective
+7.2 Experiment 2: Tail-error specialist overlay
+Hypothesis
+
+The current model has more value on high-error days than ordinary days. A specialist can reduce p90/p95/RMSE while an abstention router protects ordinary rows.
+
+Evidence supporting it
+
+Post-hoc raw-error tail slices showed increasing gains:
+
+top 20% raw-error gain: +0.114°C
+top 10% raw-error gain: +0.133°C
+top 5% raw-error gain: +0.161°C
+top 1% raw-error gain: +0.219°C
+Exact labels
+
+For train rows only:
+
+true_residual_c = y_true_c - anchor_forecast_max_c
+abs_residual_c = abs(true_residual_c)
+tail_150_label = 1 if abs_residual_c >= 1.5 else 0
+tail_200_label = 1 if abs_residual_c >= 2.0 else 0
+tail_sign_label = sign(true_residual_c)
+Exact models
+T1_tail150_classifier: LightGBM binary classifier
+T2_tail200_classifier: LightGBM binary classifier
+T3_tail_sign_classifier: LightGBM binary or multiclass classifier
+T4_tail_residual_regressor: LightGBM MAE residual model trained with tail sample weights
+
+Sample weights for T4:
+
+weight = 1.0 normally
+weight = 2.5 if abs_residual_c >= 1.5
+weight = 4.0 if abs_residual_c >= 2.0
+Overlay rule
+
+Apply tail overlay only if:
+
+tail150_probability >= 0.60
+and tail_sign_probability >= 0.62
+and abs(tail_residual_prediction_c) >= 0.25
+
+Then:
+
+candidate_residual_c = clipped tail_residual_prediction_c
+hard cap = 1.00°C
+
+The final decision between router correction and tail correction:
+
+if tail overlay passes and predicted tail benefit exceeds router benefit:
+    use tail correction
+else:
+    use router correction or zero
+Promotion gates
+
+Tail overlay is promotable only if:
+
+overall MAE does not worsen versus Experiment 1
+overall RMSE improves by >= 0.010°C versus Experiment 1
+p90 or p95 improves by >= 0.020°C versus Experiment 1
+max absolute error does not worsen by > 0.30°C versus raw official
+no sealed no-harm violation after frozen selection
+Failure criteria
+
+Reject tail overlay if:
+
+overall MAE worsens by > 0.003°C
+or p90/p95 improvement is cosmetic
+or tail classifier cannot rank risk better than random in rolling validation
+7.3 Experiment 3: Forecast-anchor provenance and earlier-cutoff repair
+Hypothesis
+
+The tminus1_1500 failure may be caused by true lack of strict lead-1 Info.gov local anchors before 15:00, or by selector strictness/target-date mapping. This must be audited before rejecting earlier cutoffs.
+
+Evidence supporting it
+
+Source eligibility audit:
+
+tminus1_1500 no_eligible_anchor: 9647
+tminus1_1500 selected: 0
+
+But 18:00 and 21:00 had many selected anchors, meaning the source starts becoming viable later in the day.
+
+Exact experiment
+
+Add a non-ML provenance audit that scans all rows from:
+
+public.hko_historical_forecasts_2000_2026
+
+for candidate cutoffs:
+
+tminus1_1500
+tminus1_1630
+tminus1_1800
+tminus1_2100
+tminus1_2359
+
+For each target date/cutoff, output:
+
+strict_selected_anchor_status
+strict_candidate_count
+all_info_gov_local_count
+all_info_gov_any_quality_count
+all_lead0_count
+all_lead1_count
+usable_local_minmax_count
+parse_status_counts
+row_quality_status_counts
+min_issue_at_hkt
+max_issue_at_hkt_before_cutoff
+nearest_issue_after_cutoff_hkt
+minutes_to_next_eligible_after_cutoff
+reason_no_anchor
+Promotion condition to later ML
+
+Earlier cutoff can enter modeling only if:
+
+coverage >= 80% from 2011 onward
+raw anchor MAE is competitive enough to matter
+source contract remains apples-to-apples or is separately labeled
+leakage audit passes
+
+Otherwise, document:
+
+15:00 is not viable under strict Info.gov local lead-1 source.
+8. Codex-ready implementation spec
+8.1 New config
+
+Create:
+
+implementation/configs/hkg_tmax/residual_ml_next_round.yaml
+
+Contents:
+
+seed: 20260705
+allow_leakage_failures: false
+
+dates:
+  start_date: "2000-01-02"
+  presealed_end_date: "2023-12-31"
+  sealed_start_date: "2024-01-01"
+  sealed_end_date: "2026-05-31"
+
+cutoff_profiles:
+  - tminus1_2359
+  - tminus1_2100
+  - tminus1_1800
+
+primary_cutoff_profile: tminus1_2359
+
+anchor_source: public.hko_historical_forecasts_2000_2026
+hourly_source: public.hko_info_gov_hourly_readings_1998_2026
+target_history_source: feature_safe.hko_target_history_pre2024
+sealed_confirmation_mode: sealed_blind_mode
+
+feature_policy:
+  max_raw_features: 90
+  use_pruned_feature_set: true
+  include_full_station_network: false
+  include_full_text_warning: false
+  include_full_target_memory: false
+
+candidate_models:
+  lgbm_a3_residual: true
+  lgbm_pruned_full_residual: true
+  catboost_residual: true
+  robust_linear_residual: true
+  direct_absolute_diagnostic: false
+
+router:
+  enabled: true
+  inner_folds_min_train_years: 5
+  threshold_benefit_grid: [0.00, 0.02, 0.04, 0.06, 0.08]
+  threshold_apply_grid: [0.52, 0.56, 0.60, 0.64]
+  threshold_sign_grid: [0.56, 0.60, 0.64, 0.68]
+  positive_cap_grid_c: [0.35, 0.50, 0.75]
+  negative_cap_grid_c: [0.25, 0.35, 0.50]
+  hard_abs_cap_grid_c: [0.35, 0.50, 0.75]
+  selection_metric: mae
+  no_harm_guardrails:
+    max_presealed_rmse_worse_vs_current_a7_c: 0.005
+    max_presealed_p90_worse_vs_current_a7_c: 0.010
+    max_monthly_worse_vs_raw_c: 0.015
+    min_apply_rate: 0.15
+    max_apply_rate: 0.70
+
+tail_specialist:
+  enabled: true
+  tail_abs_thresholds_c: [1.5, 2.0]
+  tail_probability_grid: [0.55, 0.60, 0.65, 0.70]
+  sign_probability_grid: [0.58, 0.62, 0.66]
+  min_abs_tail_correction_c: [0.25, 0.35]
+  hard_abs_cap_c: 1.00
+
+early_cutoff_audit:
+  enabled: true
+  cutoff_profiles:
+    - tminus1_1500
+    - tminus1_1630
+    - tminus1_1800
+    - tminus1_2100
+    - tminus1_2359
+8.2 New modules
+
+Create:
+
+implementation/code/src/hkg_tmax/features/pruned_feature_policy.py
+
+Responsibilities:
+
+Define PRUNED_FEATURES.
+Validate all requested features exist or emit missing-feature diagnostics.
+Map pruned features to source families.
+Reject feature count > max_raw_features unless config override is explicit.
+
+Create:
+
+implementation/code/src/hkg_tmax/modeling/selective_router.py
+
+Responsibilities:
+
+Build inner OOF candidate predictions.
+Train apply classifier.
+Train sign classifier.
+Train expected-benefit regressor.
+Grid-search router thresholds on rolling validation only.
+Apply zero-correction abstention rule.
+Apply asymmetric correction caps.
+Emit candidate/router diagnostics.
+
+Required functions:
+
+def make_inner_folds(train: pd.DataFrame) -> list[FoldSpec]: ...
+
+def build_oof_candidate_corrections(
+    train: pd.DataFrame,
+    feature_names: list[str],
+    seed: int,
+) -> pd.DataFrame: ...
+
+def build_router_labels(oof: pd.DataFrame) -> pd.DataFrame: ...
+
+def fit_router_models(
+    oof: pd.DataFrame,
+    router_features: list[str],
+    seed: int,
+) -> dict[str, Any]: ...
+
+def select_router_thresholds(
+    oof: pd.DataFrame,
+    config: dict[str, Any],
+) -> dict[str, Any]: ...
+
+def apply_selective_router(
+    valid: pd.DataFrame,
+    candidate_predictions: pd.DataFrame,
+    router_models: dict[str, Any],
+    thresholds: dict[str, Any],
+) -> pd.DataFrame: ...
+
+Create:
+
+implementation/code/src/hkg_tmax/modeling/tail_specialist.py
+
+Responsibilities:
+
+Train tail-risk classifiers.
+Train tail residual regressor with sample weights.
+Apply tail overlay only when probability/sign/correction thresholds pass.
+Emit tail-risk diagnostics.
+
+Required functions:
+
+def build_tail_labels(frame: pd.DataFrame) -> pd.DataFrame: ...
+
+def fit_tail_models(
+    train: pd.DataFrame,
+    feature_names: list[str],
+    seed: int,
+) -> dict[str, Any]: ...
+
+def apply_tail_overlay(
+    valid: pd.DataFrame,
+    base_router_predictions: pd.DataFrame,
+    tail_models: dict[str, Any],
+    thresholds: dict[str, Any],
+) -> pd.DataFrame: ...
+
+Create:
+
+implementation/code/src/hkg_tmax/evaluation/no_harm_reporting.py
+
+Responsibilities:
+
+Score helped/worsened/tied rows.
+Score apply-rate diagnostics.
+Score wrong-sign diagnostics.
+Score no-harm guardrails.
+Produce slice-level no-harm pass/fail report.
+
+Required outputs:
+
+no_harm_audit.json
+router_threshold_selection.csv
+router_apply_rate_by_split.csv
+router_apply_rate_by_month.csv
+router_benefit_deciles.csv
+help_worse_rows.csv
+
+Create:
+
+implementation/code/src/hkg_tmax/data/anchor_provenance_audit.py
+
+Responsibilities:
+
+Audit all forecast-row availability around early cutoffs.
+Explain why strict anchors are missing.
+Build alternative candidate selector diagnostics without changing primary model.
+
+Required functions:
+
+def load_all_forecast_candidates(connection, params) -> pd.DataFrame: ...
+
+def build_anchor_provenance_audit(
+    targets: pd.DataFrame,
+    forecasts_all: pd.DataFrame,
+    cutoff_profiles: list[CutoffProfile],
+) -> pd.DataFrame: ...
+
+def summarize_anchor_provenance(audit: pd.DataFrame) -> dict[str, Any]: ...
+8.3 Existing modules to modify
+
+Modify:
+
+implementation/code/src/hkg_tmax/evaluation/ablation_runner.py
+
+Add new model IDs:
+
+C0_current_A7_reproduction
+C1_pruned_residual_ensemble
+C2_selective_router
+C3_tail_overlay_router
+
+Do not remove A0-A8. The next round must still reproduce the old ladder for comparison.
+
+Modify:
+
+implementation/code/src/hkg_tmax/modeling/residual_models.py
+
+Changes:
+
+Add fit_lgbm_classifier.
+Add fit_lgbm_benefit_regressor.
+Add robust_linear fallback:
+  try HuberRegressor(max_iter=2000, tol=1e-4)
+  if convergence warning or failure, fit Ridge/ElasticNet
+Emit convergence status into model diagnostics.
+
+Modify:
+
+implementation/code/src/hkg_tmax/evaluation/reporting.py
+
+Add artifact writers for:
+
+router_model_card.md
+next_round_summary.json
+no_harm_audit.json
+tail_specialist_audit.json
+anchor_provenance_audit.csv
+anchor_provenance_summary.json
+
+Modify:
+
+implementation/code/src/hkg_tmax/features/leakage_guards.py
+
+Add checks:
+
+router_oof_predictions_are_inner_fold_only
+router_thresholds_selected_without_presealed_or_sealed_if configured so
+tail_labels_not_used_as_features
+posthoc_raw_error_slices_not_used_as_features
+sealed_rows_not_used_for_router_threshold_selection
+8.4 New script
+
+Create:
+
+implementation/scripts/run_hkg_tmax_residual_ml_next_round.py
+
+CLI:
+
+.\.venv\Scripts\python.exe scripts\run_hkg_tmax_residual_ml_next_round.py `
+  --config configs\hkg_tmax\residual_ml_next_round.yaml `
+  --output-dir experiments\hkg_tmax_residual_ml_next_round\results
+
+Required script flow:
+
+1. Load config.
+2. Build the same leakage-safe feature matrix.
+3. Apply pruned feature policy.
+4. Run original A0-A8 reproduction on primary cutoff.
+5. Run C1 pruned residual ensemble.
+6. Run C2 selective router with inner OOF training.
+7. Run C3 tail overlay.
+8. Run cutoff sensitivity for 18:00, 21:00, 23:59.
+9. Run anchor provenance audit for 15:00/16:30/18:00/21:00/23:59.
+10. Run leakage audit.
+11. Run no-harm audit.
+12. Write all artifacts.
+13. Print promotion decision.
+8.5 Required artifacts
+
+Write to:
+
+experiments/hkg_tmax_residual_ml_next_round/results/
+
+Mandatory artifacts:
+
+summary.json
+next_round_model_card.md
+scoreboard.csv
+scoreboard_by_split.csv
+scoreboard_by_month.csv
+scoreboard_by_regime.csv
+scoreboard_by_official_error_proxy.csv
+ablation_scoreboard.csv
+cutoff_sensitivity_scoreboard.csv
+router_threshold_selection.csv
+router_oof_diagnostics.csv
+router_apply_rate_by_split.csv
+router_apply_rate_by_month.csv
+router_apply_rate_by_regime.csv
+router_benefit_deciles.csv
+help_worse_rows.csv
+tail_specialist_audit.json
+tail_specialist_scoreboard.csv
+no_harm_audit.json
+leakage_audit.json
+row_count_audit.json
+feature_lineage.json
+feature_matrix_schema.json
+feature_missingness_report.csv
+feature_importance_lgbm.csv
+feature_importance_catboost.csv
+linear_model_diagnostics.csv
+ensemble_weights.json
+router_model_params.json
+anchor_provenance_audit.csv
+anchor_provenance_summary.json
+source_eligibility_audit.csv
+prediction_rows.csv
+prediction_rows.parquet
+8.6 Scoreboard schema additions
+
+Extend prediction rows with:
+
+candidate_resid_lgbm_a3_c
+candidate_resid_lgbm_pruned_full_c
+candidate_resid_catboost_c
+candidate_resid_linear_c
+candidate_resid_ensemble_c
+candidate_resid_std_c
+router_apply_probability
+router_sign_probability
+router_expected_benefit_c
+router_applied_flag
+router_selected_threshold_id
+tail150_probability
+tail200_probability
+tail_sign_probability
+tail_overlay_applied_flag
+final_correction_source
+abs_improvement_vs_raw_c
+helped_vs_raw_flag
+worsened_vs_raw_flag
+
+Important:
+
+abs_improvement_vs_raw_c
+helped_vs_raw_flag
+worsened_vs_raw_flag
+
+are evaluation-only columns. They must never be feature columns.
+
+8.7 Tests to add
+
+Create:
+
+implementation/code/tests/test_hkg_tmax_next_round_selective_router.py
+
+Tests:
+
+def test_router_oof_predictions_do_not_use_same_inner_fold_labels(): ...
+
+def test_router_labels_are_evaluation_only_not_feature_columns(): ...
+
+def test_selective_router_abstains_to_zero_when_thresholds_not_met(): ...
+
+def test_asymmetric_caps_are_applied_correctly(): ...
+
+def test_tail_overlay_requires_probability_and_sign_thresholds(): ...
+
+def test_no_harm_audit_flags_monthly_degradation(): ...
+
+def test_anchor_provenance_reports_tminus1_1500_missing_reason(): ...
+
+def test_sealed_rows_not_used_for_router_threshold_selection(): ...
+
+def test_raw_error_decile_not_allowed_as_feature(): ...
+
+def test_prediction_rows_include_apply_and_tail_diagnostics(): ...
+8.8 Runtime constraints
+
+The previous run used 120 tree iterations. For next round:
+
+Keep candidate models at 120-200 trees.
+Use pruned features.
+Do not run unrestricted hyperparameter search.
+Use small threshold grids.
+Fail fast if feature count exceeds configured max.
+Write intermediate router OOF artifacts for debugging.
+
+Expected runtime should remain similar to the current full run plus router OOF overhead. Do not add neural nets or large external model training.
+
+9. Do not overclaim
+
+The current run is not a trading-grade breakthrough.
+
+It is:
+
+a clean leakage-safe calibration improvement
+with small MAE gain
+good bias correction
+some RMSE/tail improvement
+but insufficient meaningful edge
+
+The next round must prove incremental edge under strict no-harm constraints.
+
+Non-negotiable rules remain:
+
+No sealed row may be used for feature selection, model selection, threshold selection, calibration, or hyperparameter tuning.
+No post-cutoff source may be used.
+No raw Daily Extract payload row may become a predictor.
+No target-day Daily Extract value may become a predictor.
+No lag1 target label may be used unless exact row-level publication availability is proven and encoded.
+No raw official-error slice may become a feature.
+No reported improvement is valid unless leakage audit and no-harm audit both pass.
+10. Codex verification checklist
+
+Codex should mark the next round complete only when all of the following are true:
+
+[ ] Original A0-A8 ladder is reproduced within 0.002°C MAE tolerance.
+[ ] C1 pruned residual ensemble is scored.
+[ ] C2 selective router is scored.
+[ ] C3 tail overlay is scored.
+[ ] Router training uses inner OOF predictions only.
+[ ] Router thresholds are selected without presealed/sealed leakage.
+[ ] Sealed rows are confirmation-only.
+[ ] No raw Daily Extract payload predictors exist in feature lineage.
+[ ] No post-cutoff forecast issue is used.
+[ ] No post-cutoff hourly dispatch or observation is used.
+[ ] Target-history lag2 floor still passes.
+[ ] Raw official-error labels are evaluation-only.
+[ ] No-harm audit is written.
+[ ] Help/worse row report is written.
+[ ] Monthly, seasonal, official-bin, issue-bucket, thunderstorm/rainstorm slices are written.
+[ ] Tail overlay has separate promotion/failure decision.
+[ ] Anchor provenance audit explains 15:00 strict-anchor failure.
+[ ] Huber/linear convergence status is explicit.
+[ ] Feature count is <= 90 unless config override is explicit.
+[ ] Final model card states promote/no-promote.
+
+Final recommendation:
+
+Move from broad all-row residual ML to selective no-harm residual correction.
+Use the current A7 result as a clean baseline, not as a promoted model.
+The next credible edge must come from knowing when to correct and when to abstain.

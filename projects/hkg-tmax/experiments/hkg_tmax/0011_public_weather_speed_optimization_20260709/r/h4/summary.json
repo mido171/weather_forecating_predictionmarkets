@@ -1,0 +1,87 @@
+{
+  "by_source": {
+    "himawari9_b13_s0510": {
+      "bytes": 456907779,
+      "fetch_ok": 142,
+      "norm_ok": 142,
+      "tasks": 144
+    }
+  },
+  "bytes_ok": 456907779,
+  "completed_at_utc": "2026-07-09T13:40:48.043837Z",
+  "config": {
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day": "2026-06-21",
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "max_attempts": 3,
+    "max_tasks": null,
+    "normalize": true,
+    "range_workers": 1,
+    "sources": [
+      "himawari_b13_s0510"
+    ],
+    "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_s0011",
+    "timeout": 120,
+    "use_processes": false,
+    "workers": 4
+  },
+  "failure_count": 2,
+  "fetch_ok": 142,
+  "fetch_seconds_p50": 2.7157248000148684,
+  "fetch_seconds_p90": 4.412010800035205,
+  "first_failures": [
+    {
+      "error": "HTTPError: HTTP Error 404: Not Found",
+      "item_id": "himawari9_B13_S0510_20260621_0240",
+      "source": "himawari9_b13_s0510",
+      "status": "error"
+    },
+    {
+      "error": "HTTPError: HTTP Error 404: Not Found",
+      "item_id": "himawari9_B13_S0510_20260621_1440",
+      "source": "himawari9_b13_s0510",
+      "status": "error"
+    }
+  ],
+  "mb_per_second_wall": 2.1528744439036593,
+  "normalization_seconds_p50": 2.715405000024475,
+  "normalization_seconds_p90": 3.961164899985306,
+  "normalize_ok": 142,
+  "normalized_row_count": 142,
+  "resources": {
+    "cpu_max_percent": null,
+    "cpu_mean_percent": null,
+    "cpu_sampler_available": false,
+    "staging_end_bytes": 0,
+    "staging_max_bytes": 0
+  },
+  "started_at_utc": "2026-07-09T13:37:15.800802Z",
+  "tasks_per_minute_wall": 40.71026156752656,
+  "tasks_total": 144,
+  "trial_name": "himawari_fetch_normalize_w4",
+  "trial_type": "parallel_fetch_normalize",
+  "wall_seconds": 212.23150300001726
+}

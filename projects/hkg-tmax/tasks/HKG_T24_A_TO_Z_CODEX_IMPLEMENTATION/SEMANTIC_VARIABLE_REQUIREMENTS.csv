@@ -1,0 +1,57 @@
+family,semantic_variable,levels,applicable_models,priority,forecast_use
+surface,air_temperature,2 m above ground / sfc,all atmospheric deterministic and ensembles,P0,"hourly trajectory, direct Tmax, MOS"
+surface,dew_point_temperature,2 m above ground / sfc,"GFS, GEFS, IFS where available, CWA, AI",P0,moisture load and T-Td spread
+surface,relative_or_specific_humidity,2 m / near surface,where available,P1,cloud/fog/marine regime
+surface,u_wind,10 m above ground / sfc,all atmospheric models,P0,vector wind and onshore component
+surface,v_wind,10 m above ground / sfc,all atmospheric models,P0,vector wind and onshore component
+surface,mean_sea_level_pressure,MSL / sfc,all atmospheric models,P0,"ridge, surge, TC and pressure tendency"
+surface,surface_pressure,surface,where available,P1,local pressure and vertical reductions
+cloud,total_cloud_cover,entire atmosphere / sfc,"GFS, GEFS, IFS, CWA",P0,radiative suppression
+cloud,low_mid_high_cloud,layer-specific,where available,P1,cloud vertical structure
+precip,total_precipitation,surface accumulation,all atmospheric models,P0,rain/cloud suppression and regime
+precip,precipitation_rate,surface,where available,P1,timing relative to heating window
+radiation,downward_shortwave_radiation,surface,"GFS, IFS, CWA where available",P0,solar heating integral
+radiation,downward_longwave_radiation,surface,where available,P2,nighttime thermal memory
+boundary_layer,planetary_boundary_layer_height,surface/layer,where available,P1,mixing potential
+surface_flux,sensible_heat_flux,surface,where available,P2,surface heating efficiency
+surface_flux,latent_heat_flux,surface,where available,P2,moisture partitioning
+land,soil_temperature,0-10 cm or nearest,where available,P2,heat-storage context
+land,soil_moisture,0-10 cm or nearest,where available,P2,evaporative cooling context
+convection,CAPE,surface/column,"GFS, GEFS, CWA, IFS where available",P1,convective cloud/rain risk
+convection,CIN,surface/column,"GFS, GEFS, CWA, IFS where available",P1,cap and cloud-break risk
+pressure_level,temperature,1000 hPa,pressure-level atmospheric models,P1,thermal profile and stability
+pressure_level,relative_or_specific_humidity,1000 hPa,pressure-level atmospheric models,P1,moisture profile
+pressure_level,geopotential_height,1000 hPa,pressure-level atmospheric models,P1,ridge/trough and thickness
+pressure_level,u_wind,1000 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,1000 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,1000 hPa,where available,P1,ascent/subsidence
+pressure_level,temperature,925 hPa,pressure-level atmospheric models,P0,thermal profile and stability
+pressure_level,relative_or_specific_humidity,925 hPa,pressure-level atmospheric models,P0,moisture profile
+pressure_level,geopotential_height,925 hPa,pressure-level atmospheric models,P1,ridge/trough and thickness
+pressure_level,u_wind,925 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,925 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,925 hPa,where available,P1,ascent/subsidence
+pressure_level,temperature,850 hPa,pressure-level atmospheric models,P0,thermal profile and stability
+pressure_level,relative_or_specific_humidity,850 hPa,pressure-level atmospheric models,P0,moisture profile
+pressure_level,geopotential_height,850 hPa,pressure-level atmospheric models,P0,ridge/trough and thickness
+pressure_level,u_wind,850 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,850 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,850 hPa,where available,P1,ascent/subsidence
+pressure_level,temperature,700 hPa,pressure-level atmospheric models,P0,thermal profile and stability
+pressure_level,relative_or_specific_humidity,700 hPa,pressure-level atmospheric models,P0,moisture profile
+pressure_level,geopotential_height,700 hPa,pressure-level atmospheric models,P1,ridge/trough and thickness
+pressure_level,u_wind,700 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,700 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,700 hPa,where available,P1,ascent/subsidence
+pressure_level,temperature,500 hPa,pressure-level atmospheric models,P0,thermal profile and stability
+pressure_level,relative_or_specific_humidity,500 hPa,pressure-level atmospheric models,P1,moisture profile
+pressure_level,geopotential_height,500 hPa,pressure-level atmospheric models,P0,ridge/trough and thickness
+pressure_level,u_wind,500 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,500 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,500 hPa,where available,P1,ascent/subsidence
+pressure_level,temperature,300 hPa,pressure-level atmospheric models,P1,thermal profile and stability
+pressure_level,relative_or_specific_humidity,300 hPa,pressure-level atmospheric models,P1,moisture profile
+pressure_level,geopotential_height,300 hPa,pressure-level atmospheric models,P1,ridge/trough and thickness
+pressure_level,u_wind,300 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,v_wind,300 hPa,pressure-level atmospheric models,P1,advection and shear
+pressure_level,vertical_velocity,300 hPa,where available,P1,ascent/subsidence

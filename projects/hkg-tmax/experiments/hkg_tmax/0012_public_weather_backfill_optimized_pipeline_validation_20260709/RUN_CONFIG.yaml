@@ -1,0 +1,26 @@
+experiment_id: 0012_public_weather_backfill_optimized_pipeline_validation_20260709
+primary_full_run: full_robustness_jun10_jul8_rerun4
+targeted_retry: targeted_gfs_retry_after_full_rerun4
+start_date: 2026-06-10
+end_date: 2026-07-08
+sources: ['gefs_control', 'gfs', 'himawari_b13_s0510']
+cycles: [0, 6, 12, 18]
+leads: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+execution_mode: optimized
+model_fetch_workers: 8
+model_range_workers: 4
+model_normalize_workers: 2
+himawari_workers: 8
+model_range_coalesce_gap_bytes: 0
+cpu_telemetry_requested: true
+cpu_telemetry_available: false
+cpu_telemetry_unavailable_reason: psutil_not_installed_in_active_venv
+staging_root: repo_local_short_path_per_day_shard
+max_staging_gb: 1.0
+stop_free_gb: 50.0
+retain_failed_raw: False
+dry_run: False
+skip_existing_complete: true
+max_attempts_primary: 5
+max_attempts_targeted_retry: 7
+day_shard_max_workers: 2

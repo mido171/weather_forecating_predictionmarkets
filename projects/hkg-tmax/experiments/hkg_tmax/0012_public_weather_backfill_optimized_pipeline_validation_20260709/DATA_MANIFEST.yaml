@@ -1,0 +1,24 @@
+sources:
+  - noaa_gfs_public_nomads_or_s3_idx_range
+  - noaa_gefs_control_public_nomads_or_s3_idx_range
+  - noaa_himawari9_ahi_b13_s0510
+date_range_utc:
+  start: 2026-06-10
+  end: 2026-07-08
+inventory_per_day:
+  gfs: 68
+  gefs_control: 68
+  himawari_b13_s0510: 144
+model_cycles_utc: [0, 6, 12, 18]
+model_leads_hours: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+himawari_band: B13
+himawari_segment: S0510
+raw_retention: deleted_after_db_commit
+database_schema: weather_backfill
+accepted_primary_run: full_robustness_jun10_jul8_rerun4
+accepted_targeted_retry: targeted_gfs_retry_after_full_rerun4
+excluded_from_accepted_scope:
+  - radar
+  - gefs_perturbed_members
+  - full_grib_grids
+  - full_himawari_rasters

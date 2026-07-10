@@ -1,0 +1,50 @@
+{
+  "id": "T20",
+  "suffix": "causal_long_history_target_memory_climatology",
+  "title": "Causal Long-History Target Memory and Climatology Feature Store",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T01",
+    "T15",
+    "T18"
+  ],
+  "mission": "Exploit the 1884+ HKO target record through strictly available lags, causal climatology, trends, volatility and spell-state features.",
+  "inputs": [
+    "Canonical target labels",
+    "label availability contract",
+    "target snapshots"
+  ],
+  "steps": [
+    "Determine earliest label date available at each cutoff; do not assume T\u22121.",
+    "Create explicit lag and lagged rolling windows with availability-safe offsets.",
+    "Create causal day-of-year, harmonic, decayed and trend-adjusted climatologies fitted on prior years only.",
+    "Create 7/30/60-day slopes, curvature, range, volatility, MAD/IQR, spell duration, breakout, reversal and year-over-year analog features.",
+    "Version feature formulas and effective history counts.",
+    "Create long-history target-memory expert-ready matrices independent of modern NWP."
+  ],
+  "db_objects": [
+    "feature_store target_memory definitions/values"
+  ],
+  "outputs": [
+    "feature_definitions_target_memory.csv",
+    "availability_lag_audit.csv",
+    "history_count_profile.csv",
+    "causal_climatology_validation.md"
+  ],
+  "tests": [
+    "Artificial future-value injection tests",
+    "fold-local climatology",
+    "lag boundary tests",
+    "no T/T\u22121 if unavailable"
+  ],
+  "acceptance": [
+    "Every feature uses labels provably available",
+    "Recomputed values match reference tests"
+  ],
+  "failure": [
+    "Publication timing unresolved: enforce conservative approved lag and flag"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t20_causal_long_history_target_memory_climatology.md"
+}

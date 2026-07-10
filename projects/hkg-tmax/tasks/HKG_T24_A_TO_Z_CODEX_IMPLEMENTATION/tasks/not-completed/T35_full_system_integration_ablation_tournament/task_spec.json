@@ -1,0 +1,55 @@
+{
+  "id": "T35",
+  "suffix": "full_system_integration_ablation_tournament",
+  "title": "Full System Integration, Ablation, and Championship Tournament",
+  "phase": "E Validation",
+  "deps": [
+    "T33",
+    "T34"
+  ],
+  "mission": "Assemble the complete pre-2024 system, run all ablations and select one frozen core candidate under predeclared rules.",
+  "inputs": [
+    "All OOF experts/router/specialists/distribution",
+    "baseline ladder",
+    "promotion rules"
+  ],
+  "steps": [
+    "Implement deterministic inference graph from snapshot to final P50.",
+    "Compare official raw, residual memory, individual MOS, static blend, dynamic router, router+specialists and distributional P50.",
+    "Run component/family/source ablations.",
+    "Run negative controls and shuffled-date tests.",
+    "Report full/slice/tail metrics and complexity cost.",
+    "Select the simplest candidate meeting promotion gates.",
+    "Freeze code/config/features/artifact hashes before opening confirmation."
+  ],
+  "db_objects": [
+    "research system registry",
+    "frozen candidate manifest"
+  ],
+  "outputs": [
+    "system_scoreboard.csv",
+    "ablation_matrix.csv",
+    "slice_metrics.csv",
+    "tail_metrics.csv",
+    "negative_controls.csv",
+    "FROZEN_CANDIDATE_MANIFEST.json",
+    "model_card.md"
+  ],
+  "tests": [
+    "End-to-end deterministic replay",
+    "all source lineage",
+    "identical rows",
+    "denylist",
+    "sealing check"
+  ],
+  "acceptance": [
+    "Exactly one frozen core candidate or explicit no-promotion result",
+    "No sealed labels accessed"
+  ],
+  "failure": [
+    "No candidate beats baselines robustly: freeze best baseline and return to research loop"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t35_full_system_integration_ablation_tournament.md"
+}

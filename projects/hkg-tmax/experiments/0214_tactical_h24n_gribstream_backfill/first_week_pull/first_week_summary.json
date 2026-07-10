@@ -1,0 +1,169 @@
+{
+  "api_event_log": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/experiments/0214_tactical_h24n_gribstream_backfill/logs/gribstream_first_week_api_events.jsonl",
+  "daily_limit_for_3_days_from_provider": 768000,
+  "database": "postgresql://***:***@127.0.0.1:5432/hkg_tmax_research",
+  "datasets_requested": [
+    "gfs",
+    "gefsatmosmean",
+    "gefsatmos",
+    "ifsoper",
+    "ifsenfo",
+    "cwawrf15",
+    "aifsoper",
+    "aifsenfo",
+    "aigfssfc",
+    "aigfspres",
+    "aigefssfc",
+    "graphcast",
+    "fourcastnetgfs",
+    "nbmoc"
+  ],
+  "effective_credits_per_minute": 3391.455,
+  "effective_rows_per_second": 60.88,
+  "measured_credits_consumed_estimate": 10952,
+  "measured_fetch_seconds_sum": 188.57,
+  "measured_forecast_wide_rows_upserted": 11796,
+  "measured_rows_returned": 11796,
+  "projected_credit_headroom_vs_three_day_allowance": 408877,
+  "projected_hours_at_measured_speed": 9.31,
+  "projected_minutes_at_measured_speed": 558.79,
+  "projected_total_credits_for_current_scope": 1895123,
+  "projected_total_rows_for_current_scope": 1971993,
+  "projection": {
+    "datasets": [
+      {
+        "credits_per_run": 325.0,
+        "dataset": "gfs",
+        "projected_run_count": 1919,
+        "projected_total_credits": 623675,
+        "projected_total_rows": 575700,
+        "rows_per_run": 300.0,
+        "stage": "core"
+      },
+      {
+        "credits_per_run": 64.0,
+        "dataset": "gefsatmosmean",
+        "projected_run_count": 2090,
+        "projected_total_credits": 133760,
+        "projected_total_rows": 200640,
+        "rows_per_run": 96.0,
+        "stage": "core"
+      },
+      {
+        "credits_per_run": 248.0,
+        "dataset": "gefsatmos",
+        "projected_run_count": 2090,
+        "projected_total_credits": 518320,
+        "projected_total_rows": 518320,
+        "rows_per_run": 248.0,
+        "stage": "core"
+      },
+      {
+        "credits_per_run": 108.0,
+        "dataset": "ifsoper",
+        "projected_run_count": 845,
+        "projected_total_credits": 91260,
+        "projected_total_rows": 91260,
+        "rows_per_run": 108.0,
+        "stage": "core"
+      },
+      {
+        "credits_per_run": 408.0,
+        "dataset": "ifsenfo",
+        "projected_run_count": 843,
+        "projected_total_credits": 343944,
+        "projected_total_rows": 343944,
+        "rows_per_run": 408.0,
+        "stage": "core"
+      },
+      {
+        "credits_per_run": 50.0,
+        "dataset": "cwawrf15",
+        "projected_run_count": 3,
+        "projected_total_credits": 150,
+        "projected_total_rows": 180,
+        "rows_per_run": 60.0,
+        "stage": "prospective"
+      },
+      {
+        "credits_per_run": 40.0,
+        "dataset": "aifsoper",
+        "projected_run_count": 482,
+        "projected_total_credits": 19280,
+        "projected_total_rows": 28920,
+        "rows_per_run": 60.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 204.0,
+        "dataset": "aifsenfo",
+        "projected_run_count": 355,
+        "projected_total_credits": 72420,
+        "projected_total_rows": 72420,
+        "rows_per_run": 204.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 20.0,
+        "dataset": "aigfssfc",
+        "projected_run_count": 67,
+        "projected_total_credits": 1340,
+        "projected_total_rows": 4020,
+        "rows_per_run": 60.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 10.0,
+        "dataset": "aigfspres",
+        "projected_run_count": 67,
+        "projected_total_credits": 670,
+        "projected_total_rows": 4020,
+        "rows_per_run": 60.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 124.0,
+        "dataset": "aigefssfc",
+        "projected_run_count": 386,
+        "projected_total_credits": 47864,
+        "projected_total_rows": 47864,
+        "rows_per_run": 124.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 30.0,
+        "dataset": "graphcast",
+        "projected_run_count": 741,
+        "projected_total_credits": 22230,
+        "projected_total_rows": 44460,
+        "rows_per_run": 60.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 30.0,
+        "dataset": "fourcastnetgfs",
+        "projected_run_count": 669,
+        "projected_total_credits": 20070,
+        "projected_total_rows": 40140,
+        "rows_per_run": 60.0,
+        "stage": "optional"
+      },
+      {
+        "credits_per_run": 20.0,
+        "dataset": "nbmoc",
+        "projected_run_count": 7,
+        "projected_total_credits": 140,
+        "projected_total_rows": 105,
+        "rows_per_run": 15.0,
+        "stage": "probe"
+      }
+    ],
+    "projected_total_credits": 1895123,
+    "projected_total_rows": 1971993
+  },
+  "results_csv": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/experiments/0214_tactical_h24n_gribstream_backfill/first_week_pull/first_week_results.csv",
+  "status": "passed",
+  "three_day_credit_allowance": 2304000,
+  "total_wall_seconds": 193.758,
+  "updated_at_utc": "2026-06-25T05:29:06Z"
+}

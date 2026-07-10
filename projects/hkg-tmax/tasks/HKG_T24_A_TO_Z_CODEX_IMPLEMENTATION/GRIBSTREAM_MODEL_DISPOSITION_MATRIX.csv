@@ -1,0 +1,57 @@
+model_code,domain,disposition,archive_or_window,reason
+rap,United States,exclude_geography,,US regional; no HKG coverage
+gfs,Global,core_backfill,2021-03-22,Primary deterministic NWP and MOS expert
+gdas,Global,secondary_probe,,Analysis/initial-state surprise; not a T+24 anchor
+nbm,CONUS,exclude_geography,2020-09-29,NBM concept is useful; CONUS grid is not HKG
+nbmak,Alaska,exclude_geography,2020-10-01,No HKG coverage
+nbmhi,Hawaii,exclude_geography,2020-10-01,No HKG coverage
+nbmpr,Puerto Rico,exclude_geography,2020-10-01,No HKG coverage
+nbmgu,Guam,exclude_geography,2020-10-01,Guam domain does not imply Hong Kong coverage
+nbmoc,Oceanic,coverage_probe,2020-10-01,Probe HKG/marine coordinates; marine-context only if covered
+nbmqmd,CONUS,exclude_geography,,No HKG coverage
+nbmpar,CONUS,exclude_geography,,No HKG coverage
+nbmparak,Alaska,exclude_geography,,No HKG coverage
+nbmparhi,Hawaii,exclude_geography,,No HKG coverage
+nbmparpr,Puerto Rico,exclude_geography,,No HKG coverage
+nbmpargu,Guam,exclude_geography,,No HKG coverage
+nbmparoc,Oceanic,coverage_probe,,Probe only; short/parallel source
+nbmparqmd,CONUS,exclude_geography,,No HKG coverage
+aigfssfc,Global,shadow_backfill,2026-04-16,Operational AI deterministic surface; too short for normal weight
+aigfspres,Global,shadow_backfill,2026-04-16,Operational AI deterministic pressure levels
+aigefssfc,Global,challenger_backfill,2025-06-01,31-member AI ensemble surface
+aigefspres,Global,challenger_backfill,2025-06-01,31-member AI ensemble pressure levels
+dafsgtg,CONUS,exclude_geography,,No HKG coverage
+dafsificonus,CONUS,exclude_geography,,No HKG coverage
+dafsifiak,Alaska,exclude_geography,,No HKG coverage
+cwawrf15,East Asia / western Pacific,prospective_urgent,rolling last 3 days,Regional HKG-relevant short-range expert; archive every run now
+ccpa1hndgd25,CONUS,exclude_geography,,No HKG coverage
+spctstm1hr,CONUS,exclude_geography,,No HKG coverage
+spctstm4hr,CONUS,exclude_geography,,No HKG coverage
+spcltg4hr,CONUS,exclude_geography,,No HKG coverage
+spchail4hr,CONUS,exclude_geography,,No HKG coverage
+spctor4hr,CONUS,exclude_geography,,No HKG coverage
+spcwind4hr,CONUS,exclude_geography,,No HKG coverage
+uvi,Global,prospective_low_priority,rolling last 2 days,Solar-exposure proxy; direct radiation fields preferred
+fourcastnetgfs,Global,challenger_backfill,2024-05-02,Historical AI diversity; archive ends 2026-03-01
+urma,United States,exclude_geography,,No HKG coverage
+rtma,United States,exclude_geography,,No HKG coverage
+hrrr,CONUS,exclude_geography,,No HKG coverage
+rrfsprslev,CONUS,exclude_geography,,No HKG coverage
+rrfs2dfld,CONUS,exclude_geography,,No HKG coverage
+refsprslev,Varies/US experimental,exclude_geography,,No proven HKG coverage
+graphcast,Global,challenger_backfill,2024-04-25,Historical AI diversity; archive ends 2026-05-05
+gefsatmosmean,Global,core_backfill,2020-10-01,Broad spatial ensemble-mean fields
+gefsatmos,Global,core_backfill,2020-10-01,Full 31-member probabilistic expert
+gefschem,Global,secondary_targeted,2020-10-01,Aerosol/haze/radiation-suppression context
+gefswaveprob,Global ocean,secondary_targeted,2020-10-01,Marine-flow context only
+cfsflxf,Global seasonal,deprioritize,2018-10-31,"Long-horizon background only, not direct T+24 anchor"
+cfspgbf,Global seasonal,deprioritize,2018-10-31,Large-scale background only
+cfsipvf,Global seasonal,deprioritize,2018-10-31,Specialty diagnostic only
+cfsocnf,Global seasonal/ocean,deprioritize,2018-10-31,Slow marine/climate background only
+cdas,Global analysis,secondary_probe,2023-04-22,"Analysis/anomaly context, not forecast anchor"
+ifsoper,Global,core_short_history,2024-02-28,Independent deterministic expert
+ifswave,Global ocean,secondary_targeted,2024-02-28,Marine-context only
+ifsenfo,Global,core_short_history,2024-03-01,Independent ensemble expert
+ifswaef,Global ocean,secondary_targeted,2024-03-01,Marine uncertainty only
+aifsoper,Global,challenger_backfill,2025-02-25,AI deterministic diversity
+aifsenfo,Global,challenger_backfill,2025-07-02,AI ensemble diversity; very short history

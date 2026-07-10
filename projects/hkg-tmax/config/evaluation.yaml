@@ -1,0 +1,75 @@
+evaluation:
+  forecast_object:
+    continuous_distribution: true
+    contract_bucket_probabilities: true
+    point_summary: [mean, median, mode]
+    intervals: [0.5, 0.8, 0.9, 0.95]
+
+  primary_meteorological_metric: crps
+  secondary_meteorological_metrics:
+    - mae
+    - rmse
+    - bias
+    - median_absolute_error
+    - interval_coverage
+    - interval_width
+
+  primary_contract_metric: multiclass_log_loss
+  secondary_contract_metrics:
+    - multiclass_brier
+    - bucket_calibration_error
+    - boundary_day_log_loss
+    - top_choice_accuracy
+
+  uncertainty:
+    method: moving_block_bootstrap
+    block_length_days_candidates: [5, 10, 20, 30]
+    confidence_level: 0.95
+    repetitions: 2000
+    compare_paired_predictions: true
+
+  robustness_slices:
+    - year
+    - month
+    - warm_season
+    - temperature_decile
+    - rain_regime
+    - cloud_regime
+    - wind_sector
+    - tropical_cyclone_context
+    - model_spread_decile
+    - forecast_horizon
+    - data_quality_state
+
+  promotion:
+    primary_metric_must_improve: true
+    calibration_must_not_materially_degrade: true
+    tail_performance_must_not_materially_degrade: true
+    require_ablation: true
+    require_sensitivity: true
+    require_leakage_pass: true
+    require_reproducibility_pass: true
+
+splits:
+  status: provisional_until_vintage_coverage_is_known
+  development:
+    start: "2000-01-01"
+    end: "2022-12-31"
+  validation:
+    start: "2023-01-01"
+    end: "2024-06-30"
+  locked_test:
+    start: "2024-07-01"
+    end: "2026-05-31"
+  live_shadow:
+    start: "2026-06-18"
+    end: null
+  rule: "Only dates with authentic point-in-time vintages are eligible for operational evaluation."
+
+rolling_origin:
+  enabled: true
+  expanding_window_default: true
+  minimum_training_years: 5
+  calibration_window_days_candidates: [90, 180, 365, 730]
+  embargo_days: 1
+  no_random_kfold: true

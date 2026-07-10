@@ -1,0 +1,53 @@
+{
+  "id": "T00",
+  "suffix": "repository_database_preflight",
+  "title": "Repository, Database, and Contract Preflight",
+  "phase": "A Foundation",
+  "deps": [],
+  "mission": "Inspect the real repository and database, verify the corrected official-forecast facts, identify existing conventions, and produce the immutable starting-state manifest.",
+  "inputs": [
+    "Repository root and all AGENTS.md files",
+    "Configured Postgres connection",
+    "CURRENT_HKO_FORECAST_DB_FACTS.json",
+    "Audit bundle and existing experiment evidence"
+  ],
+  "steps": [
+    "Inspect repository structure, git status, branches, installed skills, migration stack, database libraries, environment-variable conventions, schedulers, object storage, tests and CI.",
+    "Enumerate database schemas, tables, views, functions, indexes, row counts, min/max timestamps, permissions and owners.",
+    "Run direct SQL against public.hko_historical_forecasts_2000_2026 to reproduce the 115,795-row clean subset, 9,667 distinct target dates, one missing date, product counts and numerical summaries.",
+    "Determine exact timezone semantics of issue columns; do not infer from names.",
+    "Locate all current dataset tables, loaders, acquisition scripts, model code and experiment registries.",
+    "Hash the repository inputs and record the starting git commit.",
+    "Create a discrepancy register; user-supplied facts are canonical only after verification."
+  ],
+  "db_objects": [
+    "catalog.preflight_snapshot or repository equivalent",
+    "No destructive schema changes"
+  ],
+  "outputs": [
+    "repo_inventory.md",
+    "database_inventory.csv",
+    "official_forecast_verification.sql",
+    "official_forecast_verification_results.csv",
+    "starting_state.json",
+    "discrepancies.csv"
+  ],
+  "tests": [
+    "SQL result checks",
+    "timezone conversion tests",
+    "read-only safety check"
+  ],
+  "acceptance": [
+    "All repository conventions documented",
+    "Official forecast counts exactly reproduced or discrepancy clearly proven",
+    "Every existing data/model table mapped to an owner and purpose",
+    "No uncommitted user work overwritten"
+  ],
+  "failure": [
+    "Database unavailable: complete repository inspection and provide exact SQL command/blocker",
+    "Count mismatch: stop canonicalization and open blocker; do not silently continue"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t00_repository_database_preflight.md"
+}

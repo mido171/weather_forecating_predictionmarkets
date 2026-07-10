@@ -1,0 +1,138 @@
+{
+  "state": "COMPLETE_WITH_FAILURES",
+  "summary": {
+    "by_source": {
+      "gefs_control": {
+        "skipped_existing": 68
+      },
+      "gfs": {
+        "skipped_existing": 68
+      },
+      "himawari9_b13_s0510": {
+        "db_write_seconds_total": 0.02496820001397282,
+        "fetch_failed": 3,
+        "fetch_seconds_total": 2.247942799993325,
+        "normalize_seconds_total": 0.0004159000236541033,
+        "skipped_existing": 141,
+        "source_issues_touched": 3,
+        "total_seconds_total": 2.273326900030952
+      }
+    },
+    "completed_at_utc": "2026-07-09T18:24:33.625701Z",
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day_elapsed_seconds": {
+      "2026-06-18": 1.1788416000199504
+    },
+    "db_write_seconds_total": 0.02496820001397282,
+    "elapsed_seconds": 1.389362899994012,
+    "end_date": "2026-06-18",
+    "execution_mode": "optimized",
+    "expected": {
+      "days": 1,
+      "himawari_scans": 144,
+      "model_objects": 136,
+      "radar_expected_frames_approx": 0,
+      "total_static_tasks_without_radar_manifest": 280
+    },
+    "experiment_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709",
+    "fetch_failed": 3,
+    "fetch_seconds_total": 2.247942799993325,
+    "final_staging_bytes": 0,
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "normalize_seconds_total": 0.0004159000236541033,
+    "phase_observations": [
+      {
+        "db_write": 0.013711499981582165,
+        "fetch": 0.888896900054533,
+        "item_id": "himawari9_B13_S0510_20260618_0240",
+        "normalize": 0.00012390001211315393,
+        "source": "himawari9_b13_s0510",
+        "total": 0.9027323000482284
+      },
+      {
+        "db_write": 0.00616200000513345,
+        "fetch": 0.80689429998165,
+        "item_id": "himawari9_B13_S0510_20260618_1440",
+        "normalize": 0.00017449998995289207,
+        "source": "himawari9_b13_s0510",
+        "total": 0.8132307999767363
+      },
+      {
+        "db_write": 0.005094700027257204,
+        "fetch": 0.552151599957142,
+        "item_id": "himawari9_B13_S0510_20260618_2030",
+        "normalize": 0.00011750002158805728,
+        "source": "himawari9_b13_s0510",
+        "total": 0.5573638000059873
+      }
+    ],
+    "phase_summary": {
+      "db_write": {
+        "count": 3,
+        "max_seconds": 0.013711499981582165,
+        "mean_seconds": 0.00832273333799094,
+        "p50_seconds": 0.00616200000513345,
+        "p90_seconds": 0.00616200000513345
+      },
+      "fetch": {
+        "count": 3,
+        "max_seconds": 0.888896900054533,
+        "mean_seconds": 0.7493142666644417,
+        "p50_seconds": 0.80689429998165,
+        "p90_seconds": 0.80689429998165
+      },
+      "normalize": {
+        "count": 3,
+        "max_seconds": 0.00017449998995289207,
+        "mean_seconds": 0.00013863334121803442,
+        "p50_seconds": 0.00012390001211315393,
+        "p90_seconds": 0.00012390001211315393
+      },
+      "total": {
+        "count": 3,
+        "max_seconds": 0.9027323000482284,
+        "mean_seconds": 0.7577756333436506,
+        "p50_seconds": 0.8132307999767363,
+        "p90_seconds": 0.8132307999767363
+      }
+    },
+    "run_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260618_20260618_20260709T182432Z_124744",
+    "skipped_existing": 277,
+    "source_issues_touched": 3,
+    "sources": [
+      "gefs_control",
+      "gfs",
+      "himawari_b13_s0510"
+    ],
+    "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-18\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260618_20260618_20260709T182432Z_124744\\staging",
+    "start_date": "2026-06-18",
+    "started_at_utc": "2026-07-09T18:24:32.231636Z",
+    "status": "complete_with_failures",
+    "task_base_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-18\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260618_20260618_20260709T182432Z_124744",
+    "total_seconds_total": 2.273326900030952
+  },
+  "updated_at_utc": "2026-07-09T18:24:33.673657Z"
+}

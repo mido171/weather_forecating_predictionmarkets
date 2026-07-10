@@ -1,0 +1,56 @@
+{
+  "id": "T13",
+  "suffix": "hko_arwf_exact_vintage_collector",
+  "title": "HKO ARWF Exact-Vintage Prospective Collector",
+  "phase": "B Acquisition",
+  "deps": [
+    "T04",
+    "T05"
+  ],
+  "mission": "Implement prospective collection of every ARWF station forecast issue, raw payload and hourly station trajectory with exact first-seen time.",
+  "inputs": [
+    "Existing ARWF acquisition code/table",
+    "HKO official endpoint/page/API",
+    "T05 station registry",
+    "scheduler"
+  ],
+  "steps": [
+    "Discover and document the actual machine-readable source used by current code.",
+    "Poll frequently enough to detect issues without assuming a fixed 0400/1600 or noon/midnight schedule; store observed issue/first-seen times.",
+    "Preserve raw payload and response headers.",
+    "Normalize station, issue, valid time, lead, temperature, RH, wind and precipitation/weather fields.",
+    "Map every station to the registry.",
+    "Store all issues, not just latest.",
+    "Alert on parser/schema changes and missing station/lead cells."
+  ],
+  "db_objects": [
+    "raw ARWF objects",
+    "live_nwp_anchor.arwf_run/hourly_value or repository equivalent"
+  ],
+  "outputs": [
+    "collector",
+    "schema mapping",
+    "initial current backfill",
+    "first_seen manifest",
+    "station mapping",
+    "quality dashboard"
+  ],
+  "tests": [
+    "Schema drift fixture",
+    "issue deduplication",
+    "valid/lead tests",
+    "station completeness",
+    "first-seen immutability"
+  ],
+  "acceptance": [
+    "Every future issue archived with raw lineage",
+    "No model-time numeric placeholder remains",
+    "ARWF remains challenger until evidence threshold"
+  ],
+  "failure": [
+    "No machine-readable historical archive: document; do not invent past issues"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t13_hko_arwf_exact_vintage_collector.md"
+}

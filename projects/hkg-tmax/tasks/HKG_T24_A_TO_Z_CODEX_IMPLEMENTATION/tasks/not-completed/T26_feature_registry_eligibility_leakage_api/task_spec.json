@@ -1,0 +1,56 @@
+{
+  "id": "T26",
+  "suffix": "feature_registry_eligibility_leakage_api",
+  "title": "Feature Registry, Eligibility API, and Automated Leakage Gate",
+  "phase": "C Feature Platform",
+  "deps": [
+    "T19",
+    "T20",
+    "T21",
+    "T22",
+    "T23",
+    "T24",
+    "T25"
+  ],
+  "mission": "Register every feature and enforce production/research/diagnostic eligibility automatically before any model fit.",
+  "inputs": [
+    "All feature definitions",
+    "availability contracts",
+    "hard denylist/evidence"
+  ],
+  "steps": [
+    "Create feature registry with source, formula, unit, availability, fit scope, role and status.",
+    "Implement feature materialization API requiring target date/cutoff/frame.",
+    "Implement denylist patterns for target/residual/error/outcome-derived fields.",
+    "Reject full-history normalization/PCA/text models outside folds.",
+    "Generate feature manifests and hashes for every matrix.",
+    "Implement model-training whitelist checks."
+  ],
+  "db_objects": [
+    "feature_store.feature_definition",
+    "governance.feature_eligibility_audit"
+  ],
+  "outputs": [
+    "feature_registry.csv",
+    "hard_denylist.csv",
+    "eligibility_validator",
+    "matrix_manifest_schema.json",
+    "audit reports"
+  ],
+  "tests": [
+    "Inject forbidden fields and prove rejection",
+    "blocked source test",
+    "fold-fit metadata test",
+    "hash reproducibility"
+  ],
+  "acceptance": [
+    "No training job can run without a passing feature manifest",
+    "Every feature status explicit"
+  ],
+  "failure": [
+    "Unknown feature defaults to blocked, not allowed"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t26_feature_registry_eligibility_leakage_api.md"
+}

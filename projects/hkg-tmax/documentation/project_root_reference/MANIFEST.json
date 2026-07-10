@@ -1,0 +1,3012 @@
+{
+  "file_count": 601,
+  "files": [
+    {
+      "path": ".agents/skills/audit-leakage/SKILL.md",
+      "sha256": "ad88980617af54dbbd605651cacdcfc32773c49eba36a6e535902fde5b187660",
+      "size_bytes": 1111
+    },
+    {
+      "path": ".agents/skills/evaluate-forecast/SKILL.md",
+      "sha256": "2c729d8d89f70df9f86b26d93bf23bcb2269088af26eee9bc1e61fd27a9bde95",
+      "size_bytes": 968
+    },
+    {
+      "path": ".agents/skills/ingest-source/SKILL.md",
+      "sha256": "65c385454bba9c3284f31001552c296a57dde0859150f9194ee9b7b875df9b49",
+      "size_bytes": 968
+    },
+    {
+      "path": ".agents/skills/run-experiment/SKILL.md",
+      "sha256": "7b5d0dd81c778954aa7efc8320795e13bb0104ef386946282c81126499bbaf44",
+      "size_bytes": 1332
+    },
+    {
+      "path": ".agents/skills/update-milestones/SKILL.md",
+      "sha256": "224319afaddb990f3aef90066974dbc676a2f7603abf159ef7ae5191f506bdcc",
+      "size_bytes": 738
+    },
+    {
+      "path": ".agents/skills/verify-target-parity/SKILL.md",
+      "sha256": "f0c31475c741137eaaf8005fc23ade9b16cab50e23bf3dda1e8ea11b2568edc3",
+      "size_bytes": 802
+    },
+    {
+      "path": ".codex/agents/data-engineer.toml",
+      "sha256": "c6627cd3c276340e65e2e86f66110be6c8c7fdc4ed7a097736a10eea3f792569",
+      "size_bytes": 996
+    },
+    {
+      "path": ".codex/agents/leakage-auditor.toml",
+      "sha256": "3ca6d6d8c620d63363b418819f7e3199abba1b4e1ad65a89864f960a28d01f8d",
+      "size_bytes": 994
+    },
+    {
+      "path": ".codex/agents/market-microstructure-researcher.toml",
+      "sha256": "5adaf514142f8bd41def1927f18d52a029b4280f261f73341b0e29eb5c62708c",
+      "size_bytes": 1007
+    },
+    {
+      "path": ".codex/agents/meteorology-researcher.toml",
+      "sha256": "8d055bbedb4715441541f8bcbfcb4333db8e00f78bbb7befb2ad0c57ccf999b9",
+      "size_bytes": 1112
+    },
+    {
+      "path": ".codex/agents/reproducibility-reviewer.toml",
+      "sha256": "88001d347ff1d1d95d8628e276257059ae37385f43da96b248962e2d10d1e9b9",
+      "size_bytes": 916
+    },
+    {
+      "path": ".codex/agents/target-parity-researcher.toml",
+      "sha256": "4343249eaaa2b00ff16d316d22dd0cd963b01a9e254dc86ca346cd954cf160b2",
+      "size_bytes": 994
+    },
+    {
+      "path": ".codex/config.toml",
+      "sha256": "fad076397b8da2c2a634989d84149d79bbe51739e65e1ae73acf6a7ac3c42a67",
+      "size_bytes": 70
+    },
+    {
+      "path": ".dockerignore",
+      "sha256": "55aad2c5f7de9a3a33edd8e98348dc5a698be0272e1fc51fa17c90d616776f54",
+      "size_bytes": 204
+    },
+    {
+      "path": ".env",
+      "sha256": "7ebaf70245856d7e554cafb12c35d64e205a35fa76bfd96a892142d92938af49",
+      "size_bytes": 506
+    },
+    {
+      "path": ".env.example",
+      "sha256": "8ee706c3363610ece9e782702d29a300c7db1d9484ce6ff53f5b98a2b94da46d",
+      "size_bytes": 505
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f362188197292cfd7d8e13af33820487653d77567e21871c4f951b1c0c5d0ecf",
+      "size_bytes": 457
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "1384d4a40f75078c216e55274cbe9c9a57f9f26c90079c2e7658299506865ef7",
+      "size_bytes": 810
+    },
+    {
+      "path": ".pre-commit-config.yaml",
+      "sha256": "2bcd3b23cebbf4c342e9d5e08dc0b858f9b148707e2bb687b65fc72f9dd33433",
+      "size_bytes": 442
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "792f85213f8a550075b843cad730b4497213c7c18e81ece64ed913ce134f8e15",
+      "size_bytes": 9441
+    },
+    {
+      "path": "ARTIFACT_CONTENTS.md",
+      "sha256": "76aa8c04004834d8a38713dba94263a55619e547a62581b3e47cd59275369d53",
+      "size_bytes": 840
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "0d59f14de2e29e380707e13d574f15d0313337454619bcc550531c7aba87b802",
+      "size_bytes": 7849
+    },
+    {
+      "path": "CITATIONS_AND_VERIFICATION.md",
+      "sha256": "cf514ec958b1935c309c33ef60c653784a72cfa05fadc40b355b986080836bcb",
+      "size_bytes": 2801
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "sha256": "ff2ef0a83d4a422a69bfeb8401fb6ce2b11a6cc1878c07c89a8291ca3091be72",
+      "size_bytes": 2188
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "07915d57f297ea45582cfb8e7f8cf8566416d2a684839c18a4f034501e8dd34d",
+      "size_bytes": 177
+    },
+    {
+      "path": "config/acquisition_plan.yaml",
+      "sha256": "cad171171f867b0645e6db3b8a2d02d6e75449c92eb5a7d45b14b2f9c986ceb2",
+      "size_bytes": 9223
+    },
+    {
+      "path": "config/asof.yaml",
+      "sha256": "16655fa89c6445b0e1bd66e2249bc28149b5f45fcb5546db6a820a58b08a7174",
+      "size_bytes": 1520
+    },
+    {
+      "path": "config/collector_schedules.yaml",
+      "sha256": "90f0bb5ede84ec10aa5fffa0f1d3ae58371d49daaf8945df7fdd42043867b5fc",
+      "size_bytes": 5108
+    },
+    {
+      "path": "config/data_source_catalog.yaml",
+      "sha256": "c89772b319de8eeb7de9ee02138c53a68f1528a0b52eaec91cb78d30872d46c3",
+      "size_bytes": 30209
+    },
+    {
+      "path": "config/data_sources.yaml",
+      "sha256": "29fea7ed034a5bc0b38395585545eddf2843ae35964684d8bc2d994509af9346",
+      "size_bytes": 29579
+    },
+    {
+      "path": "config/evaluation.yaml",
+      "sha256": "974e53c91f3e7fa6f4382a19691592c72ea0f282df5bb0b686d951d25a098b36",
+      "size_bytes": 1859
+    },
+    {
+      "path": "config/example_market_buckets.yaml",
+      "sha256": "f65353f1c82fe31b971403cadfb5e7a95e3dcd0b89c3ec404b89793a74964a17",
+      "size_bytes": 1019
+    },
+    {
+      "path": "config/goals.yaml",
+      "sha256": "9473394948b4e5a7cfb3dcaf13e0fd78b068b6ef99ecd4055d254373b7afc4fb",
+      "size_bytes": 1489
+    },
+    {
+      "path": "config/project.yaml",
+      "sha256": "8236b0487b826e8296bba1e203c53841abb89f2003f7b3a2d7d365ef1fe71eeb",
+      "size_bytes": 778
+    },
+    {
+      "path": "config/stations_hko.yaml",
+      "sha256": "7625a8e1716f276d88830dfd5ceaed0a765e4fdeac1e081ebe3271b999cf191a",
+      "size_bytes": 1453
+    },
+    {
+      "path": "config/target.yaml",
+      "sha256": "e5b9cbde535463367b41a53b7b3b6746452df6ad5e7c7087b93fef6dc07c8ec7",
+      "size_bytes": 1429
+    },
+    {
+      "path": "data/README.md",
+      "sha256": "d22bfa5971c50c0add8d2cf07b21067747bf738f3d6ce847f8501a7d11ee91d6",
+      "size_bytes": 893
+    },
+    {
+      "path": "DATA_ACQUISITION_SCOPE.md",
+      "sha256": "71f2f3c932934bcdb6bf503a4bb967b71c86f6c45a0495092861618a6d07ef97",
+      "size_bytes": 2053
+    },
+    {
+      "path": "DATA_ACQUISITION_STATUS.md",
+      "sha256": "9ac2194d29dcce0fc5d903eb05dd45f155b071bd4bcf921fe5f5a90fc1b72d70",
+      "size_bytes": 6103
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "608f0e0f971957fedb88f5da2d3b0a3d7755c7b43af5ecd44ce1f55535b57a54",
+      "size_bytes": 461
+    },
+    {
+      "path": "docs/00_PROJECT_OVERVIEW.md",
+      "sha256": "4663153f4bd92d68472f9b8074825184ae6252c1a93d334724a8eb0986e0915d",
+      "size_bytes": 1046
+    },
+    {
+      "path": "docs/01_RESEARCH_CHARTER.md",
+      "sha256": "42033c9e86b1c983856efdb59d2ac1ffecb55b82c83922a35c07bf6b00f43b91",
+      "size_bytes": 3469
+    },
+    {
+      "path": "docs/02_TARGET_AND_SETTLEMENT.md",
+      "sha256": "15b98d4075fb20494e4ef95027f21c41b243961a295d8153c4ae69f4dbe38d1a",
+      "size_bytes": 4280
+    },
+    {
+      "path": "docs/03_ASOF_AND_LEAKAGE.md",
+      "sha256": "734cc2913d799aa817f5a7a4c3b2eac7f8acb77dd4e07b6bad66553490f9995e",
+      "size_bytes": 5026
+    },
+    {
+      "path": "docs/04_DATA_CATALOG_AND_ACQUISITION.md",
+      "sha256": "b40895e69a93922fb224ff859a8a50dbbd82c5c907951c1bc1a8e2ec684be125",
+      "size_bytes": 5457
+    },
+    {
+      "path": "docs/05_EXPERIMENT_PROTOCOL.md",
+      "sha256": "5dc78653d09586b8a73eadbcbf278f49fc6199fa2c826b56e3c7edabf0782cd7",
+      "size_bytes": 3026
+    },
+    {
+      "path": "docs/06_EVALUATION_AND_VALIDATION.md",
+      "sha256": "85b693feb16e27727d711f33e71165c90787543512b1807fb96856bab254716d",
+      "size_bytes": 3846
+    },
+    {
+      "path": "docs/06_LEAKAGE_CONTROL.md",
+      "sha256": "5c87286bb87a1c26153829cf18fa86849e50392d366670067db3e2b50146852e",
+      "size_bytes": 955
+    },
+    {
+      "path": "docs/07_PRODUCTION_GATE.md",
+      "sha256": "4a4e8e85afb88bf09bb90e914d45fb337310cb8f979531f129c6c7c9d0518dda",
+      "size_bytes": 2333
+    },
+    {
+      "path": "docs/08_FEATURE_AND_MECHANISM_MAP.md",
+      "sha256": "6cf7ec947c00e41924b584f892dc444d4a5c482c4a66cc61a4e02b9fb2f65674",
+      "size_bytes": 7845
+    },
+    {
+      "path": "docs/09_MODELLING_ROADMAP.md",
+      "sha256": "7a03f406297efe25977d4bd7e2eb103f92590571839539419cbdd01b0a9ac0c7",
+      "size_bytes": 2993
+    },
+    {
+      "path": "docs/10_SYSTEM_ARCHITECTURE.md",
+      "sha256": "11fbb8b338f3b2ea8916050c942639cf6a908ba362ffbf72b56b6e9cad51f14b",
+      "size_bytes": 2979
+    },
+    {
+      "path": "docs/11_CODEX_OPERATING_MANUAL.md",
+      "sha256": "5ed6d567e7d88f3378f3f680096acec0db19588996765a71be708cfcb86ea5d2",
+      "size_bytes": 2605
+    },
+    {
+      "path": "docs/12_THREAT_MODEL_AND_FAILURE_MODES.md",
+      "sha256": "73e1f66e3e29e4ad8f4e668366a2bd30d32a02ac3d5632d49b5b076dbfd27161",
+      "size_bytes": 2959
+    },
+    {
+      "path": "docs/13_SOURCES_AND_VERIFICATION.md",
+      "sha256": "639409713769dd324316f815b8517ca2916198e02591ba676afc93bcf2eb0ace",
+      "size_bytes": 3691
+    },
+    {
+      "path": "docs/14_STATION_NETWORK_RESEARCH.md",
+      "sha256": "2a8ef500b29b1a314a098c40620fd3a4fd387460dc57d820fc607a54c15dc76a",
+      "size_bytes": 2184
+    },
+    {
+      "path": "docs/15_ETHICS_LEGAL_AND_DATA_TERMS.md",
+      "sha256": "73d8262f937974a06b47b1cb990d605a71168975c03c7d438eef69725346317f",
+      "size_bytes": 1525
+    },
+    {
+      "path": "docs/16_DECISION_LOG.md",
+      "sha256": "dbc693c826e89bfaebb36b4b5244c77e3986d924bb78fd4eed7545ebfd06c869",
+      "size_bytes": 1545
+    },
+    {
+      "path": "docs/17_OPERATIONAL_RUNBOOK.md",
+      "sha256": "facb67c42d1839aca18d79b7ec16d432c3b08518e6e448a233762ffee7209c21",
+      "size_bytes": 1557
+    },
+    {
+      "path": "docs/18_GLOSSARY.md",
+      "sha256": "35535b65ab32d1b0491da9c5e3758ac6fe073d42b26dd9c1a4cc9a3924895752",
+      "size_bytes": 1494
+    },
+    {
+      "path": "docs/19_MARKET_MICROSTRUCTURE.md",
+      "sha256": "126048d04cf1f65409126cae602a4bcb784ee1a2bb8572e36e3dc98d845caaa1",
+      "size_bytes": 1917
+    },
+    {
+      "path": "docs/20_REPRODUCIBILITY.md",
+      "sha256": "044ae97432cd6d89ef009fe73643035fc72aebaf6eb8afb611d45ffe2fc53fad",
+      "size_bytes": 1728
+    },
+    {
+      "path": "docs/21_RESEARCH_BACKLOG.md",
+      "sha256": "4c396fe6a995caccd44b598c49467bd5ca2c6f473fc2243b120d10c3c339b128",
+      "size_bytes": 16666
+    },
+    {
+      "path": "docs/source_contracts/hko_clmmaxt_hko.md",
+      "sha256": "2c166338d970ff5b574b17d3f591e090e981c080ef9f6ed5e6e54624d46d83df",
+      "size_bytes": 2730
+    },
+    {
+      "path": "docs/source_contracts/hko_daily_extract.md",
+      "sha256": "51328e4f55cfa43166ec9d799950b94f569f84954ea2876d70910649bd960677",
+      "size_bytes": 3992
+    },
+    {
+      "path": "docs/source_contracts/hko_station_metadata.md",
+      "sha256": "578fcbe01598450f54881d65f5eba263e1cab444792f833db3d274de1cb0c512",
+      "size_bytes": 2271
+    },
+    {
+      "path": "docs/source_contracts/README.md",
+      "sha256": "1dd9916c2e762c06ab2b6d7ee885104b27e16f113de2b962359e6d1e2a5c14cb",
+      "size_bytes": 504
+    },
+    {
+      "path": "EXPERIMENT_INDEX.md",
+      "sha256": "4512f7abba54f7686b60a0f7f16c84aca59a99eba2f87b8256e603195457c16c",
+      "size_bytes": 12006
+    },
+    {
+      "path": "experiments/_template/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/_template/ASOF_CONTRACT.md",
+      "sha256": "97cef2b993cc65b8b4ca2152119edd7a5ca6766c8b37f9341f2c213bc6a6230d",
+      "size_bytes": 949
+    },
+    {
+      "path": "experiments/_template/CONCLUSION.md",
+      "sha256": "f16c3e142aaf2cfed4ce486ecec3299971a9d3c71abf28559085dc2aa5470a6e",
+      "size_bytes": 782
+    },
+    {
+      "path": "experiments/_template/DATA_MANIFEST.yaml",
+      "sha256": "8baf1e32c0669e06365ba8de71f18e5f3668c37515edecf9292a384409bf477a",
+      "size_bytes": 544
+    },
+    {
+      "path": "experiments/_template/HYPOTHESIS.md",
+      "sha256": "ad10020ffa07a2fc1bf36b3334d202162fb92f2b8c17e7633742ef1a8c485549",
+      "size_bytes": 693
+    },
+    {
+      "path": "experiments/_template/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/_template/PROTOCOL.md",
+      "sha256": "2ebf1b1c107f0705b46568278838aca1f163c51e78ba5583d5d8af1bed90a523",
+      "size_bytes": 1096
+    },
+    {
+      "path": "experiments/_template/README.md",
+      "sha256": "ecab4af380cb898eac4ba823b534101dee3078027d600b176c9cf933b4d91e45",
+      "size_bytes": 711
+    },
+    {
+      "path": "experiments/_template/REPRODUCE.md",
+      "sha256": "ee2a474962daa4a001e6b8f7657f525aabfaa1e9958027e8e9f7880cf4c2a08a",
+      "size_bytes": 697
+    },
+    {
+      "path": "experiments/_template/results/metrics.json",
+      "sha256": "ae7a160ff98e0ffe145319be6a299cf1e8c37ccc36d477473ccbb63d0cb8e45c",
+      "size_bytes": 164
+    },
+    {
+      "path": "experiments/_template/RESULTS.md",
+      "sha256": "d2eb44369e7ad74f472bea9dd6f2151ab00523e2d80a25426d73d94205053968",
+      "size_bytes": 726
+    },
+    {
+      "path": "experiments/_template/RUN_CONFIG.yaml",
+      "sha256": "1c38778d8f9355212b5c9ffb04689785201fecbae817cb2ce002b4becbe36058",
+      "size_bytes": 608
+    },
+    {
+      "path": "experiments/_template/STATUS.yaml",
+      "sha256": "e49afb04f60ef69a83ebec81639471cdfe36ae20d88803e3be2bba3add23b129",
+      "size_bytes": 606
+    },
+    {
+      "path": "experiments/AGENTS.md",
+      "sha256": "4563667d263ab57d8ce2a9b6ab761f0016e577ec06b6a3bfb56b646b86b007d1",
+      "size_bytes": 677
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/ASOF_CONTRACT.md",
+      "sha256": "ca241604ca5ad0ad94c70373b23f78a9ae8ddb52a037259b2f8daec706b9393c",
+      "size_bytes": 2881
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/CONCLUSION.md",
+      "sha256": "0ba9e8a0c94a8f86ff90d30d2f085c8a90d000c1525b3f07c3b6b98b348e2dac",
+      "size_bytes": 2875
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/DATA_MANIFEST.yaml",
+      "sha256": "4515246fe91345a06ab56c7d1962aef8c6bb23f354f0f1768d6a681bb3ffd6e3",
+      "size_bytes": 9772
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/HYPOTHESIS.md",
+      "sha256": "401acc6abf723dce42a24ca650a8ea4e8bd612c110a04029fa3d58214c84a4c5",
+      "size_bytes": 1904
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/PROTOCOL.md",
+      "sha256": "7fc1687c7a8e8a544ef5228d3a808ae7f5d6f1852c8a41e10ef75a9dec2bc2f2",
+      "size_bytes": 2737
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/README.md",
+      "sha256": "9403519dc0da66c0ece349d72e06c79640e6a4f0bb43f5d2fe927554ce7426be",
+      "size_bytes": 1350
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/REPRODUCE.md",
+      "sha256": "2110e778574d11592ad1193b73544071bec0d0ea0c42ab6642e1d4ed2937610c",
+      "size_bytes": 2437
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/results/metrics.json",
+      "sha256": "1af1952fadb22f836f3af209cacdf83be541b7fe95b24c758208f715d947bf3b",
+      "size_bytes": 743
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/RESULTS.md",
+      "sha256": "3554f0042f5475a505c26fa806e55b7c945ac69a7b2b9fcaf57691a340a34c4a",
+      "size_bytes": 4104
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/RUN_CONFIG.yaml",
+      "sha256": "142f8414252953c19bb5e3ea661a42f4c8add3492f67d1383f7909c5a217c0e2",
+      "size_bytes": 1900
+    },
+    {
+      "path": "experiments/EXP-0001-g0-repository-and-archive-smoke-test/STATUS.yaml",
+      "sha256": "e5e698e9629b2abef33ed024794712ba9ff5529c830ab661e668a4e098de9791",
+      "size_bytes": 869
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/ASOF_CONTRACT.md",
+      "sha256": "cb23372fc62a62da582d862e9a599dbbb11208c3f192a9e1f80f1ee794d86e3c",
+      "size_bytes": 3106
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/CONCLUSION.md",
+      "sha256": "4e794b0b9d1633bfde6d2088d9bb8322d210bdb9bbb01aa1e00e73e7048c1eb1",
+      "size_bytes": 2529
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/DATA_MANIFEST.yaml",
+      "sha256": "8497208eefa81dd34e39358a97860a117cc420dcabdb39fc49d745c4c10365a0",
+      "size_bytes": 3624
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/HYPOTHESIS.md",
+      "sha256": "d7fcc9517c75abcedbbe3930fb2e9de5910146a94e47e9017842d56dc1858008",
+      "size_bytes": 2450
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/PROTOCOL.md",
+      "sha256": "a34c282b7fbab7efcdfa76eaf64f92a0c9f21fb8a0d5eca1cc3ef41da1293bc2",
+      "size_bytes": 5070
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/README.md",
+      "sha256": "160357f8c7b82e039426e284461953666af0993169eed4eb3ea634e63e1678ef",
+      "size_bytes": 1468
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/REPRODUCE.md",
+      "sha256": "350cba6846f7679cb18a898eac43d2665259a8ae7358dd6c767b2afd30e37957",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/results/metrics.json",
+      "sha256": "4ffefad8ef9190f54e50ff0d6ce220b1d5c3d17d247d0541a7f9e6d2ee997716",
+      "size_bytes": 1408
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/RESULTS.md",
+      "sha256": "1cde95785e62e4971ccaabfa7d12ddf051d456386a111e0660267bb1be96806e",
+      "size_bytes": 2875
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/RUN_CONFIG.yaml",
+      "sha256": "63f11fba837d736225619d3c0e718bd00973533b7a0f3d864362b79b6b304ae2",
+      "size_bytes": 1672
+    },
+    {
+      "path": "experiments/EXP-0002-g1-daily-extract-and-clmmaxt-target-parity/STATUS.yaml",
+      "sha256": "ce15bbde8d1342c8cbec1a6e3e8ba05ced38c200f20ed443469c8e36bb9358a0",
+      "size_bytes": 1073
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/ASOF_CONTRACT.md",
+      "sha256": "c3cbfff32af28dd58e0bc045cb5d8d3de476bbd5f518953264ce9088bd910310",
+      "size_bytes": 1828
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/CONCLUSION.md",
+      "sha256": "1e157cc1c8602f6bfc4dc3f73cf8800ec0dc22e6fd2e7d09b1e542a1a1c39a18",
+      "size_bytes": 1772
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/DATA_MANIFEST.yaml",
+      "sha256": "ca35d5ff144c154c60133f4cd495a579701ba00a56594cf6a2580e74eb95f2ad",
+      "size_bytes": 1402
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/HYPOTHESIS.md",
+      "sha256": "8a89d493aee17935881bb65eb305f71739d0531fc77764b125c16b60d0af1909",
+      "size_bytes": 2166
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/PROTOCOL.md",
+      "sha256": "7ed54c51f31b53e8e2333a05b3535ffda6741da3900194ff8cd6d92272c7fecb",
+      "size_bytes": 2718
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/README.md",
+      "sha256": "80bee5845c72acbe7a3ef5d6d1c6a2113cf109e033c31b2e85535ab914680d0b",
+      "size_bytes": 1532
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/REPRODUCE.md",
+      "sha256": "aa50159548d62e5352159ce8d64f543f22f9f0e8bf1382f7afd7d956f2936bbd",
+      "size_bytes": 1477
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/results/metrics.json",
+      "sha256": "82f3c962d9a90249645d5a27efc8b67cbff5ba516a921f993f400d2ac892a91b",
+      "size_bytes": 1331
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/RESULTS.md",
+      "sha256": "9507b9cf1173e2da31152db6242b8d7ed69bb898a615f6a0ca8d5de5f23b50e9",
+      "size_bytes": 2032
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/RUN_CONFIG.yaml",
+      "sha256": "83d791e2bc33012bbdc939ecea213dd8bb493124577e65cd14638cdc3b0332a5",
+      "size_bytes": 1425
+    },
+    {
+      "path": "experiments/EXP-0003-g1-daily-extract-first-publication-polling/STATUS.yaml",
+      "sha256": "59bfab0301f210a1d0f397949a801fc5c8ecf49e4985e1ea7b9eba6c0176a4bd",
+      "size_bytes": 1121
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/ASOF_CONTRACT.md",
+      "sha256": "2b5ccc7295aa9bad4e82acfca73b8e8c180c38c2b18f225d357d94bcd3222051",
+      "size_bytes": 436
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/CONCLUSION.md",
+      "sha256": "bf3d8f05afcb0f64031780ff2dae3f9943a9c42d1a7345affd2e007a81a77c1e",
+      "size_bytes": 1475
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/DATA_MANIFEST.yaml",
+      "sha256": "8082ced60b53eee0f076e49b189cc0fad409eba4e9fa2a69ef22806761059ec9",
+      "size_bytes": 942
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/HYPOTHESIS.md",
+      "sha256": "e9de8b3ff13df5d2f9106262a62425c7a9b949f389bd4e9a85a32d9af8880faf",
+      "size_bytes": 1709
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/PROTOCOL.md",
+      "sha256": "2365a754b6b87f7b16af49affd83a6335735193d71202104eab6e155003eda55",
+      "size_bytes": 930
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/README.md",
+      "sha256": "d75f54ef62b316eaca73d7ebbe0a1e90f78073850da4bdba9086da43b2d4c2d7",
+      "size_bytes": 1072
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/REPRODUCE.md",
+      "sha256": "535176fbe8b4f3c8083a8bfcc6d99417e7c6040b4eb0d529459ca31ac65b88f4",
+      "size_bytes": 800
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/results/metrics.json",
+      "sha256": "be0792f5740b9b9d72c53e91686c989c626f3a1f677114974e73e904b489f57c",
+      "size_bytes": 1486
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/RESULTS.md",
+      "sha256": "edad914a23d2e96cadbae10edfbe56d3a8dd9a45a7e948c959ef34ef8c1ca72f",
+      "size_bytes": 1359
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/RUN_CONFIG.yaml",
+      "sha256": "b1c3fb38b586eed29ea8878d8e28ed0e5c8bfb49898e0805f14b6223d634c68b",
+      "size_bytes": 969
+    },
+    {
+      "path": "experiments/EXP-0004-g1-daily-extract-bounded-polling-candidate-gating/STATUS.yaml",
+      "sha256": "94f1d39a68f1cb4807537b88844f1d33ad7f06b7488c3d0f1608cc6fd21c2bac",
+      "size_bytes": 1099
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/ASOF_CONTRACT.md",
+      "sha256": "59cfd9d83fbb7e78c6eed92f2eb606971e07dc94713f0ffc13e46eb83e3bace1",
+      "size_bytes": 1478
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/CONCLUSION.md",
+      "sha256": "f7845c54fa7a81e4d130b68786dfd48948da3eadb55339a6604675354c24da7a",
+      "size_bytes": 1152
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/DATA_MANIFEST.yaml",
+      "sha256": "3e19d30e627e6578cd681b50ca667f7a696035e2c4d434a84354bede5eeb22c3",
+      "size_bytes": 1699
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/HYPOTHESIS.md",
+      "sha256": "7f7512e2371a90257baf7c3fa53421d4a916afc83d65f73ee4acff12c56616b1",
+      "size_bytes": 1439
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/PROTOCOL.md",
+      "sha256": "02dc65078d33400037b4ecb92f7df1e95a7ccaac2f72b5e55d2845fda52851c2",
+      "size_bytes": 2109
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/README.md",
+      "sha256": "5d41ceaa00fbeda3672b1fcaa2bcd7ad154e75086138f8dc3e2ce8a6995ca8ce",
+      "size_bytes": 1458
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/REPRODUCE.md",
+      "sha256": "abe991889ec1b0e4622b2662d96cf26f45880b643f0a458962beb4ef724a18bd",
+      "size_bytes": 918
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/results/metrics.json",
+      "sha256": "3ecb81875a5811b3603cba4a7bebac01bab77b6fc8875d702c944bf661e26f06",
+      "size_bytes": 1680
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/RESULTS.md",
+      "sha256": "f3dc58edb5a8ddf8937c2cbe36f8e6292148afb80fd1b213e2feab8060aa17a5",
+      "size_bytes": 1665
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/RUN_CONFIG.yaml",
+      "sha256": "d63396dba03f11e3335d0a286c5cd28a6e68a01bc2b19027621b3f7218282dcd",
+      "size_bytes": 1076
+    },
+    {
+      "path": "experiments/EXP-0005-g1-daily-extract-active-first-publication-watch-2026-06-18/STATUS.yaml",
+      "sha256": "c01619c7228f342cf0c625ff687ccb5601a4a5e3111b958e79158aab78b2a974",
+      "size_bytes": 1126
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/ASOF_CONTRACT.md",
+      "sha256": "adc6ab910791003a2db733e044f92b19c0fe64a6d797ee4bc54733185f5d233c",
+      "size_bytes": 1411
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/CONCLUSION.md",
+      "sha256": "20ce088f4061901e67b62d0d8a9e2f20bf2c5c503af549316557cefa104525a9",
+      "size_bytes": 1007
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/DATA_MANIFEST.yaml",
+      "sha256": "f9690d6dc015dc35854282c16f1c0f285aedbc65e4b5e0eb5edaf60cbf63f3a3",
+      "size_bytes": 2772
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/HYPOTHESIS.md",
+      "sha256": "460663cd245d7a6150269dcd0bb2d229609f16a2024a9ca8f66e51ae8dcaf592",
+      "size_bytes": 1229
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/PROTOCOL.md",
+      "sha256": "49348023308c235e0724638b5a587be1cd8106d3439bc0c31b846ab0c7338b54",
+      "size_bytes": 1669
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/README.md",
+      "sha256": "783a9d6d0e6f91a1efe9d861aa02809df807b66444c8115a8523d1f5955630ad",
+      "size_bytes": 1412
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/REPRODUCE.md",
+      "sha256": "5de7dc62fcbb0b597c0d3b6a0dcf0de6d8abe390c4489ec1375d7f57d79ab3ca",
+      "size_bytes": 624
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/results/metrics.json",
+      "sha256": "8ae9b9570e1feb1f4248f49c097bd538418692b9841e328b84e05d29316e6a48",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/RESULTS.md",
+      "sha256": "6ffc06c9830f69656c43f0d702c9e5f0f8dd3b1383ec5601b6a00ce83a4cef57",
+      "size_bytes": 2333
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/RUN_CONFIG.yaml",
+      "sha256": "2f27b00e10e41e776f5428b2be99b363a6c7e06dc2e1ec543175df74482f17c9",
+      "size_bytes": 1220
+    },
+    {
+      "path": "experiments/EXP-0006-g1-daily-extract-active-first-publication-watch-2026-06-18-conti/STATUS.yaml",
+      "sha256": "6d39e394362fdc1b7399cf7a1bb2a3dbdcf9cdf138b5d84b2ed41fd1d29ce0ab",
+      "size_bytes": 1125
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/ASOF_CONTRACT.md",
+      "sha256": "dadbc3db5f556219f654cf13723495b2ec650b918d7aabce6d72c7980b4fbbd4",
+      "size_bytes": 887
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/CONCLUSION.md",
+      "sha256": "c3b24c747ec1172c92ea83ba572e9a093822ba645ec10fa5d79302f24e7a5ea8",
+      "size_bytes": 901
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/DATA_MANIFEST.yaml",
+      "sha256": "ef19d524f1191b6b5086c88bfd3f5a3bf783ffc8205a1c1f93cdc790c56915b3",
+      "size_bytes": 2230
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/HYPOTHESIS.md",
+      "sha256": "0bb7d57cde07994c6900cbed8ab747429193ee616a29b6438678659bb81e5802",
+      "size_bytes": 1132
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/PROTOCOL.md",
+      "sha256": "bc375f961f25107698a30f9df670cee457a3fa8f919a108e17b262a23f7d3cbe",
+      "size_bytes": 1469
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/README.md",
+      "sha256": "d4245ec9811897057dad106520b5400c1b83e803e57e7d35db5420bcbcb8c05f",
+      "size_bytes": 1345
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/REPRODUCE.md",
+      "sha256": "e9e1c59ffe7944ac7d0c2db2f3e1031c00fcd7da1574c4e8ccbf41ece600d760",
+      "size_bytes": 624
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/results/metrics.json",
+      "sha256": "f4028307b3840e779e80e24cecbbdc9ea3666c9d47728e883532b8bb2e832cde",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/RESULTS.md",
+      "sha256": "1d668ff2e4afa5efeeebdf78a795721c7943b372ef9f236adfa5de8e9d9c599c",
+      "size_bytes": 1440
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/RUN_CONFIG.yaml",
+      "sha256": "ab72a1ca56ad0fc1fbe7c5ccd2473ab48c4cb22275edada6663517ff57c6564c",
+      "size_bytes": 1139
+    },
+    {
+      "path": "experiments/EXP-0007-g1-daily-extract-active-first-publication-watch-2026-06-18-secon/STATUS.yaml",
+      "sha256": "702a12b0468d293c99d5f5d8f86e5a1dd685fdf2de395477082f0ac37a9a216a",
+      "size_bytes": 1112
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/CONCLUSION.md",
+      "sha256": "7a3df274795b417dffe3aa5eecd49f9fe771464c17b3a403bd7da5c27f2042a9",
+      "size_bytes": 1889
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/DATA_MANIFEST.yaml",
+      "sha256": "8f4fc8b3cc46c5bfd6c76eb54752064c71b8b1cf4c50736d926787acdaa82d50",
+      "size_bytes": 2277
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/HYPOTHESIS.md",
+      "sha256": "0a1659413215d4fb5fe996dfc12c41ed7ae013529f9c499225a142c3d3cc940e",
+      "size_bytes": 1817
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/PROTOCOL.md",
+      "sha256": "ed974c04127799c81f2ca6f3c54ad41a779fc334bb15330ea35003893533341e",
+      "size_bytes": 2762
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/README.md",
+      "sha256": "93b8443df94d5909e2d3edeac97732f822fb602db622cb2a056c1044a2dfa991",
+      "size_bytes": 1387
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/REPRODUCE.md",
+      "sha256": "0a761f936a20e29e7b68d08a2730e38405edc4d0285e69aa86f3b2c5fa508e2f",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/results/metrics.json",
+      "sha256": "1f4cd22915d8b50671e8d86ec68402ce0f07aab5d9f7b3ef9303d1a79ddf5bc1",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/RESULTS.md",
+      "sha256": "e823c43533ad036d09e90be8d819c3d9d8412b39e55e119d619bcbd236a676d5",
+      "size_bytes": 1908
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/RUN_CONFIG.yaml",
+      "sha256": "41ea3aa28251cfdee104e67297e2bc4704222500716ffc2274bc06805d3fa604",
+      "size_bytes": 1411
+    },
+    {
+      "path": "experiments/EXP-0008-g1-daily-extract-active-first-publication-watch-2026-06-18-third/STATUS.yaml",
+      "sha256": "131408c8e8721059798e7b9ca6640d0701589fe50c5c76400324e591d9b39abf",
+      "size_bytes": 1110
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/CONCLUSION.md",
+      "sha256": "363e97ebccb677a949a0cc9444eba23896528f13525b90172c617922cc4a8b51",
+      "size_bytes": 1890
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/DATA_MANIFEST.yaml",
+      "sha256": "74391addb5b0b98ab0dc44af0bc2039b57ea1f97f16608aeb1d419a66d89f07f",
+      "size_bytes": 2279
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/HYPOTHESIS.md",
+      "sha256": "bc82ba0151562e2d74f9bae5ea3db479ea638f6c8695d840a19392c5c0e5ab15",
+      "size_bytes": 1830
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/PROTOCOL.md",
+      "sha256": "ed974c04127799c81f2ca6f3c54ad41a779fc334bb15330ea35003893533341e",
+      "size_bytes": 2762
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/README.md",
+      "sha256": "7745ea0b9ced76d88f1eea19eb378fb24a3e4dfaa8075152dc906213dc80f59b",
+      "size_bytes": 1389
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/REPRODUCE.md",
+      "sha256": "5f6aa7b87a4da8cf4d2f7470fb2d4137b30e11e153197a12d97dd832f6e0a85b",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/results/metrics.json",
+      "sha256": "1955aa1a25757b6ee057339fbf75acb7c207b573d95c4911dcf4a9c0b293b300",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RESULTS.md",
+      "sha256": "59fe8d3fcdbc9cb0da32fa1ced2135f61fb0b1a92efcb831f9040f177e135219",
+      "size_bytes": 1908
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RUN_CONFIG.yaml",
+      "sha256": "b20bf12db5376b94890c1961d19c7debff532ab949acf08bf1ed7975578e73f7",
+      "size_bytes": 1411
+    },
+    {
+      "path": "experiments/EXP-0009-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/STATUS.yaml",
+      "sha256": "dbb20a2e901580a8ee66438e76fe8032660756e20af333be6aea00a38b607b0e",
+      "size_bytes": 1112
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/CONCLUSION.md",
+      "sha256": "3e1e37b0c15c15c7e998b3e163f4351c443b7259eccc5b340615ffca3129dc25",
+      "size_bytes": 1889
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/DATA_MANIFEST.yaml",
+      "sha256": "e5092ed61445dfd823486338451b07eb3e8290a72d3b136bb106bd6b36c529f5",
+      "size_bytes": 2277
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/HYPOTHESIS.md",
+      "sha256": "d5989df1608c3471671f128099800a3c08db006428ca64cb9a0900a43d9309ba",
+      "size_bytes": 1834
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/PROTOCOL.md",
+      "sha256": "ed974c04127799c81f2ca6f3c54ad41a779fc334bb15330ea35003893533341e",
+      "size_bytes": 2762
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/README.md",
+      "sha256": "9cdc17751e139a4d94f622de8d204c0df105e1f8fd91692bc0ee921890787cb9",
+      "size_bytes": 1387
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/REPRODUCE.md",
+      "sha256": "d99a394dc9816793bf2c230ad4b2b9c7d107dbd33e87728d4aad78273fa4b1e3",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/results/metrics.json",
+      "sha256": "ed25202350fc6f237aff0eb9103b2d00d01ffdcc61b2cbda66bdda00814e0989",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/RESULTS.md",
+      "sha256": "2097b46b6ebc0e73c3b05af1eaee92d85864608a3137c10b95b7eb30099f300c",
+      "size_bytes": 1908
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/RUN_CONFIG.yaml",
+      "sha256": "b39eaeac9f0933a6abc8c66c5a2873b20cf1bb8aaa7dcff9c28a1b9e4a542710",
+      "size_bytes": 1411
+    },
+    {
+      "path": "experiments/EXP-0010-g1-daily-extract-active-first-publication-watch-2026-06-18-fifth/STATUS.yaml",
+      "sha256": "717b9d9ce94e9ea00ad914141b861f0ebe8da999fe331837653995683522794d",
+      "size_bytes": 1110
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/CONCLUSION.md",
+      "sha256": "d7603ce727a2fdc08920a2f9938e1d8313289038f6854db0086f7ac5aebf127b",
+      "size_bytes": 1889
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/DATA_MANIFEST.yaml",
+      "sha256": "7a104f306abf988006f2ad940cf62acfc8d0c804fc3782086325ffde40d8b0c2",
+      "size_bytes": 2277
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/HYPOTHESIS.md",
+      "sha256": "1fc7ab102f9006f82c759a060f2d0aea797a838b5e6cfabb3d44ae71d177272c",
+      "size_bytes": 1834
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/PROTOCOL.md",
+      "sha256": "ed974c04127799c81f2ca6f3c54ad41a779fc334bb15330ea35003893533341e",
+      "size_bytes": 2762
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/README.md",
+      "sha256": "3572890b0a97c8bd236eab115f2be2ad6217b59b385bb88a150ac8aa14a74820",
+      "size_bytes": 1387
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/REPRODUCE.md",
+      "sha256": "6e31c7e9e398b9a6d70f761ed76f8078f9bf31236761b3676e881e53507463fd",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/results/metrics.json",
+      "sha256": "24c0e992f6e33a376b186849ebed20dd47db8964d8c9891749577c098299d835",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/RESULTS.md",
+      "sha256": "48ea8480616a60eaa45fdf2620f2a4c0720393a2133deb3abab076438acae9c1",
+      "size_bytes": 1908
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/RUN_CONFIG.yaml",
+      "sha256": "b059994cbdcc5d8e3d7226dc9581339fe74c2d250969e4dd99a9886aff204a72",
+      "size_bytes": 1411
+    },
+    {
+      "path": "experiments/EXP-0011-g1-daily-extract-active-first-publication-watch-2026-06-18-sixth/STATUS.yaml",
+      "sha256": "0f8cb626a8da7964a090e3e08b5a767104c40fbd08e4559358af452eadeb31a6",
+      "size_bytes": 1110
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/CONCLUSION.md",
+      "sha256": "c9c94d5b781b2f9c22078753c59636d169062cd3f2f3137e3a789eb40b1b6c4b",
+      "size_bytes": 1742
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/DATA_MANIFEST.yaml",
+      "sha256": "2514baa555d5e6a01ce373ed18798dcc287cdd165ec0b8cd59311b7d18b0b79e",
+      "size_bytes": 2867
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/HYPOTHESIS.md",
+      "sha256": "0b7c26f70b938d076a19513aa0c31ae0b5881cac98e52fcfd31cdd5c0c6eba6f",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/PROTOCOL.md",
+      "sha256": "828fdedd863bec7243f3591dc3fc1f488d75d5e1ecedfbbf175e416f62d301b0",
+      "size_bytes": 2832
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/README.md",
+      "sha256": "e7f3d47d64c395690c189be3493016d104bd9745bcbf6a1d4051ddd4caa350ab",
+      "size_bytes": 1518
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/REPRODUCE.md",
+      "sha256": "85da288c9bfd75036bc2340428e3ec23163bde2de855d4917787fa42d0e18b96",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/results/metrics.json",
+      "sha256": "c3f191fd0d32cfd9ddf4b46ae0306aa06a6b1972a3ecf45c3a7ef83f1d0b9c86",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RESULTS.md",
+      "sha256": "bccc1dd3ac29879824d6e1c449d8e2da155905a5f0d10a27d26e2a4f435bf793",
+      "size_bytes": 1826
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RUN_CONFIG.yaml",
+      "sha256": "fe88e98a3dd25ace85a448d11e9d5cefbe7f682c7625080a33a0d43ffd0f819c",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0012-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/STATUS.yaml",
+      "sha256": "1419d0f49b8d0b61a888e277eca19d129495f1713e4dd6bef3f379858173d561",
+      "size_bytes": 892
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/CONCLUSION.md",
+      "sha256": "a2c569a7e82abbb0a6179d820e15b305b9f972bca730d132b17d077ec6bc4088",
+      "size_bytes": 1741
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/DATA_MANIFEST.yaml",
+      "sha256": "ec27fd6240e36472bbff337b53943bf50a476845a5c6ee11a937513cdedca72a",
+      "size_bytes": 2866
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/HYPOTHESIS.md",
+      "sha256": "96d617edba288eb46c12764ec9f22ffd896a591e779bc00223936e48d3eaff37",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/PROTOCOL.md",
+      "sha256": "828fdedd863bec7243f3591dc3fc1f488d75d5e1ecedfbbf175e416f62d301b0",
+      "size_bytes": 2832
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/README.md",
+      "sha256": "9f1dc684d2b61320d17716ad0ae387a11fba2bb4aecdabfcf866d9f6e344aa4a",
+      "size_bytes": 1517
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/REPRODUCE.md",
+      "sha256": "525dc7f2d6223aba47be5d01d42dc88869fe6e82587ba252772a3c30f61b0e5e",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/results/metrics.json",
+      "sha256": "32a50da0e2039cfe9094a7e5ea32a95ccf0fe4477143e6f9c1d59e1c04dcaeca",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RESULTS.md",
+      "sha256": "85ba2253469fc3866ba5add08f8712d787df28a93577eb8b1cc9dfe92265955b",
+      "size_bytes": 1571
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RUN_CONFIG.yaml",
+      "sha256": "693738b4b637a414b7a694764f393718ac640c02935236884a9c8a497c5547a1",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0013-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/STATUS.yaml",
+      "sha256": "14460b6f62b52c0098cbb27cff59188f03b7401dc1fd7ae631d4a8035730dfe4",
+      "size_bytes": 890
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/CONCLUSION.md",
+      "sha256": "6101cc3b8f2e87bae8ac1b228cec8cbb614d0bfe1632edc7c9bc49e77b00e143",
+      "size_bytes": 1740
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/DATA_MANIFEST.yaml",
+      "sha256": "b107d9123cbedef42f2bbc776fbb8c0aeac5541e230f1cae777212b1af215253",
+      "size_bytes": 2865
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/HYPOTHESIS.md",
+      "sha256": "0855c664da9b69f0b71ad5533389a8cb49ccf0a64a2c99ec0257b6dd3e6242ca",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/PROTOCOL.md",
+      "sha256": "828fdedd863bec7243f3591dc3fc1f488d75d5e1ecedfbbf175e416f62d301b0",
+      "size_bytes": 2832
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/README.md",
+      "sha256": "2f9ccb34ec9389570abb4d0f42421e2bc53fd7206d9dfdee20968516bff1bcf0",
+      "size_bytes": 1513
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/REPRODUCE.md",
+      "sha256": "f3f84944be217f166ca25514405d7192f35730d3e4c72ae9994c1569c23b66bf",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/results/metrics.json",
+      "sha256": "5fa9df9ad193e848d3abd62a7213d4d425fd51011e770c14d9eab91a1074289a",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/RESULTS.md",
+      "sha256": "0afcea555b2d19662781cd768c82191fd7b6c2a2cec6019eb894bd3c6c85edb2",
+      "size_bytes": 1571
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/RUN_CONFIG.yaml",
+      "sha256": "ad5967b6ee59266dcbde3b58e7f7945e101a6c25dd0fefdf062b99c85de959bd",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0014-g1-daily-extract-active-first-publication-watch-2026-06-18-ninth/STATUS.yaml",
+      "sha256": "37735e701a3179ab4238e6b62ac7f71a6b77048c5b65fe831f2ff3ab5966bc0a",
+      "size_bytes": 888
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/CONCLUSION.md",
+      "sha256": "b59f750870425514904224adc6849613258d772f0ba3d17a01d2128754bae3f3",
+      "size_bytes": 1740
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/DATA_MANIFEST.yaml",
+      "sha256": "05bc4e95040d61e6e0b17c442dd65226b25e15707f6e51da75a6e397eb7b5946",
+      "size_bytes": 2865
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/HYPOTHESIS.md",
+      "sha256": "63a8cf482677439bc1a2bcd5cec6f0f6652809fec9ce065e6948fd016aff96e1",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/PROTOCOL.md",
+      "sha256": "828fdedd863bec7243f3591dc3fc1f488d75d5e1ecedfbbf175e416f62d301b0",
+      "size_bytes": 2832
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/README.md",
+      "sha256": "dd3550d71942cedd323bfeda7bd9890f4a9a96305c10f5049a9d279d4a20973d",
+      "size_bytes": 1512
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/REPRODUCE.md",
+      "sha256": "c345236061eddacd69c36863aa91c4244aa705143f4ed7882c00ec4a484f3401",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/results/metrics.json",
+      "sha256": "629183f99ea4bd6f1d94084ce9f4ae0f8206805792a89a1cfc2d27a77036dbb2",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/RESULTS.md",
+      "sha256": "03249668a3773135bc932d3809a7d6d8191bd00d9f6be8c012343def957cf0b3",
+      "size_bytes": 1571
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/RUN_CONFIG.yaml",
+      "sha256": "5a46269f9f29dffafd716559f43f3dc706f9c01ab29e24aef8b978d1b117ae0c",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0015-g1-daily-extract-active-first-publication-watch-2026-06-18-tenth/STATUS.yaml",
+      "sha256": "99d690a52e2f13847b5cfcb1334cac5077623867c1185a8ba8114f66c0c0bea0",
+      "size_bytes": 888
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/ASOF_CONTRACT.md",
+      "sha256": "96859fc2f848507b4767fb5286951aa168b5bc4983d1b0838dad93f959e7dc33",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/CONCLUSION.md",
+      "sha256": "5e6c8fb68286b5fb645c268f5882037c4578a2eca4f9a95509ba559c5911702d",
+      "size_bytes": 1762
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/DATA_MANIFEST.yaml",
+      "sha256": "e3cf27bef5cf7960e70de82c7fd7c742a063bb265b9a71ed1b44a8d27bcda070",
+      "size_bytes": 2868
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/HYPOTHESIS.md",
+      "sha256": "10cbcdfe382340c1f6773f9c87bb266ec4301e600cede11d6dc92bbf1f8348f0",
+      "size_bytes": 1866
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/PROTOCOL.md",
+      "sha256": "828fdedd863bec7243f3591dc3fc1f488d75d5e1ecedfbbf175e416f62d301b0",
+      "size_bytes": 2832
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/README.md",
+      "sha256": "ebea8647fea1af6b6763bda3f918af7e8401055d5d75f7dc048aeb73f08f8b18",
+      "size_bytes": 1521
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/REPRODUCE.md",
+      "sha256": "a063e07bf3eee8f35354492f66a54a63750befaa94af65eae26a3286dc710cc4",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/results/metrics.json",
+      "sha256": "3c6b2f98f2b5f125a061d264aa548841321719cd0b3437dc381eef0aa89f73ae",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/RESULTS.md",
+      "sha256": "bcd232a0e3a7d4313fa659c6fad4d97fb93811ff6966873e14072ed47e1b862a",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/RUN_CONFIG.yaml",
+      "sha256": "722426370a8672ccebe2129962b77cc3aec840e16aa4f3873aa2c7dfcaee5e3a",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0016-g1-daily-extract-active-first-publication-watch-2026-06-18-eleve/STATUS.yaml",
+      "sha256": "1e712c8f44e744050056d7e6d7b8275b16b2198dcd8e7ea6bece8fa04849d126",
+      "size_bytes": 912
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/CONCLUSION.md",
+      "sha256": "5c5b3583ad69b1446da81d78f25df27fb62ebfbe6cd00ec85e5d4e0c0450b6d2",
+      "size_bytes": 1765
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/DATA_MANIFEST.yaml",
+      "sha256": "36a35ad2750073a5b466ec249688eca1fc9ac9bb99241dc5fe3bd39eb12afb27",
+      "size_bytes": 2867
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/HYPOTHESIS.md",
+      "sha256": "13113df9f1f00c44f907f0101bed5cb47664ec83ce5561d4d39f0c3248523053",
+      "size_bytes": 1753
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/PROTOCOL.md",
+      "sha256": "3766409407c49b30556681e2a28e6a25e476381e61fb8b1610774fceaba17013",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/README.md",
+      "sha256": "4c0df7d4910fd6c12fb30cd394190603497ac6fe1fc701578a2930722bac9386",
+      "size_bytes": 1521
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/REPRODUCE.md",
+      "sha256": "46c81674709d273739adbb3665a1feb4200928873535b76af27c6bf034091a2a",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/results/metrics.json",
+      "sha256": "e7d17a438e13f52b5ed5a64b7a071f67e6bcb50951ab4d6e0035944651f30e42",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/RESULTS.md",
+      "sha256": "ac930e9171407ec54a15632f7445021eb2d21741c2b7cfc62c78ba7ce50a8699",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/RUN_CONFIG.yaml",
+      "sha256": "5618070870a4f640ddf583c56aa3950976fa798a896621531200e41901e7873f",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0017-g1-daily-extract-active-first-publication-watch-2026-06-18-twelf/STATUS.yaml",
+      "sha256": "eceb555f24ed73423094b66ff7edbaef757ef71840d6438b3a625a284a0cc54f",
+      "size_bytes": 910
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/CONCLUSION.md",
+      "sha256": "efcb2d106aaafbb093ca91355638f68b11857e819ea4485087a0afd2aaa6739f",
+      "size_bytes": 1768
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/DATA_MANIFEST.yaml",
+      "sha256": "4c352f354abe9c714fe586a321018209d26f68920acdd2f59772905168ad687f",
+      "size_bytes": 2870
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/HYPOTHESIS.md",
+      "sha256": "2caa5670f8d1e936c98a7078ee25f9e3909bdb6b06c200e34cb63ccdb91d4e08",
+      "size_bytes": 1756
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/PROTOCOL.md",
+      "sha256": "14fd86ac4a910459028aaec4ade1c957271df611f477b12d6bd75103c36ccce4",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/README.md",
+      "sha256": "3e5528161dc6f774155ea7e5615e17f6c44ae062b800183cbc78473ffa1dc8c4",
+      "size_bytes": 1529
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/REPRODUCE.md",
+      "sha256": "cd6eed1640a87d1087c34679b114ae7a03bc6bee56712917a3d2cefb589b61b1",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/results/metrics.json",
+      "sha256": "7c90469b52e75a241598ef6c8b78e480b8bc1cf35eb825fc39d3fdbecad2975d",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/RESULTS.md",
+      "sha256": "6a157e7b4084fdd3f5c2496754b96a1f0d508eecd0b7914395d81f118b0af0c3",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/RUN_CONFIG.yaml",
+      "sha256": "e140e88a06261bc209efdd55eba64aa978a206a978208abc556de3241f527c72",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0018-g1-daily-extract-active-first-publication-watch-2026-06-18-thirt/STATUS.yaml",
+      "sha256": "9812eb70f8371db23f8b09a282dd54ced0899ec7300cc776f4a69c3ad451719b",
+      "size_bytes": 916
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/CONCLUSION.md",
+      "sha256": "5f64187a6ffb921f700c5075527e787d33edeb7cc3ef1ec78c8eb563f844f17a",
+      "size_bytes": 1768
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/DATA_MANIFEST.yaml",
+      "sha256": "dede7dff0a723bd9c89f47f054f93daabdc587dd7ece0080866e3462e4c177a5",
+      "size_bytes": 2870
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/HYPOTHESIS.md",
+      "sha256": "4f2c5dc035806a2e62fa07b6cfc9ac56de0462c386a5e91a812590998d3247fe",
+      "size_bytes": 1756
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/PROTOCOL.md",
+      "sha256": "d57733e76f67d6c49292fa4ab114e893dff1777a6d36be3329576969ad749037",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/README.md",
+      "sha256": "80c11557e6ed978f62fb8b49ab1790642a82af7efdbbf4807ca3d6c60b0b14f0",
+      "size_bytes": 1532
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/REPRODUCE.md",
+      "sha256": "eb6778c88d0ba3eece77008b39b3d946650f83e99dfdbf150a99d6f168f33017",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/results/metrics.json",
+      "sha256": "abddf2a68cdc69bbda5d59a99df62cf5d6fde868523da6170d6a3a312953772b",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RESULTS.md",
+      "sha256": "9e2d1fdf2b9ea42a5b6a933ef6c86ae75d3eac0bd12defdcac8cdbb0cc2bb8ca",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/RUN_CONFIG.yaml",
+      "sha256": "cc2e2ef003e82861016c64909fbcc43def10b724a87b0ca9ee5a0ba9ef9554b0",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0019-g1-daily-extract-active-first-publication-watch-2026-06-18-fourt/STATUS.yaml",
+      "sha256": "904e8b49802bf048154bda324076f68f577188358ffbcc683fec35d9faebcebc",
+      "size_bytes": 916
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/CONCLUSION.md",
+      "sha256": "1187ec6296345e9f240cae79d34c5150b6cbab3102c520e0054020def33ee0f1",
+      "size_bytes": 1767
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/DATA_MANIFEST.yaml",
+      "sha256": "7209efd65b8e61ca5042395fb04c2b7412781177ab245200d8cfc13243346055",
+      "size_bytes": 2869
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/HYPOTHESIS.md",
+      "sha256": "0d6fda181618c2b79408635a91efbbe86b84f6928b7f7f69a9760644cca9955c",
+      "size_bytes": 1755
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/PROTOCOL.md",
+      "sha256": "b9dc629b9d5b2802662642a2317e7b7c76813d8188768bc2ac6b309f3fbd14da",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/README.md",
+      "sha256": "dd3fd8cf89a74c752d09f3a157cfb6b8c7aa3ecef3bda28ec2df70fab6b262bf",
+      "size_bytes": 1529
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/REPRODUCE.md",
+      "sha256": "dd3fa5cbfe28ec05b00c8516f9cf00b12edadefcdb61f79eb638df63902fc9d8",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/results/metrics.json",
+      "sha256": "17660685f0058df04db403220e648c64ea735ce979c0a5da89b937ae63be0759",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/RESULTS.md",
+      "sha256": "52e59c5a3ad8f0e07a0cd2524078f6cc157ff7502d7f6358997b862ae7fae067",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/RUN_CONFIG.yaml",
+      "sha256": "67ff12ba880781254413d02db1bf41c9f20467527ca66de0719b43e2a8ab8c98",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0020-g1-daily-extract-active-first-publication-watch-2026-06-18-fifte/STATUS.yaml",
+      "sha256": "fa26f0bad2facd711c4e303b6c725e79e55e6b748624d485eeeced4477257eb9",
+      "size_bytes": 914
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/CONCLUSION.md",
+      "sha256": "131e6e51dfb5912b6743ad51bbd237058c23929fdeb21c50def0e8b60e14cabb",
+      "size_bytes": 1767
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/DATA_MANIFEST.yaml",
+      "sha256": "e4097e75436a46f7547cd6e05b22edbc4fee1ab0c093bf5f7b0d1b8cf5867e95",
+      "size_bytes": 2869
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/HYPOTHESIS.md",
+      "sha256": "57ae60483235961df2defc0a3fbffe09ca14ea9dfcac07b6a35de6bb408c7acf",
+      "size_bytes": 1755
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/PROTOCOL.md",
+      "sha256": "c2c53344cd091dd51b863af6d870f1311f5022a9050b73b57afe1ca1b39772e3",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/README.md",
+      "sha256": "ef0f266d4e3b1b3e70ac3ae0e2dd736cf3130c73d5195f4aae83d8e2dae983ee",
+      "size_bytes": 1528
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/REPRODUCE.md",
+      "sha256": "090381809b1aa3aaa529beecd05767a6b171f1a5ae7b83ab6a7fd1235ddbe86c",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/results/metrics.json",
+      "sha256": "846ba1247a949dbc364504c9eb5725db84944be3d568eb4db34a02244056befc",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/RESULTS.md",
+      "sha256": "bb8858f0a136c282aa2ba5e19fb3f7daf7d1007548819e614ddfd1c0bbb03990",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/RUN_CONFIG.yaml",
+      "sha256": "bd04b6319f69b242c54f64398113c18941b8dce44cbb9177851ece016c10c422",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0021-g1-daily-extract-active-first-publication-watch-2026-06-18-sixte/STATUS.yaml",
+      "sha256": "690352f8d66b195bd48908b00df25165d27e40cd005e6ff1a00c691192bfbdcc",
+      "size_bytes": 914
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/ASOF_CONTRACT.md",
+      "sha256": "ec56af5c0325cb7ceb3ecdce7a2f2fb3de47a749aad69c5632ea56f973d3755d",
+      "size_bytes": 2267
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/CONCLUSION.md",
+      "sha256": "9d870b146ac317b332959a3c3480c83304e4194b858024b7b6739ee829154255",
+      "size_bytes": 1769
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/DATA_MANIFEST.yaml",
+      "sha256": "adba55c422c55179843e65b4c78f4d23badc4596f621b8eb385bddd4b9c2a6f3",
+      "size_bytes": 2871
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/HYPOTHESIS.md",
+      "sha256": "e9832a824f4c111e73d7e7487069717037335c75f8b12c7800b8dca13e4be451",
+      "size_bytes": 1757
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/PROTOCOL.md",
+      "sha256": "0862841be106495e44b1e0dcac5d7df20cd3dd8dc09f65b41b29335aa509e247",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/README.md",
+      "sha256": "ed0d1203a4af5b5d0cc9ed89b5b6c7938cdb67c7ae6c82fef2f2e453c327f96a",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/REPRODUCE.md",
+      "sha256": "798a263c8ee3014b2b37d19738327e696f2940c19a71380a2a28bfcb7e59fbb9",
+      "size_bytes": 1654
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/results/metrics.json",
+      "sha256": "80e6b574e7e1ca69b1a9ded61f4fb891544b7bc207baab80f898e4051e4c1950",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RESULTS.md",
+      "sha256": "5959bfdb45b1cdc35a178d2fd1b09434ae65dca5473ae8a19fcc89f58d2505d0",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/RUN_CONFIG.yaml",
+      "sha256": "4e032d6969e2206e096e9aac261a816305b0834dfc0a2cd249fd9d21148f624c",
+      "size_bytes": 1343
+    },
+    {
+      "path": "experiments/EXP-0022-g1-daily-extract-active-first-publication-watch-2026-06-18-seven/STATUS.yaml",
+      "sha256": "26a3d68991ecea98473b6ac9bca3747493764ee9469310011c017ee2f4723c97",
+      "size_bytes": 918
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/ASOF_CONTRACT.md",
+      "sha256": "9dd9a8adf6e4d4ca6cbbd3c24505cd820ea71128316aad18fd4b6faaee53a06c",
+      "size_bytes": 2224
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/CONCLUSION.md",
+      "sha256": "35e4aedc70c3fb552492edafe2d0487685aa8079ec87eeb1a99d4978babae8f5",
+      "size_bytes": 1797
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/DATA_MANIFEST.yaml",
+      "sha256": "aba0c461e1482e84cca4f7590fbcee898be114ac29ba91c965d0f81934777d45",
+      "size_bytes": 2870
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/HYPOTHESIS.md",
+      "sha256": "d89fc6a2d0e05a2ab72e200d067d33a2ae0de779262f36edc9280c446c9ab7be",
+      "size_bytes": 1756
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/PROTOCOL.md",
+      "sha256": "a18624a251d17a944b541d4c63750712ebec033fe18b79eb002733fce665b6a3",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/README.md",
+      "sha256": "937efd294e7ed8454c88e8657b5ebbcecb6d013f64102607e4f733c0fdd99777",
+      "size_bytes": 1458
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/REPRODUCE.md",
+      "sha256": "1c8be1102869196a58b784d8fbba1b0c7ecd42af49c488cb88529b2b3c6e2f6c",
+      "size_bytes": 1676
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/results/metrics.json",
+      "sha256": "08606e4a6b7cec3364efc3cba1d8ca491c6e26bde8b4bd2b5dcd704c22ce1677",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RESULTS.md",
+      "sha256": "4fd4e6d037b77b116653973ebac175fb5301a5b001b6943848698824c1f8618a",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/RUN_CONFIG.yaml",
+      "sha256": "34b411b642f9223adea72ce976d4690f101d4a474a41c53ed83dac1292044289",
+      "size_bytes": 1348
+    },
+    {
+      "path": "experiments/EXP-0023-g1-daily-extract-active-first-publication-watch-2026-06-18-eight/STATUS.yaml",
+      "sha256": "a4ee9b16be80c64a0c52cc69d75a865f9e658fe3700cc97d949d845918f1e302",
+      "size_bytes": 918
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/ASOF_CONTRACT.md",
+      "sha256": "9dd9a8adf6e4d4ca6cbbd3c24505cd820ea71128316aad18fd4b6faaee53a06c",
+      "size_bytes": 2224
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/CONCLUSION.md",
+      "sha256": "a2ddbeec21ac711820f3b617d02a81887c39d8be4a5a273e0f8aa93ba8635b1e",
+      "size_bytes": 1797
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/DATA_MANIFEST.yaml",
+      "sha256": "6f93797de0290b93516347d6f85d7300845013da262436083a09ef92323ed863",
+      "size_bytes": 2870
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/HYPOTHESIS.md",
+      "sha256": "68bde5f1970a75c9ab4f41b4ca89d6376676e4b98d9df5f170e096ea59c4e941",
+      "size_bytes": 1756
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/PROTOCOL.md",
+      "sha256": "5cb4dcfaa8cb33e37d00c64a36238bbcd1a4f1a05fa6d7008c749c627bf2728a",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/README.md",
+      "sha256": "1f67a2be3d34641954adc03b5e8c29d40fbda1b347ce8d9aac3eaf9df06c1c55",
+      "size_bytes": 1458
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/REPRODUCE.md",
+      "sha256": "9115c137585ca4a491166b7d2736cac6c9f28c395db7bfa4a9cd779dfb3da938",
+      "size_bytes": 1676
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/results/metrics.json",
+      "sha256": "cb3976a595a15ec870aa65266857636217a977741b7cae671b6717417dfca61d",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/RESULTS.md",
+      "sha256": "f8a39ce8f8f0763692411f42217369adfaeacd28658955bfee36f97c4636b44f",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/RUN_CONFIG.yaml",
+      "sha256": "56c38e3f637f914e1edcd31ceb5a54906516d460b9bc4101ff4217bdbd47d68e",
+      "size_bytes": 1348
+    },
+    {
+      "path": "experiments/EXP-0024-g1-daily-extract-active-first-publication-watch-2026-06-18-ninet/STATUS.yaml",
+      "sha256": "b3275f4f7ba88b0dce2deb4b009517b38581852a54dc2f6c67e2fe9fa052e480",
+      "size_bytes": 918
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "9dd9a8adf6e4d4ca6cbbd3c24505cd820ea71128316aad18fd4b6faaee53a06c",
+      "size_bytes": 2224
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "ad5f63e15bd33f3a8f6e5981d3e31c1aa7b52ab8db1cbeb3ef24d4820998fe67",
+      "size_bytes": 1796
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "fdc522f2e039c248db409a01d9b684a1a82bc92aed0b7a841806a6f2040a36b1",
+      "size_bytes": 2869
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "a98530be31987190ffc829d150389f79f0465badeb55e6ce048a4e884f6f713a",
+      "size_bytes": 1755
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "8155ef55182d3063ec5d66ba7f86c706129e455aebd90d5275a0fca601a4499d",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "e385f91d205da3bc15e79f361b8b07b81390fcaf94dcda50c0e28d2fecec7498",
+      "size_bytes": 1455
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "2f6235462629d4d6838c21573fd1db335330f92c7d41ba4d426ebf157ee6ded4",
+      "size_bytes": 1676
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "20616e1e35802903b1fdc8165b5a4ed7f8537b592fe985a92f99474c965a5f87",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "82d1b5e318d00b45b1cdeee0ca87fd2a803deddd16d9aae13da1d7d3d3ad4d09",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "2056e520b57f7310dde9eaaa70a36e3dc8043c2327604d23658ec946907e0ec4",
+      "size_bytes": 1348
+    },
+    {
+      "path": "experiments/EXP-0025-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "3c30397e30cbfa15d2737772c2b5702e73cf992af5b1e415b32b3343f2f4c839",
+      "size_bytes": 916
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "9dd9a8adf6e4d4ca6cbbd3c24505cd820ea71128316aad18fd4b6faaee53a06c",
+      "size_bytes": 2224
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "06a102f4a6db86fd24bca70825b7dd068eb9f378907dfd07e744be8237d5e91a",
+      "size_bytes": 1799
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "ff56a15d32f73882629db1e4f3bd0e4d1faf3478e255093ee1f71ca3a1fc39ec",
+      "size_bytes": 2872
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "068824a2454200a02d576586105786c16a9bdbd7f165ccc9b0eab6bb9daf4fcc",
+      "size_bytes": 1758
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "94925e5a65468b078bd5c269ba4cd9d4b2a6a9c3e98c11ac321dfb3d19b1523f",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "ca5f2d1225bae4138c919d050e54ee608f1ac1235e0d53bb2d87aafff34abbfc",
+      "size_bytes": 1464
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "d1236da0439ce0927030554720f75f4215688eadb65048f47892036b78081c3b",
+      "size_bytes": 1676
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "1360cbc017464adaacf8956fd5089bb6219a6f98852fe5beee858fb2a55d688b",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "b2712465209d826b5979146ed7fe4b0e8031663b22987fa0fa7c497f900d7c30",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "174158bb40d7e23d3dee1c755ea9165aaedca64f78ea698533395e5a1d01f53c",
+      "size_bytes": 1348
+    },
+    {
+      "path": "experiments/EXP-0026-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "123d07b078350ca8ebd9e25fd6a63eb36bf5bf98bc1b3000014e0317b9779fb1",
+      "size_bytes": 922
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "9dd9a8adf6e4d4ca6cbbd3c24505cd820ea71128316aad18fd4b6faaee53a06c",
+      "size_bytes": 2224
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "076600df14b8bc2b8d8a2c608d4891daf22058dbf6869c855456926f417fb4e8",
+      "size_bytes": 1800
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "ffff7cb71e909bd76e0a0df8cdc4e76802972e2e3171cf102786bd1cd9abe8d0",
+      "size_bytes": 2873
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "164e90e21e5f2c7afb9a8c4e68139709391ba6980d18e7b270c89db573bddfa6",
+      "size_bytes": 1759
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "673b12f4bb6bb5f842456be72dc20217351399af14eef1443ba80297968e9027",
+      "size_bytes": 3174
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "455d2c51fcf801409eef654cb6700ac43a452a6503722549cae28325ac643aec",
+      "size_bytes": 1467
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "b3ce76220228b04dd8fab27d06ae81892101feccb49317048b3220c07226e0c2",
+      "size_bytes": 1676
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "dc90c9720fc482b63f0f473121505f1712e41224a25c94d0c51cdbc5964aaaf4",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "26e91a92d504d73beccac006ff3ca5df40546d72762c95ae93ba1e7ce1f10f6f",
+      "size_bytes": 1524
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "c47ee8e202364ea31a14a79d5ea9424e084d97754a92252dc637258e5181fc83",
+      "size_bytes": 1348
+    },
+    {
+      "path": "experiments/EXP-0027-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "16b7a988f4022de0b68b538fedf3027dea0abf4a4af3682d84349849a9743fa6",
+      "size_bytes": 924
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "e1a275a11b0fea496b72b732b4bc6cd875587a21e1e0079878e631002aef1460",
+      "size_bytes": 1699
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "bb86f4d21bbf6525b5b69738fac66b402046f3df156efa966ba6f35963e70c64",
+      "size_bytes": 1831
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "39121671ba40aee54b01d561b8c6fc0573a23598e48700243dfa5b6db84f21b8",
+      "size_bytes": 4245
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "f993fbdfe74c6f120e7c6e30e19f405a1a650ea2e216317e0c22a7e8304a2570",
+      "size_bytes": 1848
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "dffa0d02aec9883e2421f744e1dd0f0c447acfa975c40934af491d2eba8dc948",
+      "size_bytes": 2808
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "0a13708d0379fcff5e490e4625527e799d9ed62cae24ea7e3779cc7d0f2a0179",
+      "size_bytes": 1518
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "82db16cc8a0fc95d29a44aaa12f50bbc44284530d0c5bd0bcae9caf9ef8978b3",
+      "size_bytes": 1573
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "db04423cdd8d45a5650dbda26e852005547825664a792b2f87377464cf5dd7e6",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "28c96df828ab8a101c18dc7042ae258b168758bea379064f0780a1505c196770",
+      "size_bytes": 1311
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "8f83eaccaa009f76e5580d948432f9a41ca53a67b5f27f7e207fecb0c01b6f67",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0028-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "37cf995de12719f4743c3364d0c9b50f9b13d6e280f9c592fe3839610e74134a",
+      "size_bytes": 925
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "e1a275a11b0fea496b72b732b4bc6cd875587a21e1e0079878e631002aef1460",
+      "size_bytes": 1699
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "4c486a565285a96c8866b63c3b302162a5a688b5668637ef8e551d5affb23f79",
+      "size_bytes": 1872
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "65a611aa23b768c5ae357e1b8350173af364828e6bbd8cda60159ef5d3f71ace",
+      "size_bytes": 4241
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "d9990b250d882f3f6e88d2d002cca1ee1074bd578541712cc2acff90c3fa29d9",
+      "size_bytes": 1848
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "e6ae1b89b3b5d5324f7a766ef7f985f4479bcf5b03492e04bcfefdeef1d3dca5",
+      "size_bytes": 2808
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "4c7d10da41c87d1e9c76d3f6c62e11bd14bd454e891ccbd2bcc69ab81c40c379",
+      "size_bytes": 1497
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "01e988fd6c3c4ad73e317546ea723bb9051760b9b3912cdf1590585954ab2f13",
+      "size_bytes": 1573
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "8c91aba0c909df5d6e186e2070a46ad27c0612a607a9c5427ee4063975ce298c",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "b72628a049cf6d3e6f7eca948b537153111e5f8ccb3f67a43300ce69de561efc",
+      "size_bytes": 1443
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "c8116a1651513919456e7057272a6180317497323b991f094904e5460a58168e",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0029-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "fdb5fbafb4e150a2b711069902c378dec2e35962975dca7e2c3d2ef5f2aad8c4",
+      "size_bytes": 924
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "e1a275a11b0fea496b72b732b4bc6cd875587a21e1e0079878e631002aef1460",
+      "size_bytes": 1699
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "5fc52592fcac7334408f6bfe87c0f7b05e62d0b8f826f1354e410cb6f5580b1c",
+      "size_bytes": 1871
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "e889013831db35be3271509b6b39c13f69e50af0c0bb164afb10dc9c7df39100",
+      "size_bytes": 4241
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "abd3af7fbc1730df7042bffa9205c8617041fcfd0e92f290b4c6725d29ce6040",
+      "size_bytes": 1848
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "433f34cd2157ed48467fbdd6e4f55793077e1779c96307d260940b31f7b895b6",
+      "size_bytes": 2808
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "537da77ca919849de56f4102882c026bd298d76123d80ed85bcd21da8e879188",
+      "size_bytes": 1494
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "5a2bebff6ffe3ed5d5805f206b4b581d12a6e0b19ba10af5ddcf83aba1f70ab4",
+      "size_bytes": 1573
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "ff28f0f47b7c811961e99c245af4836c056468c229377443b88a4dd76fcb1bba",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "3a80827eb93f5cb53d3dd285e249c881997174a5e994df99f88902ff4e1c8e15",
+      "size_bytes": 1443
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "a2e9c68af4d0ab3d8ca50c5bdb5405e917e58dd6244f11c8c29f6b1c9b2f4795",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0030-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "52303ee326df5fa3ef60aac6f9348c7eff0c9a958c733ce470525770659d4cf1",
+      "size_bytes": 922
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "e1a275a11b0fea496b72b732b4bc6cd875587a21e1e0079878e631002aef1460",
+      "size_bytes": 1699
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "d1f55a2dc99ff9ca6af217d58238e60f0ae4c36fa686656aeb5b6825e34925c8",
+      "size_bytes": 1871
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "4e4e7b526ca514743eb37848fe177a5a9df1dc662094811189af5535315fa9df",
+      "size_bytes": 4258
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "68d9594ed9955cd1317787a5a21cad5840ea1c97696f1362ac8328bed6aa65dd",
+      "size_bytes": 1848
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "254805270d3296a4c6484d6c6adceca49699a09cf056c4e5cdc4a7ece98d40ab",
+      "size_bytes": 2808
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "cad94ef0822c533e7d07208c3a3d8780fbb6ea926ec2f504f3eeafa271752300",
+      "size_bytes": 1494
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "42753a39a0809f9407ef8fd5fdef2a55f6be287d254c3069fe39eb1a131c6a88",
+      "size_bytes": 1573
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "89087cabeac527d7d31a09d38e9e3f31e6e0da77c0655b2b962cc8bff85669a9",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "32cdcf5213ea453d405a8c9d089aad9f60d409e23037dfd4b0b71bdde1b389bd",
+      "size_bytes": 1443
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "18eb8456334f79e7f72ad540c0d16555ec0a8b32b7ed5c488b775c8d4d941700",
+      "size_bytes": 1534
+    },
+    {
+      "path": "experiments/EXP-0031-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "ec03886854ace8399259662cacb4b05a048841d3259a1bd36e39dc919810663b",
+      "size_bytes": 922
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/artifacts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/ASOF_CONTRACT.md",
+      "sha256": "c19ae3ff5e3de32b371badc8444efeeef4b010b1bea9d6b837a0249f9b54c63d",
+      "size_bytes": 321
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/CONCLUSION.md",
+      "sha256": "f1261c84ec720bf02eb5b74e4fb16d395dd94e0114a8cd3a9b5f5b52e39de32b",
+      "size_bytes": 797
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/DATA_MANIFEST.yaml",
+      "sha256": "374d773b1571e01f2493ca8cd42c2187de5d9ffbad73da8794195829b9098f68",
+      "size_bytes": 2025
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/HYPOTHESIS.md",
+      "sha256": "1277490a663b75a8bd0b6741c615792394289cf313b2347c457daf94ee4d9f44",
+      "size_bytes": 389
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/logs/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/PROTOCOL.md",
+      "sha256": "70abca498ee55ec941c26fc8ebeac91f7153777a3aadeece1eee1a79373dc7fc",
+      "size_bytes": 545
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/README.md",
+      "sha256": "33dca4833f245b793076a387f285692e2ce7bc41022fb15f5007f351e0bb0783",
+      "size_bytes": 1496
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/REPRODUCE.md",
+      "sha256": "abab2c748ed767b75d4d5eacaa2db6828db196a077b9458a4943ccb9c0aa51ad",
+      "size_bytes": 353
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/results/metrics.json",
+      "sha256": "94c35722cf7538e7ed7d04708713fd24f254d66d29f4e0fa5698a37558485ac7",
+      "size_bytes": 7432
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RESULTS.md",
+      "sha256": "0328e34d05f3b539ed32dda8e1e190a1ae9d95a102d74e02b21d356e1d5c4847",
+      "size_bytes": 807
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/RUN_CONFIG.yaml",
+      "sha256": "5acc12738d0fb1650b3f88278379823251df7ddd6e897ab66e9ef04407b797ab",
+      "size_bytes": 458
+    },
+    {
+      "path": "experiments/EXP-0032-g1-daily-extract-active-first-publication-watch-2026-06-18-twent/STATUS.yaml",
+      "sha256": "de5f1ef4a74dd9aa92d6a6c7f332f1e5f420423cd658436ce9d5e6fbbb44c3a2",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/registry.yaml",
+      "sha256": "ef5368d4d375f7ff28a0e2634fab95d43d56376f7c164a3f143ac1b51241f9e1",
+      "size_bytes": 8254
+    },
+    {
+      "path": "FIRST_GOALS.md",
+      "sha256": "adabf1b12198d38fe22b9dcbac9a664cd7692d067059d7d8a22fe4187224516d",
+      "size_bytes": 24410
+    },
+    {
+      "path": "HKG_TMAX_FIRST_GOALS.md",
+      "sha256": "d9a65aeb170787fca8d1eccd80d96c0178609ba06acf386abe23ce602cf11925",
+      "size_bytes": 528
+    },
+    {
+      "path": "INITIAL_CODEX_PROMPT.md",
+      "sha256": "e9f01ad64b87bb32a01bb8c09e9bb9332726bbd74fbed3d93da7f235e0ddb5b9",
+      "size_bytes": 1741
+    },
+    {
+      "path": "Makefile",
+      "sha256": "579dee9372e58abe9e0f32a2a293d2e24741e60efd00d1f7ce78ed74d07eb55b",
+      "size_bytes": 1081
+    },
+    {
+      "path": "metadata/source_catalog.csv",
+      "sha256": "3aace2cfd9472684b965f856a4cdf3f828ca988173b6aec5473bafdbdd78c386",
+      "size_bytes": 20374
+    },
+    {
+      "path": "metadata/source_catalog.parquet",
+      "sha256": "b2fd31e6972cc46a157ec98b07d99a63dedd092cd112678f972f7f1e9a8fad62",
+      "size_bytes": 19840
+    },
+    {
+      "path": "MILESTONES.md",
+      "sha256": "e71baaa173cda891cf2e25438807775db2ef353fb617ab021b5f3305251e164e",
+      "size_bytes": 1949
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "95ed26d724c18ed3749cfed71ebeeb4700056c40623f3c96a3dc9a95f07165f1",
+      "size_bytes": 1327
+    },
+    {
+      "path": "README.md",
+      "sha256": "2d3e7b7d11f21a0e7f9faf8a9cd7feed570025f8605667c7c4032b77f0fc03a9",
+      "size_bytes": 3302
+    },
+    {
+      "path": "reports/acquisition_remaining_blockers.md",
+      "sha256": "6560abff3d215f6cf311a9ba70217a46c556902b2bbc8e3417064d57529dfdec",
+      "size_bytes": 2006
+    },
+    {
+      "path": "reports/daily_extract_publication.md",
+      "sha256": "add69657a2a9b26fbe463d8c4fc74896c278b0e99cdf1bedcf371040944c4b37",
+      "size_bytes": 1996
+    },
+    {
+      "path": "reports/data_coverage.md",
+      "sha256": "e351fbdba6a55b71f942018ffb5178c2f67a0a4104037fd57130d65734d0ed82",
+      "size_bytes": 8482
+    },
+    {
+      "path": "reports/data_inventory.md",
+      "sha256": "e687805bbe58ec39835ae4596d554a8c238914071feec410571f875a232d4c14",
+      "size_bytes": 4714
+    },
+    {
+      "path": "reports/live_collector_health.md",
+      "sha256": "c3cc219b93b1e142f745c9092ff278abdb8bb0859b800cd61cbde755ed3d5d99",
+      "size_bytes": 1212
+    },
+    {
+      "path": "reports/polling_loop_postmortem.md",
+      "sha256": "79698e71f8205c11212b30f47a857ee1da1cd4b30648f158f12eb532ddfadadf",
+      "size_bytes": 2300
+    },
+    {
+      "path": "reports/schema_and_quality.md",
+      "sha256": "ccba903687bb95846a047b5eabb9c08dd02b8601e0cf47a73a093da082c06b37",
+      "size_bytes": 790
+    },
+    {
+      "path": "reports/source_blockers.md",
+      "sha256": "4a95cc87c80e5df5641933f942062beffd9a37f6df88c32e75aa4f457d04c444",
+      "size_bytes": 4409
+    },
+    {
+      "path": "reports/source_inventory.md",
+      "sha256": "3459da10370366135e79aeabf09d98e618c95a4c09e62309faeb9d7b6dd0f614",
+      "size_bytes": 8898
+    },
+    {
+      "path": "reports/station_registry.md",
+      "sha256": "edec01982bb8f05509cb27294891bdc254c8e5fa71abae0edc87e3e08455e97f",
+      "size_bytes": 346
+    },
+    {
+      "path": "reports/storage_and_volume.md",
+      "sha256": "2af3178e87bf1936d645211f7be742db716c99f95f3fd14e561e356b62a02176",
+      "size_bytes": 265
+    },
+    {
+      "path": "reports/target_parity.md",
+      "sha256": "dc7bf03fd8f8e43e183a5c4e5dcbbe2da6de905432ab6663dd981c217eaa97e5",
+      "size_bytes": 2303
+    },
+    {
+      "path": "reports/TEST_ACCESS_LOG.md",
+      "sha256": "1864afeeb0f2def57b2f878d0dba0758fc5bfefdf3fe34d0af48d3860fc705f1",
+      "size_bytes": 230
+    },
+    {
+      "path": "requirements-dev.txt",
+      "sha256": "65fcc05e0b93371306726d96f781baaf9a0a66f52f6d28cfa27f48f35ba99d5a",
+      "size_bytes": 118
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "c4ae0ad4f72be2bcae5f8a3a0106f546d1f08a97699b563197f5deb2ccf7d8b6",
+      "size_bytes": 30
+    },
+    {
+      "path": "schemas/experiment_metrics.schema.json",
+      "sha256": "3099385d7b47a49b417093ac532187f7ae9e793073298cce8c2e986ba7801de6",
+      "size_bytes": 1209
+    },
+    {
+      "path": "schemas/prediction.schema.json",
+      "sha256": "120c7dd2020157d6d8f31bd0653e0a26a78dc08a09325be9e7c628941debf9ee",
+      "size_bytes": 1932
+    },
+    {
+      "path": "schemas/raw_snapshot.schema.json",
+      "sha256": "3392e9203c584a6dad26279d04666b969f2c3c695cc8b6f18a41475ac188fd31",
+      "size_bytes": 856
+    },
+    {
+      "path": "schemas/target_parity.schema.json",
+      "sha256": "18ccd2de5f540b8b6cfdf18949984ea407c0acb3b232443cd20945eacf1e2ef2",
+      "size_bytes": 1286
+    },
+    {
+      "path": "scripts/archive_live_loop.sh",
+      "sha256": "6357bfb65a556036d869441370e45e8fcd81a1a85b39b86ad140c97ebcfbfa30",
+      "size_bytes": 728
+    },
+    {
+      "path": "scripts/bootstrap.ps1",
+      "sha256": "c0656fff619137807a520c303505a0e3235c511efc63e00b7440580c12ba4d4f",
+      "size_bytes": 1554
+    },
+    {
+      "path": "scripts/bootstrap.sh",
+      "sha256": "987f69c11a7a488e769c42a6aa18926491460026ea3f1cda28243d22a7c12205",
+      "size_bytes": 991
+    },
+    {
+      "path": "scripts/build_target_parity.py",
+      "sha256": "03bd5dd407abef70462ec9730667fffb0f5a6810ef413c197ee5cf12fdb0fcce",
+      "size_bytes": 10658
+    },
+    {
+      "path": "scripts/check_collector_health.ps1",
+      "sha256": "df4e96fe06082e0103ecb1d798db2e135aafa441805e3b640117f8e20ffae61f",
+      "size_bytes": 230
+    },
+    {
+      "path": "scripts/install_windows_collectors.ps1",
+      "sha256": "2e3757bcc9fc06bc2db4a910b256ad639de3c349069cb9e13f7159df45f2fa1a",
+      "size_bytes": 1074
+    },
+    {
+      "path": "scripts/poll_daily_extract.py",
+      "sha256": "57befab3aec2727ce5dd7b4b5dd2b7731529d3120336b8d99f6b1ce22b3644c1",
+      "size_bytes": 8934
+    },
+    {
+      "path": "scripts/snapshot_hkg_market.sh",
+      "sha256": "a64c0fba4521e5e442d1be75309535d7b0f60e0c4e5a723f9571c37bf93e10b6",
+      "size_bytes": 301
+    },
+    {
+      "path": "scripts/start_collectors.ps1",
+      "sha256": "4277d01429896486f391a2fc7f0e4e4a8a062f3124f36df5a3175c16f859be0c",
+      "size_bytes": 173
+    },
+    {
+      "path": "scripts/stop_collectors.ps1",
+      "sha256": "b2a06c67f04bed22eaaef14019c314df6c9a97125e4e0790631347ab95eb4bc8",
+      "size_bytes": 220
+    },
+    {
+      "path": "scripts/systemd/hkg-tmax-archive.service.example",
+      "sha256": "a7b2d519c345cefd5cdab846aba4ab2517c772690b2af820066fcabf07461885",
+      "size_bytes": 523
+    },
+    {
+      "path": "scripts/systemd/hkg-tmax-archive.timer.example",
+      "sha256": "578630b5382355398c96597c08927449652942252b89e88f9da6fe0dc541be70",
+      "size_bytes": 186
+    },
+    {
+      "path": "scripts/uninstall_windows_collectors.ps1",
+      "sha256": "f9101e8bc9a100948bb75f668072978abdf943d5cfb9b182c21fe63987391e50",
+      "size_bytes": 347
+    },
+    {
+      "path": "scripts/verify_repo.sh",
+      "sha256": "46e04e6fc8869c799949599225e715d3dcf66e35dd339a04e51c98f99cb6c4c0",
+      "size_bytes": 270
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "6cdada8d0af5585f7cefd4c039719c5f4c5e1017e7c6e7e69bbf580cf7a93bad",
+      "size_bytes": 512
+    },
+    {
+      "path": "src/hkg_tmax/__init__.py",
+      "sha256": "acd8c25a361c3030903351dfa0b252eb956b54c3672aa4a2f10342a8b64db212",
+      "size_bytes": 309
+    },
+    {
+      "path": "src/hkg_tmax/__main__.py",
+      "sha256": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "size_bytes": 61
+    },
+    {
+      "path": "src/hkg_tmax/acquisition.py",
+      "sha256": "05aa289f46749c4cc09c9981a8b9b2904dfb9d054f6462afbf84fda2df3e9617",
+      "size_bytes": 16653
+    },
+    {
+      "path": "src/hkg_tmax/asof.py",
+      "sha256": "0ca4af121d43a9e8d83104c9b34b6a0b256cca41dbe093f2253485a3b6dd5987",
+      "size_bytes": 2815
+    },
+    {
+      "path": "src/hkg_tmax/bronze.py",
+      "sha256": "73c2a897f3bd9a4c8395ac4ca0981bdb27df58d64e19085f7e7d56476670d718",
+      "size_bytes": 9295
+    },
+    {
+      "path": "src/hkg_tmax/cli.py",
+      "sha256": "07f6de62008991f1281686c8c0fde293605d580d32c414e69502c32d4ca7ee8b",
+      "size_bytes": 17442
+    },
+    {
+      "path": "src/hkg_tmax/collector.py",
+      "sha256": "feecc69bd7d1e6280447b198303339c3a1fce7e0fbb1191d888326818e8cfd16",
+      "size_bytes": 19144
+    },
+    {
+      "path": "src/hkg_tmax/config.py",
+      "sha256": "1f7f1d632b1ad54cefb6243701a917fdc68597c5f5199c78c30ee50dc04c3514",
+      "size_bytes": 4792
+    },
+    {
+      "path": "src/hkg_tmax/distribution.py",
+      "sha256": "9423bc59673c3f762527eca1b79aaf9ca0464c9850b878bab1986abf2f75a770",
+      "size_bytes": 3296
+    },
+    {
+      "path": "src/hkg_tmax/doctor.py",
+      "sha256": "5e9b8ead35b4ef119f6e8a8d1fc147174d8b36bd0313270766fa0336af4bb52d",
+      "size_bytes": 1337
+    },
+    {
+      "path": "src/hkg_tmax/experiments.py",
+      "sha256": "78334dc26430f20726729db28307c70f39149d68d55a08ddc1766dc43b3f3fc7",
+      "size_bytes": 6842
+    },
+    {
+      "path": "src/hkg_tmax/fetch.py",
+      "sha256": "e093463020b83fc00e952c55c9df839c5db346574811de9fc7253f478aa86efe",
+      "size_bytes": 4623
+    },
+    {
+      "path": "src/hkg_tmax/hashing.py",
+      "sha256": "f84919aff34d5f0dd6f32de7e07535f86c8671b4a387ab3eaa8ab51e04e0753b",
+      "size_bytes": 844
+    },
+    {
+      "path": "src/hkg_tmax/hko.py",
+      "sha256": "ed89b5b0583df4d5cc5f4b14453223c0997847dfadd59325503f139e142bd013",
+      "size_bytes": 8755
+    },
+    {
+      "path": "src/hkg_tmax/hko_backfill.py",
+      "sha256": "c23e93fdeaced8a9dec2ff0eeaec2f263b2f56fa88afa4f40fd53c9b17440b97",
+      "size_bytes": 27155
+    },
+    {
+      "path": "src/hkg_tmax/manifest.py",
+      "sha256": "62c1fa233036b7cef0e38a88a465d9f58df29fe661c0225dddc687d761490a78",
+      "size_bytes": 1419
+    },
+    {
+      "path": "src/hkg_tmax/market.py",
+      "sha256": "9df4191846d0bb5b74760c4cdaf414a64a6b05372cbcd1a3e8fafb98bca39ce3",
+      "size_bytes": 839
+    },
+    {
+      "path": "src/hkg_tmax/metrics.py",
+      "sha256": "08d894146e80236a749219b3070d4e19642dc5b588a5a985de6a42b7a4492dd5",
+      "size_bytes": 4087
+    },
+    {
+      "path": "src/hkg_tmax/milestones.py",
+      "sha256": "5e795f7f29b215b813a7803ea00cd9aec8776cee1062ce6dcea30a9938ab6507",
+      "size_bytes": 5907
+    },
+    {
+      "path": "src/hkg_tmax/publication.py",
+      "sha256": "d3f86dbf490e018d971b92a56024a6cfe7bacb6cb39e76a0818cf3f00bb43c82",
+      "size_bytes": 13532
+    },
+    {
+      "path": "src/hkg_tmax/settlement.py",
+      "sha256": "ce22f8020211c7751dd2d422da0936cab87235e74cb8b9aad5c2e3aa098d1f96",
+      "size_bytes": 5867
+    },
+    {
+      "path": "src/hkg_tmax/sources.py",
+      "sha256": "244719335fa3b84ea00c659207a574cdec3d6f88f6c3f09c701e7a2c02ac313a",
+      "size_bytes": 4033
+    },
+    {
+      "path": "src/hkg_tmax/statistics.py",
+      "sha256": "03a6ebb1928c4a2d010a7387a0347a7a9e4971a795df67d9a42325e3999d06e2",
+      "size_bytes": 3043
+    },
+    {
+      "path": "src/hkg_tmax/storage.py",
+      "sha256": "49c03d40e63b54f40b2f9e7f56e17f6ed4228a7dca3309ca02fe6629788d0ecc",
+      "size_bytes": 3392
+    },
+    {
+      "path": "src/hkg_tmax/target.py",
+      "sha256": "49182839e886204555a415c54007dc3b93ee324ae71be1a270731022765ae805",
+      "size_bytes": 2681
+    },
+    {
+      "path": "src/hkg_tmax/timeutils.py",
+      "sha256": "8ac342ec697a51c8808463736886733f5cf82cd82ae83a2fcb74ae21c9cd9c41",
+      "size_bytes": 2555
+    },
+    {
+      "path": "src/hkg_tmax/validation.py",
+      "sha256": "5e0154cd5ef279ecfda3c98598aaf0381e5abff4a71afd2a4db6d8f350e2980a",
+      "size_bytes": 6174
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/dependency_links.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/entry_points.txt",
+      "sha256": "3b089335b3f44f471c9784b1b2d610e83b683d09af04af01aa7e967c46aa8e5a",
+      "size_bytes": 47
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/PKG-INFO",
+      "sha256": "4ba21b785b18258df358c4b80c5eb11c5a35146dd0c08ecbb0c34710b11cbd42",
+      "size_bytes": 4639
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/requires.txt",
+      "sha256": "9890967ce66bccc973ff1e960e250335a98131eead8bee79830e01b101156a63",
+      "size_bytes": 313
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/SOURCES.txt",
+      "sha256": "43b349ae86541ad0e45080681d4406cb551ffa41665d5386eb34ce8e7fcaffd3",
+      "size_bytes": 1081
+    },
+    {
+      "path": "src/hkg_tmax_elite.egg-info/top_level.txt",
+      "sha256": "12ebdde0bf10e93993f9cbfbaf8ff284deff07aef99871d84ad3d786435f9418",
+      "size_bytes": 9
+    },
+    {
+      "path": "templates/DATASET_CARD.md",
+      "sha256": "c7c4fffc2f4b62da6a290d8a6f0c8e63ca5e11ba7441b1464fd8006b5d4f9570",
+      "size_bytes": 418
+    },
+    {
+      "path": "templates/INCIDENT.md",
+      "sha256": "a80357dd8ce3013bea1b81bade7319dac9f5063e786fd3f617ff6d70f2fd8bd1",
+      "size_bytes": 385
+    },
+    {
+      "path": "templates/MODEL_CARD.md",
+      "sha256": "6aa70dcf01f5cf67847ce7f12cf3aaf9a21e9682c69e4635d839c1de1abc3c4a",
+      "size_bytes": 511
+    },
+    {
+      "path": "templates/SOURCE_CONTRACT.md",
+      "sha256": "94b3fa0c6cd3421ce3ef05127d0c5caadfa13aea2a35c67bf9feae97850f4505",
+      "size_bytes": 1070
+    },
+    {
+      "path": "tests/conftest.py",
+      "sha256": "d8a29e795ba69366b968715c21f5c2f22c9aebf740a1c87309049d895451baac",
+      "size_bytes": 130
+    },
+    {
+      "path": "tests/test_acquisition.py",
+      "sha256": "1b21aa6654fe0cce6a41dab5903ec589dc346712f25dfe4cf6ba44d94a0ce98e",
+      "size_bytes": 3706
+    },
+    {
+      "path": "tests/test_asof.py",
+      "sha256": "07f248ca190a849f482acea69745a30c0d8f3a92f6bf651d001333e8d26dcc3c",
+      "size_bytes": 1211
+    },
+    {
+      "path": "tests/test_bronze.py",
+      "sha256": "6d0ddf79118e44a53df57eeab49bcdce26d9c89a0f3b2b0a34354b412bf1038c",
+      "size_bytes": 1758
+    },
+    {
+      "path": "tests/test_config_and_sources.py",
+      "sha256": "8ec4261a26f50c221709688d75b0380372b4a62a4787f9bc813f955d7980eedb",
+      "size_bytes": 1234
+    },
+    {
+      "path": "tests/test_distribution.py",
+      "sha256": "a6f9f90a669436f764b98ceac88077525a85b09626b8e8147ad408e5012bd43b",
+      "size_bytes": 796
+    },
+    {
+      "path": "tests/test_experiments.py",
+      "sha256": "8f0733f7fca91108bd9639434a526131e4b9d7678e7bfc8fd6b2a5ed68f3421e",
+      "size_bytes": 1039
+    },
+    {
+      "path": "tests/test_fetch.py",
+      "sha256": "469ed2ab6a935560d8bfd27a359df7a3500f8bff7496f12081a9fb7281c14b1c",
+      "size_bytes": 4182
+    },
+    {
+      "path": "tests/test_hko.py",
+      "sha256": "bcab900e0969d489cd8a08f6105084463e612ee9e47fa0279d302054c6ada006",
+      "size_bytes": 2771
+    },
+    {
+      "path": "tests/test_hko_backfill.py",
+      "sha256": "f0751b0c3bb11a098c85d23a907f973c70ae6d2264357462844c3f8488d4ef71",
+      "size_bytes": 2003
+    },
+    {
+      "path": "tests/test_manifest.py",
+      "sha256": "073cf992ee31978f02992fece1b9d85be7b0bc9617e8230fac5b29d86d3cfccf",
+      "size_bytes": 452
+    },
+    {
+      "path": "tests/test_market.py",
+      "sha256": "91c2da8210af6b6f4f34499540b2ad2d07b3402f7e875b5a003f554cd46c852e",
+      "size_bytes": 1054
+    },
+    {
+      "path": "tests/test_metrics.py",
+      "sha256": "445f6c871f796052851555fd4664302694057a49fb26dd0994b69a1fbd66e0e5",
+      "size_bytes": 917
+    },
+    {
+      "path": "tests/test_publication.py",
+      "sha256": "4a59f0293c1f2509f9041ce20ae4baa3d962f015de38eddd2db4e35bd1a6ee96",
+      "size_bytes": 7707
+    },
+    {
+      "path": "tests/test_settlement.py",
+      "sha256": "9c3190cf3c6a5aaf638d7142d75fce44dace22520b4ad7e5422e7503491661f4",
+      "size_bytes": 1540
+    },
+    {
+      "path": "tests/test_statistics.py",
+      "sha256": "5b4b0279fb5d31a7d8282d2da3940a27fb227d4d0d2b6fca417fd235ed30b771",
+      "size_bytes": 392
+    },
+    {
+      "path": "tests/test_storage.py",
+      "sha256": "d11b9185ce208d83c4fb9a3556b1c8b4c37fc0ce9f39e895ad18904e7cc236d2",
+      "size_bytes": 1788
+    },
+    {
+      "path": "tests/test_target.py",
+      "sha256": "1777186d4b51b3d1ba0816c2b3eeb8a11a803deb5b7d2e07f7fe5655e93c4558",
+      "size_bytes": 3541
+    },
+    {
+      "path": "tests/test_timeutils.py",
+      "sha256": "6a76a03811fcd987cbf9afa7a5756b1a03d21ea2d099a302356ddca35937c443",
+      "size_bytes": 1100
+    },
+    {
+      "path": "tests/test_validation.py",
+      "sha256": "31b61c413a3accf142f51f5c1b71b41eef21c3f20f6c63e9d696abccd00112c6",
+      "size_bytes": 1265
+    },
+    {
+      "path": "work_packages/WP-0001-data-acquisition-reset/README.md",
+      "sha256": "0aaf926050abd17ae6ddef5fce99ee4b6acc6a3c8d6e7d4011f63ba5239e5743",
+      "size_bytes": 1060
+    },
+    {
+      "path": "work_packages/WP-0001-data-acquisition-reset/STATUS.yaml",
+      "sha256": "1d600b488ad6153e16d090abd485075bd2d244cf2838ad962f4657fa401b314e",
+      "size_bytes": 459
+    }
+  ],
+  "generated_at_utc": "2026-06-19T05:21:10.836526Z",
+  "schema_version": 1
+}

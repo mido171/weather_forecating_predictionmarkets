@@ -1,0 +1,53 @@
+{
+  "id": "T29",
+  "suffix": "core_gfs_gefs_mos_experts",
+  "title": "Core GFS and GEFS Local MOS Experts",
+  "phase": "D Modelling",
+  "deps": [
+    "T22",
+    "T23",
+    "T27"
+  ],
+  "mission": "Train deterministic GFS MOS and probabilistic GEFS MOS on the strict modern core frame, including expected-error outputs.",
+  "inputs": [
+    "GFS/GEFS features",
+    "core frame 2021-03-22\u20132023-12-31",
+    "official and target labels behind research role"
+  ],
+  "steps": [
+    "Construct direct model Tmax baselines.",
+    "Train GFS residual-to-HKO MOS using trajectory, spatial and vertical features.",
+    "Train GEFS conditional median/quantiles and residual calibration.",
+    "Train expected absolute-error models for both experts.",
+    "Use nested expanding folds and model-version features.",
+    "Compare direct, simple bias, linear MOS, GAM and boosting.",
+    "Ablate radiation/cloud/moisture/spatial/vertical groups."
+  ],
+  "db_objects": [
+    "research GFS/GEFS model artifacts and OOF predictions"
+  ],
+  "outputs": [
+    "gfs_mos_scoreboard.csv",
+    "gefs_mos_scoreboard.csv",
+    "oof_predictions.parquet",
+    "quantile_metrics.csv",
+    "feature_group_ablation.csv"
+  ],
+  "tests": [
+    "OOF-only downstream outputs",
+    "quantile coverage",
+    "model version/era checks",
+    "strict eligibility"
+  ],
+  "acceptance": [
+    "MOS beats direct model or is rejected",
+    "GEFS distribution calibrated enough for router/distribution layer",
+    "All corrections bounded and documented"
+  ],
+  "failure": [
+    "Historical availability grade below B: results labeled diagnostic-proxy, not strict champion"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t29_core_gfs_gefs_mos_experts.md"
+}

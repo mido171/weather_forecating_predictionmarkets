@@ -1,0 +1,157 @@
+Folder:
+`data/datasets/12_hkg_t24_robust_experiment_outputs`
+
+This folder stores output datasets from robust long-history experiments. It is not raw weather data, but it is useful for GPT-Pro because it records what has already been tested and what feature matrices/predictions exist.
+
+Main files:
+
+- `hkg_t24_exp0050_0099_feature_matrix.parquet`
+- `hkg_t24_r14_feature_matrix.parquet`
+- `hkg_t24_r14_oof_predictions.parquet`
+- `hkg_t24_r14_scoreboard.parquet`
+- `hkg_t24_r14_fold_score_deltas.parquet`
+- `hkg_t24_r14_feature_diagnostics.parquet`
+- Equivalent R15, R16, and R17 files.
+
+Expanded feature matrix:
+
+- File: `hkg_t24_exp0050_0099_feature_matrix.parquet`.
+- Rows: 48,577.
+- Columns: 566.
+- Target-date range: 1884-01-01 to 2023-12-31.
+- Includes target lag/memory/calendar fields, IGRA fields, ISD station/network fields, pressure/moisture/wind fields, and other engineered long-history signals.
+
+R14 feature matrix:
+
+- Rows: 26,632.
+- Columns: 120.
+- Target-date range: 1949-06-03 to 2023-12-31.
+- Uses target lags/calendar plus IGRA upper-air/stability and ISD-derived fields.
+
+R15/R17 feature matrices:
+
+- Rows: 23,943.
+- Columns: 120.
+- Target-date range: 1949-06-03 to 2023-12-31.
+- Uses target lags/calendar, upper-air, and ISD coupling/surface fields.
+
+R16 feature matrix:
+
+- Rows: 25,202.
+- Columns: 120.
+- Target-date range: 1947-01-01 to 2023-12-31.
+- Includes station/network features and ISD fields.
+
+OOF prediction range:
+
+- R14 OOF predictions: 63,939 rows, target dates 1965-01-01 to 2023-12-31.
+- R15 OOF predictions: 55,872 rows, target dates 1965-01-01 to 2023-12-31.
+- R16 OOF predictions: 55,881 rows, target dates 1965-01-01 to 2023-12-31.
+- R17 OOF predictions: 55,872 rows, target dates 1965-01-01 to 2023-12-31.
+
+Scoreboard summary:
+
+| Experiment | Best model in scoreboard | OOF range | N | MAE | RMSE | Bias |
+|---|---|---|---:|---:|---:|---:|
+| R14 | `r14_upper_air_core` | 1965-01-01 to 2023-12-31 | 21,313 | 1.489763 | 1.889322 | -0.081561 |
+| R15 | `r15_coupling_terms` | 1965-01-01 to 2023-12-31 | 18,624 | 1.243243 | 1.573119 | -0.155773 |
+| R16 | `r16_isd_regional_aggregate` | 1965-01-01 to 2023-12-31 | 18,627 | 1.258535 | 1.598569 | -0.117841 |
+| R17 | `r17_era_transfer_terms` | 1965-01-01 to 2023-12-31 | 18,624 | 1.232364 | 1.561883 | -0.062805 |
+
+Interpretation:
+
+- These experiments are long-history OOF screens, not final production models.
+- They show that upper-air, regional surface, and era-transfer/coupling terms materially outperform a lag/calendar baseline in these setups.
+- They should be used as prior evidence for where to mine deeper signals, not as final production artifacts.
+
+## Acquired Raw HKO High-Frequency Station Archives Not In Clean Numbered Folders
+
+The following high-frequency station/weather archive data is possessed in the broader raw archive and was documented by the acquisition handoff. It is not currently one of the clean numbered normalized dataset folders. These sources are too short for the user's current 39+ year robust-experiment requirement but are still useful for future recent-period/live work.
+
+| Feed | Public archive range downloaded | Observation range | Rows | Stations |
+|---|---|---|---:|---:|
+| 1-minute temperature | 2020-06-01 to 2026-06-18 | 2020-06-30 09:00 to 2026-06-18 23:50 | 16,859,348 | 39 |
+| Since-midnight max/min | 2020-06-01 to 2026-06-18 | 2020-06-30 09:00 to 2026-06-18 23:50 | 16,882,046 | 39 |
+| 1-minute humidity | 2020-06-01 to 2026-06-18 | 2020-06-30 09:00 to 2026-06-18 23:50 | 10,666,499 | 28 |
+| 15-minute UV index | 2020-06-01 to 2026-06-18 | 2020-06-30 10:15 to 2026-06-18 18:15 | 101,423 | not station-row based |
+| 1-minute pressure | 2021-06-01 to 2026-06-18 | 2021-06-29 10:10 to 2026-06-18 23:50 | 4,640,858 | 12 |
+| 1-minute solar | 2021-06-01 to 2026-06-18 | 2021-06-28 00:00 to 2026-06-18 23:50 | 825,420 | 2 |
+| 10-minute wind | 2021-06-01 to 2026-06-18 | 2021-06-29 10:10 to 2026-06-18 23:49 | 11,605,053 | 31 |
+
+Interpretation:
+
+- These are rich, high-frequency, multi-station feeds.
+- They do not go back before 2020/2021 in the public historical archive versions found so far.
+- They should be excluded from the current long-history-only experiment requirement, but retained for live system design, short-history residual analysis, intraday diagnostic studies, and calibration once the project permits shorter-history features.
+
+## Point-In-Time And Leakage Interpretation
+
+Use these rules when deciding if a dataset can be used in modelling:
+
+| Data family | Can be label? | Can be predictor? | Caveat |
+|---|---|---|---|
+| HKO target labels | yes | no | This is the target outcome. |
+| HKO Daily Extract payload rows | yes/audit | no unless first-publication proven | Treat as target-side unless exact publication timing is proven. |
+| HKO daily climate elements | yes for same-day target; predictors only if lagged safely | cautious | Finalized daily data may have unknown publication timing. Use only lagged values with documented cutoff. |
+| HKO official RSS forecast archive | no | yes for exact-vintage periods | Use `available_at_hkt` and `published_at_hkt`. |
+| HKO official press forecast archive | no | yes when issue time is before cutoff and parser row is valid | Must handle null min/max and product-era changes. |
+| NOAA IGRA upper-air | no | proxy only unless release latency proven | Strong mechanism signal but archive release timing is not exact operational vintage. |
+| NOAA ISD regional surface | no | proxy only unless release latency proven | Quality-controlled archive, not exact live-vintage history. |
+| HKO TC best track | diagnostic only | no for live prediction | Retrospective post-analysis. |
+| HKO radar/satellite/lightning/nowcast | no | yes prospectively after retrieval | Short live/current history only. |
+| HKO marine/tide/coastal waters | no | yes prospectively after retrieval | Short live/current history only. |
+| HKO ARWF station forecasts | no | yes prospectively after retrieval | Currently almost no back-history. |
+| NCEP GRIB inventory | no | not until decoded and policy-approved | Inventory only; fields need extraction. |
+| Static geospatial inventory | no | yes after deterministic feature derivation | Static context must be derived with reproducible station mapping. |
+
+## Current Strengths
+
+- Very long target history from 1884.
+- Very long official daily HKO climate context across temperature, pressure, rainfall, humidity, cloud, wet-bulb, sunshine/radiation, sea temperature, wind, lightning, and visibility.
+- Strong regional surface station network from ISD, with many stations spanning 1950s to 2025.
+- Strong Hong Kong upper-air profile archive from 1949 to 2026.
+- Official forecast archive data exists in two major eras: press archive around 2000-2011 and RSS exact archives from 2020/2021 to 2026.
+- A first generation of robust long-history feature matrices and OOF predictions already exists through 2023.
+
+## Current Weaknesses And Gaps
+
+- The exact official forecast archive is not yet continuous from 2000 to 2026 in the clean scored dataset. Current local clean files have press archive coverage in 2000-2011 and exact RSS forecast coverage in 2020/2021-2026.
+- Many HKO high-frequency station feeds are short-history only, beginning in 2020/2021.
+- NCEP data is currently an inventory of GRIB2 files, not decoded variables.
+- Static geospatial data is currently an inventory of downloaded packages, not completed station-level features.
+- Radar/satellite/lightning/nowcast/marine/ARWF data is mostly current/live and not long-history.
+- IGRA and ISD are not exact operational-vintage sources unless release latency is proven or the experiment explicitly treats them as proxy research inputs.
+
+## Best Immediate GPT-Pro Research Use
+
+For the next research planning round, GPT-Pro should treat the available data like this:
+
+1. Use the HKO target and HKO daily climate elements as the long-history backbone.
+2. Use NOAA ISD regional station summaries to discover multi-station pressure, dewpoint, wind, temperature-gradient, station-slope, and advection signals.
+3. Use IGRA upper-air to discover lower-troposphere heat, inversion, humidity, stability, and wind-profile regimes.
+4. Use official forecast archive rows for anchor, residual, bias-correction, forecast-range, forecast-midpoint, and trust-routing work where date coverage is sufficient and issue times are safe.
+5. Use TC best track only for retrospective regime labels or post-analysis explanations, not as live predictor input.
+6. Do not prioritize short high-frequency HKO feeds for the current 39+ year requirement, but keep them for later live/recent-period system layers.
+7. Do not use NCEP GRIBs until decoded fields, cycle times, valid times, and feature extraction policy are finished.
+8. Convert static geospatial inventory into station context features before expecting it to help modelling.
+
+## Recommended Next Data Engineering Steps
+
+1. Finish the official forecast archive backfill/cleaning so the 2000-2026 official forecast record is as continuous as possible.
+2. Convert high-value normalized sources into one analysis-ready, leakage-safe feature store:
+   - target lag/memory/calendar fields,
+   - HKO daily climate lagged fields,
+   - ISD station/day cutoff fields,
+   - IGRA lagged/proxy fields,
+   - official forecast anchor/residual fields where available,
+   - static station context features once derived.
+3. Build exact per-feature eligibility metadata:
+   - source id,
+   - valid time,
+   - issue time,
+   - retrieval time,
+   - release-latency assumption,
+   - earliest usable cutoff.
+4. Derive station geospatial context from the static inventory.
+5. Decode NCEP GRIB2 only after approving exact variables, domain, levels, members, leads, cycles, and byte budget.
+6. Keep the short live/current feeds running, but keep them separate from long-history experiments until they have sufficient history or a specific live-use purpose.

@@ -1,0 +1,38 @@
+target:
+  target_id: hko_daily_absolute_max_first_published
+  local_timezone: Asia/Hong_Kong
+  local_date_semantics: calendar_day_00_00_to_23_59_59_999
+  contract_named_publisher: Hong Kong Observatory
+  contract_named_product: Daily Extract
+  contract_named_field: Absolute Daily Max (deg. C)
+  source_precision_celsius: 0.1
+  revision_semantics: first_publication_only_per_current_contract_template
+  canonical_status: pending_g1_verification
+
+candidate_historical_label:
+  source_id: hko_clmmaxt_hko
+  data_type: CLMMAXT
+  station_code: HKO
+  station_name: Hong Kong Observatory
+  status: candidate_only_until_parity_passes
+  known_coverage_note: "Official API documentation lists 1884 to present, excluding 1940–1946."
+  required_parity_rate: 1.0
+  mismatch_policy: quarantine_and_investigate
+
+settlement_adapter:
+  parse_rules_each_event: true
+  archive_full_event_json: true
+  archive_rules_text: true
+  normalized_rules_hash_required: true
+  unknown_rules_hash_action: halt
+  overlapping_buckets_action: halt
+  bucket_gap_action: halt
+  missing_source_action: halt
+  ambiguous_date_action: halt
+  unsupported_precision_action: halt
+
+never_assume:
+  - "Displayed integer label means nearest-integer rounding."
+  - "A generic Hong Kong city forecast represents the settlement target."
+  - "Latest corrected climate data equals first-published settlement data."
+  - "All future Hong Kong contracts retain identical rules."

@@ -1,0 +1,111 @@
+{
+  "state": "COMPLETE_WITH_FAILURES",
+  "summary": {
+    "area_features_upserted": 31070,
+    "by_source": {
+      "envf_hkust_hko_radar": {
+        "area_features_upserted": 2520,
+        "fetch_ok": 120,
+        "manifest_frames": 120,
+        "normalize_ok": 120,
+        "source_issues_touched": 120,
+        "station_features_upserted": 1920
+      },
+      "gefs_control": {
+        "area_features_upserted": 13104,
+        "fetch_ok": 68,
+        "max_raw_object_bytes": 8069620,
+        "max_staging_bytes_after_fetch": 8069620,
+        "normalize_ok": 68,
+        "raw_bytes_deleted": 520607608,
+        "raw_files_deleted": 68,
+        "source_issues_touched": 68,
+        "station_features_upserted": 1144
+      },
+      "gfs": {
+        "area_features_upserted": 13884,
+        "fetch_ok": 68,
+        "max_raw_object_bytes": 12240221,
+        "max_staging_bytes_after_fetch": 16219694,
+        "normalize_ok": 68,
+        "raw_bytes_deleted": 802755415,
+        "raw_files_deleted": 68,
+        "source_issues_touched": 68,
+        "station_features_upserted": 1204
+      },
+      "himawari9_b13_s0510": {
+        "area_features_upserted": 1562,
+        "fetch_failed": 2,
+        "fetch_ok": 142,
+        "max_raw_object_bytes": 3118080,
+        "max_staging_bytes_after_fetch": 3118080,
+        "normalize_ok": 142,
+        "raw_bytes_deleted": 430504559,
+        "raw_files_deleted": 142,
+        "source_issues_touched": 144,
+        "station_features_upserted": 13490
+      }
+    },
+    "completed_at_utc": "2026-07-09T09:52:03.270796Z",
+    "cycles": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "day_elapsed_seconds": {
+      "2026-06-13": 2880.078920400003
+    },
+    "elapsed_seconds": 2880.269859699998,
+    "end_date": "2026-06-13",
+    "expected": {
+      "days": 1,
+      "himawari_scans": 144,
+      "model_objects": 136,
+      "radar_expected_frames_approx": 120,
+      "total_static_tasks_without_radar_manifest": 280
+    },
+    "experiment_id": "0010_public_weather_backfill_jun10_jul8_lean_db_test_20260709",
+    "fetch_failed": 2,
+    "fetch_ok": 398,
+    "leads": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48
+    ],
+    "max_raw_object_bytes": 12240221,
+    "max_staging_bytes": 16219694,
+    "min_free_disk_bytes": 254279696384,
+    "normalize_ok": 398,
+    "radar_manifest_frames": 120,
+    "raw_bytes_deleted": 1753867582,
+    "raw_files_deleted": 278,
+    "run_id": "0010_public_weather_backfill_jun10_jul8_lean_db_test_20260709_20260613_20260613_20260709T090402Z_37836",
+    "source_issues_touched": 400,
+    "sources": [
+      "gefs_control",
+      "gfs",
+      "himawari_b13_s0510",
+      "radar"
+    ],
+    "start_date": "2026-06-13",
+    "started_at_utc": "2026-07-09T09:04:02.995286Z",
+    "station_features_upserted": 17758,
+    "status": "complete_with_failures"
+  },
+  "updated_at_utc": "2026-07-09T09:52:03.325328Z"
+}

@@ -1,0 +1,47 @@
+timezone: Asia/Hong_Kong
+
+candidate_horizons:
+  H39:
+    local_expression: "T-1 00:00:00"
+    nominal_hours_before_15h_peak: 39
+    status: evaluate_in_g2
+  H27:
+    local_expression: "T-1 12:00:00"
+    nominal_hours_before_15h_peak: 27
+    status: evaluate_in_g2
+  H24N:
+    local_expression: "T-1 15:00:00"
+    nominal_hours_before_15h_peak: 24
+    status: user_preferred_candidate
+  H15:
+    local_expression: "T 00:00:00"
+    nominal_hours_before_15h_peak: 15
+    status: evaluate_in_g2
+
+primary_horizon: null
+secondary_horizon: null
+
+eligibility:
+  governing_timestamp: available_at
+  rule: "available_at <= forecast_cutoff"
+  require_timezone_aware: true
+  missing_available_at_action: reject
+  default_latency_allowed: false
+  source_specific_latency_required: true
+  revised_data_requires_original_vintage: true
+
+timestamp_semantics:
+  valid_at: "When the physical state or forecast applies."
+  issued_at: "Provider-declared model/forecast issue or initialization time."
+  published_at: "Provider-declared or observed public publication time."
+  available_at: "Earliest defensible time the system could have consumed it."
+  retrieved_at: "When our archive actually received it."
+
+forbidden:
+  - target-day finalized target as feature
+  - future model cycle
+  - latest-only forecast substituted for historical vintage
+  - reanalysis without publication-lag simulation
+  - final tropical-cyclone best track as operational input
+  - target-dependent imputation
+  - whole-dataset normalization before temporal split

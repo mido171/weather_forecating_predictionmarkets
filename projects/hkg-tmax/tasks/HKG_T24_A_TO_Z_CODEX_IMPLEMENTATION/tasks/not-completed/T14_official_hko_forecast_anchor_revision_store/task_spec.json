@@ -1,0 +1,57 @@
+{
+  "id": "T14",
+  "suffix": "official_hko_forecast_anchor_revision_store",
+  "title": "Canonical Official HKO Anchor and Revision Store",
+  "phase": "B Acquisition",
+  "deps": [
+    "T00",
+    "T01",
+    "T04"
+  ],
+  "mission": "Canonicalize the 2000\u20132026 HKO official local forecast archive into all-vintage and one-row-at-cutoff views, preserving text, issue history and parser era.",
+  "inputs": [
+    "public.hko_historical_forecasts_2000_2026",
+    "verified T00 facts",
+    "cutoff function",
+    "target labels under sealed permissions"
+  ],
+  "steps": [
+    "Preserve all raw rows and clean usable_local_minmax rows.",
+    "Verify issue timezone and convert to UTC/HKT correctly.",
+    "Define eligible rows for target T as issued/available before cutoff and meteorologically targeting T.",
+    "Create latest-at-cutoff anchor view and all-pre-cutoff-vintages view.",
+    "Derive first/latest max/min, revision count/path, issue intervals, revision momentum, issue age, source/product/parser era and missingness.",
+    "Populate stale_hours from verified issue/cutoff semantics.",
+    "Preserve full forecast/weather/wind/RH/PSR text.",
+    "Reconcile the single missing target date without fabrication.",
+    "Compute official raw baseline only on eligible target dates."
+  ],
+  "db_objects": [
+    "operational_anchor official_vintage/target_snapshot views",
+    "research official residual table behind sealed role"
+  ],
+  "outputs": [
+    "canonicalization SQL/code",
+    "coverage_calendar.csv",
+    "revision_feature_profile.csv",
+    "baseline_scoreboard_pre2024.csv",
+    "timezone_audit.md"
+  ],
+  "tests": [
+    "Reproduce 115,795 clean rows and 9,667 dates",
+    "latest-at-cutoff uniqueness",
+    "no post-cutoff issue selected",
+    "text preservation",
+    "baseline reproducibility"
+  ],
+  "acceptance": [
+    "Near-continuous anchor established with exact selection",
+    "Discrepancies resolved or blocked"
+  ],
+  "failure": [
+    "Ambiguous issue timezone: quarantine affected era until proven"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t14_official_hko_forecast_anchor_revision_store.md"
+}

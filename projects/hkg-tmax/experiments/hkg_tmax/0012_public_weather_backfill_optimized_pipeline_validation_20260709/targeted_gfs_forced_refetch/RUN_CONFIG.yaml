@@ -1,0 +1,19 @@
+experiment_id: 0012_public_weather_backfill_optimized_pipeline_validation_20260709
+run_id: 0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260616_20260617_20260709T161207Z_48204
+start_date: 2026-06-16
+end_date: 2026-06-17
+sources: ['gfs']
+cycles: [0, 6, 12, 18]
+leads: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+execution_mode: optimized
+model_fetch_workers: 4
+model_range_workers: 4
+model_normalize_workers: 2
+himawari_workers: 8
+model_range_coalesce_gap_bytes: 0
+cpu_telemetry: False
+staging_root: None
+max_staging_gb: 1.0
+stop_free_gb: 50.0
+retain_failed_raw: False
+dry_run: False

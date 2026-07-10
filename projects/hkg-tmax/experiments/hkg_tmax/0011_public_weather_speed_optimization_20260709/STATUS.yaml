@@ -1,0 +1,10 @@
+status: completed
+created_at_local: "2026-07-09"
+latest_run: "2026-07-09 full benchmark plus coalescing trials"
+raw_staging_policy: transient_delete_after_each_worker_then_remove_short_staging_root
+open_questions:
+  - whether local wgrib2 is available or should be installed
+  - whether model normalization should use cfgrib process pools or a wgrib2-derived parser path
+cleanup_audit:
+  staging_root_exists_after_run: false
+  raw_payload_files_under_experiment: 0

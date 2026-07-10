@@ -1,0 +1,133 @@
+{
+  "by_source": {
+    "gefs_control": {
+      "skipped_existing": 68
+    },
+    "gfs": {
+      "skipped_existing": 68
+    },
+    "himawari9_b13_s0510": {
+      "db_write_seconds_total": 0.043903900019358844,
+      "fetch_failed": 2,
+      "fetch_seconds_total": 1.5442538000643253,
+      "normalize_seconds_total": 0.0002989000058732927,
+      "skipped_existing": 142,
+      "source_issues_touched": 2,
+      "total_seconds_total": 1.5884566000895575
+    }
+  },
+  "completed_at_utc": "2026-07-09T15:21:01.223552Z",
+  "cycles": [
+    0,
+    6,
+    12,
+    18
+  ],
+  "day_elapsed_seconds": {
+    "2026-06-21": 1.1619200999848545
+  },
+  "db_write_seconds_total": 0.043903900019358844,
+  "elapsed_seconds": 1.537017399969045,
+  "end_date": "2026-06-21",
+  "execution_mode": "optimized",
+  "expected": {
+    "days": 1,
+    "himawari_scans": 144,
+    "model_objects": 136,
+    "radar_expected_frames_approx": 0,
+    "total_static_tasks_without_radar_manifest": 280
+  },
+  "experiment_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709",
+  "fetch_failed": 2,
+  "fetch_seconds_total": 1.5442538000643253,
+  "final_staging_bytes": 0,
+  "leads": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    30,
+    33,
+    36,
+    39,
+    42,
+    45,
+    48
+  ],
+  "normalize_seconds_total": 0.0002989000058732927,
+  "phase_observations": [
+    {
+      "db_write": 0.03983329999027774,
+      "fetch": 0.7775877000531182,
+      "item_id": "himawari9_B13_S0510_20260621_0240",
+      "normalize": 0.00015410000924021006,
+      "source": "himawari9_b13_s0510",
+      "total": 0.8175751000526361
+    },
+    {
+      "db_write": 0.004070600029081106,
+      "fetch": 0.7666661000112072,
+      "item_id": "himawari9_B13_S0510_20260621_1440",
+      "normalize": 0.00014479999663308263,
+      "source": "himawari9_b13_s0510",
+      "total": 0.7708815000369214
+    }
+  ],
+  "phase_summary": {
+    "db_write": {
+      "count": 2,
+      "max_seconds": 0.03983329999027774,
+      "mean_seconds": 0.021951950009679422,
+      "p50_seconds": 0.004070600029081106,
+      "p90_seconds": 0.004070600029081106
+    },
+    "fetch": {
+      "count": 2,
+      "max_seconds": 0.7775877000531182,
+      "mean_seconds": 0.7721269000321627,
+      "p50_seconds": 0.7666661000112072,
+      "p90_seconds": 0.7666661000112072
+    },
+    "normalize": {
+      "count": 2,
+      "max_seconds": 0.00015410000924021006,
+      "mean_seconds": 0.00014945000293664634,
+      "p50_seconds": 0.00014479999663308263,
+      "p90_seconds": 0.00014479999663308263
+    },
+    "total": {
+      "count": 2,
+      "max_seconds": 0.8175751000526361,
+      "mean_seconds": 0.7942283000447787,
+      "p50_seconds": 0.7708815000369214,
+      "p90_seconds": 0.7708815000369214
+    }
+  },
+  "resource_telemetry": {
+    "cpu_max_percent": null,
+    "cpu_mean_percent": null,
+    "cpu_sampler_available": false,
+    "staging_end_bytes": 0,
+    "staging_max_bytes": 0
+  },
+  "run_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260621_20260621_20260709T152059Z_115632",
+  "skipped_existing": 278,
+  "source_issues_touched": 2,
+  "sources": [
+    "gefs_control",
+    "gfs",
+    "himawari_b13_s0510"
+  ],
+  "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260621_20260621_20260709T152059Z_115632\\staging",
+  "start_date": "2026-06-21",
+  "started_at_utc": "2026-07-09T15:20:59.680250Z",
+  "status": "complete_with_failures",
+  "task_base_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260621_20260621_20260709T152059Z_115632",
+  "total_seconds_total": 1.5884566000895575
+}

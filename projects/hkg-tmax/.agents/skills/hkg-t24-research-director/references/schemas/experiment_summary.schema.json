@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/hkg-t24/experiment_summary.schema.json",
+  "title": "HKG T+24 experiment summary",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "experiment_id",
+    "slug",
+    "status",
+    "created_at_utc",
+    "target",
+    "frame_id",
+    "date_start",
+    "date_end",
+    "n_candidate",
+    "n_common",
+    "baseline_id",
+    "baseline_mae_c",
+    "candidate_id",
+    "candidate_mae_c",
+    "mae_delta_c",
+    "candidate_rmse_c",
+    "candidate_bias_c",
+    "leakage_status",
+    "confirmation_rows_used",
+    "promotion_decision",
+    "spec_sha256",
+    "code_sha256",
+    "data_manifest_sha256"
+  ],
+  "properties": {
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-]+$"
+    },
+    "status": {
+      "enum": [
+        "COMPLETED_PROMOTION_CANDIDATE",
+        "COMPLETED_INFORMATION_GAIN_ONLY",
+        "COMPLETED_NULL_OR_NEGATIVE",
+        "REJECTED_LEAKAGE",
+        "REJECTED_TIMESTAMP",
+        "REJECTED_SPECIFICATION",
+        "REJECTED_DATA_QUALITY",
+        "BLOCKED_MISSING_DATA",
+        "FAILED_RUNTIME"
+      ]
+    },
+    "created_at_utc": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "frame_id": {
+      "type": "string"
+    },
+    "date_start": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "date_end": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "n_candidate": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_common": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "baseline_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "baseline_mae_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "candidate_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidate_mae_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "mae_delta_c": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "candidate_rmse_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "candidate_bias_c": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "leakage_status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_SCORED",
+        "BLOCKED"
+      ]
+    },
+    "confirmation_rows_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "owner_authorized_confirmation": {
+      "type": "boolean"
+    },
+    "promotion_decision": {
+      "type": "string"
+    },
+    "spec_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "code_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_manifest_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "common_row_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "baseline_n": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "candidate_n": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "development_gate_reached": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

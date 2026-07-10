@@ -1,0 +1,30 @@
+{
+  "matrix_rows": 38588,
+  "previous_prediction_rows": 157670,
+  "combined_prediction_rows": 252272,
+  "candidate_rows": 15767,
+  "rows_by_cutoff": {
+    "tminus1_1500": 9647,
+    "tminus1_1800": 9647,
+    "tminus1_2100": 9647,
+    "tminus1_2359": 9647
+  },
+  "prediction_rows_by_model": {
+    "A0_raw_official": 15767,
+    "A1_grouped_residual": 15767,
+    "A2_revision_residual_lgbm": 15767,
+    "A3_hko_hourly_state_residual_lgbm": 15767,
+    "A4_network_gradients_residual_lgbm": 15767,
+    "A5_text_warning_residual_lgbm": 15767,
+    "A6_target_memory_residual_lgbm": 15767,
+    "A7_final_residual_ensemble": 15767,
+    "A8_direct_lgbm_absolute": 15767,
+    "B0_climatology_persistence": 15767,
+    "D0_A7_reproduction": 15767,
+    "D1_official_residual_memory_shrinkage": 15767,
+    "D2_A3_plus_residual_memory_lgbm": 15767,
+    "D3_pruned_full_plus_residual_memory_lgbm": 15767,
+    "D4_residual_memory_constrained_stack": 15767,
+    "D5_conservative_A7_plus_memory_blend": 15767
+  }
+}

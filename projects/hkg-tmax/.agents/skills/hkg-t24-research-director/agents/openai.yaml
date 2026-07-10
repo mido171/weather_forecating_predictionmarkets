@@ -1,0 +1,7 @@
+interface:
+  display_name: "HKG T+24 Research Director"
+  short_description: "Invent and direct the next leakage-safe HKO Tmax experiment."
+  long_description: "Reads the complete HKG T+24 data and experiment corpus, maintains research memory, designs one fully specified high-information-gain experiment, invokes the experiment executor, ingests the result, and repeats under strict T-24 leakage controls."
+  default_prompt: "Use $hkg-t24-research-director and $hkg-t24-experiment-executor to begin or resume the sequential HKG T+24 research cycle. Keep 2024+ sealed."
+policy:
+  allow_implicit_invocation: true

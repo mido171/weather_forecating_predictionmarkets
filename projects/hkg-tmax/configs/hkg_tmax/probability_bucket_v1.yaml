@@ -1,0 +1,145 @@
+experiment_id: hkg_tmax_probability_buckets_v1
+database_url: postgresql://postgres:root@127.0.0.1:5432/hkg_tmax_research
+target:
+  station: HKG
+  label_source: HKO Daily Extract one-decimal daily maximum
+  bucket_keys:
+    - 24_or_below
+    - "25"
+    - "26"
+    - "27"
+    - "28"
+    - "29"
+    - "30"
+    - "31"
+    - "32"
+    - "33"
+    - 34_or_higher
+  decimal_rules:
+    - "<=24.9 -> 24_or_below"
+    - "25.0..25.9 -> 25"
+    - "26.0..26.9 -> 26"
+    - "27.0..27.9 -> 27"
+    - "28.0..28.9 -> 28"
+    - "29.0..29.9 -> 29"
+    - "30.0..30.9 -> 30"
+    - "31.0..31.9 -> 31"
+    - "32.0..32.9 -> 32"
+    - "33.0..33.9 -> 33"
+    - ">=34.0 -> 34_or_higher"
+cutoffs:
+  - name: t_minus_1_1800_hkt
+    hkt_time: "18:00"
+    primary: false
+  - name: t_minus_1_1900_hkt
+    hkt_time: "19:00"
+    primary: false
+  - name: t_minus_1_2000_hkt
+    hkt_time: "20:00"
+    primary: false
+  - name: t_minus_1_2100_hkt
+    hkt_time: "21:00"
+    primary: false
+  - name: t_minus_1_2200_hkt
+    hkt_time: "22:00"
+    primary: false
+  - name: t_minus_1_2300_hkt
+    hkt_time: "23:00"
+    primary: false
+  - name: t_minus_1_2359_hkt
+    hkt_time: "23:59"
+    primary: true
+forecast_filter:
+  source: info_gov
+  product_type: local
+  row_quality_status: usable_local_minmax
+  target_issue_lead_days: 1
+temporal_governance:
+  development_start: "2000-01-02"
+  outer_folds:
+    - name: fold1
+      train_end: "2010-12-31"
+      validate_start: "2011-01-01"
+      validate_end: "2013-12-31"
+    - name: fold2
+      train_end: "2013-12-31"
+      validate_start: "2014-01-01"
+      validate_end: "2016-12-31"
+    - name: fold3
+      train_end: "2016-12-31"
+      validate_start: "2017-01-01"
+      validate_end: "2019-12-31"
+    - name: fold4
+      train_end: "2019-12-31"
+      validate_start: "2020-01-01"
+      validate_end: "2021-12-31"
+  presealed_holdout:
+    name: presealed_2022_2023
+    train_end: "2021-12-31"
+    validate_start: "2022-01-01"
+    validate_end: "2023-12-31"
+  sealed_confirmation:
+    name: sealed_2024_2026_05
+    train_end: "2023-12-31"
+    validate_start: "2024-01-01"
+    validate_end: "2026-05-31"
+metrics:
+  primary: normalized_rps
+  secondary:
+    - nll
+    - multiclass_brier
+    - crps
+    - ece
+    - mce
+    - entropy
+  calibration_bins: 10
+bootstrap:
+  iterations: 500
+  seed: 20260705
+models:
+  B2_month_residual_pmf:
+    shrink_alpha: 10.0
+  B3_forecast_level_residual_pmf:
+    shrink_alpha: 12.0
+  B4_hierarchical_residual_pmf:
+    alpha_grid:
+      month_alpha: [2.0, 5.0, 10.0, 20.0]
+      cell_alpha: [2.0, 5.0, 10.0, 20.0, 40.0]
+  B5_kernel_analog:
+    nearest_neighbors: 180
+    weight_floor: 1.0e-8
+    default_bandwidths:
+      forecast_max_c: 1.0
+      forecast_range_c: 1.5
+      forecast_max_revision_c: 1.0
+      month_circular: 2.0
+  mos:
+    ridge_alphas: [0.01, 0.1, 1.0, 10.0]
+    student_t_df: [3, 5, 8, 12]
+  C1_multinomial_ridge:
+    c_values: [0.03, 0.1, 0.3, 1.0]
+  C2_ordinal_cdf_logistic:
+    C: 0.1
+calibration:
+  K0: identity
+  K1_power_gamma: 0.95
+  K2: monotone_cdf_projection
+stacking:
+  l2_to_b4: 0.02
+acceptance_gates:
+  leakage_total_violations: 0
+  identical_row_set_per_leaderboard: true
+  complex_vs_b4_fold14_min_rps_gain: 0.015
+  complex_vs_b4_presealed_min_rps_gain: 0.010
+  nll_worse_than_b4_max: 0.005
+  brier_worse_than_b4_max: 0.002
+  key_calibration_bin_min_n: 100
+  key_calibration_abs_gap_max: 0.12
+scope_exclusions:
+  - market prices
+  - expected value
+  - order books
+  - Kelly sizing
+  - PnL
+  - market-implied blending
+  - trade recommendations

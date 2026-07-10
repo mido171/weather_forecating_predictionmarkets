@@ -1,0 +1,52 @@
+{
+  "id": "T11",
+  "suffix": "cwa_wrf_urgent_prospective_collector",
+  "title": "CWA WRF 15 km Urgent Prospective Collector",
+  "phase": "B Acquisition",
+  "deps": [
+    "T06"
+  ],
+  "mission": "Deploy an always-on collector for the rolling three-day CWA WRF archive and preserve every future issue with exact first-seen timestamps.",
+  "inputs": [
+    "T03 CWA selectors",
+    "T05 local/synoptic domains",
+    "T06 client",
+    "scheduler/secret infrastructure"
+  ],
+  "steps": [
+    "Poll on a cadence that captures every 6-hourly run with retries and overlap.",
+    "Use /runs over the trailing window and deduplicate by run.",
+    "Collect HKO/station points, local patch and high-value surface/pressure variables.",
+    "Record first successful observation time per run/variable group.",
+    "Alert on missed cycles and coverage drops.",
+    "Backfill currently retained runs immediately."
+  ],
+  "db_objects": [
+    "live acquisition scheduler",
+    "nwp_core runs/values",
+    "availability events"
+  ],
+  "outputs": [
+    "collector service",
+    "scheduler config",
+    "first_seen_log.csv",
+    "missed_cycle_alerts",
+    "initial retained-window backfill"
+  ],
+  "tests": [
+    "Simulated missed poll recovery",
+    "duplicate polling",
+    "first-seen immutability",
+    "alert tests"
+  ],
+  "acceptance": [
+    "Collector continuously archives new cycles",
+    "No retained run silently lost after deployment"
+  ],
+  "failure": [
+    "API outage: preserve retry/alert evidence and recover within retention window"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t11_cwa_wrf_urgent_prospective_collector.md"
+}

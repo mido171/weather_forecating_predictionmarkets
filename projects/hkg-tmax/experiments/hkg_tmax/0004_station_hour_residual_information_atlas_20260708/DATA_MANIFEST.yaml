@@ -1,0 +1,12 @@
+database_url_redacted: "postgresql://postgres:***@127.0.0.1:5432/hkg_tmax_research"
+tables:
+  target: label_core.hko_daily_tmax
+  official_forecast: public.hko_historical_forecasts_2000_2026
+  hourly_observations: public.hko_info_gov_hourly_readings_1998_2026
+date_window: "2000-01-02..2023-12-31"
+confirmation_rows_allowed: false
+temporary_postgres_tables:
+  - atlas_frame
+  - atlas_hourly
+  - atlas_station_long
+  - atlas_features

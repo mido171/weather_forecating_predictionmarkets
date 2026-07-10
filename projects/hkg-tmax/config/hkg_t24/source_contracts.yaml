@@ -1,0 +1,1035 @@
+schema_version: 1
+generated_at_utc: '2026-06-20T10:26:20.401123Z'
+locked_test_start: '2025-01-01'
+polymarket_allowed: false
+contracts:
+- source_id: hko_daily_extract
+  provider: Hong Kong Observatory
+  role: canonical_target_candidate
+  priority: P0
+  cadence: daily
+  historical_range: interactive
+  point_in_time_status: TARGET_ONLY
+  availability_tier: TARGET_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: first public appearance must be observed and archived
+  revision_policy: current Polymarket template ignores later revisions
+  tags:
+  - bootstrap_now
+  - target
+  - hko
+- source_id: hko_daily_extract_catalog
+  provider: Hong Kong Observatory
+  role: daily_extract_backing_coverage_index
+  priority: P0
+  cadence: provider_updated
+  historical_range: 1884-present coverage metadata
+  point_in_time_status: METADATA
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive before resolving Daily Extract month/year payload choice
+  revision_policy: provider may update endYear/endMonth and coverage ranges
+  tags:
+  - target
+  - metadata
+  - hko
+- source_id: hko_daily_extract_month
+  provider: Hong Kong Observatory
+  role: canonical_target_candidate_backing_payload
+  priority: P0
+  cadence: daily_until_month_finalized
+  historical_range: current_not_yet_annualized_months
+  point_in_time_status: TARGET_ONLY
+  availability_tier: TARGET_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive each distinct payload; first successful retrieval is
+    first-publication candidate only when polling is active
+  revision_policy: later payloads may revise or complete prior values; never overwrite
+    first archived payload
+  tags:
+  - target
+  - hko
+- source_id: hko_daily_extract_year
+  provider: Hong Kong Observatory
+  role: canonical_target_candidate_backing_payload
+  priority: P1
+  cadence: annual_or_provider_rollup
+  historical_range: historical_annual_payloads
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: latest annual payload is not proof of first-publication timing
+  revision_policy: provider may update annualized historical payloads
+  tags:
+  - target
+  - hko
+- source_id: hko_clmmaxt_hko
+  provider: Hong Kong Observatory
+  role: candidate_historical_target_label
+  priority: P0
+  cadence: monthly_update_of_daily_history
+  historical_range: 1884-present excluding documented gaps
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: latest file is revised/finalized history, not necessarily first
+    publication
+  revision_policy: verify against first-published Daily Extract
+  tags:
+  - bootstrap_now
+  - target_proxy
+  - hko
+- source_id: hko_daily_climate_download
+  provider: Hong Kong Observatory
+  role: historical_daily_elements
+  priority: P1
+  cadence: monthly_or_element_specific
+  historical_range: element_specific
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: use for historical mechanisms; record update/revision behavior
+    per element
+  revision_policy: finalized climate data may be revised
+  tags:
+  - hko
+  - climate
+- source_id: hko_open_data_catalog
+  provider: Hong Kong Observatory
+  role: authoritative_dataset_catalog
+  priority: P0
+  cadence: provider_updated
+  historical_range: n/a
+  point_in_time_status: METADATA
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive catalog snapshots
+  revision_policy: provider may change endpoints/cadence
+  tags:
+  - bootstrap_now
+  - metadata
+  - hko
+- source_id: hko_api_documentation
+  provider: Hong Kong Observatory
+  role: authoritative_api_and_station_metadata
+  priority: P0
+  cadence: provider_updated
+  historical_range: n/a
+  point_in_time_status: METADATA
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive PDF and hash
+  revision_policy: revalidate parsers when hash changes
+  tags:
+  - metadata
+  - hko
+- source_id: hko_latest_1min_temperature
+  provider: Hong Kong Observatory
+  role: live_station_network_temperature
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: retrieved payload becomes available at successful retrieval;
+    track source timestamp
+  revision_policy: provisional observations
+  tags:
+  - bootstrap_now
+  - live
+  - temperature
+  - hko
+- source_id: hko_since_midnight_maxmin
+  provider: Hong Kong Observatory
+  role: live_maximum_and_minimum_since_midnight
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: retrieved payload becomes available at successful retrieval
+  revision_policy: provisional observations
+  tags:
+  - bootstrap_now
+  - live
+  - tmax_so_far
+  - hko
+- source_id: hko_latest_relative_humidity
+  provider: Hong Kong Observatory
+  role: live_station_network_humidity
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: record provider timestamp and retrieval timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - humidity
+  - hko
+- source_id: hko_latest_pressure
+  provider: Hong Kong Observatory
+  role: live_station_network_pressure
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: record provider timestamp and retrieval timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - pressure
+  - hko
+- source_id: hko_latest_wind
+  provider: Hong Kong Observatory
+  role: live_station_network_wind
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: record provider timestamp and retrieval timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - wind
+  - hko
+- source_id: hko_latest_solar_radiation
+  provider: Hong Kong Observatory
+  role: live_solar_radiation
+  priority: P0
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve station/product differences
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - radiation
+  - hko
+- source_id: hko_latest_uv_index
+  provider: Hong Kong Observatory
+  role: live_uv_index
+  priority: P1
+  cadence: every_15_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: retrieved payload becomes available at successful retrieval;
+    track source timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - uv
+  - radiation
+  - hko
+- source_id: hko_automatic_rainfall
+  provider: Hong Kong Observatory
+  role: live_station_network_rainfall
+  priority: P0
+  cadence: every_15_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve product-specific station semantics
+  revision_policy: provisional; HKO-labelled rainfall may differ from official climatological
+    rainfall
+  tags:
+  - bootstrap_now
+  - live
+  - rain
+  - hko
+- source_id: hko_latest_visibility
+  provider: Hong Kong Observatory
+  role: live_station_network_visibility
+  priority: P1
+  cadence: every_10_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: retrieved payload becomes available at successful retrieval;
+    track source timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - live
+  - visibility
+  - hko
+- source_id: hko_current_weather_report
+  provider: Hong Kong Observatory
+  role: current_weather_report_and_regional_observations
+  priority: P0
+  cadence: provider_updated
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed payload and source timestamp
+  revision_policy: each changed payload is a separate vintage
+  tags:
+  - bootstrap_now
+  - live
+  - weather_report
+  - hko
+- source_id: hko_gridded_rainfall_nowcast
+  provider: Hong Kong Observatory
+  role: issued_rainfall_nowcast
+  priority: P1
+  cadence: every_12_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every issue with valid times
+  revision_policy: new issue supersedes but never overwrites older issue
+  tags:
+  - bootstrap_now
+  - nowcast
+  - rain
+  - hko
+- source_id: hko_radar
+  provider: Hong Kong Observatory
+  role: radar_images_and_derived_features
+  priority: P1
+  cadence: approximately_every_6_minutes
+  historical_range: limited_public_display_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive native image plus metadata; no future frames
+  revision_policy: preserve each frame
+  tags:
+  - radar
+  - rain
+  - image
+  - hko
+- source_id: hko_radar_image_manifest
+  provider: Hong Kong Observatory
+  role: current_radar_image_manifest
+  priority: P1
+  cadence: approximately_every_6_minutes
+  historical_range: limited_public_display_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed manifest and only use frames referenced
+    by retrieval-time manifests
+  revision_policy: preserve each manifest/frame vintage
+  tags:
+  - bootstrap_now
+  - radar
+  - rain
+  - image
+  - hko
+- source_id: hko_lightning
+  provider: Hong Kong Observatory
+  role: lightning_observations
+  priority: P2
+  cadence: page_approximately_5_minutes_counts_15_minutes
+  historical_range: limited_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive source timestamps
+  revision_policy: provisional
+  tags:
+  - lightning
+  - convection
+  - hko
+- source_id: hko_lightning_counts_latest
+  provider: Hong Kong Observatory
+  role: lightning_counts_latest
+  priority: P1
+  cadence: every_15_minutes
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive source timestamps and retrieval timestamps
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - lightning
+  - convection
+  - hko
+- source_id: hko_satellite
+  provider: Hong Kong Observatory
+  role: satellite_imagery
+  priority: P1
+  cadence: product_specific
+  historical_range: limited_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve channel, scan time, publication time, projection
+  revision_policy: preserve each image
+  tags:
+  - satellite
+  - cloud
+  - image
+  - hko
+- source_id: hko_local_weather_forecast
+  provider: Hong Kong Observatory
+  role: official_forecast_benchmark
+  priority: P0
+  cadence: hourly_and_as_needed
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed payload and issue/update time
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - forecast
+  - official
+  - hko
+- source_id: hko_nine_day_forecast
+  provider: Hong Kong Observatory
+  role: official_forecast_benchmark
+  priority: P0
+  cadence: at_least_twice_daily_and_as_needed
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive each forecast vintage
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - forecast
+  - official
+  - hko
+- source_id: hko_weather_warning_summary
+  provider: Hong Kong Observatory
+  role: official_warning_vintage_summary
+  priority: P1
+  cadence: warning_update
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed warning payload and issue/update time
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - warning
+  - forecast
+  - official
+  - hko
+- source_id: hko_weather_warning_information
+  provider: Hong Kong Observatory
+  role: official_warning_vintage_detail
+  priority: P1
+  cadence: warning_update
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed warning payload and issue/update time
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - warning
+  - forecast
+  - official
+  - hko
+- source_id: hko_special_weather_tips
+  provider: Hong Kong Observatory
+  role: official_special_weather_tips
+  priority: P1
+  cadence: provider_updated
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed payload and source timestamp
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - warning
+  - tips
+  - official
+  - hko
+- source_id: hko_automatic_regional_forecast
+  provider: Hong Kong Observatory
+  role: station_specific_automatic_forecast
+  priority: P1
+  cadence: product_specific
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive issue time and station/valid hour
+  revision_policy: each issue is a vintage
+  tags:
+  - forecast
+  - station
+  - hko
+- source_id: hko_upper_air
+  provider: Hong Kong Observatory
+  role: king_s_park_soundings
+  priority: P1
+  cadence: typically_twice_daily
+  historical_range: source_specific
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: sounding launch/receipt time plus processing latency
+  revision_policy: distinguish preliminary and corrected
+  tags:
+  - upper_air
+  - sounding
+  - hko
+- source_id: hko_station_metadata
+  provider: Hong Kong Observatory
+  role: station_identity_and_history
+  priority: P0
+  cadence: provider_updated
+  historical_range: station_specific
+  point_in_time_status: METADATA
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive snapshots and effective dates
+  revision_policy: provider may update metadata
+  tags:
+  - metadata
+  - stations
+  - hko
+- source_id: hko_historical_archive_api
+  provider: DATA.GOV.HK
+  role: historical_version_discovery
+  priority: P0
+  cadence: daily
+  historical_range: dataset_specific
+  point_in_time_status: POTENTIAL_POINT_IN_TIME_ARCHIVE
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: inspect list-files/list-file-versions/get-file timestamps in
+    GMT+8
+  revision_policy: preserve exact file version
+  tags:
+  - archive
+  - versions
+  - data_gov_hk
+- source_id: hko_south_china_coastal_waters_bulletin
+  provider: Hong Kong Observatory
+  role: south_china_coastal_waters_bulletin
+  priority: P1
+  cadence: provider_updated
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed bulletin and source timestamp
+  revision_policy: each issue is a separate vintage
+  tags:
+  - bootstrap_now
+  - marine
+  - coastal_waters
+  - hko
+- source_id: hko_latest_tidal_information
+  provider: Hong Kong Observatory
+  role: latest_tidal_information
+  priority: P1
+  cadence: provider_updated
+  historical_range: latest_only_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every changed payload and source timestamp
+  revision_policy: provisional
+  tags:
+  - bootstrap_now
+  - marine
+  - tide
+  - hko
+- source_id: ecmwf_open_ifs_aifs
+  provider: ECMWF
+  role: operational_nwp_and_ai_forecasts
+  priority: P0
+  cadence: cycle_and_product_specific
+  historical_range: rolling_public_archive_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive every cycle/member; use actual file appearance time
+  revision_policy: never replace an older cycle
+  tags:
+  - nwp
+  - ensemble
+  - ai
+  - forecast
+- source_id: noaa_gfs
+  provider: NOAA NCEP
+  role: operational_global_deterministic_forecast
+  priority: P0
+  cadence: four_cycles_daily
+  historical_range: archive_specific
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: use actual file availability and cycle metadata
+  revision_policy: archive immutable cycle files
+  tags:
+  - nwp
+  - forecast
+  - noaa
+- source_id: noaa_gefs
+  provider: NOAA NCEP
+  role: operational_global_ensemble_forecast
+  priority: P0
+  cadence: cycle_specific
+  historical_range: archive_specific
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: use actual member/file availability
+  revision_policy: archive immutable cycle files
+  tags:
+  - nwp
+  - ensemble
+  - noaa
+- source_id: dwd_icon
+  provider: Deutscher Wetterdienst
+  role: operational_global_deterministic_forecast
+  priority: P1
+  cadence: cycle_specific
+  historical_range: rolling_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: actual file timestamp and successful retrieval
+  revision_policy: archive each cycle
+  tags:
+  - nwp
+  - forecast
+  - dwd
+- source_id: dwd_icon_eps
+  provider: Deutscher Wetterdienst
+  role: operational_global_ensemble_forecast
+  priority: P1
+  cadence: cycle_specific
+  historical_range: rolling_unless_self_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: actual file/member timestamp
+  revision_policy: archive each cycle
+  tags:
+  - nwp
+  - ensemble
+  - dwd
+- source_id: copernicus_era5
+  provider: Copernicus Climate Change Service
+  role: retrospective_synoptic_and_mechanism_analysis
+  priority: P2
+  cadence: hourly
+  historical_range: 1940_present_with_release_lag
+  point_in_time_status: RETROSPECTIVE_ONLY
+  availability_tier: MECHANISM_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: forbidden operationally unless release lag is explicitly simulated
+  revision_policy: version and retrieval date required
+  tags:
+  - reanalysis
+  - retrospective
+- source_id: copernicus_era5_land
+  provider: Copernicus Climate Change Service
+  role: retrospective_land_surface_analysis
+  priority: P3
+  cadence: hourly
+  historical_range: 1950_present_with_release_lag
+  point_in_time_status: RETROSPECTIVE_ONLY
+  availability_tier: MECHANISM_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: forbidden operationally unless release lag is explicitly simulated
+  revision_policy: version and retrieval date required
+  tags:
+  - reanalysis
+  - land
+  - retrospective
+- source_id: noaa_isd
+  provider: NOAA NCEI
+  role: regional_synoptic_station_history
+  priority: P2
+  cadence: hourly_subhourly_station_dependent
+  historical_range: station_specific
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: quality-controlled archive; not automatically real-time vintage
+  revision_policy: preserve archive version
+  tags:
+  - observations
+  - regional
+  - noaa
+- source_id: hko_tropical_cyclone_realtime
+  provider: Hong Kong Observatory
+  role: point_in_time_tropical_cyclone_advisories_and_tracks
+  priority: P1
+  cadence: advisory_specific
+  historical_range: limited_unless_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive each advisory and forecast track
+  revision_policy: never substitute final best track
+  tags:
+  - tropical_cyclone
+  - synoptic
+  - hko
+- source_id: hko_tropical_cyclone_track_realtime
+  provider: Hong Kong Observatory
+  role: realtime_tropical_cyclone_track_list
+  priority: P1
+  cadence: advisory_specific
+  historical_range: limited_unless_archived
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: archive each retrieved track-list payload with retrieval timestamp
+  revision_policy: never substitute final best track
+  tags:
+  - bootstrap_now
+  - tropical_cyclone
+  - synoptic
+  - hko
+- source_id: hko_tropical_cyclone_best_track
+  provider: Hong Kong Observatory
+  role: retrospective_regime_label
+  priority: P2
+  cadence: annual_or_event_update
+  historical_range: multi_decadal
+  point_in_time_status: RETROSPECTIVE_ONLY
+  availability_tier: MECHANISM_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: never use as if known at forecast cutoff
+  revision_policy: version required
+  tags:
+  - tropical_cyclone
+  - retrospective
+- source_id: hong_kong_air_quality
+  provider: Hong Kong Environmental Protection Department
+  role: exploratory_aerosol_haze_proxy
+  priority: P3
+  cadence: hourly_or_subhourly
+  historical_range: dataset_specific
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: establish exact issue and revision behavior before operational
+    use
+  revision_policy: provider_specific
+  tags:
+  - aerosol
+  - air_quality
+  - exploratory
+- source_id: terrain_land_cover_coastline
+  provider: multiple_official_or_open_geospatial_sources
+  role: static_station_and_flow_context
+  priority: P2
+  cadence: static_versioned
+  historical_range: version_specific
+  point_in_time_status: STATIC_METADATA
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: record license/version/effective date
+  revision_policy: never silently replace
+  tags:
+  - terrain
+  - land_cover
+  - geospatial
+- source_id: noaa_ghcnh_hko
+  provider: NOAA NCEI
+  role: exact_or_nearest_hourly_station_history_for_hko_headquarters
+  priority: P0
+  cadence: archive_release
+  historical_range: station_specific
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve archive version and distinguish from HKO live feeds
+  revision_policy: archive may revise; hash every retrieval
+  tags:
+  - observations
+  - station
+  - ghcnh
+  - noaa
+- source_id: noaa_oisst_v21
+  provider: NOAA
+  role: daily_gridded_sea_surface_temperature
+  priority: P0
+  cadence: daily
+  historical_range: 1981-09-present
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve publication/revision timestamps and retrieval time;
+    do not assume preliminary equals final
+  revision_policy: distinguish preliminary and revised products where exposed
+  tags:
+  - ocean
+  - sst
+  - noaa
+  - gridded
+- source_id: himawari_ahi_noaa_aws
+  provider: JMA / NOAA Open Data Registry
+  role: geostationary_satellite_cloud_and_radiation_context
+  priority: P0
+  cadence: scan_product_specific
+  historical_range: 2015-07-present
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve source object key, checksum where available, scan time,
+    channel, crop policy, and retrieval time
+  revision_policy: original scans immutable; never replace one scan with another
+  tags:
+  - satellite
+  - himawari
+  - cloud
+  - gridded
+- source_id: gpm_imerg_final
+  provider: NASA GPM
+  role: historical_gridded_precipitation_final_run
+  priority: P0
+  cadence: half_hourly
+  historical_range: about_2000-present
+  point_in_time_status: RETROSPECTIVE_ONLY
+  availability_tier: MECHANISM_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve observation window, product version, run type, publication
+    time, and retrieval time
+  revision_policy: Final run supersedes Early/Late for retrospective use only; never
+    masquerade as live
+  tags:
+  - precipitation
+  - imerg
+  - nasa
+  - gridded
+  - retrospective
+- source_id: gpm_imerg_early_late
+  provider: NASA GPM
+  role: near_real_time_gridded_precipitation
+  priority: P0
+  cadence: half_hourly
+  historical_range: live_from_collector_start
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve run type, issue time, observation window, retrieval
+    time, and revision relationship
+  revision_policy: Early and Late are separate operational products; do not overwrite
+    either with Final
+  tags:
+  - precipitation
+  - imerg
+  - nasa
+  - gridded
+  - live
+- source_id: cams_eac4_reanalysis
+  provider: Copernicus Atmosphere Monitoring Service
+  role: retrospective_aerosol_haze_reanalysis
+  priority: P1
+  cadence: product_specific
+  historical_range: maximum_available_history
+  point_in_time_status: RETROSPECTIVE_ONLY
+  availability_tier: MECHANISM_ONLY
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve ADS request parameters, product version, release lag,
+    and retrieval time
+  revision_policy: retrospective reanalysis versioned by retrieval and product metadata
+  tags:
+  - aerosol
+  - haze
+  - cams
+  - retrospective
+- source_id: cams_global_composition_forecasts
+  provider: Copernicus Atmosphere Monitoring Service
+  role: operational_aerosol_haze_forecasts
+  priority: P1
+  cadence: forecast_cycle_specific
+  historical_range: live_from_collector_start
+  point_in_time_status: OPERATIONAL_POINT_IN_TIME
+  availability_tier: GOLD_EXACT_VINTAGE
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: preserve forecast cycle, lead, variable, level, actual availability,
+    and retrieval time
+  revision_policy: never overwrite an older forecast cycle
+  tags:
+  - aerosol
+  - haze
+  - cams
+  - forecast
+  - live
+- source_id: hong_kong_epd_air_quality_observations
+  provider: Hong Kong Environmental Protection Department
+  role: official_local_air_quality_observations
+  priority: P1
+  cadence: hourly_or_subhourly
+  historical_range: dataset_specific
+  point_in_time_status: PROXY_WITH_LIMITATIONS
+  availability_tier: SILVER_OPERATIONAL_REPLAY
+  operational_input_allowed_by_tier: true
+  market_source_forbidden_in_this_goal: false
+  availability_rule: establish source timestamps, station metadata, relocation history,
+    and revision behavior before operational use
+  revision_policy: provider_specific; preserve raw snapshots and metadata versions
+  tags:
+  - air_quality
+  - aerosol
+  - epd
+  - hong_kong
+- source_id: polymarket_gamma_event_by_slug
+  provider: Polymarket
+  role: event_market_rules_metadata
+  priority: P0
+  cadence: poll_on_change
+  historical_range: event_specific
+  point_in_time_status: MARKET_ONLY
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: true
+  availability_rule: archive every changed payload and normalized rules hash
+  revision_policy: never overwrite old metadata
+  tags:
+  - market
+  - rules
+  - polymarket
+- source_id: polymarket_clob_book
+  provider: Polymarket
+  role: executable_order_book_snapshot
+  priority: P0
+  cadence: on_demand_or_websocket
+  historical_range: latest_unless_self_archived
+  point_in_time_status: MARKET_ONLY
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: true
+  availability_rule: archive server and retrieval timestamps
+  revision_policy: append-only snapshots
+  tags:
+  - market
+  - orderbook
+  - polymarket
+- source_id: polymarket_market_websocket
+  provider: Polymarket
+  role: live_order_book_deltas_and_trades
+  priority: P0
+  cadence: event_driven
+  historical_range: self_archived_only
+  point_in_time_status: MARKET_ONLY
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: true
+  availability_rule: persist sequence, receive time, source time, reconnect state
+  revision_policy: append-only
+  tags:
+  - market
+  - websocket
+  - polymarket
+- source_id: polymarket_price_history
+  provider: Polymarket
+  role: historical_token_prices
+  priority: P1
+  cadence: on_demand
+  historical_range: token_specific
+  point_in_time_status: MARKET_ONLY
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: true
+  availability_rule: price history is not full historical depth
+  revision_policy: archive query and response
+  tags:
+  - market
+  - price
+  - polymarket
+- source_id: polymarket_fee_parameters
+  provider: Polymarket
+  role: cost_model
+  priority: P0
+  cadence: market_and_policy_specific
+  historical_range: policy_specific
+  point_in_time_status: MARKET_ONLY
+  availability_tier: FORBIDDEN
+  operational_input_allowed_by_tier: false
+  market_source_forbidden_in_this_goal: true
+  availability_rule: query/store fee parameters per token and date
+  revision_policy: never assume one schedule across time
+  tags:
+  - market
+  - fees
+  - polymarket

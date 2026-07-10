@@ -1,0 +1,92 @@
+{
+  "status": "pass",
+  "total_violations": 0,
+  "checks": [
+    {
+      "check_name": "forecast_anchor_issue_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "forecast_revision_issue_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "hourly_dispatch_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "hourly_observation_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "max_hourly_dispatch_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "max_hourly_observation_at_or_before_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "target_history_lag2_floor",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_target_dates": []
+      }
+    },
+    {
+      "check_name": "raw_daily_extract_not_used_as_predictor",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "target_label_predictor_minimum_lag_days",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "features": []
+      }
+    },
+    {
+      "check_name": "forecast_anchor_apples_to_apples_info_gov_source",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {
+        "sample_source_urls": []
+      }
+    },
+    {
+      "check_name": "one_selected_anchor_per_target_cutoff",
+      "status": "pass",
+      "violation_count": 0,
+      "details": {}
+    }
+  ]
+}

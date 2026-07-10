@@ -1,0 +1,126 @@
+{
+  "by_source": {
+    "gefs_control": {
+      "skipped_existing": 68
+    },
+    "gfs": {
+      "skipped_existing": 68
+    },
+    "himawari9_b13_s0510": {
+      "db_write_seconds_total": 0.07564400002593175,
+      "fetch_failed": 2,
+      "fetch_seconds_total": 1.330431399983354,
+      "normalize_seconds_total": 0.0002443999983370304,
+      "skipped_existing": 142,
+      "source_issues_touched": 2,
+      "total_seconds_total": 1.4063198000076227
+    }
+  },
+  "completed_at_utc": "2026-07-09T18:15:21.524762Z",
+  "cycles": [
+    0,
+    6,
+    12,
+    18
+  ],
+  "day_elapsed_seconds": {
+    "2026-06-10": 1.0479904999956489
+  },
+  "db_write_seconds_total": 0.07564400002593175,
+  "elapsed_seconds": 1.4908710999879986,
+  "end_date": "2026-06-10",
+  "execution_mode": "optimized",
+  "expected": {
+    "days": 1,
+    "himawari_scans": 144,
+    "model_objects": 136,
+    "radar_expected_frames_approx": 0,
+    "total_static_tasks_without_radar_manifest": 280
+  },
+  "experiment_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709",
+  "fetch_failed": 2,
+  "fetch_seconds_total": 1.330431399983354,
+  "final_staging_bytes": 0,
+  "leads": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    30,
+    33,
+    36,
+    39,
+    42,
+    45,
+    48
+  ],
+  "normalize_seconds_total": 0.0002443999983370304,
+  "phase_observations": [
+    {
+      "db_write": 0.053300100029446185,
+      "fetch": 0.6749632999999449,
+      "item_id": "himawari9_B13_S0510_20260610_0240",
+      "normalize": 0.00012290000449866056,
+      "source": "himawari9_b13_s0510",
+      "total": 0.7283863000338897
+    },
+    {
+      "db_write": 0.02234389999648556,
+      "fetch": 0.655468099983409,
+      "item_id": "himawari9_B13_S0510_20260610_1440",
+      "normalize": 0.00012149999383836985,
+      "source": "himawari9_b13_s0510",
+      "total": 0.677933499973733
+    }
+  ],
+  "phase_summary": {
+    "db_write": {
+      "count": 2,
+      "max_seconds": 0.053300100029446185,
+      "mean_seconds": 0.03782200001296587,
+      "p50_seconds": 0.02234389999648556,
+      "p90_seconds": 0.02234389999648556
+    },
+    "fetch": {
+      "count": 2,
+      "max_seconds": 0.6749632999999449,
+      "mean_seconds": 0.665215699991677,
+      "p50_seconds": 0.655468099983409,
+      "p90_seconds": 0.655468099983409
+    },
+    "normalize": {
+      "count": 2,
+      "max_seconds": 0.00012290000449866056,
+      "mean_seconds": 0.0001221999991685152,
+      "p50_seconds": 0.00012149999383836985,
+      "p90_seconds": 0.00012149999383836985
+    },
+    "total": {
+      "count": 2,
+      "max_seconds": 0.7283863000338897,
+      "mean_seconds": 0.7031599000038113,
+      "p50_seconds": 0.677933499973733,
+      "p90_seconds": 0.677933499973733
+    }
+  },
+  "run_id": "0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260610_20260610_20260709T181519Z_129804",
+  "skipped_existing": 278,
+  "source_issues_touched": 2,
+  "sources": [
+    "gefs_control",
+    "gfs",
+    "himawari_b13_s0510"
+  ],
+  "staging_root": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-10\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260610_20260610_20260709T181519Z_129804\\staging",
+  "start_date": "2026-06-10",
+  "started_at_utc": "2026-07-09T18:15:20.029998Z",
+  "status": "complete_with_failures",
+  "task_base_dir": "C:\\Users\\ahmad\\Desktop\\generalFiles\\git\\weather_markets\\weather_data_extraction\\bootstrap\\hkg_tmax_elite_codex_bootstrap\\hkg_tmax_elite_codex\\_weather_backfill_staging\\day_shards\\0012_public_weather_backfill_optimized_pipeline_validation_20260709\\2026-06-10\\0012_public_weather_backfill_optimized_pipeline_validation_20260709_20260610_20260610_20260709T181519Z_129804",
+  "total_seconds_total": 1.4063198000076227
+}

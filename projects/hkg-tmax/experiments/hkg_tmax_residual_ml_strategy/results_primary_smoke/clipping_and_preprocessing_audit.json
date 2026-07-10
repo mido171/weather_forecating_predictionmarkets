@@ -1,0 +1,9 @@
+{
+  "residual_prediction_hard_cap_c": [
+    -3.0,
+    3.0
+  ],
+  "linear_numeric_imputation": "training-fold median",
+  "tree_missing_values": "LightGBM/CatBoost native or encoded missing flags; categorical MISSING token",
+  "sealed_rows_used_for_preprocessing": false
+}

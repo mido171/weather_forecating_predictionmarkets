@@ -1,0 +1,94 @@
+seed: 20260706
+allow_leakage_failures: false
+
+dates:
+  label_core_start_date: "2000-01-02"
+  label_core_end_date: "2023-12-31"
+  sealed_start_date: "2024-01-01"
+  sealed_end_date: "2026-05-31"
+
+cutoff_profiles:
+  - tminus1_2359
+  - tminus1_2100
+  - tminus1_1800
+
+primary_cutoff_profile: tminus1_2359
+
+data_sources:
+  official_forecast_source: public.hko_historical_forecasts_2000_2026
+  label_core_source: label_core.hko_daily_tmax
+  sealed_confirmation_source: sealed_confirmation.hko_daily_tmax
+  target_history_source: feature_safe.hko_target_history_pre2024
+  hourly_source: public.hko_info_gov_hourly_readings_1998_2026
+
+input_artifacts:
+  reuse_previous_feature_matrix: true
+  previous_results_dir: experiments/hkg_tmax_residual_ml_strategy/results
+  previous_champion_model_id: A7_final_residual_ensemble
+  previous_raw_model_id: A0_raw_official
+
+feature_policy:
+  max_raw_features: 90
+  max_features_with_residual_memory: 130
+  use_pruned_feature_set: true
+  include_full_323_feature_matrix: false
+  include_full_station_network: false
+  include_full_text_nlp: false
+  include_tail_router_labels: false
+  include_raw_official_error_bins: false
+  include_helped_worsened_labels: false
+  include_direct_absolute_predictions_as_predictors: false
+
+residual_memory:
+  min_lag_days: 2
+  lag1_enabled: false
+  same_cutoff_profile_only: true
+  large_residual_threshold_c: 1.5
+  min_counts:
+    roll7: 4
+    roll14: 7
+    roll30: 15
+    roll60: 30
+  d1_shrinkage:
+    shrink_grid: [0.10, 0.20, 0.35, 0.50]
+    cap_abs_grid_c: [0.20, 0.35, 0.50]
+  d5_conservative_blend:
+    scalar_grid: [0.70, 0.85, 1.00]
+    cap_abs_grid_c: [0.35, 0.50, 0.75]
+
+models:
+  D0_A7_reproduction: true
+  D1_official_residual_memory_shrinkage: true
+  D2_A3_plus_residual_memory_lgbm: true
+  D3_pruned_full_plus_residual_memory_lgbm: true
+  D4_residual_memory_constrained_stack: true
+  D5_conservative_A7_plus_memory_blend: true
+
+temporal_governance:
+  selection_folds:
+    - fold1_2011_2013
+    - fold2_2014_2016
+    - fold3_2017_2019
+    - fold4_2020_2021
+  presealed_holdout: "2022-01-01..2023-12-31"
+  sealed_confirmation: "2024-01-01..2026-05-31"
+  sealed_usage: report_only_after_freeze
+
+acceptance_gates:
+  require_leakage_pass: true
+  require_row_identity_pass: true
+  min_dev_mae_gain_vs_a7_c: 0.012
+  min_dev_mae_gain_vs_raw_c: 0.045
+  min_presealed_mae_gain_vs_a7_c: 0.008
+  min_presealed_mae_gain_vs_raw_c: 0.040
+  max_rmse_worse_vs_a7_c: 0.005
+  max_p90_worse_vs_a7_c: 0.010
+  min_month_n: 100
+  max_month_worse_vs_a7_c: 0.015
+  min_season_n: 1
+  max_season_worse_vs_a7_c: 0.010
+  min_official_max_bin_n: 150
+  max_official_max_bin_worse_vs_a7_c: 0.020
+  min_memory_ablation_gain_vs_without_memory_c: 0.006
+  max_sealed_reversal_vs_a7_c: 0.005
+

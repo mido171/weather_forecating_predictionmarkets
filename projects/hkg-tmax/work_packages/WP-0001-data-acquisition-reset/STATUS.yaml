@@ -1,0 +1,14 @@
+work_package_id: WP-0001
+title: HKG Tmax data acquisition reset
+status: IN_PROGRESS
+created_at_utc: "2026-06-19T00:00:00Z"
+scope: weather_data_acquisition_only
+polymarket: excluded
+modelling: forbidden
+daily_extract_rapid_polling: forbidden
+current_focus:
+  - close superseded polling loop
+  - initialize safe external data root
+  - implement content-addressed acquisition storage
+  - start non-market HKO acquisition
+  - generate coverage and status reports

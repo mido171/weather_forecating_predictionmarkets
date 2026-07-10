@@ -1,0 +1,14 @@
+endpoint_for_backfill: runs
+response_format: application/ndjson
+compression: gzip
+lead_time_min: 0h
+lead_time_max: 84h
+store_all_cycles: true
+raw_object_format: ndjson.gz
+normalized_point_storage: postgres
+raw_grid_storage: parquet_object
+availability_grades:
+  prospective_first_seen: A_EXACT_FIRST_SEEN
+  historical_schedule_proven: B_PROVIDER_SCHEDULE_PROVEN
+  run_time_only: C_RUN_TIME_ONLY
+  retrospective_only: D_RETROSPECTIVE_ONLY

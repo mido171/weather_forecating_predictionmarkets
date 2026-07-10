@@ -1,0 +1,91 @@
+{
+  "date_range_utc": {
+    "complete_utc_days": [
+      "2026-07-06",
+      "2026-07-07"
+    ],
+    "end_exclusive": "2026-07-08T00:00:00Z",
+    "start": "2026-07-06T00:00:00Z"
+  },
+  "elapsed_seconds": 191.24180829996476,
+  "experiment_id": "0008_last2_gfs_gefs_radar_structured_delivery_20260708",
+  "model_sources": {
+    "bbox_rows_by_source": [
+      {
+        "count": 1792,
+        "source": "gefs_control"
+      },
+      {
+        "count": 2048,
+        "source": "gfs"
+      }
+    ],
+    "fetch_ok_by_source": [
+      {
+        "count": 136,
+        "source": "gefs_control",
+        "status": "ok"
+      },
+      {
+        "count": 136,
+        "source": "gfs",
+        "status": "ok"
+      }
+    ],
+    "idx_ok_by_source": [
+      {
+        "count": 74,
+        "source": "gefs_control",
+        "status": "error"
+      },
+      {
+        "count": 62,
+        "source": "gefs_control",
+        "status": "ok"
+      },
+      {
+        "count": 71,
+        "source": "gfs",
+        "status": "error"
+      },
+      {
+        "count": 65,
+        "source": "gfs",
+        "status": "ok"
+      }
+    ],
+    "station_rows_by_source": [
+      {
+        "count": 136,
+        "source": "gefs_control"
+      },
+      {
+        "count": 136,
+        "source": "gfs"
+      }
+    ]
+  },
+  "radar": {
+    "availability_proxy_method": "observed_at_utc + 30m",
+    "cadence_minutes": 12,
+    "frame_count": 240,
+    "image_feature_ok": 240,
+    "native_issue_metadata_status": "not_native_exact_vintage",
+    "source": "HKUST ENVF HKO radar historical display"
+  },
+  "raw_retention": {
+    "experiment_staging_dir_exists_after_run": false,
+    "raw_policy": "0008 keeps no raw model or radar image payloads; radar image bytes are decoded in memory and discarded"
+  },
+  "row_counts": {
+    "attribute_catalog_last2": 163,
+    "model_bbox_features_last2": 3840,
+    "model_fetch_manifest_last2": 272,
+    "model_idx_catalog_last2": 272,
+    "model_station_features_last2": 272,
+    "radar_envf_image_features_last2": 240,
+    "radar_envf_manifest_frames_last2": 240,
+    "source_issue_glue_last2": 512
+  },
+  "source_experiment_id": "0007_public_7day_gfs_gefs_himawari_backfill_rehearsal_20260708"
+}

@@ -1,0 +1,8 @@
+sources:
+  official_forecasts: public.hko_historical_forecasts_2000_2026
+  label_core: label_core.hko_daily_tmax
+  sealed_confirmation: sealed_confirmation.hko_daily_tmax
+  target_history: feature_safe.hko_target_history_pre2024
+  hourly_readings: public.hko_info_gov_hourly_readings_1998_2026
+input_artifacts:
+  previous_results: experiments/hkg_tmax_residual_ml_strategy/results

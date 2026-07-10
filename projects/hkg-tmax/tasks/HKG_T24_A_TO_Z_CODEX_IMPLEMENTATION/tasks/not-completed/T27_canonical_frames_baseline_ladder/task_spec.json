@@ -1,0 +1,55 @@
+{
+  "id": "T27",
+  "suffix": "canonical_frames_baseline_ladder",
+  "title": "Canonical Evaluation Frames and Baseline Ladder",
+  "phase": "D Modelling",
+  "deps": [
+    "T18",
+    "T26"
+  ],
+  "mission": "Define immutable target-date frames and score all simple baselines before complex modelling.",
+  "inputs": [
+    "Target snapshots",
+    "labels under research role",
+    "split policy",
+    "official anchor",
+    "feature matrices"
+  ],
+  "steps": [
+    "Create OFFICIAL_ANCHOR_DEV 2000\u20132023 and CORE_NWP_DEV 2021-03-22\u20132023-12-31.",
+    "Create long-history target and diagnostic frames.",
+    "Score causal climatology, target-memory, official raw, official residual memory, direct GFS, direct GEFS median, simple MOS baselines and static blends.",
+    "Report identical-row MAE/RMSE/bias/tails and yearly/season slices.",
+    "Record missing-source masks and frame membership.",
+    "Register previous trustworthy champions only on comparable frames."
+  ],
+  "db_objects": [
+    "research.frame_registry",
+    "research.baseline_scores",
+    "research.predictions"
+  ],
+  "outputs": [
+    "frame_membership.csv",
+    "baseline_scoreboard.csv",
+    "slice_metrics.csv",
+    "yearly_metrics.csv",
+    "comparability_report.md"
+  ],
+  "tests": [
+    "Row identity checks",
+    "score recomputation",
+    "sealed-period exclusion",
+    "baseline prediction lineage"
+  ],
+  "acceptance": [
+    "Official raw baseline reproduced",
+    "All later tasks name a frame and baseline",
+    "No cross-frame leaderboard mixing"
+  ],
+  "failure": [
+    "Core source coverage insufficient: adjust frame transparently, never impute future data"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t27_canonical_frames_baseline_ladder.md"
+}

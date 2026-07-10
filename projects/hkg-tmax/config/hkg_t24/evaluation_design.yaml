@@ -1,0 +1,27 @@
+schema_version: 1
+generated_at_utc: '2026-06-20T10:26:20.681848Z'
+locked_test_start: '2025-01-01'
+validation_2024_budget: R01 reproduction only until R30 preregistration
+four_year_oof:
+  requirement: at least four years of OOF test data for all experiments
+  long_history:
+    status: PASS
+    available_days: 51134
+    required_days: 1461
+    available_years: 139.997
+    start_date: '1884-01-01'
+    end_date: '2023-12-31'
+    reason: 'target/daily climate development history before validation 2024: 140.00
+      years available'
+  modern_high_frequency:
+    status: BLOCKED
+    available_days: 1279
+    required_days: 1461
+    available_years: 3.502
+    start_date: '2020-07-01'
+    end_date: '2023-12-31'
+    reason: 'modern HKO high-frequency development history before validation 2024:
+      3.50 years available, requires at least 4.0 years'
+  policy: Modern high-frequency experiments are blocked under the strict four-year
+    rule unless the evaluation design is explicitly revised without using locked-test
+    data.

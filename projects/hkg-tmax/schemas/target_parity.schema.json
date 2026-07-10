@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "target_parity.schema.json",
+  "title": "Target parity record",
+  "type": "object",
+  "required": [
+    "local_date",
+    "rules_sha256",
+    "daily_extract_first_value",
+    "computed_winner",
+    "quality_state"
+  ],
+  "properties": {
+    "local_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "event_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rules_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "daily_extract_first_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "daily_extract_first_available_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "daily_extract_latest_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "clmmaxt_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "actual_winner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "computed_winner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quality_state": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,810 @@
+{
+  "event": {
+    "url": "https://polymarket.com/event/highest-temperature-in-hong-kong-on-july-6-2026",
+    "slug": "highest-temperature-in-hong-kong-on-july-6-2026",
+    "title": "Highest temperature in Hong Kong on July 6?",
+    "target_date": "2026-07-06",
+    "gamma_event_id": "664852",
+    "active": true,
+    "closed": false,
+    "archived": false
+  },
+  "forecast": {
+    "source": "HKO fnd 9-day forecast",
+    "update_time_hkt": "2026-07-06T01:05:00+08:00",
+    "target_date": "2026-07-06",
+    "forecast_min_c": 27.0,
+    "forecast_max_c": 31.0
+  },
+  "model": {
+    "method": "B4_hierarchical_residual_pmf",
+    "bucket_keys": [
+      "24_or_below",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34_or_higher"
+    ],
+    "probabilities": {
+      "24_or_below": 1.9314142902661077e-07,
+      "25": 1.9313177253454881e-07,
+      "26": 3.862616137706853e-07,
+      "27": 0.007979607653043511,
+      "28": 0.04845205269637238,
+      "29": 0.10710752596534924,
+      "30": 0.2467014542332775,
+      "31": 0.28118955469014445,
+      "32": 0.22826367229339364,
+      "33": 0.06396088919719806,
+      "34_or_higher": 0.016344470736405964
+    },
+    "train_rows": 9644,
+    "train_start": "2000-01-02",
+    "train_end": "2026-05-31",
+    "month_alpha": 20.0,
+    "cell_alpha": 10.0,
+    "alpha_selection": {
+      "selection": "inner_chronological",
+      "best_inner_rps": 0.04378404753354802,
+      "tried": [
+        {
+          "month_alpha": 2.0,
+          "cell_alpha": 2.0,
+          "inner_rps": 0.04390397532119345
+        },
+        {
+          "month_alpha": 2.0,
+          "cell_alpha": 5.0,
+          "inner_rps": 0.043813178225643554
+        },
+        {
+          "month_alpha": 2.0,
+          "cell_alpha": 10.0,
+          "inner_rps": 0.04378434992148249
+        },
+        {
+          "month_alpha": 2.0,
+          "cell_alpha": 20.0,
+          "inner_rps": 0.04379392470666518
+        },
+        {
+          "month_alpha": 2.0,
+          "cell_alpha": 40.0,
+          "inner_rps": 0.04384055595874189
+        },
+        {
+          "month_alpha": 5.0,
+          "cell_alpha": 2.0,
+          "inner_rps": 0.043904004872510546
+        },
+        {
+          "month_alpha": 5.0,
+          "cell_alpha": 5.0,
+          "inner_rps": 0.04381318445146562
+        },
+        {
+          "month_alpha": 5.0,
+          "cell_alpha": 10.0,
+          "inner_rps": 0.04378429717457589
+        },
+        {
+          "month_alpha": 5.0,
+          "cell_alpha": 20.0,
+          "inner_rps": 0.04379375987547942
+        },
+        {
+          "month_alpha": 5.0,
+          "cell_alpha": 40.0,
+          "inner_rps": 0.04384021646755135
+        },
+        {
+          "month_alpha": 10.0,
+          "cell_alpha": 2.0,
+          "inner_rps": 0.04390405377767956
+        },
+        {
+          "month_alpha": 10.0,
+          "cell_alpha": 5.0,
+          "inner_rps": 0.043813195271311244
+        },
+        {
+          "month_alpha": 10.0,
+          "cell_alpha": 10.0,
+          "inner_rps": 0.04378421139446724
+        },
+        {
+          "month_alpha": 10.0,
+          "cell_alpha": 20.0,
+          "inner_rps": 0.04379349050460411
+        },
+        {
+          "month_alpha": 10.0,
+          "cell_alpha": 40.0,
+          "inner_rps": 0.04383966126482409
+        },
+        {
+          "month_alpha": 20.0,
+          "cell_alpha": 2.0,
+          "inner_rps": 0.043904150301829474
+        },
+        {
+          "month_alpha": 20.0,
+          "cell_alpha": 5.0,
+          "inner_rps": 0.043813218486201476
+        },
+        {
+          "month_alpha": 20.0,
+          "cell_alpha": 10.0,
+          "inner_rps": 0.04378404753354802
+        },
+        {
+          "month_alpha": 20.0,
+          "cell_alpha": 20.0,
+          "inner_rps": 0.04379297113128054
+        },
+        {
+          "month_alpha": 20.0,
+          "cell_alpha": 40.0,
+          "inner_rps": 0.0438385893272914
+        }
+      ]
+    },
+    "row_audit": {
+      "targets_loaded": 9648,
+      "strict_forecasts_loaded": 88504,
+      "eligible_revision_rows": 165380,
+      "selected_forecast_rows": 26407,
+      "modeling_rows": 26407,
+      "primary_modeling_rows": 9644,
+      "bucket_rule_examples": {
+        "24.9": "24_or_below",
+        "25.0": "25",
+        "31.9": "31",
+        "32.0": "32",
+        "34.0": "34_or_higher"
+      },
+      "rows_by_split": [
+        {
+          "split_label": "fold1_validation",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 984
+        },
+        {
+          "split_label": "fold1_validation",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 991
+        },
+        {
+          "split_label": "fold1_validation",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 1096
+        },
+        {
+          "split_label": "fold2_validation",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 967
+        },
+        {
+          "split_label": "fold2_validation",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 977
+        },
+        {
+          "split_label": "fold2_validation",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 1095
+        },
+        {
+          "split_label": "fold3_validation",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 994
+        },
+        {
+          "split_label": "fold3_validation",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 1007
+        },
+        {
+          "split_label": "fold3_validation",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 1095
+        },
+        {
+          "split_label": "fold4_validation",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 678
+        },
+        {
+          "split_label": "fold4_validation",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 679
+        },
+        {
+          "split_label": "fold4_validation",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 731
+        },
+        {
+          "split_label": "presealed_holdout",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 663
+        },
+        {
+          "split_label": "presealed_holdout",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 667
+        },
+        {
+          "split_label": "presealed_holdout",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 730
+        },
+        {
+          "split_label": "sealed_confirmation",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 764
+        },
+        {
+          "split_label": "sealed_confirmation",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 767
+        },
+        {
+          "split_label": "sealed_confirmation",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 882
+        },
+        {
+          "split_label": "training_pool",
+          "cutoff_profile": "t_minus_1_1800_hkt",
+          "rows": 3285
+        },
+        {
+          "split_label": "training_pool",
+          "cutoff_profile": "t_minus_1_2100_hkt",
+          "rows": 3340
+        },
+        {
+          "split_label": "training_pool",
+          "cutoff_profile": "t_minus_1_2359_hkt",
+          "rows": 4015
+        }
+      ],
+      "bucket_keys": [
+        "24_or_below",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34_or_higher"
+      ]
+    }
+  },
+  "market_rows": [
+    {
+      "bucket": "24_or_below",
+      "label": "24\u00b0C or below",
+      "market_id": "2791312",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-24corbelow",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 2646.5449999999996,
+      "liquidity": 6789.70172,
+      "model_yes_pct": 1.9314142902661077e-05,
+      "model_no_pct": 99.9999806858571,
+      "market_buy_yes_c": 0.1,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 100.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -0.09998068585709735,
+      "no_edge_pp": -1.9314142903681386e-05,
+      "yes_roi_on_cost_pct": -99.98068585709734,
+      "no_roi_on_cost_pct": -1.9314142903681386e-05
+    },
+    {
+      "bucket": "25",
+      "label": "25\u00b0C",
+      "market_id": "2791313",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-25c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 2926.4719270000005,
+      "liquidity": 7732.92248,
+      "model_yes_pct": 1.931317725345488e-05,
+      "model_no_pct": 99.99998068682274,
+      "market_buy_yes_c": 0.1,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 100.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -0.09998068682274655,
+      "no_edge_pp": -1.9313177261892633e-05,
+      "yes_roi_on_cost_pct": -99.98068682274653,
+      "no_roi_on_cost_pct": -1.9313177261892633e-05
+    },
+    {
+      "bucket": "26",
+      "label": "26\u00b0C",
+      "market_id": "2791314",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-26c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 3212.230414,
+      "liquidity": 7893.06115,
+      "model_yes_pct": 3.8626161377068534e-05,
+      "model_no_pct": 99.99996137383862,
+      "market_buy_yes_c": 0.1,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 100.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -0.09996137383862294,
+      "no_edge_pp": -3.862616138405883e-05,
+      "yes_roi_on_cost_pct": -99.96137383862293,
+      "no_roi_on_cost_pct": -3.862616138405883e-05
+    },
+    {
+      "bucket": "27",
+      "label": "27\u00b0C",
+      "market_id": "2791315",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-27c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 3732.335634,
+      "liquidity": 5588.78679,
+      "model_yes_pct": 0.7979607653043511,
+      "model_no_pct": 99.20203923469565,
+      "market_buy_yes_c": 0.2,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 100.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": 0.597960765304351,
+      "no_edge_pp": -0.797960765304353,
+      "yes_roi_on_cost_pct": 298.9803826521755,
+      "no_roi_on_cost_pct": -0.797960765304353
+    },
+    {
+      "bucket": "28",
+      "label": "28\u00b0C",
+      "market_id": "2791316",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-28c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 10114.969431999998,
+      "liquidity": 7977.89771,
+      "model_yes_pct": 4.845205269637238,
+      "model_no_pct": 95.15479473036275,
+      "market_buy_yes_c": 0.3,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 100.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": 4.545205269637238,
+      "no_edge_pp": -4.845205269637248,
+      "yes_roi_on_cost_pct": 1515.0684232124127,
+      "no_roi_on_cost_pct": -4.845205269637248
+    },
+    {
+      "bucket": "29",
+      "label": "29\u00b0C",
+      "market_id": "2791317",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-29c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 6326.145386,
+      "liquidity": 1967.84376,
+      "model_yes_pct": 10.710752596534924,
+      "model_no_pct": 89.28924740346508,
+      "market_buy_yes_c": 1.9,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 99.4,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": 8.810752596534924,
+      "no_edge_pp": -10.110752596534923,
+      "yes_roi_on_cost_pct": 463.72382087025915,
+      "no_roi_on_cost_pct": -10.171783296312798
+    },
+    {
+      "bucket": "30",
+      "label": "30\u00b0C",
+      "market_id": "2791318",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-30c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 6083.859341,
+      "liquidity": 1891.6465,
+      "model_yes_pct": 24.67014542332775,
+      "model_no_pct": 75.32985457667225,
+      "market_buy_yes_c": 14.0,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 89.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": 10.67014542332775,
+      "no_edge_pp": -13.670145423327753,
+      "yes_roi_on_cost_pct": 76.21532445234106,
+      "no_roi_on_cost_pct": -15.35971395879523
+    },
+    {
+      "bucket": "31",
+      "label": "31\u00b0C",
+      "market_id": "2791319",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-31c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 3360.952351000001,
+      "liquidity": 2536.2597,
+      "model_yes_pct": 28.118955469014445,
+      "model_no_pct": 71.88104453098556,
+      "market_buy_yes_c": 35.0,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 66.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -6.881044530985555,
+      "no_edge_pp": 5.881044530985562,
+      "yes_roi_on_cost_pct": -19.6601272313873,
+      "no_roi_on_cost_pct": 8.910673531796306
+    },
+    {
+      "bucket": "32",
+      "label": "32\u00b0C",
+      "market_id": "2791320",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-32c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 7087.694429999998,
+      "liquidity": 2420.7751,
+      "model_yes_pct": 22.826367229339365,
+      "model_no_pct": 77.17363277066063,
+      "market_buy_yes_c": 44.0,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 58.0,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -21.173632770660635,
+      "no_edge_pp": 19.17363277066063,
+      "yes_roi_on_cost_pct": -48.12189266059235,
+      "no_roi_on_cost_pct": 33.05798753562178
+    },
+    {
+      "bucket": "33",
+      "label": "33\u00b0C",
+      "market_id": "2791321",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-33c",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 5225.009144000002,
+      "liquidity": 2111.12473,
+      "model_yes_pct": 6.396088919719806,
+      "model_no_pct": 93.60391108028018,
+      "market_buy_yes_c": 12.9,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 88.8,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -6.5039110802801945,
+      "no_edge_pp": 4.803911080280187,
+      "yes_roi_on_cost_pct": -50.417915351009256,
+      "no_roi_on_cost_pct": 5.409809775090301
+    },
+    {
+      "bucket": "34_or_higher",
+      "label": "34\u00b0C or higher",
+      "market_id": "2791322",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-34corhigher",
+      "active": true,
+      "closed": false,
+      "accepting_orders": true,
+      "volume": 9357.597144999996,
+      "liquidity": 1444.09423,
+      "model_yes_pct": 1.6344470736405965,
+      "model_no_pct": 98.3655529263594,
+      "market_buy_yes_c": 2.2,
+      "market_buy_yes_source": "clob_ask",
+      "market_buy_no_c": 98.3,
+      "market_buy_no_source": "clob_ask",
+      "yes_edge_pp": -0.5655529263594037,
+      "no_edge_pp": 0.06555292635940191,
+      "yes_roi_on_cost_pct": -25.706951198154712,
+      "no_roi_on_cost_pct": 0.0666865985344882
+    }
+  ],
+  "edges": [
+    {
+      "side": "Buy No",
+      "bucket": "32",
+      "label": "32\u00b0C",
+      "market_price_c": 58.0,
+      "model_fair_c": 77.17363277066063,
+      "edge_pp": 19.17363277066063,
+      "roi_on_cost_pct": 33.05798753562178,
+      "classification": "ELITE",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-32c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "30",
+      "label": "30\u00b0C",
+      "market_price_c": 14.0,
+      "model_fair_c": 24.67014542332775,
+      "edge_pp": 10.67014542332775,
+      "roi_on_cost_pct": 76.21532445234106,
+      "classification": "very good",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-30c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "29",
+      "label": "29\u00b0C",
+      "market_price_c": 1.9,
+      "model_fair_c": 10.710752596534924,
+      "edge_pp": 8.810752596534924,
+      "roi_on_cost_pct": 463.72382087025915,
+      "classification": "very good",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-29c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "31",
+      "label": "31\u00b0C",
+      "market_price_c": 66.0,
+      "model_fair_c": 71.88104453098556,
+      "edge_pp": 5.881044530985562,
+      "roi_on_cost_pct": 8.910673531796306,
+      "classification": "good",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-31c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "33",
+      "label": "33\u00b0C",
+      "market_price_c": 88.8,
+      "model_fair_c": 93.60391108028018,
+      "edge_pp": 4.803911080280187,
+      "roi_on_cost_pct": 5.409809775090301,
+      "classification": "normal",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-33c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "28",
+      "label": "28\u00b0C",
+      "market_price_c": 0.3,
+      "model_fair_c": 4.845205269637238,
+      "edge_pp": 4.545205269637238,
+      "roi_on_cost_pct": 1515.0684232124127,
+      "classification": "normal",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-28c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "27",
+      "label": "27\u00b0C",
+      "market_price_c": 0.2,
+      "model_fair_c": 0.7979607653043511,
+      "edge_pp": 0.597960765304351,
+      "roi_on_cost_pct": 298.9803826521755,
+      "classification": "normal",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-27c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "34_or_higher",
+      "label": "34\u00b0C or higher",
+      "market_price_c": 98.3,
+      "model_fair_c": 98.3655529263594,
+      "edge_pp": 0.06555292635940191,
+      "roi_on_cost_pct": 0.0666865985344882,
+      "classification": "normal",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-34corhigher"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "25",
+      "label": "25\u00b0C",
+      "market_price_c": 100.0,
+      "model_fair_c": 99.99998068682274,
+      "edge_pp": -1.9313177261892633e-05,
+      "roi_on_cost_pct": -1.9313177261892633e-05,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-25c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "24_or_below",
+      "label": "24\u00b0C or below",
+      "market_price_c": 100.0,
+      "model_fair_c": 99.9999806858571,
+      "edge_pp": -1.9314142903681386e-05,
+      "roi_on_cost_pct": -1.9314142903681386e-05,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-24corbelow"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "26",
+      "label": "26\u00b0C",
+      "market_price_c": 100.0,
+      "model_fair_c": 99.99996137383862,
+      "edge_pp": -3.862616138405883e-05,
+      "roi_on_cost_pct": -3.862616138405883e-05,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-26c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "26",
+      "label": "26\u00b0C",
+      "market_price_c": 0.1,
+      "model_fair_c": 3.8626161377068534e-05,
+      "edge_pp": -0.09996137383862294,
+      "roi_on_cost_pct": -99.96137383862293,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-26c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "24_or_below",
+      "label": "24\u00b0C or below",
+      "market_price_c": 0.1,
+      "model_fair_c": 1.9314142902661077e-05,
+      "edge_pp": -0.09998068585709735,
+      "roi_on_cost_pct": -99.98068585709734,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-24corbelow"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "25",
+      "label": "25\u00b0C",
+      "market_price_c": 0.1,
+      "model_fair_c": 1.931317725345488e-05,
+      "edge_pp": -0.09998068682274655,
+      "roi_on_cost_pct": -99.98068682274653,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-25c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "34_or_higher",
+      "label": "34\u00b0C or higher",
+      "market_price_c": 2.2,
+      "model_fair_c": 1.6344470736405965,
+      "edge_pp": -0.5655529263594037,
+      "roi_on_cost_pct": -25.706951198154712,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-34corhigher"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "27",
+      "label": "27\u00b0C",
+      "market_price_c": 100.0,
+      "model_fair_c": 99.20203923469565,
+      "edge_pp": -0.797960765304353,
+      "roi_on_cost_pct": -0.797960765304353,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-27c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "28",
+      "label": "28\u00b0C",
+      "market_price_c": 100.0,
+      "model_fair_c": 95.15479473036275,
+      "edge_pp": -4.845205269637248,
+      "roi_on_cost_pct": -4.845205269637248,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-28c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "33",
+      "label": "33\u00b0C",
+      "market_price_c": 12.9,
+      "model_fair_c": 6.396088919719806,
+      "edge_pp": -6.5039110802801945,
+      "roi_on_cost_pct": -50.417915351009256,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-33c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "31",
+      "label": "31\u00b0C",
+      "market_price_c": 35.0,
+      "model_fair_c": 28.118955469014445,
+      "edge_pp": -6.881044530985555,
+      "roi_on_cost_pct": -19.6601272313873,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-31c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "29",
+      "label": "29\u00b0C",
+      "market_price_c": 99.4,
+      "model_fair_c": 89.28924740346508,
+      "edge_pp": -10.110752596534923,
+      "roi_on_cost_pct": -10.171783296312798,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-29c"
+    },
+    {
+      "side": "Buy No",
+      "bucket": "30",
+      "label": "30\u00b0C",
+      "market_price_c": 89.0,
+      "model_fair_c": 75.32985457667225,
+      "edge_pp": -13.670145423327753,
+      "roi_on_cost_pct": -15.35971395879523,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-30c"
+    },
+    {
+      "side": "Buy Yes",
+      "bucket": "32",
+      "label": "32\u00b0C",
+      "market_price_c": 44.0,
+      "model_fair_c": 22.826367229339365,
+      "edge_pp": -21.173632770660635,
+      "roi_on_cost_pct": -48.12189266059235,
+      "classification": "bad",
+      "price_source": "clob_ask",
+      "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-32c"
+    }
+  ],
+  "best_edge": {
+    "side": "Buy No",
+    "bucket": "32",
+    "label": "32\u00b0C",
+    "market_price_c": 58.0,
+    "model_fair_c": 77.17363277066063,
+    "edge_pp": 19.17363277066063,
+    "roi_on_cost_pct": 33.05798753562178,
+    "classification": "ELITE",
+    "price_source": "clob_ask",
+    "market_slug": "highest-temperature-in-hong-kong-on-july-6-2026-32c"
+  },
+  "rules": {
+    "rounding": "one-decimal Decimal-safe HKO Daily Extract target; 31.9C is bucket 31; 32.0C is bucket 32; 34.0C+ is 34_or_higher",
+    "price_source": "CLOB token ask via /price?side=SELL; Gamma outcomePrices only fallback",
+    "scope": "analysis_only_no_orders"
+  }
+}

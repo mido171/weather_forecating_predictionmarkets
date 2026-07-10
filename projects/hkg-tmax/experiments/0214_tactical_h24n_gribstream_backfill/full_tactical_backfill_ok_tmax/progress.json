@@ -1,0 +1,111 @@
+{
+  "api_event_log": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/experiments/0214_tactical_h24n_gribstream_backfill/logs/gribstream_full_tactical_backfill_ok_tmax_api_events.jsonl",
+  "completed_chunks": 1163,
+  "database": "postgresql://***:***@127.0.0.1:5432/hkg_tmax_research",
+  "days_requested": 10000,
+  "db_summary": {
+    "chunk_status": {
+      "completed": 1153,
+      "completed_empty": 2,
+      "failed": 8
+    },
+    "forecast_wide_rows_by_dataset": [
+      {
+        "dataset": "aifsenfo",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2025-07-02 20:00:00+02",
+        "rows": 72270
+      },
+      {
+        "dataset": "aifsoper",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2025-02-25 19:00:00+01",
+        "rows": 28884
+      },
+      {
+        "dataset": "aigefssfc",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2025-06-01 20:00:00+02",
+        "rows": 46252
+      },
+      {
+        "dataset": "aigfspres",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2026-04-21 20:00:00+02",
+        "rows": 3660
+      },
+      {
+        "dataset": "aigfssfc",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2026-04-21 20:00:00+02",
+        "rows": 3660
+      },
+      {
+        "dataset": "cwawrf15",
+        "max_run_time": "2026-06-24 20:00:00+02",
+        "min_run_time": "2026-06-22 20:00:00+02",
+        "rows": 180
+      },
+      {
+        "dataset": "fourcastnetgfs",
+        "max_run_time": "2026-02-18 19:00:00+01",
+        "min_run_time": "2024-05-02 20:00:00+02",
+        "rows": 37824
+      },
+      {
+        "dataset": "gefsatmos",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2020-10-01 20:00:00+02",
+        "rows": 517824
+      },
+      {
+        "dataset": "gefsatmosmean",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2020-10-01 20:00:00+02",
+        "rows": 200436
+      },
+      {
+        "dataset": "gfs",
+        "max_run_time": "2026-06-22 02:00:00+02",
+        "min_run_time": "2021-03-23 01:00:00+01",
+        "rows": 575004
+      },
+      {
+        "dataset": "graphcast",
+        "max_run_time": "2026-05-04 20:00:00+02",
+        "min_run_time": "2024-04-25 20:00:00+02",
+        "rows": 44220
+      },
+      {
+        "dataset": "ifsenfo",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2024-03-01 19:00:00+01",
+        "rows": 343616
+      },
+      {
+        "dataset": "ifsoper",
+        "max_run_time": "2026-06-21 20:00:00+02",
+        "min_run_time": "2024-02-28 19:00:00+01",
+        "rows": 91260
+      }
+    ],
+    "raw_response_objects": 1258
+  },
+  "estimated_credits_consumed": 1889276,
+  "expected_credits": 1895063,
+  "forecast_wide_rows_upserted": 1964157,
+  "output_name": "full_tactical_backfill_ok_tmax",
+  "planned_chunks": 1163,
+  "progress_json": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/progress.json",
+  "raw_root": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/data/_pipeline_internal/raw/gribstream_tactical_full_tactical_backfill_ok_tmax",
+  "results_csv": "C:/Users/ahmad/Desktop/generalFiles/git/weather_markets/weather_data_extraction/bootstrap/hkg_tmax_elite_codex_bootstrap/hkg_tmax_elite_codex/experiments/0214_tactical_h24n_gribstream_backfill/full_tactical_backfill_ok_tmax/batch_results.csv",
+  "rows_returned": 1964157,
+  "status": "failed",
+  "status_counts": {
+    "completed": 1153,
+    "completed_empty": 2,
+    "failed": 8
+  },
+  "total_wall_seconds": 15388.761,
+  "updated_at_utc": "2026-06-25T17:31:17Z"
+}

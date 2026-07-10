@@ -1,0 +1,521 @@
+ .env.example                                       |    4 +
+ .gitignore                                         |   12 +
+ AGENTS.md                                          |   41 +
+ CHANGELOG.md                                       |   55 +
+ Dockerfile                                         |    4 +-
+ MILESTONES.md                                      | 1815 +++++++++++++-
+ Makefile                                           |   12 +-
+ README.md                                          |   14 +-
+ code/src/hkg_t24/cli.py                            |  419 ++++
+ code/src/hkg_t24/constants.py                      |  243 +-
+ code/src/hkg_t24/db/ddl.py                         |  283 +++
+ code/src/hkg_t24/features/snapshot_builder.py      |   45 +-
+ code/tests/hkg_t24/test_schema_sql_contract.py     |   22 +
+ .../hkg_t24/test_snapshot_builder_synthetic.py     |   32 +-
+ compose.yaml                                       |   35 +
+ config/collector_schedules.yaml                    |  184 +-
+ config/data_source_catalog.yaml                    |  167 +-
+ config/data_sources.yaml                           |  112 +
+ data/README.md                                     |   35 +-
+ docs/PROJECT_STRUCTURE_AND_CODE_MAP.md             |  118 +-
+ .../CITATIONS_AND_VERIFICATION.md                  |    6 +-
+ .../GRIBSTREAM_FETCHED_DATA_INVENTORY_20260626.md  |  498 ----
+ ...AM_LEAKAGE_SAFE_DB_RETRIEVAL_LEDGER_20260626.md |  936 --------
+ .../context/HKG_T24_001_FOUNDATION_DEEP_DIVE.md    |  608 -----
+ .../context/HKG_T24_001_SOURCE_SAFETY_AUDIT.md     |  746 ------
+ .../context/HKG_T24_001_VERIFICATION_GUIDE.md      |  703 ------
+ ...POSTGRES_STRATEGY_DATASET_INVENTORY_20260626.md | 2529 --------------------
+ experiments/AGENTS.md                              |   14 -
+ .../ASOF_CONTRACT.md                               |   56 -
+ .../CONCLUSION.md                                  |   86 -
+ .../DATA_MANIFEST.yaml                             |  194 --
+ .../HYPOTHESIS.md                                  |   47 -
+ .../PROTOCOL.md                                    |   84 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   68 -
+ .../RESULTS.md                                     |  109 -
+ .../RUN_CONFIG.yaml                                |   53 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |   29 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   77 -
+ .../DATA_MANIFEST.yaml                             |   82 -
+ .../HYPOTHESIS.md                                  |   58 -
+ .../PROTOCOL.md                                    |  125 -
+ .../README.md                                      |   43 -
+ .../REPRODUCE.md                                   |   49 -
+ .../RESULTS.md                                     |   88 -
+ .../RUN_CONFIG.yaml                                |   49 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |   25 -
+ .../ASOF_CONTRACT.md                               |   45 -
+ .../CONCLUSION.md                                  |   55 -
+ .../DATA_MANIFEST.yaml                             |   34 -
+ .../HYPOTHESIS.md                                  |   52 -
+ .../PROTOCOL.md                                    |   73 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   40 -
+ .../RESULTS.md                                     |   57 -
+ .../RUN_CONFIG.yaml                                |   32 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |   22 -
+ .../ASOF_CONTRACT.md                               |   14 -
+ .../CONCLUSION.md                                  |   43 -
+ .../DATA_MANIFEST.yaml                             |   20 -
+ .../HYPOTHESIS.md                                  |   40 -
+ .../PROTOCOL.md                                    |   32 -
+ .../README.md                                      |   31 -
+ .../REPRODUCE.md                                   |   24 -
+ .../RESULTS.md                                     |   36 -
+ .../RUN_CONFIG.yaml                                |   24 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |   26 -
+ .../ASOF_CONTRACT.md                               |   37 -
+ .../CONCLUSION.md                                  |   38 -
+ .../DATA_MANIFEST.yaml                             |   30 -
+ .../HYPOTHESIS.md                                  |   39 -
+ .../PROTOCOL.md                                    |   64 -
+ .../README.md                                      |   43 -
+ .../REPRODUCE.md                                   |   24 -
+ .../RESULTS.md                                     |   40 -
+ .../RUN_CONFIG.yaml                                |   29 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |   33 -
+ .../ASOF_CONTRACT.md                               |   38 -
+ .../CONCLUSION.md                                  |   36 -
+ .../DATA_MANIFEST.yaml                             |   40 -
+ .../HYPOTHESIS.md                                  |   33 -
+ .../PROTOCOL.md                                    |   55 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   16 -
+ .../RESULTS.md                                     |   52 -
+ .../RUN_CONFIG.yaml                                |   31 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   27 -
+ .../CONCLUSION.md                                  |   34 -
+ .../DATA_MANIFEST.yaml                             |   35 -
+ .../HYPOTHESIS.md                                  |   31 -
+ .../PROTOCOL.md                                    |   52 -
+ .../README.md                                      |   41 -
+ .../REPRODUCE.md                                   |   16 -
+ .../RESULTS.md                                     |   38 -
+ .../RUN_CONFIG.yaml                                |   26 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   69 -
+ .../DATA_MANIFEST.yaml                             |   39 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   75 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   47 -
+ .../RUN_CONFIG.yaml                                |   37 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   69 -
+ .../DATA_MANIFEST.yaml                             |   39 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   75 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   47 -
+ .../RUN_CONFIG.yaml                                |   37 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   69 -
+ .../DATA_MANIFEST.yaml                             |   39 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   75 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   47 -
+ .../RUN_CONFIG.yaml                                |   37 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   69 -
+ .../DATA_MANIFEST.yaml                             |   39 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   75 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   47 -
+ .../RUN_CONFIG.yaml                                |   37 -
+ .../STATUS.yaml                                    |   32 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   64 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   80 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   64 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   64 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   80 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   59 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   64 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   80 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   59 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   64 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   80 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   59 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   48 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   80 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   64 -
+ .../CONCLUSION.md                                  |   65 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   62 -
+ .../CONCLUSION.md                                  |   67 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   62 -
+ .../CONCLUSION.md                                  |   67 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   62 -
+ .../CONCLUSION.md                                  |   67 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   62 -
+ .../CONCLUSION.md                                  |   67 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   62 -
+ .../CONCLUSION.md                                  |   67 -
+ .../DATA_MANIFEST.yaml                             |   57 -
+ .../HYPOTHESIS.md                                  |   48 -
+ .../PROTOCOL.md                                    |   91 -
+ .../README.md                                      |   42 -
+ .../REPRODUCE.md                                   |   58 -
+ .../RESULTS.md                                     |   55 -
+ .../RUN_CONFIG.yaml                                |   43 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   57 -
+ .../CONCLUSION.md                                  |   69 -
+ .../DATA_MANIFEST.yaml                             |   98 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   81 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   48 -
+ .../RESULTS.md                                     |   49 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   57 -
+ .../CONCLUSION.md                                  |   70 -
+ .../DATA_MANIFEST.yaml                             |   98 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   81 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   48 -
+ .../RESULTS.md                                     |   56 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   57 -
+ .../CONCLUSION.md                                  |   70 -
+ .../DATA_MANIFEST.yaml                             |   98 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   81 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   48 -
+ .../RESULTS.md                                     |   56 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |   57 -
+ .../CONCLUSION.md                                  |   70 -
+ .../DATA_MANIFEST.yaml                             |   99 -
+ .../HYPOTHESIS.md                                  |   45 -
+ .../PROTOCOL.md                                    |   81 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   48 -
+ .../RESULTS.md                                     |   56 -
+ .../RUN_CONFIG.yaml                                |   44 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ .../ASOF_CONTRACT.md                               |    8 -
+ .../CONCLUSION.md                                  |   26 -
+ .../DATA_MANIFEST.yaml                             |   56 -
+ .../HYPOTHESIS.md                                  |    8 -
+ .../PROTOCOL.md                                    |   13 -
+ .../README.md                                      |   44 -
+ .../REPRODUCE.md                                   |   12 -
+ .../RESULTS.md                                     |   23 -
+ .../RUN_CONFIG.yaml                                |   12 -
+ .../STATUS.yaml                                    |   30 -
+ .../artifacts/.gitkeep                             |    0
+ .../logs/.gitkeep                                  |    0
+ .../results/metrics.json                           |  116 -
+ experiments/_template/ASOF_CONTRACT.md             |   39 -
+ experiments/_template/CONCLUSION.md                |   47 -
+ experiments/_template/DATA_MANIFEST.yaml           |   30 -
+ experiments/_template/HYPOTHESIS.md                |   31 -
+ experiments/_template/PROTOCOL.md                  |   69 -
+ experiments/_template/README.md                    |   34 -
+ experiments/_template/REPRODUCE.md                 |   41 -
+ experiments/_template/RESULTS.md                   |   49 -
+ experiments/_template/RUN_CONFIG.yaml              |   35 -
+ experiments/_template/STATUS.yaml                  |   30 -
+ experiments/_template/artifacts/.gitkeep           |    0
+ experiments/_template/logs/.gitkeep                |    0
+ experiments/_template/results/metrics.json         |    9 -
+ experiments/registry.yaml                          |  166 --
+ metadata/source_catalog.csv                        |   11 +-
+ metadata/source_catalog.parquet                    |  Bin 23260 -> 25470 bytes
+ pyproject.toml                                     |    7 +
+ reports/acquisition_remaining_blockers.md          |    6 +-
+ reports/data_coverage.md                           |   90 +-
+ reports/data_inventory.md                          |   23 +-
+ reports/jira_001_contract_coverage.md              |   20 +-
+ reports/live_collector_health.md                   |   51 +-
+ reports/schema_and_quality.md                      |    2 +-
+ reports/source_blockers.md                         |   11 +-
+ reports/source_inventory.md                        |   14 +-
+ reports/storage_and_volume.md                      |    5 +-
+ requirements.txt                                   |    8 +
+ scripts/install_windows_collectors.ps1             |    3 +-
+ scripts/start_collectors.ps1                       |    3 +
+ src/hkg_tmax/__init__.py                           |   14 -
+ src/hkg_tmax/__main__.py                           |    4 -
+ src/hkg_tmax/acquisition.py                        |  516 ----
+ src/hkg_tmax/asof.py                               |   82 -
+ src/hkg_tmax/bronze.py                             |  232 --
+ src/hkg_tmax/cli.py                                |  430 ----
+ src/hkg_tmax/collector.py                          |  497 ----
+ src/hkg_tmax/config.py                             |  141 --
+ src/hkg_tmax/distribution.py                       |   82 -
+ src/hkg_tmax/doctor.py                             |   42 -
+ src/hkg_tmax/experiments.py                        |  199 --
+ src/hkg_tmax/fetch.py                              |  155 --
+ src/hkg_tmax/hashing.py                            |   36 -
+ src/hkg_tmax/hko.py                                |  256 --
+ src/hkg_tmax/hko_backfill.py                       | 2162 -----------------
+ src/hkg_tmax/manifest.py                           |   58 -
+ src/hkg_tmax/market.py                             |   32 -
+ src/hkg_tmax/metrics.py                            |   96 -
+ src/hkg_tmax/milestones.py                         |  164 --
+ src/hkg_tmax/publication.py                        |  352 ---
+ src/hkg_tmax/settlement.py                         |  169 --
+ src/hkg_tmax/sources.py                            |  117 -
+ src/hkg_tmax/statistics.py                         |   90 -
+ src/hkg_tmax/storage.py                            |  111 -
+ src/hkg_tmax/target.py                             |   83 -
+ src/hkg_tmax/timeutils.py                          |   73 -
+ src/hkg_tmax/validation.py                         |  179 --
+ tests/conftest.py                                  |    8 -
+ tests/test_acquisition.py                          |  112 -
+ tests/test_asof.py                                 |   48 -
+ tests/test_bronze.py                               |   50 -
+ tests/test_config_and_sources.py                   |   29 -
+ tests/test_distribution.py                         |   22 -
+ tests/test_experiments.py                          |   30 -
+ tests/test_fetch.py                                |  136 --
+ tests/test_hko.py                                  |   69 -
+ tests/test_hko_backfill.py                         |  169 --
+ tests/test_manifest.py                             |   12 -
+ tests/test_market.py                               |   31 -
+ tests/test_metrics.py                              |   38 -
+ tests/test_publication.py                          |  227 --
+ tests/test_settlement.py                           |   40 -
+ tests/test_statistics.py                           |   13 -
+ tests/test_storage.py                              |   50 -
+ tests/test_target.py                               |  103 -
+ tests/test_timeutils.py                            |   35 -
+ tests/test_validation.py                           |   38 -
+ 520 files changed, 3651 insertions(+), 34260 deletions(-)

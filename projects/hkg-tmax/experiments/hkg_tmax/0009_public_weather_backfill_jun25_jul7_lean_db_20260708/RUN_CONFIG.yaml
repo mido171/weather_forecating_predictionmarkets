@@ -1,0 +1,11 @@
+experiment_id: 0009_public_weather_backfill_jun25_jul7_lean_db_20260708
+run_id: 0009_public_weather_backfill_jun25_jul7_lean_db_20260708_20260708T143234Z
+start_date: 2026-07-07
+end_date: 2026-07-07
+sources: ['gefs_control', 'gfs', 'himawari_b13_s0510', 'radar']
+cycles: [0]
+leads: [30]
+max_staging_gb: 4.0
+stop_free_gb: 50.0
+retain_failed_raw: False
+dry_run: False

@@ -1,0 +1,17 @@
+forbidden_field_or_family,reason
+target_tmax_c for current T,Current outcome
+official_residual_c for current T,Derived from current outcome
+official_abs_error_c for current T,Derived from current outcome
+official_underforecast_c,Derived from current outcome
+official_overforecast_c,Derived from current outcome
+hot_day_underforecast_flag,Uses current outcome/error
+cold_day_overforecast_flag,Uses current outcome/error
+candidate_error_c for current T,Current outcome
+target-day finalized climate,Not known at T-1 cutoff
+target-day station observations,Target day has not occurred at T-24
+later forecast revision,Published after decision cutoff
+full-history normalization,Uses future rows
+retrospective TC best track as predictor,Post-analysis
+unclean IGRA sentinel-derived fields,Corrupted
+ISD wind direction before parser repair,Constant 20-degree defect
+2024+ target outcomes,Sealed confirmation

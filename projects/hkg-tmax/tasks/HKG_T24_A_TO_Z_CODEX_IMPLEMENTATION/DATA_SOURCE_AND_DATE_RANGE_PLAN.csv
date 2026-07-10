@@ -1,0 +1,25 @@
+source_group,source,acquire_from,acquire_to,role,caveat
+existing,HKO target Tmax,1884-01-01,current,label + causally available memory,canonical labels; T forbidden as input
+existing,HKO daily climate 21 variables,1884-01-01,current,diagnostic teacher,publication timing unproven
+existing,IGRA HKM00045004,1949-06-01,current,diagnostic physics teacher,clean sentinels; release latency unproven
+existing,ISD regional 36 stations,1945-11-30,2025-08-24,research proxy / live station design,repair wind and metadata; historical availability unproven
+existing,Official HKO local forecasts,2000-01-01 issue,2026-06-20 issue,"primary anchor, revision, text, residual","115,795 usable rows; verify timezone"
+existing,HKO TC best track,1985,2024,diagnostic labels,retrospective only
+existing,Radar/satellite/lightning/nowcast,short 2026 history,current,prospective cloud/rain layer,collect exact-vintage
+existing,Marine/tide/coastal,short 2026 history,current,prospective marine context,collect exact-vintage
+existing,HKO ARWF,current/very short,current,prospective local NWP anchor,archive every issue
+existing,NCEP GRIB inventory,inventory only,current,object catalog,decode/repair cycle metadata
+existing,Static geospatial,static,current,station context,derive reproducibly
+existing,Experiment outputs,pre-2024 OOF and analyses,2023,research evidence only,never canonical live feature source
+gribstream,GEFS atmospheric members,2020-10-01,current,core ensemble expert,all 31 members at selected locations
+gribstream,GEFS atmospheric mean,2020-10-01,current,core broad spatial ensemble mean,local and synoptic domains
+gribstream,GFS,2021-03-22,current,core deterministic expert,"all cycles, exact run metadata"
+gribstream,IFS operational,2024-02-28,current,short-history challenger,ECMWF attribution required
+gribstream,IFS ensemble,2024-03-01,current,short-history ensemble challenger,member subset/full as quota permits
+gribstream,GraphCast historical,2024-04-25,2026-05-05,AI diversity challenger,historical archive
+gribstream,FourCastNetGFS historical,2024-05-02,2026-03-01,AI diversity challenger,historical archive
+gribstream,AIFS operational,2025-02-25,current,AI challenger,strong shrinkage
+gribstream,AIGEFS surface/pressure,2025-06-01,current,AI ensemble challenger,31 members
+gribstream,AIFS ensemble,2025-07-02,current,AI ensemble challenger,very short history
+gribstream,AIGFS surface/pressure,2026-04-16,current,shadow collector,too short for promotion
+gribstream,CWA WRF 15 km,rolling last 3 days,current,prospective regional expert,poll immediately and continuously

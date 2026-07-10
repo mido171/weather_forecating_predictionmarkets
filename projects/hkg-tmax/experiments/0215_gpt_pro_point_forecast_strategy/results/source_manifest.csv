@@ -1,0 +1,5 @@
+source_id,location,rows,first_date,last_date,null_or_unusable_percent,source_role
+target_history,feature_safe.hko_target_history_pre2024,8765,2000-01-02,2023-12-31,0.0,official target labels for daily absolute maximum temperature at HKO/HKG station
+lead1_hko_forecast_archive,public.hko_historical_forecasts_2000_2026,80089,2000-01-02,2023-12-31,0.0,HKO local lead-1 forecast min/max archive used as official anchor
+hko_daily_climate,diagnostic_physics.codex_audit_ds_02_hko_daily_climate_all_elements_hko_d_f7bb0017,187025,1999-01-01,2023-12-31,3.085683732121374,"daily HKO climate state, lagged to T-2 in production features"
+gpt_pro_strategy_spec,C:\Users\ahmad\.codex\attachments\2f15d411-f901-46b6-9fb4-5bae7b3c26ef\pasted-text.txt,1722,,,0.0,implementation specification read before coding

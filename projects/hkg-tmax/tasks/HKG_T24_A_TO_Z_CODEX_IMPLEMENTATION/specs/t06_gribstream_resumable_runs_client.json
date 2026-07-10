@@ -1,0 +1,67 @@
+{
+  "id": "T06",
+  "suffix": "gribstream_resumable_runs_client",
+  "title": "Resumable GribStream Runs Client and Raw Landing Zone",
+  "phase": "B Acquisition",
+  "deps": [
+    "T03",
+    "T04",
+    "T05"
+  ],
+  "mission": "Implement the reusable authenticated client, request planner, selector resolver, chunker, retry/quota logic, raw landing, normalization and manifests used by every model acquisition task.",
+  "inputs": [
+    "GribStream API key via GRIBSTREAM_API_KEY",
+    "T03 catalog/selector snapshots",
+    "T04 schema",
+    "T05 locations",
+    "acquisition_policy.yaml"
+  ],
+  "steps": [
+    "Use official Python client or direct HTTP while preserving exact payloads.",
+    "Use /runs for backfill; support timeseries only for controlled operational convenience.",
+    "Canonicalize request JSON and derive request SHA-256.",
+    "Support coordinate and grid requests, ensemble members, expressions, filters, min/max lead.",
+    "Stream NDJSON/gzip to immutable object files while computing checksum and row count.",
+    "Normalize forecasted_at to run_time_utc and forecasted_time to valid_time_utc; compute lead_minutes.",
+    "Capture retrieved_at and prospective first_seen.",
+    "Implement resumable state machine and bounded retries.",
+    "Prevent tokens in logs.",
+    "Expose dry-run row/quota estimates."
+  ],
+  "db_objects": [
+    "raw_audit.acquisition_request",
+    "raw_audit.response_object",
+    "nwp_core.model_run",
+    "nwp_core.point_value"
+  ],
+  "outputs": [
+    "client package",
+    "CLI commands",
+    "request planner",
+    "normalizer",
+    "resume ledger",
+    "sample manifests",
+    "operator runbook"
+  ],
+  "tests": [
+    "Mock API tests",
+    "real tiny smoke query",
+    "out-of-order response handling",
+    "gzip/NDJSON",
+    "idempotent rerun",
+    "429 Retry-After",
+    "empty response classification",
+    "secret scan"
+  ],
+  "acceptance": [
+    "Same request never creates duplicate values",
+    "Interrupted download resumes",
+    "All values preserve exact selector/run/valid/member lineage"
+  ],
+  "failure": [
+    "Catalog selector change: stop affected semantic variable and require new selector snapshot"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t06_gribstream_resumable_runs_client.md"
+}

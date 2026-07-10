@@ -1,0 +1,71 @@
+seed: 20260705
+allow_leakage_failures: false
+
+dates:
+  start_date: "2000-01-02"
+  presealed_end_date: "2023-12-31"
+  sealed_start_date: "2024-01-01"
+  sealed_end_date: "2026-05-31"
+
+cutoff_profiles:
+  - tminus1_2359
+  - tminus1_2100
+  - tminus1_1800
+
+primary_cutoff_profile: tminus1_2359
+anchor_source: public.hko_historical_forecasts_2000_2026
+hourly_source: public.hko_info_gov_hourly_readings_1998_2026
+target_history_source: feature_safe.hko_target_history_pre2024
+sealed_confirmation_mode: sealed_blind_mode
+
+input_artifacts:
+  reuse_previous_feature_matrix: true
+  previous_results_dir: experiments/hkg_tmax_residual_ml_strategy/results
+
+feature_policy:
+  max_raw_features: 90
+  use_pruned_feature_set: true
+  include_full_station_network: false
+  include_full_text_warning: false
+  include_full_target_memory: false
+
+candidate_models:
+  lgbm_a3_residual: true
+  lgbm_pruned_full_residual: true
+  catboost_residual: true
+  robust_linear_residual: true
+  direct_absolute_diagnostic: false
+
+router:
+  enabled: true
+  inner_folds_min_train_years: 5
+  threshold_benefit_grid: [0.00, 0.02, 0.04, 0.06, 0.08]
+  threshold_apply_grid: [0.52, 0.56, 0.60, 0.64]
+  threshold_sign_grid: [0.56, 0.60, 0.64, 0.68]
+  positive_cap_grid_c: [0.35, 0.50, 0.75]
+  negative_cap_grid_c: [0.25, 0.35, 0.50]
+  hard_abs_cap_grid_c: [0.35, 0.50, 0.75]
+  selection_metric: mae
+  no_harm_guardrails:
+    max_presealed_rmse_worse_vs_current_a7_c: 0.005
+    max_presealed_p90_worse_vs_current_a7_c: 0.010
+    max_monthly_worse_vs_raw_c: 0.015
+    min_apply_rate: 0.15
+    max_apply_rate: 0.70
+
+tail_specialist:
+  enabled: true
+  tail_abs_thresholds_c: [1.5, 2.0]
+  tail_probability_grid: [0.55, 0.60, 0.65, 0.70]
+  sign_probability_grid: [0.58, 0.62, 0.66]
+  min_abs_tail_correction_c: [0.25, 0.35]
+  hard_abs_cap_c: 1.00
+
+early_cutoff_audit:
+  enabled: true
+  cutoff_profiles:
+    - tminus1_1500
+    - tminus1_1630
+    - tminus1_1800
+    - tminus1_2100
+    - tminus1_2359

@@ -1,0 +1,262 @@
+{
+  "columns": [
+    {
+      "name": "target_date",
+      "dtype": "datetime64[ns]"
+    },
+    {
+      "name": "target_tmax_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "target_station",
+      "dtype": "object"
+    },
+    {
+      "name": "target_source_id",
+      "dtype": "object"
+    },
+    {
+      "name": "retrieved_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "quality_status",
+      "dtype": "object"
+    },
+    {
+      "name": "target_table",
+      "dtype": "object"
+    },
+    {
+      "name": "target_tmax_1dp",
+      "dtype": "float64"
+    },
+    {
+      "name": "bucket_key",
+      "dtype": "object"
+    },
+    {
+      "name": "bucket_index",
+      "dtype": "int64"
+    },
+    {
+      "name": "target_year",
+      "dtype": "int32"
+    },
+    {
+      "name": "target_month",
+      "dtype": "int32"
+    },
+    {
+      "name": "target_dayofyear",
+      "dtype": "int32"
+    },
+    {
+      "name": "season",
+      "dtype": "object"
+    },
+    {
+      "name": "cutoff_profile",
+      "dtype": "object"
+    },
+    {
+      "name": "cutoff_hkt",
+      "dtype": "object"
+    },
+    {
+      "name": "cutoff_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "is_primary_cutoff",
+      "dtype": "bool"
+    },
+    {
+      "name": "bulletin_id",
+      "dtype": "object"
+    },
+    {
+      "name": "source",
+      "dtype": "object"
+    },
+    {
+      "name": "source_url",
+      "dtype": "object"
+    },
+    {
+      "name": "product_type",
+      "dtype": "object"
+    },
+    {
+      "name": "index_date",
+      "dtype": "object"
+    },
+    {
+      "name": "snapshot_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "issue_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "forecast_min_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_range_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_midpoint_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "row_quality_status",
+      "dtype": "object"
+    },
+    {
+      "name": "raw_sha256",
+      "dtype": "object"
+    },
+    {
+      "name": "raw_path",
+      "dtype": "object"
+    },
+    {
+      "name": "source_archive_path",
+      "dtype": "object"
+    },
+    {
+      "name": "ingested_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "selected_rank",
+      "dtype": "int64"
+    },
+    {
+      "name": "eligible_revision_count",
+      "dtype": "int64"
+    },
+    {
+      "name": "revision_count",
+      "dtype": "int64"
+    },
+    {
+      "name": "forecast_max_min_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_max_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_mean_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_std_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_min_min_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_min_max_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_range_mean_path",
+      "dtype": "float64"
+    },
+    {
+      "name": "first_issue_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "latest_issue_at_utc",
+      "dtype": "datetime64[ns, UTC]"
+    },
+    {
+      "name": "first_forecast_max_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "latest_forecast_max_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "first_forecast_min_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "latest_forecast_min_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_revision_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_min_revision_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_path_width_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "forecast_max_path_slope_c_per_revision",
+      "dtype": "float64"
+    },
+    {
+      "name": "revision_direction",
+      "dtype": "object"
+    },
+    {
+      "name": "residual_c",
+      "dtype": "float64"
+    },
+    {
+      "name": "residual_tenths",
+      "dtype": "int64"
+    },
+    {
+      "name": "forecast_max_tenths",
+      "dtype": "int64"
+    },
+    {
+      "name": "issue_hour_hkt",
+      "dtype": "int32"
+    },
+    {
+      "name": "official_max_bin",
+      "dtype": "object"
+    },
+    {
+      "name": "official_max_round",
+      "dtype": "int64"
+    },
+    {
+      "name": "split_label",
+      "dtype": "object"
+    },
+    {
+      "name": "row_identity",
+      "dtype": "object"
+    }
+  ],
+  "row_count": 26407,
+  "primary_key": [
+    "target_date",
+    "cutoff_profile"
+  ],
+  "notes": "Rows are one target date by cutoff profile. Primary leaderboard uses is_primary_cutoff=true."
+}

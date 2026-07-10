@@ -1,0 +1,51 @@
+{
+  "id": "T28",
+  "suffix": "official_target_station_family_experts",
+  "title": "Official, Target-Memory, and Station Family Experts",
+  "phase": "D Modelling",
+  "deps": [
+    "T27"
+  ],
+  "mission": "Train the long-history official residual expert, target-memory expert and station microclimate expert with genuine temporal OOF predictions.",
+  "inputs": [
+    "Official/target/station feature families",
+    "canonical frames",
+    "OOF factory conventions"
+  ],
+  "steps": [
+    "Train regularized linear/GAM baselines first.",
+    "Train constrained boosting candidates with nested temporal tuning.",
+    "Official expert predicts actual minus official anchor with source-era structure.",
+    "Target-memory expert predicts Tmax or official residual using long history.",
+    "Station expert predicts small residual correction and expected error; separate proxy/live status.",
+    "Generate OOF predictions and feature ablations.",
+    "Cap corrections and compare with causal residual-memory baseline."
+  ],
+  "db_objects": [
+    "research model registry/OOF predictions"
+  ],
+  "outputs": [
+    "expert_scoreboards.csv",
+    "oof_predictions.parquet",
+    "feature_ablation.csv",
+    "model_cards/",
+    "correction_cap_study.csv"
+  ],
+  "tests": [
+    "Nested fold isolation",
+    "feature whitelist",
+    "identical rows",
+    "negative-control shuffled features"
+  ],
+  "acceptance": [
+    "At least one OOF artifact per expert",
+    "No in-sample prediction used downstream",
+    "Weak experts retained only as diagnostics/fallback"
+  ],
+  "failure": [
+    "Station proxy status prevents production promotion until availability proof"
+  ],
+  "cutoff_contract": "hkg_t24_1500hkt_v1",
+  "sealed_development_end": "2023-12-31",
+  "task_file": "tasks/t28_official_target_station_family_experts.md"
+}

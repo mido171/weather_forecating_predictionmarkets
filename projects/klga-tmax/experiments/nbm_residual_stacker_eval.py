@@ -26,7 +26,7 @@ for _thread_env in (
 
 import numpy as np
 import pandas as pd
-import psycopg2
+import psycopg
 from scipy.optimize import minimize
 
 
@@ -119,7 +119,7 @@ def load_core_dataset() -> pd.DataFrame:
     if not database_url:
         raise RuntimeError("KLGA_DB_URL is required for this read-only experiment")
     database_url = database_url.replace("postgresql+psycopg://", "postgresql://", 1)
-    with psycopg2.connect(database_url) as conn:
+    with psycopg.connect(database_url) as conn:
         df = pd.read_sql_query(
             sql,
             conn,

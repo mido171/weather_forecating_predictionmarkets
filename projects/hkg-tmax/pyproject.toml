@@ -12,6 +12,7 @@ license = {text = "Private research use; third-party data remains subject to sou
 authors = [{name = "HKG Tmax Research"}]
 dependencies = [
   "httpx>=0.27,<1",
+  "beautifulsoup4>=4.12,<5",
   "catboost>=1.2,<2",
   "lightgbm>=4.5,<5",
   "mysql-connector-python>=9,<10",

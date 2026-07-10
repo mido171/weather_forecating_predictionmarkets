@@ -31,7 +31,7 @@ for _thread_env in (
 
 import numpy as np
 import pandas as pd
-import psycopg2
+import psycopg
 from scipy.optimize import minimize, minimize_scalar
 
 
@@ -188,7 +188,7 @@ def load_wide_feature_frame() -> tuple[pd.DataFrame, dict[str, int]]:
     where fv.feature_build_version = %s
       and fv.feature_available = true
     """
-    with psycopg2.connect(database_dsn()) as conn:
+    with psycopg.connect(database_dsn()) as conn:
         features = pd.read_sql_query(
             feature_sql,
             conn,
